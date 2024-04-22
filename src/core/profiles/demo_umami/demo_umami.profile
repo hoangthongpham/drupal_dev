@@ -67,7 +67,7 @@ function demo_umami_toolbar() {
     $items['experimental-profile-warning']['#type'] = 'toolbar_item';
     $items['experimental-profile-warning']['tab'] = [
       '#type' => 'inline_template',
-      '#template' => '<a class="toolbar-warning" href="{{ more_info_link }}">This site is intended for demonstration purposes.</a>',
+      '#template' => '',
       '#context' => [
         'more_info_link' => 'https://www.drupal.org/node/2941833',
       ],

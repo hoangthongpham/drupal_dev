@@ -443,3 +443,69 @@
 2024/04/19 03:17:33 [notice] 1#1: start worker process 29
 2024/04/19 03:17:33 [notice] 1#1: start worker process 30
 2024/04/19 03:24:15 [error] 27#27: *10 directory index of "/var/www/html/" is forbidden, client: 172.21.0.1, server: drupal_dev.local, request: "GET / HTTP/1.1", host: "drupal_dev.local"
+2024/04/19 11:11:18 [notice] 1#1: using the "epoll" event method
+2024/04/19 11:11:18 [notice] 1#1: nginx/1.25.5
+2024/04/19 11:11:18 [notice] 1#1: built by gcc 12.2.0 (Debian 12.2.0-14) 
+2024/04/19 11:11:18 [notice] 1#1: OS: Linux 6.6.22-linuxkit
+2024/04/19 11:11:18 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576
+2024/04/19 11:11:18 [notice] 1#1: start worker processes
+2024/04/19 11:11:18 [notice] 1#1: start worker process 28
+2024/04/19 11:11:18 [notice] 1#1: start worker process 29
+2024/04/19 11:11:18 [notice] 1#1: start worker process 30
+2024/04/19 11:11:18 [notice] 1#1: start worker process 31
+2024/04/19 11:11:18 [notice] 1#1: start worker process 32
+2024/04/19 11:11:18 [notice] 1#1: start worker process 33
+2024/04/19 11:11:18 [notice] 1#1: start worker process 34
+2024/04/19 11:11:18 [notice] 1#1: start worker process 35
+2024/04/19 11:27:40 [notice] 1#1: signal 3 (SIGQUIT) received, shutting down
+2024/04/19 11:27:40 [notice] 29#29: gracefully shutting down
+2024/04/19 11:27:40 [notice] 32#32: gracefully shutting down
+2024/04/19 11:27:40 [notice] 31#31: gracefully shutting down
+2024/04/19 11:27:40 [notice] 30#30: gracefully shutting down
+2024/04/19 11:27:40 [notice] 28#28: gracefully shutting down
+2024/04/19 11:27:40 [notice] 33#33: gracefully shutting down
+2024/04/19 11:27:40 [notice] 34#34: gracefully shutting down
+2024/04/19 11:27:40 [notice] 35#35: gracefully shutting down
+2024/04/19 11:27:40 [notice] 33#33: exiting
+2024/04/19 11:27:40 [notice] 29#29: exiting
+2024/04/19 11:27:40 [notice] 32#32: exiting
+2024/04/19 11:27:40 [notice] 31#31: exiting
+2024/04/19 11:27:40 [notice] 30#30: exiting
+2024/04/19 11:27:40 [notice] 28#28: exiting
+2024/04/19 11:27:40 [notice] 34#34: exiting
+2024/04/19 11:27:40 [notice] 35#35: exiting
+2024/04/19 11:27:40 [notice] 29#29: exit
+2024/04/19 11:27:40 [notice] 34#34: exit
+2024/04/19 11:27:40 [notice] 33#33: exit
+2024/04/19 11:27:40 [notice] 32#32: exit
+2024/04/19 11:27:40 [notice] 31#31: exit
+2024/04/19 11:27:40 [notice] 30#30: exit
+2024/04/19 11:27:40 [notice] 28#28: exit
+2024/04/19 11:27:40 [notice] 35#35: exit
+2024/04/19 11:27:41 [notice] 1#1: signal 17 (SIGCHLD) received from 35
+2024/04/19 11:27:41 [notice] 1#1: worker process 28 exited with code 0
+2024/04/19 11:27:41 [notice] 1#1: worker process 29 exited with code 0
+2024/04/19 11:27:41 [notice] 1#1: worker process 30 exited with code 0
+2024/04/19 11:27:41 [notice] 1#1: worker process 31 exited with code 0
+2024/04/19 11:27:41 [notice] 1#1: worker process 32 exited with code 0
+2024/04/19 11:27:41 [notice] 1#1: worker process 33 exited with code 0
+2024/04/19 11:27:41 [notice] 1#1: worker process 34 exited with code 0
+2024/04/19 11:27:41 [notice] 1#1: worker process 35 exited with code 0
+2024/04/19 11:27:41 [notice] 1#1: exit
+2024/04/19 11:28:41 [notice] 1#1: using the "epoll" event method
+2024/04/19 11:28:41 [notice] 1#1: nginx/1.25.5
+2024/04/19 11:28:41 [notice] 1#1: built by gcc 12.2.0 (Debian 12.2.0-14) 
+2024/04/19 11:28:41 [notice] 1#1: OS: Linux 6.6.22-linuxkit
+2024/04/19 11:28:41 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576
+2024/04/19 11:28:41 [notice] 1#1: start worker processes
+2024/04/19 11:28:41 [notice] 1#1: start worker process 28
+2024/04/19 11:28:41 [notice] 1#1: start worker process 29
+2024/04/19 11:28:41 [notice] 1#1: start worker process 30
+2024/04/19 11:28:41 [notice] 1#1: start worker process 31
+2024/04/19 11:28:41 [notice] 1#1: start worker process 32
+2024/04/19 11:28:41 [notice] 1#1: start worker process 33
+2024/04/19 11:28:41 [notice] 1#1: start worker process 34
+2024/04/19 11:28:41 [notice] 1#1: start worker process 35
+2024/04/21 07:59:07 [warn] 30#30: *633 a client request body is buffered to a temporary file /var/cache/nginx/client_temp/0000000001, client: 192.168.65.1, server: drupal_dev.local, request: "POST /product/add/default?ajax_form=1&_wrapper_format=drupal_ajax HTTP/1.1", host: "drupal_dev.local", referrer: "https://drupal_dev.local/product/add/default"
+2024/04/21 08:00:06 [warn] 30#30: *633 a client request body is buffered to a temporary file /var/cache/nginx/client_temp/0000000002, client: 192.168.65.1, server: drupal_dev.local, request: "POST /media-library?media_library_opener_id=media_library.opener.field_widget&media_library_allowed_types%5Bimage%5D=image&media_library_allowed_types%5Bvideo%5D=video&media_library_selected_type=image&media_library_remaining=10&media_library_opener_parameters%5Bfield_widget_id%5D=field_images&media_library_opener_parameters%5Bentity_type_id%5D=commerce_product&media_library_opener_parameters%5Bbundle%5D=default&media_library_opener_parameters%5Bfield_name%5D=field_images&hash=ZNs-qEBzT4N_KOHozlcGgt0P8xlqascinBgBMh9rt_k&ajax_form=1&_wrapper_format=drupal_ajax HTTP/1.1", host: "drupal_dev.local", referrer: "https://drupal_dev.local/product/add/default"
+2024/04/21 08:00:57 [warn] 30#30: *633 a client request body is buffered to a temporary file /var/cache/nginx/client_temp/0000000003, client: 192.168.65.1, server: drupal_dev.local, request: "POST /media-library?media_library_opener_id=media_library.opener.field_widget&media_library_allowed_types%5Bimage%5D=image&media_library_allowed_types%5Bvideo%5D=video&media_library_selected_type=image&media_library_remaining=10&media_library_opener_parameters%5Bfield_widget_id%5D=field_images&media_library_opener_parameters%5Bentity_type_id%5D=commerce_product&media_library_opener_parameters%5Bbundle%5D=default&media_library_opener_parameters%5Bfield_name%5D=field_images&hash=ZNs-qEBzT4N_KOHozlcGgt0P8xlqascinBgBMh9rt_k&ajax_form=1&_wrapper_format=drupal_ajax&_wrapper_format=drupal_ajax HTTP/1.1", host: "drupal_dev.local", referrer: "https://drupal_dev.local/product/add/default"
