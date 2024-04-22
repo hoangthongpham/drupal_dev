@@ -1,0 +1,12 @@
+name: T_commerce
+type: theme
+description: 'A commerce theme for Drupal.'
+core_version_requirement: '>=9.2'
+libraries:
+  - t_commerce/global-styling
+  - t_commerce/global-scripts
+base theme: false
+regions:
+  header: 'Header'
+  content: 'Content'
+  footer: 'Footer'
