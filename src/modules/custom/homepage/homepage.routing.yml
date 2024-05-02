@@ -1,0 +1,7 @@
+mini.store.homepage:
+  path: '/homepage'
+  defaults:
+    _controller: '\Drupal\homepage\Controller\HomepageController::index'
+    _title: 'Home page'
+  requirements:
+    _permission: 'some permission'

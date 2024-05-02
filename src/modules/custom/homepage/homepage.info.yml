@@ -1,0 +1,5 @@
+name: 'homepage'
+type: module
+description: 'Custom homepage'
+package: Custom
+core_version_requirement: ^10 || ^11
