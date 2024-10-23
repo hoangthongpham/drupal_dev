@@ -1,0 +1,83 @@
+{% if items %}
+    <div class="theme-pagination-block text-center">
+        <div class="row">
+            <div class="col-xl-12">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination d-block">
+                        {# Previous button #}
+                        {% if items.first %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ items.first.href }}" title="{{ 'Go to first page'|t }}">
+                                    <span aria-hidden="true">
+                                        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+                                        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+                                    </span>
+                                    <span class="sr-only">{{ items.first.text|default('« First'|t) }}</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                        {# Print previous item if we are not on the first page. #}
+                        {% if items.previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ items.previous.href }}"
+                                   title="{{ 'Go to previous page'|t }}">
+                                    <span aria-hidden="true"><i class="fa fa-chevron-left"
+                                                                aria-hidden="true"></i></span>
+                                    <span class="sr-only">{{ items.previous.text|default('‹ Previous'|t) }}</span>
+                                </a>
+                            </li>
+                        {% endif %}
+
+
+                        {# Page numbers #}
+                        {% set current_page = current %}
+                        {% set total_pages = items.pages|length %}
+
+                        {# Show a few pages around the current page #}
+                        {# Page numbers around current page #}
+                        {% set current_page = current %}
+                        {% set total_pages = items.pages|length %}
+                        {% for key, item in items.pages %}
+                            {% if key == 1 or key == total_pages or key >= current_page - 3 and key <= current_page + 3 %}
+                                <li class="page-item {{ current_page == key ? 'active' : '' }}">
+                                    {% if item.current %}
+                                        <span class="page-link">{{ key }}</span>
+                                    {% else %}
+                                        <a class="page-link" href="{{ item.href }}">{{ key }}</a>
+                                    {% endif %}
+                                </li>
+                            {% elseif key == current_page - 4 or key == current_page + 4 %}
+                                <li class="page-item disabled">
+                                    <span class="page-link">...</span>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {# Print next item if we are not on the last page. #}
+                        {% if items.next %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ items.next.href }}" aria-label="{{ 'Next'|t }}">
+                                    <span aria-hidden="true"><i class="fa fa-chevron-right"
+                                                                aria-hidden="true"></i></span>
+                                    <span class="sr-only">{{ 'Next'|t }}</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                        {# Print last item if we are not on the last page. #}
+                        {% if items.last %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ items.last.href }}" aria-label="{{ 'Next'|t }}">
+                                    <span aria-hidden="true">
+                                        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+                                        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+                                    </span>
+                                    <span class="sr-only">{{ 'Last'|t }}</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+{% endif %}

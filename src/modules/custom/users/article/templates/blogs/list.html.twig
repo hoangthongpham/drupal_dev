@@ -1,0 +1,76 @@
+<!-- section start -->
+<section class="section-b-space blog-page ratio2_3">
+    <div class="container">
+        <div class="row">
+            <div class="col-xl-9 col-lg-8 col-md-7">
+                {% if data.items is not empty %}
+                    {% for item in data.items %}
+                        <div class="row blog-media">
+                            <div class="col-xl-6">
+                                <div class="blog-left">
+                                    <a href="{{ item.detail }}">
+                                        <img src="{{ item.imageUrl }}" class="img-fluid blur-up lazyload bg-img"
+                                             alt="{{ item.title }}"/>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="col-xl-6">
+                                <div class="blog-right">
+                                    <div>
+                                        <h6>{{ item.created }}</h6>
+                                        <a href="{{ item.detail }}">
+                                            <h4>{{ item.title }}</h4>
+                                        </a>
+                                        <ul class="post-social">
+                                            <li>Posted By : {{ item.author }}</li>
+                                        </ul>
+                                        <p>{{ item.summary }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                    {{ data.pager }}
+                {% endif %}
+            </div>
+            <div class="col-xl-3 col-lg-4 col-md-5">
+                <div class="blog-sidebar">
+                    <div class="theme-card">
+                        <h4>Release date</h4>
+                        <ul class="d-lg-inline-grid" >
+                            <li>
+                                <a href="/" class="btn btn-link">09/2024</a>
+                            </li>
+                            <li>
+                                <a href="/" class="btn btn-link">08/2024</a>
+                            </li>
+                            <li>
+                                <a href="/" class="btn btn-link">07/2024</a>
+                            </li>
+                            <li>
+                                <a href="/" class="btn btn-link">06/2024</a>
+                            </li>
+                            <li>
+                                <a href="/" class="btn btn-link">05/2024</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="theme-card">
+                        <h4>Tags</h4>
+                        <ul class="popular-blog">
+                            <li>
+                                <button type="button" class="btn btn-primary p-1 m-1">Tag 1</button>
+                                <button type="button" class="btn btn-primary p-1 m-1">Tag 2</button>
+                                <button type="button" class="btn btn-primary p-1 m-1">Tag as 3</button>
+                                <button type="button" class="btn btn-primary p-1 m-1">Tag 44444</button>
+                                <button type="button" class="btn btn-primary p-1 m-1">Tag 5</button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {{ pager }}
+</section>
+<!-- Section ends -->

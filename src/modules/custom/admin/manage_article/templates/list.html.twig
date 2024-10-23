@@ -1,0 +1,114 @@
+<div id="lang-code-table" data-lang-code="{{ data[1] }}"></div>
+<div class="link_add">
+    <a id="add_article" href="/admin/article/add">{{ 'Add article'|t }} </a>
+</div>
+<div class="filter_article col-md-10">
+    <div id="form_search"class="form_search" >
+        <label>{{ 'Search'|t }}</label>
+        <input class="search" id ="search_form" type="text"></input>
+        <button class="btn_search btn-primary" id="btn_search" type="button">{{ 'Search'|t }}</button>
+    </div>
+    
+    <div id="filter_language" class="filter_language">
+        <label>{{ 'Language'|t }}</label>
+        <select class="form-select form-select-md item-search" name="langcode" id="langcode">
+            {% for code, language in data[0] %}
+                <option value="{{ code }}">{{ language.getName()|t }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div id ="filter_status"class="filter_status">
+        <label>{{ 'Status'|t }}</label>
+        <select class="form-select form-select-md item-search"  id ="status" name="status">
+            <option value="">{{ 'All'|t }}</option>
+            <option value="Active">{{ 'Active'|t }}</option>
+            <option value="InActive">{{ 'InActive'|t }}</option>
+        </select>
+    </div>
+    <div id="filter_date_from"class="filter_date_from" >
+        <label>{{ 'Date From'|t }}</label><br/>
+        <input class="date_from" id ="date_from" name = "date_from" type="text"></input>
+    </div>
+    <div id="filter_date_to"class="filter_date_to" >
+        <label>{{ 'Date To'|t }}</label><br/>
+        <input class="date_to" id ="date_to" name="date_to" type="text"></input>
+    </div>
+</div>
+
+<table id="listTable">
+    <thead>
+        <th width="5%" style="text-align:center">#</th>
+        <th width="" style="text-align:center">{{ 'Title'|t }}</th>
+        <th width="10%" style="text-align:center">{{'Status'|t }}</th>
+        <th width="10%" style="text-align:center">{{'Language'|t }}</th>
+        <th width="10%" style="text-align:center">{{ 'Update'|t }}</th>
+        <th width="10%" style="text-align:center">{{ 'Action'|t }}</th>
+    <thead> 
+    <tbody>
+    </tbody>
+</table>
+
+
+<!-- Modal -->
+<div class="modal edit_modal" id="edit_modal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <h4 class="modal-title">{{ 'Edit Article'|t }}</h4>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+      <!-- Modal body -->
+      <form class="quickForm" id="quickForm" action="" method="POST">
+        <div class="modal-body">
+              <input type="hidden" class="form-control nid" name="nid" value=""  placeholder=""></input>
+              <div class="form-group mb-3">
+                  <label  class="form-label">{{'Title'|t }}</label>
+                  <input type="text" class="form-control title" name="title" value=""  placeholder=""></input>
+              </div>
+              <div class="form-group mb-3">
+                  <label  class="form-label body_vale">{{ 'Body'|t }}</label>
+                  <textarea type="text"  class="form-control body_value" name="body_value"rows="4" value=""></textarea>
+              </div>
+        </div>
+        <!-- Modal footer -->
+        <div class="modal-footer">
+          <input type="submit" name="submit_modal" id="submit_modal" class="btn btn-primary" value="Update"></input>
+          <button type="button" class="btn btn-danger close" data-dismiss="modal">Close</button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+
+
+
+<div class="modal view_modal" id="view_modal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <h4 class="modal-title">{{ 'View Article'|t }}</h4>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+      <!-- Modal body -->
+      <div class="modal-body">
+            <div class="form-group mb-3">
+                <label type="text" class="title_view" name="title_view" value=""  placeholder=""></label>
+                <div class="article_image form-control">
+                    <img src="" width="200" height="200" class="image" id ="image" name="image"></img>
+                </div>
+                <p class="body_value_view" name="body_value_view" value=""></p>
+            </div>
+      </div>
+      <!-- Modal footer -->
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+

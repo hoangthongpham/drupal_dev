@@ -1,0 +1,154 @@
+<?php
+    namespace Drupal\manage_article\Form;
+    use Drupal\Core\Form\FormBase;
+    use Drupal\Core\Form\FormStateInterface;
+    use Drupal\Code\Database\Database;
+    use Drupal\Core\Entity\ContentEntityForm;
+    use Drupal\node\Entity\Node;
+    use \Drupal\file\Entity\File;
+    use Drupal\taxonomy\Entity\Term;
+
+    class EditArticleForm extends FormBase {
+        /**
+         * {@inheritdoc}
+         */
+        
+        public function getFormId(){
+            return 'edit_article';
+        }
+
+        /**
+         * {@inheritdoc}
+         */
+        public function buildForm(array $form,FormStateInterface $form_state ){
+            $nid = \Drupal::routeMatch()->getParameter('id');
+            $node = \Drupal\node\Entity\Node::load($nid);
+            if(isset($_GET['langcode'])){
+                $langCode = $_GET['langcode'];
+            }
+            if($node->hasTranslation($langCode)) {
+                $node = $node->getTranslation($langCode);
+            }
+            if($node->get('field_image')->target_id){
+                $file = File::load($node->get('field_image')->target_id);
+                $field_image =  $file->fid->value;
+            }else{
+                $field_image='';
+            }
+
+            $name_tag = '';
+            if($node->get('field_tags')->target_id){
+                $termId = $node->get('field_tags')->target_id;
+                $term = Term::load($termId);
+                if($term){
+                    $name_tag = $term->name->value;
+                }else{
+                    $name_tag = '';
+                }
+            }
+            $form['title'] = array(
+                '#type'=>'textfield',
+                '#title'=>$this->t('Title'),
+                '#default_value'=> $node->title->value,
+                '#required' => true,
+            );
+            $folder = date('Y-m', time());
+            $form['image'] = array(
+                '#type' => 'details',
+                '#title' => $this->t('Image'),
+                '#open' => TRUE,
+            );
+            $form['image']['field_image'] = [
+                '#type' => 'managed_file',
+                '#title' => $this->t('Add a new file'),
+                '#upload_validators' => [
+                    'file_validate_extensions' => ['gif png jpg jpeg'],
+                    'file_validate_size' => [25600000],
+                ],
+                '#upload_location' => 'public://'.$folder.'',
+                '#default_value'=>[$field_image],
+             ];
+            $form['body_value'] = array(
+                '#type'=>'text_format',
+                '#title'=>$this->t('Body'),
+                '#default_value'=>$node->body->value,
+                '#required' => true,
+            );
+            $form['field_tags'] = array(
+                '#type'=>'textfield',
+                '#title'=>$this->t('Tags'),
+                '#default_value'=>$name_tag,
+                '#description'=>$this->t('Enter a comma-separated list. For example: Amsterdam, Mexico City, "Cleveland, Ohio"'),
+                '#required' => true,
+            );
+            $form['status'] = array(
+                '#type'=>'checkbox',
+                '#title' => $this->t('Published'),
+                '#default_value'=>$node->status->value,
+            );
+            $form['save'] = array(
+                '#type'=>'submit',
+                '#value'=>'update',
+                '#button_type'=> 'primary'
+            );
+            return $form;
+
+        }
+        /**
+         * {@inheritdoc}
+         */
+        public function validateForm(array &$form, FormStateInterface $form_state){
+            $title =$form_state->getValue('title');
+            if(trim($title) == ''){
+                $form_state->setErrorByName('title',$this->t('Title field is required'));
+            }
+            elseif($form_state->getValue('body_value') ==''){
+                $form_state->setErrorByName('body_value',$this->t('Body field is required'));
+            }
+        }
+        /**
+         * {@inheritdoc}
+         */
+        public function submitForm (array &$form, FormStateInterface $form_state ){
+            $postData = $form_state->getValues();
+            if($postData['field_image']){
+                $fileId = $postData['field_image'][0]; 
+            }else{
+                $fileId=null;
+            }
+            $nid = \Drupal::routeMatch()->getParameter('id');
+            $node = \Drupal\node\Entity\Node::load($nid);
+            if(isset($_GET['langcode'])){
+                $langCode = $_GET['langcode'];
+            }
+            if($node->hasTranslation($langCode)) {
+                $node = $node->getTranslation($langCode);
+            }
+            if($node->get('field_tags')->target_id){
+                $termId = $node->get('field_tags')->target_id;
+                $term = Term::load($termId);
+                $term->name->setValue($postData['field_tags']);
+                $term->Save();
+            }else {
+                $term = Term::create([
+                    'vid' => 'tags', 
+                    'name' => $postData['field_tags'],
+                ]);
+                $term->save();
+            }
+            $node->get('field_tags')->target_id = $term->id();
+            $node->title = $postData['title'];
+            $node->body = $postData['body_value'];
+            $node->field_image = $fileId;
+            $node->status=$postData['status'];
+            $node->save();
+
+
+            $response  = new \Symfony\Component\HttpFoundation\RedirectResponse('/admin/articles');
+            $response->send(); 
+             
+            \Drupal::messenger()->addStatus($this->t('Article update successfully!'), 'status',TRUE);
+        }
+
+    }
+

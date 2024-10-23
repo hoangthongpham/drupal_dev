@@ -1,29 +1,34 @@
 # Main theme library.
 global:
   js:
-    js/vendor/jquery-2.2.4.min.js: {}
-    js/vendor/popper.js: {}
-    js/vendor/bootstrap.min.js: {}
-    js/jquery.ajaxchimp.min.js: {}
-    js/jquery.nice-select.min.js: {}
-    js/jquery.sticky.js: {}
-    js/nouislider.min.js: {}
-    js/countdown.js: {}
-    js/jquery.magnific-popup.min.js: {}
-    js/owl.carousel.min.js: {}
-    'https://maps.googleapis.com/maps/api/js?key=AIzaSyCjCGmQ0Uq4exrzdcL6rvxywDDOvfAu6eE': {}
-    js/gmaps.min.js: {}
-    js/main.js: {}
+    'public/js/jquery-3.3.1.min.js': {}
+    'public/js/slick.js': {}
+    'public/js/slick-animation.min.js': {}
+    'public/js/menu.js': {}
+    'public/js/sticky-menu.js': {}
+    'public/js/lazysizes.min.js': {}
+    'public/js/feather.min.js': {}
+    'public/js/bootstrap.bundle.min.js': {}
+    'public/js/bootstrap-notify.min.js': {}
+    'public/js/script.js': {}
+    'public/js/custom-slick-animated.js': {}
+
   css:
     theme:
-      css/linearicons.css: {}
-      css/font-awesome.min.css: {}
-      css/themify-icons.css: {}
-      css/bootstrap.css: {}
-      css/owl.carousel.css: {}
-      css/nice-select.css: {}
-      css/nouislider.min.css: {}
-      css/ion.rangeSlider.css: {}
-      css/ion.rangeSlider.skinFlat.css: {}
-      css/magnific-popup.css: {}
-      css/main.css: {}
+      'public/css/vendors/font-awesome.css': {}
+      'public/css/vendors/slick.css': {}
+      'public/css/vendors/slick-theme.css': {}
+      'public/css/vendors/animate.css': {}
+      'public/css/vendors/themify-icons.css': {}
+      'public/css/vendors/bootstrap.css': {}
+      'public/css/style.css': {}
+
+google_font:
+  css:
+    theme:
+      'https://fonts.googleapis.com/css?family=Lato:300,400,700,900': {}
+      'https://fonts.gstatic.com': {}
+      'https://fonts.googleapis.com/css2?family=Yellowtail&display=swap': {}
+      'https://fonts.googleapis.com/css2?family=Cormorant:wght@400;500;600;700&display=swap': {}
+      'https://fonts.googleapis.com/css2?family=Recursive:wght@400;500;600;700;800;900&display=swap': {}
+      'https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap': {}

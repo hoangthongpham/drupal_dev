@@ -1,39 +1,44 @@
 <!DOCTYPE html>
 <html lang="zxx" class="no-js">
 
-	<head>
-		<!-- Mobile Specific Meta -->
-		<meta
-		name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-		<!-- Favicon-->
-		<link
-		rel="shortcut icon" href="themes/mini_store/img/fav.png">
-		<!-- Author Meta -->
-		<meta
-		name="author" content="CodePixar">
-		<!-- Meta Description -->
-		<meta
-		name="description" content="">
-		<!-- Meta Keyword -->
-		<meta
-		name="keywords" content="">
-		<!-- meta character set -->
-		<meta charset="UTF-8">
-		<head-placeholder token="{{ placeholder_token }}">
-			<title>{{ head_title|safe_join(' | ') }}</title>
-			<css-placeholder token="{{ placeholder_token }}">
-				<js-placeholder token="{{ placeholder_token }}">
-					{{ attach_library('mini_store/global') }}
+  <head>
+    <!-- Mobile Specific Meta -->
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="description" content="multikart">
+    <meta name="keywords" content="multikart">
+    <meta name="author" content="multikart">
+    <link rel="icon" href="themes/mini_store/public/images/favicon/20.png" type="image/x-icon">
+    <link rel="shortcut icon" href="themes/mini_store/public/images/favicon/20.png" type="image/x-icon">
+
+    <head-placeholder token="{{ placeholder_token }}">
+    <title>{{ head_title|safe_join(' | ') }}</title>
+    <css-placeholder token="{{ placeholder_token }}">
+    <js-placeholder token="{{ placeholder_token }}">
+  </head>
+  <body class="theme-color-28">
+    {{ page }}
+    <js-bottom-placeholder token="{{ placeholder_token }}">
+  <script>
+      $(window).on('load', function () {
+          setTimeout(function () {
+              $('#newyear').modal('show');
+          }, 2500);
+      });
+      feather.replace();
+
+      function openSearch() {
+          document.getElementById("search-overlay").style.display = "block";
+      }
+
+      function closeSearch() {
+          document.getElementById("search-overlay").style.display = "none";
+      }
 
 
-				</head>
+  </script>
 
-				<body>
-
-					{{ page }}
-
-
-					<js-bottom-placeholder token="{{ placeholder_token }}"></body>
-				</body>
-			</html>
+  </body>
+</html>
 

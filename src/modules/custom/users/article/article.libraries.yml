@@ -1,0 +1,20 @@
+manage_article_asset:
+  version: 1.13
+  js:
+      asset/js/jquery-3.5.1.js: {}
+      asset/js/popper.min.js: {}
+      asset/js/bootstrap.min.js: {}
+      asset/js/jquery.validate.min.js: {}
+      asset/js/jquery.dataTables.min.js: {}
+      asset/js/jquery-ui.js: {}
+      asset/js/credit-card.js: {}s
+
+  css:
+    theme:
+      asset/css/jquery.dataTables.min.css: {}
+      asset/css/bootstrap.min.css: {}
+      asset/css/jquery-ui.css: {}
+      asset/css/style.css: {}
+  dependencies:
+  - core/jquery
+  - core/jquery.ui.datepicker

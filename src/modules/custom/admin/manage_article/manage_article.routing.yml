@@ -1,0 +1,65 @@
+manage_article.load:
+  path: "/admin/articles"
+  defaults:
+    _controller: '\Drupal\manage_article\Controller\ArticleController::load'
+    _title: "List articles"
+  requirements:
+    _permission: "admin user"
+
+manage_article.getList:
+  path: "/admin/get-list"
+  defaults:
+    _controller: '\Drupal\manage_article\Controller\ArticleController::getList'
+    _title: "List articles"
+    _format: "json"
+  requirements:
+    _permission: "admin user"
+manage_article.add:
+  path: "/admin/article/add"
+  defaults:
+    _form: '\Drupal\manage_article\Form\ArticleForm'
+    _title: "Add Article"
+  requirements:
+    _permission: "admin user"
+
+manage_article.edit:
+  path: "/admin/article/edit/{id}"
+  defaults:
+    _form: '\Drupal\manage_article\Form\EditArticleForm'
+    _title: "Edit articles"
+  requirements:
+    _permission: "admin user"
+
+manage_article.deleteArticle:
+  path: "/admin/article/delete/{id}"
+  defaults:
+    _controller: '\Drupal\manage_article\Controller\ArticleController::deleteArticle'
+  requirements:
+    _permission: "admin user"
+
+manage_article.showArticle:
+  path: "/admin/quick-edit/{id}"
+  defaults:
+    _controller: '\Drupal\manage_article\Controller\ArticleController::showArticle'
+    _title: "Quick Edit"
+    _format: "json"
+  requirements:
+    _permission: "admin user"
+
+manage_article.updateArticle:
+  path: "/admin/update-article"
+  defaults:
+    _controller: '\Drupal\manage_article\Controller\ArticleController::updateArticle'
+    _title: "Update Article"
+    _format: "json"
+  requirements:
+    _permission: "admin user"
+
+manage_article.viewArticle:
+  path: "/admin/view/{id}"
+  defaults:
+    _controller: '\Drupal\manage_article\Controller\ArticleController::showArticle'
+    _title: "View article"
+    _format: "json"
+  requirements:
+    _permission: "admin user"

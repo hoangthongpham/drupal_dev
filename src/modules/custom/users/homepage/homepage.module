@@ -1,0 +1,42 @@
+<?php
+
+/**
+ * Implements hook_theme().
+ *
+ * We use hook_theme to define the templates used.
+ */
+function homepage_theme($existing, $type, $theme, $path)
+{
+    return [
+        'homepage_header' => [
+            'template' => 'block/header',
+            'variables' => [
+                'data' => [],
+            ],
+        ],
+        'homepage_footer' => [
+            'template' => 'block/footer',
+            'variables' => [
+                'data' => [],
+            ],
+        ],
+        'homepage_slider' => [
+            'template' => 'block/slider',
+            'variables' => [
+                'data' => [],
+            ],
+        ],
+        'homepage_breadcrumb' => [
+            'template' => 'block/breadcrumb',
+            'variables' => [
+                'data' => [],
+            ],
+        ],
+        'homepage_template' => [
+            'template' => 'pages/homepage',
+            'variables' => [
+                'data' => [],
+            ],
+        ]
+    ];
+}

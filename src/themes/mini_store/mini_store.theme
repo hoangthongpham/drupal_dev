@@ -27,3 +27,58 @@ function mini_store_preprocess_page(array &$variables): void {
 function mini_store_preprocess_node(array &$variables): void {
 
 }
+
+/**
+ * Implements hook_element_info_alter().
+ */
+function mini_store_element_info_alter(&$type) {
+    unset($type['page']['#theme_wrappers']['off_canvas_page_wrapper']);
+}
+
+function mini_store_theme_suggestions_alter(array &$suggestions, array &$variables, $hook) {
+  // alter login form
+  if ($hook == 'form' ) {
+    if(isset($variables['element']['#id']) && $variables['element']['#id'] == 'user-login-form') {
+      $suggestions[] = 'form__' . str_replace('-', '_', $variables['element']['#id']);
+      // add class login form
+      $variables['element']['#attributes']['class'][] = 'row login_form';
+    }
+
+    if (isset($variables['element']['#id']) && $variables['element']['#id'] == 'contact-message-website-feedback-form') {
+      $suggestions[] = 'form__website_feedback';
+      // add class login form
+      $variables['element']['#attributes']['class'][] = 'row contact_form';
+      // dump($variables['element']['name']);
+      // dump($variables['element']['mail']);
+      // dump($variables['element']['subject']);
+      // dump($variables['element']['message']);
+    }
+
+  }
+}
+
+function mini_store_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id)
+{
+  if($form_id == 'user_login_form') {
+    $form['name']['#attributes']['placeholder'] = $form['name']['#title'];
+    $form['name']['#attributes']['class'][] = ['form-control'];
+    unset($form['name']['#title']);
+
+
+    $form['pass']['#attributes']['placeholder'] = $form['pass']['#title'];
+    $form['pass']['#attributes']['class'][] = ['form-control'];
+    unset($form['pass']['#title']);
+
+    $form['actions']['submit']['#attributes']['class'][] = 'primary-btn';
+  }
+
+  if($form_id == 'contact_message_website_feedback_form') {
+    // $form['subject']['#attributes']['placeholder'] = $form['subject']['widget']['#title'];
+    // $form['subject']['#attributes']['class'][] = 'form-control';
+    // unset($form['subject']['#title']);
+
+    // $form['message']['#attributes']['value'] = $form['message']['#title'];
+    // $form['message']['#attributes']['class'][] = ['form-control'];
+    // unset($form['message']['#title']);
+  }
+}

@@ -16,12 +16,16 @@
     ],
     "require": {
         "composer/installers": "^2.0",
+        "drupal/adminimal_theme": "^1.7",
         "drupal/commerce": "^2.38",
         "drupal/core-composer-scaffold": "^10.0",
         "drupal/core-project-message": "^10.0",
         "drupal/core-recommended": "^10.0",
         "drupal/core-vendor-hardening": "^10.0",
+        "drupal/devel": "^5.2",
         "drupal/inline_entity_form": "^1.0@RC",
+        "drupal/pagerer": "^3",
+        "drupal/poool": "^1.0",
         "drush/drush": "^12.5"
     },
     "conflict": {
@@ -96,5 +100,8 @@
                 "      composer remove drupal/core-project-message"
             ]
         }
+    },
+    "require-dev": {
+        "kint-php/kint": "^5.1"
     }
 }

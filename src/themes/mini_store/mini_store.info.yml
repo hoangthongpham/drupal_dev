@@ -5,17 +5,14 @@ description: A flexible theme with a responsive, mobile-first layout.
 package: Custom
 core_version_requirement: ^10
 libraries:
+  - mini_store/google_font
   - mini_store/global
 regions:
   header: 'Header'
-  primary_menu: 'Primary menu'
-  secondary_menu: 'Secondary menu'
-  page_top: 'Page top'
-  page_bottom: 'Page bottom'
-  featured: 'Featured'
   breadcrumb: 'Breadcrumb'
   content: 'Content'
-  sidebar_first: 'Sidebar first'
-  sidebar_second: 'Sidebar second'
+  sidebar_first: 'Sidebar left'
+  sidebar_second: 'Sidebar right'
   footer: 'Footer'
   disabled: 'Disabled'
+

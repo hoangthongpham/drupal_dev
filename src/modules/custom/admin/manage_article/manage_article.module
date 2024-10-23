@@ -1,0 +1,103 @@
+<?php
+    use \Drupal\Core\Url;
+    function manage_article_theme(){
+        return array(
+            'manage_article'=>array(
+                'template' => 'list',
+                'variables'=>array(
+                    'data' => []
+                )
+            ),
+            'manage_article_home' => [
+                'template' => 'home_page',
+                'variables' => [
+                  'articles' => [],
+                ],
+            ],
+            'manage_article_list' => [
+                'template' => 'list_article',
+                'variables' => [
+                  'articles' => [],
+                ],
+            ],
+            'manage_article_detail' => [
+                'template' => 'detail-article',
+                'variables' => [
+                  'article' => [],
+                ],
+            ],
+            'manage_article_search' => [
+                'template' => 'search_results',
+                'variables' => [
+                  'articles' => [],
+                ],
+            ],
+            'manage_article_tag' => [
+                'template' => 'tag_article',
+                'variables' => [
+                  'articles' => [],
+                ],
+            ],
+            'manage_article_contact' => [
+                'template' => 'contact',
+                'variables' => [
+                  'data' => [],
+                ],
+            ],
+
+            'credit_cart_re_entry' => array(
+                'template' => 'test_table/credit_card',
+                'variables' => array(
+                    'data' => [],
+                ),
+            ),
+        );
+    }
+    function manage_article_toolbar(){
+        $patterns = ['manage_article' => 'manage_article.load'];
+        $module_handler = \Drupal::moduleHandler();
+        // Build a list of links for the menu.
+        $links = [];
+        foreach ($patterns as $module => $route) {
+            // Get the module info (title, description) from Drupal.
+            $extension_list_module = \Drupal::service('extension.list.module');
+            $info = $extension_list_module->getExtensionInfo($module);
+            // If there's no info, the example isn't enabled, so don't display it.
+            if (!empty($info)) {
+                $links[$module] = array(
+                    'title' => ($info['name']),
+                    'url' => Url::fromRoute($route),
+                    'attributes' => array(
+                        'title' => $info['name'],
+                    ),
+                );
+            }
+        }
+        $items['manage_article'] = [
+            '#type'   => 'toolbar_item',
+            'tab'     => [
+                '#type'       => 'link',
+                '#title'      => t('Custom menu'),
+                '#url'        => Url::fromRoute('manage_article.load'),
+                '#attributes' => [
+                    'title' => t('Custom articles'),
+                    'class' => [
+                        'toolbar-icon',
+                        'toolbar-icon-menu'
+                    ],
+                ],
+            ],
+            'tray' => array(
+                '#heading' => t('Toppage Management'),
+                'shortcuts' => array(
+                    '#theme' => 'links__toolbar_patterns',
+                    '#links' => $links,
+                    '#attributes' => array(
+                        'class' => array('toolbar-menu'),
+                    ),
+                ),
+            ),
+        ];
+
+        return $items;
+    }

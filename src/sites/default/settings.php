@@ -1,5 +1,5 @@
 <?php
-
+// ini_set('memory_limit', '-1');
 // phpcs:ignoreFile
 
 /**
@@ -827,3 +827,9 @@ $databases['default']['default'] = array (
 $settings['config_sync_directory'] = 'sites/default/files/config_Dz4XPtgvZeUv3L1eNG1DcgP2UTjD7fQZV3BiYliHleaPjMAHuAHzu9RU_Zk_KsIr78JX237jIQ/sync';
 
 $settings['trusted_host_patterns'] = ['^drupal_dev\.local$'];
+$settings['rebuild_access'] = false;
+
+$config['system.logging']['error_level'] = 'verbose';
+error_reporting(E_ALL);
+ini_set('display_errors', TRUE);
+ini_set('display_startup_errors', TRUE);
