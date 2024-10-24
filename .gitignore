@@ -1,4 +1,4 @@
-./.docker/database/
-./.docker/nginx/logs/
-./src/sites/default/files/
+.docker/database/*
+.docker/nginx/logs/*
+src/sites/default/files/
 
