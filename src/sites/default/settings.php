@@ -826,4 +826,4 @@ $databases['default']['default'] = array (
 );
 $settings['config_sync_directory'] = 'sites/default/files/config_Dz4XPtgvZeUv3L1eNG1DcgP2UTjD7fQZV3BiYliHleaPjMAHuAHzu9RU_Zk_KsIr78JX237jIQ/sync';
 
-$settings['trusted_host_patterns'] = ['^drupal_dev\.local$'];
+$settings['trusted_host_patterns'] = ['localhost'];
