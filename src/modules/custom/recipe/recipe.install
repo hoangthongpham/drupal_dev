@@ -1,0 +1,72 @@
+<?php
+
+/**
+ * Implements hook_install().
+ */
+function recipe_install()
+{
+  // Tạo content type "recipe".
+  $node_type = \Drupal\node\Entity\NodeType::create([
+    'type' => 'recipe',
+    'name' => 'Recipe',
+    'description' => 'A content type for recipes.',
+  ]);
+  $node_type->save();
+
+  // Kiểm tra xem field storage "body" đã tồn tại chưa.
+  $field_storage = \Drupal\field\Entity\FieldStorageConfig::loadByName('node', 'body');
+  if (!$field_storage) {
+    // Tạo field storage "body" nếu chưa tồn tại.
+    $field_storage = \Drupal\field\Entity\FieldStorageConfig::create([
+      'field_name' => 'body',
+      'entity_type' => 'node',
+      'type' => 'text_with_summary',
+      'cardinality' => 1,
+    ]);
+    $field_storage->save();
+  }
+
+  // Kiểm tra xem field instance "body" đã tồn tại trong content type "recipe" chưa.
+  $field_instance = \Drupal\field\Entity\FieldConfig::loadByName('node', 'recipe', 'body');
+  if (!$field_instance) {
+    // Tạo field instance "body" trong content type "recipe".
+    $field_instance = \Drupal\field\Entity\FieldConfig::create([
+      'field_name' => 'body',
+      'entity_type' => 'node',
+      'bundle' => 'recipe',
+      'label' => 'Body',
+      'description' => 'The body of the recipe.',
+      'required' => TRUE,
+    ]);
+    $field_instance->save();
+  }
+
+  // Cấu hình form display.
+  $form_display = \Drupal\Core\Entity\Entity\EntityFormDisplay::load('node.recipe.default');
+  if (!$form_display) {
+    $form_display = \Drupal\Core\Entity\Entity\EntityFormDisplay::create([
+      'targetEntityType' => 'node',
+      'bundle' => 'recipe',
+      'mode' => 'default',
+      'status' => TRUE,
+    ]);
+  }
+  $form_display->setComponent('body', [
+    'type' => 'text_textarea_with_summary',
+  ])->save();
+
+  // Cấu hình view display.
+  $view_display = \Drupal\Core\Entity\Entity\EntityViewDisplay::load('node.recipe.default');
+  if (!$view_display) {
+    $view_display = \Drupal\Core\Entity\Entity\EntityViewDisplay::create([
+      'targetEntityType' => 'node',
+      'bundle' => 'recipe',
+      'mode' => 'default',
+      'status' => TRUE,
+    ]);
+  }
+  $view_display->setComponent('body', [
+    'label' => 'hidden',
+    'type' => 'text_default',
+  ])->save();
+}

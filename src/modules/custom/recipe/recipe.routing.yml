@@ -1,0 +1,39 @@
+recipe_module.list:
+  path: '/recipes'
+  defaults:
+    _title: 'Recipes'
+    _controller: '\Drupal\recipe\Controller\RecipeController::list'
+  requirements:
+    _permission: 'access content'
+
+recipe.add:
+  path: '/recipe/add'
+  defaults:
+    _form: '\Drupal\recipe\Form\RecipeForm'
+    _title: 'Add Recipe'
+  requirements:
+    _permission: 'access content'
+
+recipe.edit:
+  path: '/recipe/{nid}/edit'
+  defaults:
+    _form: '\Drupal\recipe\Form\RecipeForm'
+    _title: 'Edit Recipe'
+  requirements:
+    _permission: 'access content'
+  options:
+    parameters:
+      nid:
+        type: entity:node
+
+recipe.delete:
+  path: '/recipe/{nid}/delete'
+  defaults:
+    _form: '\Drupal\recipe\Form\RecipeDeleteForm'
+    _title: 'Delete Recipe'
+  requirements:
+    _permission: 'access content'
+  options:
+    parameters:
+      nid:
+        type: entity:node

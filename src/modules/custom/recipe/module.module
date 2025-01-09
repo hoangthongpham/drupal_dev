@@ -1,0 +1,17 @@
+<?php
+function recipe_page_attachments(array &$attachments)
+{
+    $attachments['#attached']['library'][] = 'recipe/bootstrap';
+}
+
+function recipe_theme()
+{
+    return [
+        'recipe_list' => [
+            'variables' => [
+                'recipes' => [],
+            ],
+            'template' => 'recipe-list',
+        ],
+    ];
+}

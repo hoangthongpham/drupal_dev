@@ -1,0 +1,6 @@
+services:
+  recipe.recipe_resource:
+    class: Drupal\recipe\Plugin\rest\resource\RecipeResource
+    arguments: []
+    tags:
+      - { name: rest_resource }
