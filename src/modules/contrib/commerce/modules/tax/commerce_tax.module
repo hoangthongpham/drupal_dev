@@ -5,11 +5,11 @@
  * Provides tax functionality.
  */
 
-use Drupal\commerce_tax\TaxableType;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\commerce_tax\TaxableType;
 use Drupal\field\FieldStorageConfigInterface;
 
 /**
@@ -43,8 +43,9 @@ function commerce_tax_entity_base_field_info(EntityTypeInterface $entity_type) {
 
     $fields['tax_registrations'] = BaseFieldDefinition::create('list_string')
       ->setLabel(t('Tax registrations'))
-      ->setDescription(t('The countries where the store is additionally registered to collect taxes.'))
+      ->setDescription(t('The countries where the store is additionally registered to collect taxes. For further details see the <a href="https://docs.drupalcommerce.org/v2/user-guide/taxes/" target="_blank">Commerce Tax documentation</a>.'))
       ->setCardinality(BaseFieldDefinition::CARDINALITY_UNLIMITED)
+      ->setSetting('display_description', TRUE)
       ->setSetting('allowed_values_function', ['\Drupal\commerce_store\Entity\Store', 'getAvailableCountries'])
       ->setDisplayOptions('form', [
         'type' => 'options_select',

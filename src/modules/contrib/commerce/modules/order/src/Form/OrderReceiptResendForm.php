@@ -2,12 +2,12 @@
 
 namespace Drupal\commerce_order\Form;
 
-use Drupal\commerce_order\Mail\OrderReceiptMailInterface;
 use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Entity\ContentEntityConfirmFormBase;
 use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\commerce_order\Mail\OrderReceiptMailInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -72,7 +72,7 @@ class OrderReceiptResendForm extends ContentEntityConfirmFormBase {
    * {@inheritdoc}
    */
   public function getCancelUrl() {
-    return $this->entity->toUrl('collection');
+    return $this->entity->toUrl();
   }
 
   /**
@@ -86,6 +86,8 @@ class OrderReceiptResendForm extends ContentEntityConfirmFormBase {
     if ($result) {
       $this->messenger()->addMessage($this->t('Order receipt resent.'));
     }
+
+    $form_state->setRedirectUrl($this->entity->toUrl());
   }
 
 }

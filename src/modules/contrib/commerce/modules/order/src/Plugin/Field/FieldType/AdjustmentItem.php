@@ -2,24 +2,27 @@
 
 namespace Drupal\commerce_order\Plugin\Field\FieldType;
 
-use Drupal\commerce_order\Adjustment;
+use Drupal\Core\Field\Attribute\FieldType;
 use Drupal\Core\Field\FieldItemBase;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\TypedData\DataDefinition;
+use Drupal\commerce_order\Adjustment;
 
 /**
  * Plugin implementation of the 'commerce_adjustment' field type.
  *
- * @FieldType(
- *   id = "commerce_adjustment",
- *   label = @Translation("Adjustment"),
- *   description = @Translation("Stores adjustments to the parent entity's price."),
- *   category = @Translation("Commerce"),
- *   list_class = "\Drupal\commerce_order\Plugin\Field\FieldType\AdjustmentItemList",
- *   no_ui = TRUE,
- *   default_widget = "commerce_adjustment_default",
- * )
+ * @property mixed $value
  */
+#[FieldType(
+  id: "commerce_adjustment",
+  label: new TranslatableMarkup("Adjustment"),
+  description: new TranslatableMarkup("Stores adjustments to the parent entity's price."),
+  category: "commerce",
+  default_widget: "commerce_adjustment_default",
+  no_ui: TRUE,
+  list_class: AdjustmentItemList::class,
+)]
 class AdjustmentItem extends FieldItemBase {
 
   /**

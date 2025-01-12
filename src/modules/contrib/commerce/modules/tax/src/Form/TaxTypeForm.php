@@ -142,9 +142,11 @@ class TaxTypeForm extends EntityForm {
    * {@inheritdoc}
    */
   public function save(array $form, FormStateInterface $form_state) {
-    $this->entity->save();
+    $status = $this->entity->save();
     $this->messenger()->addMessage($this->t('Saved the %label tax type.', ['%label' => $this->entity->label()]));
     $form_state->setRedirect('entity.commerce_tax_type.collection');
+
+    return $status;
   }
 
   /**

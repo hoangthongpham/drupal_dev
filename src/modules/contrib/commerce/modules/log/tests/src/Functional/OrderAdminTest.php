@@ -2,9 +2,9 @@
 
 namespace Drupal\Tests\commerce_log\Functional;
 
-use Drupal\commerce_order\Entity\Order;
 use Drupal\Component\Utility\Html;
 use Drupal\Tests\commerce_order\Functional\OrderBrowserTestBase;
+use Drupal\commerce_order\Entity\Order;
 
 /**
  * Tests the order admin.

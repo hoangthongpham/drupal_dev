@@ -2,21 +2,20 @@
 
 namespace Drupal\commerce_order\Entity;
 
-use Drupal\commerce\Entity\CommerceContentEntityBase;
-use Drupal\commerce_order\Adjustment;
-use Drupal\commerce_order\Event\OrderEvents;
-use Drupal\commerce_order\Event\OrderLabelEvent;
-use Drupal\commerce_order\Event\OrderProfilesEvent;
-use Drupal\commerce_order\Exception\OrderVersionMismatchException;
-use Drupal\commerce_order\OrderBalanceFieldItemList;
-use Drupal\commerce_price\Price;
-use Drupal\commerce_store\Entity\StoreInterface;
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\commerce\Entity\CommerceContentEntityBase;
+use Drupal\commerce_order\Adjustment;
+use Drupal\commerce_order\Event\OrderEvents;
+use Drupal\commerce_order\Event\OrderLabelEvent;
+use Drupal\commerce_order\Event\OrderProfilesEvent;
+use Drupal\commerce_order\Exception\OrderVersionMismatchException;
+use Drupal\commerce_price\Price;
+use Drupal\commerce_store\Entity\StoreInterface;
 use Drupal\profile\Entity\ProfileInterface;
 use Drupal\user\Entity\User;
 use Drupal\user\UserInterface;
@@ -478,6 +477,22 @@ class Order extends CommerceContentEntityBase implements OrderInterface {
       }
     }
     $this->total_price = $total_price;
+    $this->recalculateBalance();
+
+    return $this;
+  }
+
+  /**
+   * Recalculates the order balance.
+   *
+   * @return $this
+   */
+  protected function recalculateBalance() {
+    $balance = NULL;
+    if ($total_price = $this->getTotalPrice()) {
+      $balance = $total_price->subtract($this->getTotalPaid());
+    }
+    $this->set('balance', $balance);
 
     return $this;
   }
@@ -510,15 +525,22 @@ class Order extends CommerceContentEntityBase implements OrderInterface {
    */
   public function setTotalPaid(Price $total_paid) {
     $this->set('total_paid', $total_paid);
+    $this->recalculateBalance();
   }
 
   /**
    * {@inheritdoc}
    */
   public function getBalance() {
+    if (!$this->get('balance')->isEmpty()) {
+      return $this->get('balance')->first()->toPrice();
+    }
     if ($total_price = $this->getTotalPrice()) {
+      // Provide a default without storing it, to avoid having to update
+      // the field if the order currency changes before the order is placed.
       return $total_price->subtract($this->getTotalPaid());
     }
+    return NULL;
   }
 
   /**
@@ -670,6 +692,21 @@ class Order extends CommerceContentEntityBase implements OrderInterface {
     $date = DrupalDateTime::createFromTimestamp($timestamp, $timezone);
 
     return $date;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getCustomerComments(): ?string {
+    return $this->get('customer_comments')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setCustomerComments($comments): static {
+    $this->set('customer_comments', $comments);
+    return $this;
   }
 
   /**
@@ -906,8 +943,11 @@ class Order extends CommerceContentEntityBase implements OrderInterface {
       ->setLabel(t('Order balance'))
       ->setDescription(t('The order balance.'))
       ->setReadOnly(TRUE)
-      ->setComputed(TRUE)
-      ->setClass(OrderBalanceFieldItemList::class)
+      ->setDisplayOptions('view', [
+        'label' => 'hidden',
+        'type' => 'commerce_price_default',
+        'weight' => 0,
+      ])
       ->setDisplayConfigurable('form', FALSE)
       ->setDisplayConfigurable('view', TRUE);
 
@@ -968,6 +1008,16 @@ class Order extends CommerceContentEntityBase implements OrderInterface {
         'type' => 'timestamp',
         'weight' => 0,
       ])
+      ->setDisplayConfigurable('view', TRUE);
+
+    $fields['customer_comments'] = BaseFieldDefinition::create('string_long')
+      ->setLabel(t('Customer comments'))
+      ->setDisplayOptions('view', [
+        'type' => 'string',
+        'label' => 'above',
+        'settings' => [],
+      ])
+      ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
 
     return $fields;

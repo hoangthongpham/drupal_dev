@@ -2,11 +2,11 @@
 
 namespace Drupal\Tests\commerce_cart\Kernel;
 
+use Drupal\Component\Datetime\TimeInterface;
+use Drupal\Core\Session\AnonymousUserSession;
 use Drupal\commerce_order\Entity\OrderType;
 use Drupal\commerce_order\Entity\OrderTypeInterface;
 use Drupal\commerce_order\OrderRefresh;
-use Drupal\Component\Datetime\TimeInterface;
-use Drupal\Core\Session\AnonymousUserSession;
 
 /**
  * Tests the order refresh process.

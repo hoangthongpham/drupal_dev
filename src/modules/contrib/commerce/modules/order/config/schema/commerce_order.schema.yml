@@ -6,6 +6,20 @@ commerce_order.settings:
       type: boolean
       label: 'Log order version mismatch'
 
+commerce.commerce_condition.plugin.current_user_role:
+  type: commerce_condition_configuration
+  mapping:
+    matching_strategy:
+      type: string
+      label: 'Matching strategy'
+    roles:
+      type: sequence
+      label: 'Roles'
+      orderby: value
+      sequence:
+        type: string
+        label: 'Role'
+
 commerce.commerce_condition.plugin.order_billing_address:
   type: commerce_condition_configuration
   mapping:
@@ -163,3 +177,7 @@ field.formatter.settings.commerce_order_item_table:
     view:
       type: string
       label: 'Order item table view'
+
+action.configuration.commerce_order_unlock:
+  type: action_configuration_default
+  label: 'Unlock'

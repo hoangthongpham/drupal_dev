@@ -2,13 +2,13 @@
 
 namespace Drupal\commerce;
 
-use Drupal\commerce\Utility\Error;
 use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\State\StateInterface;
+use Drupal\commerce\Utility\Error;
 use GuzzleHttp\ClientInterface;
 use Psr\Log\LoggerInterface;
 
@@ -50,7 +50,7 @@ class InboxMessageFetcher implements InboxMessageFetcherInterface {
     protected InboxMessageStorageInterface $inboxMessageStorage,
     protected DateFormatterInterface $dateFormatter,
     protected StateInterface $state,
-    protected TimeInterface $time
+    protected TimeInterface $time,
   ) {
   }
 

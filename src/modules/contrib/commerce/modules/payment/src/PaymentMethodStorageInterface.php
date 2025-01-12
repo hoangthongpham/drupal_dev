@@ -2,8 +2,8 @@
 
 namespace Drupal\commerce_payment;
 
-use Drupal\commerce_payment\Entity\PaymentGatewayInterface;
 use Drupal\Core\Entity\ContentEntityStorageInterface;
+use Drupal\commerce_payment\Entity\PaymentGatewayInterface;
 use Drupal\profile\Entity\ProfileInterface;
 use Drupal\user\UserInterface;
 
@@ -46,6 +46,6 @@ interface PaymentMethodStorageInterface extends ContentEntityStorageInterface {
    * @return \Drupal\commerce_payment\Entity\PaymentMethodInterface
    *   A new payment method object.
    */
-  public function createForCustomer($payment_method_type, $payment_gateway_id, $customer_id, ProfileInterface $billing_profile = NULL);
+  public function createForCustomer($payment_method_type, $payment_gateway_id, $customer_id, ?ProfileInterface $billing_profile = NULL);
 
 }

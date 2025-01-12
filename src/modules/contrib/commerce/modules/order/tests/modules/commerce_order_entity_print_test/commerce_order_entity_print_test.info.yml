@@ -5,8 +5,3 @@ dependencies:
   - commerce:commerce_order
   - commerce:commerce_product
   - entity_print:entity_print
-
-# Information added by Drupal.org packaging script on 2024-02-05
-version: '8.x-2.38'
-project: 'commerce'
-datestamp: 1707150197

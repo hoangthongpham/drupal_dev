@@ -2,20 +2,24 @@
 
 namespace Drupal\commerce_tax\Plugin\Commerce\TaxType;
 
-use Drupal\commerce_order\Entity\OrderItemInterface;
-use Drupal\commerce_tax\TaxableType;
-use Drupal\commerce_tax\TaxZone;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\commerce_order\Entity\OrderItemInterface;
+use Drupal\commerce_tax\Attribute\CommerceTaxType;
+use Drupal\commerce_tax\TaxZone;
+use Drupal\commerce_tax\TaxableType;
 use Drupal\profile\Entity\ProfileInterface;
+
+// cspell:ignore Jungholz Heligoland Mittelberg Melilla Büsingen Lugano Campione
+// cspell:ignore Livigno
 
 /**
  * Provides the European Union VAT tax type.
- *
- * @CommerceTaxType(
- *   id = "european_union_vat",
- *   label = "European Union VAT",
- * )
  */
+#[CommerceTaxType(
+  id: "european_union_vat",
+  label: new TranslatableMarkup("European Union VAT"),
+)]
 class EuropeanUnionVat extends LocalTaxTypeBase {
 
   /**
@@ -440,7 +444,8 @@ class EuropeanUnionVat extends LocalTaxTypeBase {
           'id' => 'standard',
           'label' => $labels['standard'],
           'percentages' => [
-            ['number' => '0.24', 'start_date' => '2013-01-01'],
+            ['number' => '0.24', 'start_date' => '2013-01-01', 'end_date' => '2024-08-31'],
+            ['number' => '0.255', 'start_date' => '2024-09-01'],
           ],
           'default' => TRUE,
         ],
@@ -1180,7 +1185,8 @@ class EuropeanUnionVat extends LocalTaxTypeBase {
           'id' => 'standard',
           'label' => $labels['standard'],
           'percentages' => [
-            ['number' => '0.2', 'start_date' => '2011-01-01'],
+            ['number' => '0.2', 'start_date' => '2011-01-01', 'end_date' => '2024-12-31'],
+            ['number' => '0.23', 'start_date' => '2025-01-01'],
           ],
           'default' => TRUE,
         ],
@@ -1188,7 +1194,15 @@ class EuropeanUnionVat extends LocalTaxTypeBase {
           'id' => 'reduced',
           'label' => $labels['reduced'],
           'percentages' => [
-            ['number' => '0.1', 'start_date' => '2011-01-01'],
+            ['number' => '0.1', 'start_date' => '2011-01-01', 'end_date' => '2024-12-31'],
+            ['number' => '0.19', 'start_date' => '2025-01-01'],
+          ],
+        ],
+        [
+          'id' => 'second_reduced',
+          'label' => $labels['second_reduced'],
+          'percentages' => [
+            ['number' => '0.05', 'start_date' => '2023-01-01'],
           ],
         ],
       ],

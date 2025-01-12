@@ -2,13 +2,13 @@
 
 namespace Drupal\commerce_cart\EventSubscriber;
 
-use Drupal\commerce_cart\Event\CartEntityAddEvent;
-use Drupal\commerce_cart\Event\CartEvents;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslationInterface;
 use Drupal\Core\Url;
+use Drupal\commerce_cart\Event\CartEntityAddEvent;
+use Drupal\commerce_cart\Event\CartEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class CartEventSubscriber implements EventSubscriberInterface {
@@ -48,7 +48,7 @@ class CartEventSubscriber implements EventSubscriberInterface {
   /**
    * {@inheritdoc}
    */
-  public static function getSubscribedEvents() {
+  public static function getSubscribedEvents(): array {
     $events = [
       CartEvents::CART_ENTITY_ADD => 'displayAddToCartMessage',
     ];

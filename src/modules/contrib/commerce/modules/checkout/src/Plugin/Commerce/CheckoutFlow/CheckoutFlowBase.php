@@ -2,10 +2,6 @@
 
 namespace Drupal\commerce_checkout\Plugin\Commerce\CheckoutFlow;
 
-use Drupal\commerce\AjaxFormTrait;
-use Drupal\commerce\Response\NeedsRedirectException;
-use Drupal\commerce_checkout\Event\CheckoutEvents;
-use Drupal\commerce_order\Event\OrderEvent;
 use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Cache\CacheableMetadata;
@@ -16,6 +12,10 @@ use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\PluginBase;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Url;
+use Drupal\commerce\AjaxFormTrait;
+use Drupal\commerce\Response\NeedsRedirectException;
+use Drupal\commerce_checkout\Event\CheckoutEvents;
+use Drupal\commerce_order\Event\OrderEvent;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -128,7 +128,7 @@ abstract class CheckoutFlowBase extends PluginBase implements CheckoutFlowInterf
   /**
    * {@inheritdoc}
    */
-  public function __sleep() {
+  public function __sleep(): array {
     if (!empty($this->parentEntity)) {
       $this->_parentEntityId = $this->parentEntity->id();
       unset($this->parentEntity);
@@ -144,7 +144,7 @@ abstract class CheckoutFlowBase extends PluginBase implements CheckoutFlowInterf
   /**
    * {@inheritdoc}
    */
-  public function __wakeup() {
+  public function __wakeup(): void {
     parent::__wakeup();
 
     if (!empty($this->_parentEntityId)) {
@@ -347,7 +347,7 @@ abstract class CheckoutFlowBase extends PluginBase implements CheckoutFlowInterf
     $form['guest_new_account'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Create a new account for an anonymous order'),
-      '#description' => $this->t('Creates a new user account on checkout completion if the customer specified a non-existent e-mail address.'),
+      '#description' => $this->t('Creates a new user account on checkout completion if the customer specified a non-existent email address.'),
       '#default_value' => $this->configuration['guest_new_account'],
     ];
     $form['guest_new_account_notify'] = [

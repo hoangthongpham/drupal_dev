@@ -2,12 +2,12 @@
 
 namespace Drupal\commerce_order\Mail;
 
-use Drupal\commerce\MailHandlerInterface;
-use Drupal\commerce_order\Entity\OrderInterface;
-use Drupal\commerce_order\OrderTotalSummaryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Utility\Token;
+use Drupal\commerce\MailHandlerInterface;
+use Drupal\commerce_order\Entity\OrderInterface;
+use Drupal\commerce_order\OrderTotalSummaryInterface;
 
 class OrderReceiptMail implements OrderReceiptMailInterface {
 

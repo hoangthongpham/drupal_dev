@@ -5,9 +5,9 @@
  * Post update functions for Promotion.
  */
 
+use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\commerce_promotion\Entity\PromotionInterface;
 use Drupal\commerce_promotion\Plugin\Commerce\PromotionOffer\OrderItemPromotionOfferInterface;
-use Drupal\Core\Field\BaseFieldDefinition;
 
 /**
  * Add the coupons field to orders.
@@ -449,7 +449,7 @@ function commerce_promotion_post_update_10(&$sandbox = NULL) {
 /**
  * Allows promotion start and end dates to have a time component.
  */
-function commerce_promotion_post_update_11(array &$sandbox = NULL) {
+function commerce_promotion_post_update_11(?array &$sandbox = NULL) {
   $promotion_storage = \Drupal::entityTypeManager()->getStorage('commerce_promotion');
   if (!isset($sandbox['current_count'])) {
     $query = $promotion_storage->getQuery();

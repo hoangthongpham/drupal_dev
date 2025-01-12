@@ -5,9 +5,6 @@
  * Defines the Order entity and associated features.
  */
 
-use Drupal\commerce_order\Entity\OrderTypeInterface;
-use Drupal\commerce_order\Form\DashboardMetricsForm;
-use Drupal\commerce_order\Plugin\Field\FieldFormatter\PriceCalculatedFormatter;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
@@ -15,6 +12,8 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
+use Drupal\commerce_order\Form\DashboardMetricsForm;
+use Drupal\commerce_order\Plugin\Field\FieldFormatter\PriceCalculatedFormatter;
 use Drupal\entity\BundleFieldDefinition;
 use Drupal\field\FieldStorageConfigInterface;
 use Drupal\profile\Entity\ProfileType;
@@ -181,8 +180,8 @@ function template_preprocess_commerce_order(array &$variables) {
   }
 
   if ($billing_profile = $order->getBillingProfile()) {
-    $profile_view_bulder = \Drupal::entityTypeManager()->getViewBuilder('profile');
-    $variables['order']['billing_information'] = $profile_view_bulder->view($billing_profile, $view_mode);
+    $profile_view_builder = \Drupal::entityTypeManager()->getViewBuilder('profile');
+    $variables['order']['billing_information'] = $profile_view_builder->view($billing_profile, $view_mode);
   }
 
   $route_name = \Drupal::routeMatch()->getRouteName();
@@ -220,21 +219,6 @@ function commerce_order_theme_suggestions_commerce_order_receipt(array $variable
     $suggestions[] = $variables['theme_hook_original'] . '__' . $order->bundle();
   }
   return $suggestions;
-}
-
-/**
- * Adds the default order_items field to an order type.
- *
- * @param \Drupal\commerce_order\Entity\OrderTypeInterface $order_type
- *   The order type.
- *
- * @deprecated in commerce:8.x-2.16 and is removed from commerce:3.x. The order
- *   items field is now a base field.
- *
- * @see https://www.drupal.org/node/3090561
- */
-function commerce_order_add_order_items_field(OrderTypeInterface $order_type) {
-  @trigger_error('commerce_order_add_order_items_field() function is deprecated in commerce:8.x-2.16 and is removed from commerce:3.x. The order_items field is now a base field. See https://www.drupal.org/node/3090561', E_USER_DEPRECATED);
 }
 
 /**
@@ -464,11 +448,13 @@ function commerce_order_jsonapi_commerce_order_filter_access(EntityTypeInterface
  * Implements hook_theme_registry_alter().
  */
 function commerce_order_theme_registry_alter(&$theme_registry) {
-  $theme_registry['commerce_price_calculated']['variables'] += [
-    'result' => NULL,
-    'base_price' => NULL,
-    'adjustments' => [],
-  ];
+  if (isset($theme_registry['commerce_price_calculated'])) {
+    $theme_registry['commerce_price_calculated']['variables'] += [
+      'result' => NULL,
+      'base_price' => NULL,
+      'adjustments' => [],
+    ];
+  }
 }
 
 /**
@@ -501,5 +487,17 @@ function commerce_order_commerce_dashboard_page_build_alter(&$build) {
   // If all periods are disabled, skip rendering the form.
   if (isset($form['periods'])) {
     $build['metrics_form'] = $form;
+  }
+}
+
+/**
+ * Implements hook_entity_reference_selection_alter().
+ */
+function commerce_order_entity_reference_selection_alter(&$definitions) {
+  // Drupal core assumes our custom entity reference selection plugin for users
+  // is defined by a deriver and expect a "base_plugin_label" key to be present.
+  // Artificially set the base plugin label to the label.
+  if (isset($definitions['commerce:user'])) {
+    $definitions['commerce:user']['base_plugin_label'] = $definitions['commerce:user']['label'];
   }
 }

@@ -2,10 +2,10 @@
 
 namespace Drupal\commerce_payment;
 
-use Drupal\commerce_order\Entity\OrderInterface;
-use Drupal\commerce_price\Price;
 use Drupal\Core\DestructableInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\commerce_order\Entity\OrderInterface;
+use Drupal\commerce_price\Price;
 
 class PaymentOrderUpdater implements PaymentOrderUpdaterInterface, DestructableInterface {
 

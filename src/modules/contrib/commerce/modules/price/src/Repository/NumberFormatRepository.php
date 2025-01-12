@@ -29,7 +29,7 @@ class NumberFormatRepository extends ExternalNumberFormatRepository implements N
   /**
    * {@inheritdoc}
    */
-  protected function processDefinition($locale, array $definition) {
+  protected function processDefinition(string $locale, array $definition): array {
     $definition = parent::processDefinition($locale, $definition);
     // Let the definition be altered.
     $event = new NumberFormatDefinitionEvent($definition);

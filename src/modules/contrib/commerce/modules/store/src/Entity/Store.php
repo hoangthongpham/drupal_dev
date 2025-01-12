@@ -4,14 +4,15 @@ namespace Drupal\commerce_store\Entity;
 
 use CommerceGuys\Addressing\AddressFormat\AddressField;
 use CommerceGuys\Addressing\AddressFormat\FieldOverride;
-use Drupal\address\AddressInterface;
-use Drupal\commerce\EntityOwnerTrait;
-use Drupal\commerce_price\Entity\CurrencyInterface;
+use Drupal\Core\Datetime\TimeZoneFormHelper;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\address\AddressInterface;
+use Drupal\commerce\EntityOwnerTrait;
+use Drupal\commerce_price\Entity\CurrencyInterface;
 
 /**
  * Defines the store entity class.
@@ -456,7 +457,7 @@ class Store extends ContentEntityBase implements StoreInterface {
    *   The allowed values.
    */
   public static function getTimezones() {
-    return system_time_zones(NULL, TRUE);
+    return TimeZoneFormHelper::getOptionsListByRegion();
   }
 
   /**

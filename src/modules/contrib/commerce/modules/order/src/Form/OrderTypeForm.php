@@ -2,12 +2,12 @@
 
 namespace Drupal\commerce_order\Form;
 
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\commerce\EntityHelper;
 use Drupal\commerce\EntityTraitManagerInterface;
 use Drupal\commerce\Form\CommerceBundleEntityFormBase;
 use Drupal\commerce_order\Entity\OrderType;
-use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\Core\Form\FormStateInterface;
 use Drupal\entity\Form\EntityDuplicateFormTrait;
 use Drupal\state_machine\WorkflowManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -212,12 +212,13 @@ class OrderTypeForm extends CommerceBundleEntityFormBase {
    * {@inheritdoc}
    */
   public function save(array $form, FormStateInterface $form_state) {
-    $this->entity->save();
+    $status = $this->entity->save();
     $this->postSave($this->entity, $this->operation);
     $this->submitTraitForm($form, $form_state);
 
     $this->messenger()->addMessage($this->t('Saved the %label order type.', ['%label' => $this->entity->label()]));
     $form_state->setRedirect('entity.commerce_order_type.collection');
+    return $status;
   }
 
 }

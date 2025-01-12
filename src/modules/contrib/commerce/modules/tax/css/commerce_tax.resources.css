@@ -39,7 +39,7 @@
   }
   .system-status-general-info__item.commerce-tax__item {
     display: block;
-    flex: 1!important;
+    flex: 1 !important;
     width: 49%;
   }
 }

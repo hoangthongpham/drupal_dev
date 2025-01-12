@@ -2,10 +2,10 @@
 
 namespace Drupal\commerce_store\Entity;
 
-use Drupal\address\AddressInterface;
-use Drupal\commerce_price\Entity\CurrencyInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityChangedInterface;
+use Drupal\address\AddressInterface;
+use Drupal\commerce_price\Entity\CurrencyInterface;
 use Drupal\user\EntityOwnerInterface;
 
 /**

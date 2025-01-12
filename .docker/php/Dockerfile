@@ -1,4 +1,4 @@
-FROM php:8.1-fpm-alpine
+FROM php:8.3-fpm-alpine
 
 LABEL maintainer="HoangThong <phamhoangthongxyz@gmail.com>"
 
@@ -31,7 +31,8 @@ RUN docker-php-ext-install \
     opcache \
     pdo \
     pdo_pgsql \
-    pgsql
+    pgsql \
+    gd
 
 # Install PHP GD extension
 RUN apk add --no-cache libpng libpng-dev libjpeg-turbo libjpeg-turbo-dev freetype freetype-dev \

@@ -2,12 +2,12 @@
 
 namespace Drupal\commerce_product;
 
-use Drupal\commerce_product\Entity\ProductAttributeInterface;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Entity\Display\EntityFormDisplayInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\commerce_product\Entity\ProductAttributeInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 

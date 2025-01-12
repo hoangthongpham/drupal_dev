@@ -2,20 +2,21 @@
 
 namespace Drupal\commerce_tax\Plugin\Commerce\TaxType;
 
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\commerce_order\Entity\OrderItemInterface;
 use Drupal\commerce_store\Entity\StoreInterface;
+use Drupal\commerce_tax\Attribute\CommerceTaxType;
 use Drupal\commerce_tax\TaxZone;
-use Drupal\Core\Form\FormStateInterface;
 use Drupal\profile\Entity\ProfileInterface;
 
 /**
  * Provides the Canadian sales tax type.
- *
- * @CommerceTaxType(
- *   id = "canadian_sales_tax",
- *   label = "Canadian sales tax",
- * )
  */
+#[CommerceTaxType(
+  id: "canadian_sales_tax",
+  label: new TranslatableMarkup("Canadian sales tax"),
+)]
 class CanadianSalesTax extends LocalTaxTypeBase {
 
   /**

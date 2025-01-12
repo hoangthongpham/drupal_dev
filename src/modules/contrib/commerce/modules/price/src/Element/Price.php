@@ -2,9 +2,10 @@
 
 namespace Drupal\commerce_price\Element;
 
-use Drupal\commerce_price\Entity\CurrencyInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Render\Element\FormElement;
+use Drupal\Core\Render\Attribute\FormElement;
+use Drupal\Core\Render\Element\FormElementBase;
+use Drupal\commerce_price\Entity\CurrencyInterface;
 
 /**
  * Provides a price form element.
@@ -22,10 +23,11 @@ use Drupal\Core\Render\Element\FormElement;
  *   '#available_currencies' => ['USD', 'EUR'],
  * ];
  * @endcode
- *
- * @FormElement("commerce_price")
  */
-class Price extends FormElement {
+#[FormElement(
+  id: "commerce_price",
+)]
+class Price extends FormElementBase {
 
   /**
    * {@inheritdoc}
@@ -122,8 +124,14 @@ class Price extends FormElement {
       '#min' => $element['#allow_negative'] ? NULL : 0,
       '#description' => t('Format: @format', ['@format' => $number_formatter->format('9.99')]),
     ];
+    if (isset($element['#locale'])) {
+      $element['number']['#locale'] = $element['#locale'];
+    }
     if (isset($element['#ajax'])) {
       $element['number']['#ajax'] = $element['#ajax'];
+    }
+    if (isset($element['#states'])) {
+      $element['number']['#states'] = $element['#states'];
     }
 
     if (count($currency_codes) == 1) {
@@ -147,6 +155,9 @@ class Price extends FormElement {
       ];
       if (isset($element['#ajax'])) {
         $element['currency_code']['#ajax'] = $element['#ajax'];
+      }
+      if (isset($element['#states'])) {
+        $element['currency_code']['#states'] = $element['#states'];
       }
     }
     // Add the help text if specified.

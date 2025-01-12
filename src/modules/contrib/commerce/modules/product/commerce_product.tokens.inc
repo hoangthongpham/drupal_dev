@@ -5,8 +5,8 @@
  * Builds placeholder replacement tokens for product data.
  */
 
-use Drupal\commerce_product\Entity\ProductInterface;
 use Drupal\Core\Render\BubbleableMetadata;
+use Drupal\commerce_product\Entity\ProductInterface;
 
 /**
  * Implements hook_token_info().

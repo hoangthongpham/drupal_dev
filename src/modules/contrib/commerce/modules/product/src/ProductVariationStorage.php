@@ -2,11 +2,11 @@
 
 namespace Drupal\commerce_product;
 
+use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\commerce\CommerceContentEntityStorage;
 use Drupal\commerce_product\Entity\ProductInterface;
 use Drupal\commerce_product\Event\FilterVariationsEvent;
 use Drupal\commerce_product\Event\ProductEvents;
-use Drupal\Core\Entity\EntityTypeInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**

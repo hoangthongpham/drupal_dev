@@ -2,9 +2,9 @@
 
 namespace Drupal\Tests\commerce_cart\FunctionalJavascript;
 
+use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\commerce_order\Entity\Order;
 use Drupal\commerce_product\Entity\ProductVariationType;
-use Drupal\Core\Entity\Entity\EntityFormDisplay;
 
 /**
  * Tests pages with multiple products rendered with add to cart forms.

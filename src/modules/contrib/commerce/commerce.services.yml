@@ -37,14 +37,9 @@ services:
     tags:
       - { name: commerce.locale_resolver, priority: -100 }
 
-  commerce.availability_manager:
-    class: Drupal\commerce\AvailabilityManager
-    tags:
-      - { name: service_collector, tag: commerce.availability_checker, call: addChecker }
-
   commerce.config_updater:
     class: Drupal\commerce\Config\ConfigUpdater
-    arguments: ['@entity_type.manager', '@config.storage', '@config.factory']
+    arguments: ['@entity_type.manager', '@config.storage', '@config.factory', '%install_profile%']
 
   commerce.entity_uuid_mapper:
     class: Drupal\commerce\EntityUuidMapper

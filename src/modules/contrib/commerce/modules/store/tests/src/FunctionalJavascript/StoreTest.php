@@ -2,8 +2,8 @@
 
 namespace Drupal\Tests\commerce_store\FunctionalJavascript;
 
-use Drupal\commerce_store\Entity\Store;
 use Drupal\Tests\commerce\FunctionalJavascript\CommerceWebDriverTestBase;
+use Drupal\commerce_store\Entity\Store;
 
 /**
  * Tests the store UI.

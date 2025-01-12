@@ -2,8 +2,8 @@
 
 namespace Drupal\commerce_promotion\Plugin\Commerce\PromotionOffer;
 
-use Drupal\commerce_price\Calculator;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\commerce_price\Calculator;
 
 /**
  * Provides common configuration for percentage off offers.

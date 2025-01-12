@@ -2,11 +2,13 @@
 
 namespace Drupal\Tests\commerce_product\Kernel;
 
-use Drupal\commerce_product\Entity\Product;
-use Drupal\commerce_product\Entity\ProductVariation;
 use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\Tests\commerce\Kernel\CommerceKernelTestBase;
+use Drupal\commerce_product\Entity\Product;
+use Drupal\commerce_product\Entity\ProductVariation;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 
 /**
  * Tests the product tokens.
@@ -35,7 +37,7 @@ class ProductTokensTest extends CommerceKernelTestBase {
     $this->installConfig(['commerce_product']);
     $this->installConfig(['system']);
 
-    $user = $this->createUser([], ['administer commerce_product']);
+    $user = $this->createUser(['administer commerce_product']);
     $this->container->get('current_user')->setAccount($user);
   }
 
@@ -79,6 +81,7 @@ class ProductTokensTest extends CommerceKernelTestBase {
 
     // Invalid variation ID returns default variation.
     $request = Request::create('');
+    $request->setSession(new Session(new MockArraySessionStorage()));
     $request->query->add([
       'v' => '1111111',
     ]);
@@ -89,6 +92,7 @@ class ProductTokensTest extends CommerceKernelTestBase {
 
     // Test loading context via sku.
     $request = Request::create('');
+    $request->setSession(new Session(new MockArraySessionStorage()));
     $request->query->add([
       'sku' => end($variations)->getSku(),
     ]);

@@ -2,6 +2,11 @@
 
 namespace Drupal\commerce_promotion\Entity;
 
+use Drupal\Core\Datetime\DrupalDateTime;
+use Drupal\Core\Entity\EntityChangedTrait;
+use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\commerce\ConditionGroup;
 use Drupal\commerce\Entity\CommerceContentEntityBase;
 use Drupal\commerce\EntityOwnerTrait;
@@ -11,11 +16,6 @@ use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\commerce_price\Calculator;
 use Drupal\commerce_promotion\Plugin\Commerce\PromotionOffer\OrderItemPromotionOfferInterface;
 use Drupal\commerce_promotion\Plugin\Commerce\PromotionOffer\PromotionOfferInterface;
-use Drupal\Core\Datetime\DrupalDateTime;
-use Drupal\Core\Entity\EntityChangedTrait;
-use Drupal\Core\Entity\EntityStorageInterface;
-use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
 
 /**
@@ -447,7 +447,7 @@ class Promotion extends CommerceContentEntityBase implements PromotionInterface 
   /**
    * {@inheritdoc}
    */
-  public function setEndDate(DrupalDateTime $end_date = NULL) {
+  public function setEndDate(?DrupalDateTime $end_date = NULL) {
     $this->get('end_date')->value = NULL;
     if ($end_date) {
       $this->get('end_date')->value = $end_date->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT);

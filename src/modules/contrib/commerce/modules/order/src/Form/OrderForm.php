@@ -2,13 +2,9 @@
 
 namespace Drupal\commerce_order\Form;
 
-use Drupal\commerce_order\Entity\OrderItemType;
-use Drupal\Component\Datetime\TimeInterface;
-use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\Entity\ContentEntityForm;
-use Drupal\Core\Entity\EntityRepositoryInterface;
-use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\commerce_order\Entity\OrderItemType;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -24,33 +20,20 @@ class OrderForm extends ContentEntityForm {
   protected $dateFormatter;
 
   /**
-   * Constructs a new OrderForm object.
+   * The currency formatter.
    *
-   * @param \Drupal\Core\Entity\EntityRepositoryInterface $entity_repository
-   *   The entity repository.
-   * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entity_type_bundle_info
-   *   The entity type bundle info.
-   * @param \Drupal\Component\Datetime\TimeInterface $time
-   *   The time.
-   * @param \Drupal\Core\Datetime\DateFormatterInterface $date_formatter
-   *   The date formatter.
+   * @var \CommerceGuys\Intl\Formatter\CurrencyFormatterInterface
    */
-  public function __construct(EntityRepositoryInterface $entity_repository, EntityTypeBundleInfoInterface $entity_type_bundle_info, TimeInterface $time, DateFormatterInterface $date_formatter) {
-    parent::__construct($entity_repository, $entity_type_bundle_info, $time);
-
-    $this->dateFormatter = $date_formatter;
-  }
+  protected $currencyFormatter;
 
   /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    return new static(
-      $container->get('entity.repository'),
-      $container->get('entity_type.bundle.info'),
-      $container->get('datetime.time'),
-      $container->get('date.formatter')
-    );
+    $instance = parent::create($container);
+    $instance->dateFormatter = $container->get('date.formatter');
+    $instance->currencyFormatter = $container->get('commerce_price.currency_formatter');
+    return $instance;
   }
 
   /**
@@ -73,7 +56,6 @@ class OrderForm extends ContentEntityForm {
 
     $form['#tree'] = TRUE;
     $form['#theme'] = 'commerce_order_edit_form';
-    $form['#attached']['library'][] = 'commerce_order/form';
     // Changed must be sent to the client, for later overwrite error checking.
     $form['changed'] = [
       '#type' => 'hidden',
@@ -106,6 +88,7 @@ class OrderForm extends ContentEntityForm {
         // Hide the rendered state if there's a widget for it.
         '#access' => empty($form['store_id']),
       ],
+      'completed' => NULL,
       'date' => NULL,
       'changed' => $this->fieldAsReadOnly($this->t('Changed'), $last_saved),
     ];
@@ -119,6 +102,10 @@ class OrderForm extends ContentEntityForm {
       ],
       '#weight' => 91,
     ];
+    if ($completed_time = $order->getCompletedTime()) {
+      $date = $this->dateFormatter->format($completed_time, 'short');
+      $form['meta']['completed'] = $this->fieldAsReadOnly($this->t('Completed'), $date);
+    }
 
     if ($placed_time = $order->getPlacedTime()) {
       $date = $this->dateFormatter->format($placed_time, 'short');
@@ -130,6 +117,9 @@ class OrderForm extends ContentEntityForm {
     if ($store_count > 1) {
       $store_link = $order->getStore()->toLink()->toString();
       $form['meta']['store'] = $this->fieldAsReadOnly($this->t('Store'), $store_link);
+    }
+    if ($balance = $order->getBalance()) {
+      $form['meta']['balance'] = $this->fieldAsReadOnly($this->t('Order balance'), $this->currencyFormatter->format($balance->getNumber(), $balance->getCurrencyCode()));
     }
     // Move uid/mail widgets to the sidebar, or provide read-only alternatives.
     $customer = $order->getCustomer();
@@ -178,7 +168,7 @@ class OrderForm extends ContentEntityForm {
    * {@inheritdoc}
    */
   public function save(array $form, FormStateInterface $form_state) {
-    $this->entity->save();
+    $status = $this->entity->save();
     $label = $this->entity->label();
     if ($label) {
       $this->messenger()->addStatus($this->t('%label saved.', ['%label' => $this->entity->label()]));
@@ -187,6 +177,8 @@ class OrderForm extends ContentEntityForm {
       $this->messenger()->addStatus($this->t('Order saved.'));
     }
     $form_state->setRedirect('entity.commerce_order.canonical', ['commerce_order' => $this->entity->id()]);
+
+    return $status;
   }
 
 }

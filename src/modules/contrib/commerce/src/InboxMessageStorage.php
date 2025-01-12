@@ -41,7 +41,7 @@ class InboxMessageStorage implements InboxMessageStorageInterface {
   /**
    * {@inheritdoc}
    */
-  public function loadMultiple(array $conditions = [], int $limit = NULL): array {
+  public function loadMultiple(array $conditions = [], ?int $limit = NULL): array {
     $messages = [];
     $query = $this->connection->select(self::TABLE_NAME, 'm')
       ->fields('m')

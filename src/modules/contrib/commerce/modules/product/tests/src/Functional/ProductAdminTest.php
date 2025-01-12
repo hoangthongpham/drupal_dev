@@ -2,14 +2,14 @@
 
 namespace Drupal\Tests\commerce_product\Functional;
 
+use Drupal\Core\Entity\Entity\EntityFormDisplay;
+use Drupal\Tests\TestFileCreationTrait;
 use Drupal\commerce\EntityHelper;
 use Drupal\commerce_price\Price;
 use Drupal\commerce_product\Entity\Product;
 use Drupal\commerce_product\Entity\ProductVariation;
-use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
-use Drupal\Tests\TestFileCreationTrait;
 use Drupal\user\Entity\Role;
 use Drupal\user\RoleInterface;
 
@@ -174,7 +174,7 @@ class ProductAdminTest extends ProductBrowserTestBase {
       'id' => 'random',
       'label' => 'Random',
       'description' => 'My random product type',
-      'variationType' => 'default',
+      'variationTypes' => ['default'],
     ];
     $product_type = $this->createEntity('commerce_product_type', $values);
 

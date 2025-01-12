@@ -64,7 +64,7 @@ class EntityPrintOrderRendererTest extends OrderKernelTestBase {
    * Tests the rendered build output.
    */
   public function testRender() {
-    $user = $this->createUser(['mail' => $this->randomString() . '@example.com']);
+    $user = $this->createUser();
 
     $product = Product::create([
       'type' => 'default',

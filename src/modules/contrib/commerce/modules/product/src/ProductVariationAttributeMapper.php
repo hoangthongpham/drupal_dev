@@ -2,9 +2,9 @@
 
 namespace Drupal\commerce_product;
 
-use Drupal\commerce_product\Entity\ProductVariationInterface;
 use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\commerce_product\Entity\ProductVariationInterface;
 
 class ProductVariationAttributeMapper implements ProductVariationAttributeMapperInterface {
 
@@ -140,7 +140,7 @@ class ProductVariationAttributeMapper implements ProductVariationAttributeMapper
    * @return array[]
    *   The attribute values, keyed by attribute ID.
    */
-  protected function getAttributeValues(array $variations, $field_name, callable $callback = NULL) {
+  protected function getAttributeValues(array $variations, $field_name, ?callable $callback = NULL) {
     $values = [];
     foreach ($variations as $variation) {
       if (!$variation->hasField($field_name)) {

@@ -2,8 +2,8 @@
 
 namespace Drupal\Tests\commerce_payment\FunctionalJavascript;
 
-use Drupal\commerce_payment\Entity\PaymentMethod;
 use Drupal\Tests\commerce\FunctionalJavascript\CommerceWebDriverTestBase;
+use Drupal\commerce_payment\Entity\PaymentMethod;
 
 /**
  * Tests the payment method UI.

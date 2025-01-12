@@ -5,9 +5,9 @@
  * Install, update and uninstall functions for the commerce_promotion module.
  */
 
+use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\commerce\CommerceContentEntityStorageSchema;
 use Drupal\commerce_promotion\Entity\Promotion;
-use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\user\Entity\Role;
 
 /**

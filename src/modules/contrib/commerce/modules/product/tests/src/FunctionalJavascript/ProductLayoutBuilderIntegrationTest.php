@@ -2,9 +2,10 @@
 
 namespace Drupal\Tests\commerce_product\FunctionalJavascript;
 
-use Drupal\commerce_product\Entity\ProductVariationType;
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\Core\Url;
+use Drupal\commerce_product\Entity\ProductType;
+use Drupal\commerce_product\Entity\ProductVariationType;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 
@@ -21,6 +22,7 @@ class ProductLayoutBuilderIntegrationTest extends ProductWebDriverTestBase {
     'layout_discovery',
     'layout_builder',
     'commerce_cart',
+    'commerce_product',
     'image',
     'views',
     'views_ui',
@@ -234,9 +236,6 @@ class ProductLayoutBuilderIntegrationTest extends ProductWebDriverTestBase {
    * Tests configuring a layout override for a product.
    */
   public function testConfiguringOverrideLayout() {
-    $this->enableLayoutsForBundle('default', TRUE);
-    $this->configureDefaultLayout();
-
     $product = $this->createEntity('commerce_product', [
       'type' => 'default',
       'title' => $this->randomMachineName(),
@@ -253,6 +252,8 @@ class ProductLayoutBuilderIntegrationTest extends ProductWebDriverTestBase {
         ]),
       ],
     ]);
+    $this->enableLayoutsForBundle('default', TRUE);
+    $this->configureDefaultLayout();
     $this->drupalGet($product->toUrl());
     $this->assertSession()->pageTextNotContains('INJECTION-DEFAULT');
     $this->clickLink('Layout');
@@ -376,14 +377,27 @@ class ProductLayoutBuilderIntegrationTest extends ProductWebDriverTestBase {
    *   Whether to allow custom layouts.
    */
   protected function enableLayoutsForBundle($bundle, $allow_custom = FALSE) {
-    $this->drupalGet(Url::fromRoute('entity.entity_view_display.commerce_product.default', [
-      'commerce_product_type' => $bundle,
-    ]));
-    $this->getSession()->getPage()->checkField('layout[enabled]');
-    if ($allow_custom) {
-      $this->getSession()->getPage()->checkField('layout[allow_custom]');
+    $product_type = ProductType::load($bundle);
+    $urls = [];
+    // In order for the variation fields to be exposed, layout builder also has
+    // to be enabled at the variation bundle level.
+    foreach ($product_type->getVariationTypeIds() as $variation_type_id) {
+      $urls[] = Url::fromRoute('entity.entity_view_display.commerce_product_variation.default', [
+        'commerce_product_variation_type' => $variation_type_id,
+      ]);
     }
-    $this->getSession()->getPage()->pressButton('Save');
+    $urls[] = Url::fromRoute('entity.entity_view_display.commerce_product.default', [
+      'commerce_product_type' => $bundle,
+    ]);
+    foreach ($urls as $url) {
+      $this->drupalGet($url);
+      $this->getSession()->getPage()->checkField('layout[enabled]');
+      if ($allow_custom) {
+        $this->getSession()->getPage()->checkField('layout[allow_custom]');
+      }
+      $this->getSession()->getPage()->pressButton('Save');
+    }
+
     $this->assertNotEmpty($this->assertSession()->waitForElementVisible('css', '#edit-manage-layout'));
     $this->assertSession()->linkExists('Manage layout');
     $this->getSession()->getPage()->clickLink('Manage layout');
@@ -397,7 +411,7 @@ class ProductLayoutBuilderIntegrationTest extends ProductWebDriverTestBase {
    * @param callable|null $configure
    *   A callback that is invoked to configure the block.
    */
-  protected function addBlockToLayout($block_title, callable $configure = NULL) {
+  protected function addBlockToLayout($block_title, ?callable $configure = NULL) {
     $assert_session = $this->assertSession();
     $assert_session->linkExists('Add block');
     $this->clickLink('Add block');

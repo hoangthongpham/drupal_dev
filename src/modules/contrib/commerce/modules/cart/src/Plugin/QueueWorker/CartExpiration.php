@@ -2,22 +2,23 @@
 
 namespace Drupal\commerce_cart\Plugin\QueueWorker;
 
-use Drupal\commerce\Interval;
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\Queue\Attribute\QueueWorker;
 use Drupal\Core\Queue\QueueWorkerBase;
+use Drupal\commerce\Interval;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Deletes expired carts.
- *
- * @QueueWorker(
- *  id = "commerce_cart_expiration",
- *  title = @Translation("Cart expiration"),
- *  cron = {"time" = 30}
- * )
  */
+#[QueueWorker(
+  id: 'commerce_cart_expiration',
+  title: new TranslatableMarkup('Cart expiration'),
+  cron: ['time' => 30],
+)]
 class CartExpiration extends QueueWorkerBase implements ContainerFactoryPluginInterface {
 
   /**

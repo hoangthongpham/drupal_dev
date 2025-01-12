@@ -12,8 +12,7 @@ parameters:
   level: 1
 
   excludePaths:
-    # Drupal Condole command.
-    - modules/store/src/Command/CreateStoreCommand.php
+    - src/ComparisonFailureBridge.php
 
   ignoreErrors:
     # new static() is a best practice in Drupal, so we cannot fix that.

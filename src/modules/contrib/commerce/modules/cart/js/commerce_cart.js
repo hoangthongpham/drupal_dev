@@ -5,7 +5,7 @@
 
 (($, Drupal) => {
   Drupal.behaviors.commerceCartBlock = {
-    attach: (context) => {
+    attach(context) {
       const $context = $(context);
       const $cart = $context
         .find('.cart--cart-block')

@@ -3,17 +3,18 @@
 namespace Drupal\commerce_checkout\Plugin\Commerce\CheckoutPane;
 
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\commerce_checkout\Attribute\CommerceCheckoutPane;
 
 /**
  * Provides the contact information pane.
- *
- * @CommerceCheckoutPane(
- *   id = "contact_information",
- *   label = @Translation("Contact information"),
- *   default_step = "order_information",
- *   wrapper_element = "fieldset",
- * )
  */
+#[CommerceCheckoutPane(
+  id: "contact_information",
+  label: new TranslatableMarkup('Contact information'),
+  default_step: "order_information",
+  wrapper_element: "fieldset",
+)]
 class ContactInformation extends CheckoutPaneBase implements CheckoutPaneInterface {
 
   /**
@@ -29,6 +30,7 @@ class ContactInformation extends CheckoutPaneBase implements CheckoutPaneInterfa
    * {@inheritdoc}
    */
   public function buildConfigurationSummary() {
+    $parent_summary = parent::buildConfigurationSummary();
     if (!empty($this->configuration['double_entry'])) {
       $summary = $this->t('Require double entry of email: Yes');
     }
@@ -36,7 +38,7 @@ class ContactInformation extends CheckoutPaneBase implements CheckoutPaneInterfa
       $summary = $this->t('Require double entry of email: No');
     }
 
-    return $summary;
+    return $parent_summary ? implode('<br>', [$parent_summary, $summary]) : $summary;
   }
 
   /**

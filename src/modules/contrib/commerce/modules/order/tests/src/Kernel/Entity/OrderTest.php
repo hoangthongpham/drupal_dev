@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\commerce_order\Kernel\Entity;
 
+use Drupal\Tests\commerce_order\Kernel\OrderKernelTestBase;
 use Drupal\commerce_order\Adjustment;
 use Drupal\commerce_order\Entity\Order;
 use Drupal\commerce_order\Entity\OrderInterface;
@@ -9,7 +10,6 @@ use Drupal\commerce_order\Entity\OrderItem;
 use Drupal\commerce_price\Exception\CurrencyMismatchException;
 use Drupal\commerce_price\Price;
 use Drupal\profile\Entity\Profile;
-use Drupal\Tests\commerce_order\Kernel\OrderKernelTestBase;
 use Drupal\user\UserInterface;
 
 /**
@@ -383,7 +383,7 @@ class OrderTest extends OrderKernelTestBase {
    * Tests that an order's email updates with the customer.
    */
   public function testOrderEmail() {
-    $customer = $this->createUser(['mail' => 'test@example.com']);
+    $customer = $this->createUser();
     $order_with_customer = Order::create([
       'type' => 'default',
       'state' => 'completed',

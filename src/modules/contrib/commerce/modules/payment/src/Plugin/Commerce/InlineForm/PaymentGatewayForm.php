@@ -2,6 +2,10 @@
 
 namespace Drupal\commerce_payment\Plugin\Commerce\InlineForm;
 
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\commerce\Attribute\CommerceInlineForm;
 use Drupal\commerce\Plugin\Commerce\InlineForm\EntityInlineFormBase;
 use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\commerce_payment\Entity\EntityWithPaymentGatewayInterface;
@@ -12,8 +16,6 @@ use Drupal\commerce_payment\Event\FailedPaymentEvent;
 use Drupal\commerce_payment\Event\PaymentEvents;
 use Drupal\commerce_payment\Exception\PaymentGatewayException;
 use Drupal\commerce_payment\PluginForm\PaymentGatewayFormInterface;
-use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Routing\RouteMatchInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -28,12 +30,11 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  * This inline form takes a payment or a payment method entity, initializes
  * the appropriate plugin form, then lets it do its thing, while ensuring
  * that any thrown exception is correctly handled.
- *
- * @CommerceInlineForm(
- *   id = "payment_gateway_form",
- *   label = @Translation("Payment gateway form"),
- * )
  */
+#[CommerceInlineForm(
+  id: "payment_gateway_form",
+  label: new TranslatableMarkup("Payment gateway form"),
+)]
 class PaymentGatewayForm extends EntityInlineFormBase {
 
   /**

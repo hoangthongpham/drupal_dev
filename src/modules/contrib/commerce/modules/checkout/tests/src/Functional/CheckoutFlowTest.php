@@ -2,8 +2,8 @@
 
 namespace Drupal\Tests\commerce_checkout\Functional;
 
-use Drupal\commerce_checkout\Entity\CheckoutFlow;
 use Drupal\Tests\commerce\Functional\CommerceBrowserTestBase;
+use Drupal\commerce_checkout\Entity\CheckoutFlow;
 
 /**
  * Tests the checkout flow UI.
@@ -17,6 +17,7 @@ class CheckoutFlowTest extends CommerceBrowserTestBase {
    */
   protected static $modules = [
     'commerce_checkout',
+    'commerce_product',
   ];
 
   /**

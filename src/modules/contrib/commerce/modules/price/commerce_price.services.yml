@@ -23,11 +23,6 @@ services:
     class: Drupal\commerce_price\MinorUnitsConverter
     arguments: ['@commerce_price.currency_repository']
 
-  commerce_price.number_formatter_factory:
-    class: Drupal\commerce_price\NumberFormatterFactory
-    arguments: ['@commerce_price.currency_formatter']
-    deprecated: The "%service_id%" service is deprecated. You should use the 'commerce_price.currency_formatter' service instead. See https://www.drupal.org/node/2975672
-
   commerce_price.chain_price_resolver:
     class: Drupal\commerce_price\Resolver\ChainPriceResolver
     tags:

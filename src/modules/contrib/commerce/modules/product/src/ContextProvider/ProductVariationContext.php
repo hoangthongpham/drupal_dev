@@ -2,8 +2,6 @@
 
 namespace Drupal\commerce_product\ContextProvider;
 
-use Drupal\commerce_product\Entity\ProductInterface;
-use Drupal\commerce_product\Entity\ProductVariationInterface;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Entity\Display\EntityDisplayInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
@@ -15,6 +13,8 @@ use Drupal\Core\Plugin\Context\EntityContextDefinition;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\commerce_product\Entity\ProductInterface;
+use Drupal\commerce_product\Entity\ProductVariationInterface;
 use Drupal\layout_builder\DefaultsSectionStorageInterface;
 use Drupal\layout_builder\Entity\SampleEntityGeneratorInterface;
 use Drupal\layout_builder\OverridesSectionStorageInterface;
@@ -67,7 +67,7 @@ class ProductVariationContext implements ContextProviderInterface {
   public function __construct(
     RouteMatchInterface $route_match,
     EntityTypeManagerInterface $entity_type_manager,
-    EntityTypeBundleInfoInterface $entity_type_bundle_info
+    EntityTypeBundleInfoInterface $entity_type_bundle_info,
   ) {
     $this->routeMatch = $route_match;
     $this->entityTypeManager = $entity_type_manager;
@@ -143,7 +143,7 @@ class ProductVariationContext implements ContextProviderInterface {
     }
 
     if (!($value instanceof ProductVariationInterface)) {
-      if ($this->sampleEntityGenerator) {
+      if ($this->sampleEntityGenerator && !empty($layout_page)) {
         $value = $this->sampleEntityGenerator->get('commerce_product_variation', reset($variation_types));
       }
       else {

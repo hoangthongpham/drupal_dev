@@ -2,26 +2,24 @@
 
 namespace Drupal\commerce_cart\Plugin\Block;
 
-use Drupal\commerce_cart\CartProviderInterface;
+use Drupal\Core\Block\Attribute\Block;
 use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Cache\CacheableMetadata;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Extension\ModuleExtensionList;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides a cart block.
- *
- * @Block(
- *   id = "commerce_cart",
- *   admin_label = @Translation("Cart"),
- *   category = @Translation("Commerce")
- * )
  */
+#[Block(
+  id: "commerce_cart",
+  admin_label: new TranslatableMarkup('Cart'),
+  category: new TranslatableMarkup('Commerce'),
+)]
 class CartBlock extends BlockBase implements ContainerFactoryPluginInterface {
 
   /**
@@ -46,45 +44,14 @@ class CartBlock extends BlockBase implements ContainerFactoryPluginInterface {
   protected $moduleExtensionList;
 
   /**
-   * Constructs a new CartBlock.
-   *
-   * @param array $configuration
-   *   A configuration array containing information about the plugin instance.
-   * @param string $plugin_id
-   *   The plugin ID for the plugin instance.
-   * @param mixed $plugin_definition
-   *   The plugin implementation definition.
-   * @param \Drupal\commerce_cart\CartProviderInterface $cart_provider
-   *   The cart provider.
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
-   *   The entity type manager.
-   * @param \Drupal\Core\Extension\ModuleExtensionList|null $module_extension_list
-   *   The module extension list.
-   */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, CartProviderInterface $cart_provider, EntityTypeManagerInterface $entity_type_manager, ModuleExtensionList $module_extension_list = NULL) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition);
-
-    $this->cartProvider = $cart_provider;
-    $this->entityTypeManager = $entity_type_manager;
-    if (!$module_extension_list) {
-      @trigger_error('Calling ' . __METHOD__ . '() without the $module_extension_list argument is deprecated in commerce:8.x-2.32 and is removed from commerce:3.x.');
-      $module_extension_list = \Drupal::service('extension.list.module');
-    }
-    $this->moduleExtensionList = $module_extension_list;
-  }
-
-  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    return new static(
-      $configuration,
-      $plugin_id,
-      $plugin_definition,
-      $container->get('commerce_cart.cart_provider'),
-      $container->get('entity_type.manager'),
-      $container->get('extension.list.module')
-    );
+    $instance = new static($configuration, $plugin_id, $plugin_definition);
+    $instance->cartProvider = $container->get('commerce_cart.cart_provider');
+    $instance->entityTypeManager = $container->get('entity_type.manager');
+    $instance->moduleExtensionList = $container->get('extension.list.module');
+    return $instance;
   }
 
   /**
@@ -93,6 +60,7 @@ class CartBlock extends BlockBase implements ContainerFactoryPluginInterface {
   public function defaultConfiguration() {
     return [
       'dropdown' => TRUE,
+      'show_if_empty' => TRUE,
     ];
   }
 
@@ -109,6 +77,11 @@ class CartBlock extends BlockBase implements ContainerFactoryPluginInterface {
         $this->t('Yes'),
       ],
     ];
+    $form['commerce_show_if_empty'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Display block if the cart is empty'),
+      '#default_value' => (int) $this->configuration['show_if_empty'],
+    ];
 
     return $form;
   }
@@ -118,6 +91,7 @@ class CartBlock extends BlockBase implements ContainerFactoryPluginInterface {
    */
   public function blockSubmit($form, FormStateInterface $form_state) {
     $this->configuration['dropdown'] = $form_state->getValue('commerce_cart_dropdown');
+    $this->configuration['show_if_empty'] = $form_state->getValue('commerce_show_if_empty');
   }
 
   /**
@@ -127,8 +101,8 @@ class CartBlock extends BlockBase implements ContainerFactoryPluginInterface {
    *   A render array.
    */
   public function build() {
-    $cachable_metadata = new CacheableMetadata();
-    $cachable_metadata->addCacheContexts(['user', 'session']);
+    $cacheable_metadata = new CacheableMetadata();
+    $cacheable_metadata->addCacheContexts(['user', 'session']);
 
     /** @var \Drupal\commerce_order\Entity\OrderInterface[] $carts */
     $carts = $this->cartProvider->getCarts();
@@ -148,7 +122,7 @@ class CartBlock extends BlockBase implements ContainerFactoryPluginInterface {
         foreach ($cart->getItems() as $order_item) {
           $count += (int) $order_item->getQuantity();
         }
-        $cachable_metadata->addCacheableDependency($cart);
+        $cacheable_metadata->addCacheableDependency($cart);
       }
     }
 
@@ -158,6 +132,14 @@ class CartBlock extends BlockBase implements ContainerFactoryPluginInterface {
       '#title' => $this->t('Cart'),
       '#url' => Url::fromRoute('commerce_cart.page'),
     ];
+
+    if (!$this->configuration['show_if_empty'] && $count === 0) {
+      return [
+        '#cache' => [
+          'contexts' => ['cart'],
+        ],
+      ];
+    }
 
     return [
       '#attached' => [
@@ -177,6 +159,7 @@ class CartBlock extends BlockBase implements ContainerFactoryPluginInterface {
       '#cache' => [
         'contexts' => ['cart'],
       ],
+      '#dropdown' => $this->configuration['dropdown'],
     ];
   }
 

@@ -2,14 +2,14 @@
 
 namespace Drupal\Tests\commerce_promotion\Kernel\Entity;
 
+use Drupal\Core\Datetime\DrupalDateTime;
+use Drupal\Tests\commerce_order\Kernel\OrderKernelTestBase;
 use Drupal\commerce_order\Entity\Order;
 use Drupal\commerce_order\Entity\OrderItem;
 use Drupal\commerce_price\Price;
 use Drupal\commerce_promotion\Entity\Coupon;
 use Drupal\commerce_promotion\Entity\Promotion;
-use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
-use Drupal\Tests\commerce_order\Kernel\OrderKernelTestBase;
 
 /**
  * Tests the Coupon entity.

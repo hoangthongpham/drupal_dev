@@ -2,6 +2,12 @@
 
 namespace Drupal\commerce_payment\Controller;
 
+use Drupal\Core\Access\AccessException;
+use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Messenger\MessengerInterface;
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Url;
 use Drupal\commerce\Response\NeedsRedirectException;
 use Drupal\commerce\Utility\Error;
 use Drupal\commerce_checkout\CheckoutOrderManagerInterface;
@@ -10,12 +16,6 @@ use Drupal\commerce_payment\Event\FailedPaymentEvent;
 use Drupal\commerce_payment\Event\PaymentEvents;
 use Drupal\commerce_payment\Exception\PaymentGatewayException;
 use Drupal\commerce_payment\Plugin\Commerce\PaymentGateway\OffsitePaymentGatewayInterface;
-use Drupal\Core\Access\AccessException;
-use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Messenger\MessengerInterface;
-use Drupal\Core\Routing\RouteMatchInterface;
-use Drupal\Core\Url;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -112,44 +112,61 @@ class PaymentCheckoutController implements ContainerInjectionInterface {
     $step_id = $route_match->getParameter('step');
     $this->validateStepId($step_id, $order);
 
-    // Reload the order and mark it for updating, redirecting to step below
-    // will save it and free the lock. This must be done before the checkout
-    // flow plugin is initiated to make sure that it has the reloaded order
-    // object. Additionally, the checkout flow plugin gets the order from
-    // the route match object, so update the order there as well with. The
-    // passed in route match object is created on-demand in
-    // \Drupal\Core\Controller\ArgumentResolver\RouteMatchValueResolver and is
-    // not the same object as the current route match service.
-    $order = $this->entityTypeManager->getStorage('commerce_order')->loadForUpdate($order->id());
-    \Drupal::routeMatch()->getParameters()->set('commerce_order', $order);
-
-    /** @var \Drupal\commerce_payment\Entity\PaymentGatewayInterface $payment_gateway */
-    $payment_gateway = $order->get('payment_gateway')->entity;
-    $payment_gateway_plugin = $payment_gateway->getPlugin();
-    if (!$payment_gateway_plugin instanceof OffsitePaymentGatewayInterface) {
-      throw new AccessException('The payment gateway for the order does not implement ' . OffsitePaymentGatewayInterface::class);
-    }
-    /** @var \Drupal\commerce_checkout\Entity\CheckoutFlowInterface $checkout_flow */
-    $checkout_flow = $order->get('checkout_flow')->entity;
-    $checkout_flow_plugin = $checkout_flow->getPlugin();
-
+    /** @var \Drupal\commerce_order\OrderStorageInterface $order_storage */
+    $order_storage = $this->entityTypeManager->getStorage('commerce_order');
     try {
-      $payment_gateway_plugin->onReturn($order, $request);
-      $redirect_step_id = $checkout_flow_plugin->getNextStepId($step_id);
+      // Reload the order and mark it for updating, redirecting to step below
+      // will save it and free the lock. This must be done before the checkout
+      // flow plugin is initiated to make sure that it has the reloaded order
+      // object. Additionally, the checkout flow plugin gets the order from
+      // the route match object, so update the order there as well with. The
+      // passed in route match object is created on-demand in
+      // \Drupal\Core\Controller\ArgumentResolver\RouteMatchValueResolver and is
+      // not the same object as the current route match service.
+      /** @var \Drupal\commerce_order\Entity\OrderInterface $order */
+      $order = $order_storage->loadForUpdate($order->id());
+      \Drupal::routeMatch()->getParameters()->set('commerce_order', $order);
+      if ($order->getState()->getId() !== 'draft') {
+        // While we waited for the lock, the order state changed.
+        // Release our lock, and revalidate the step.
+        $order_storage->releaseLock($order->id());
+        $this->validateStepId($step_id, $order);
+      }
+
+      /** @var \Drupal\commerce_payment\Entity\PaymentGatewayInterface $payment_gateway */
+      $payment_gateway = $order->get('payment_gateway')->entity;
+      $payment_gateway_plugin = $payment_gateway->getPlugin();
+      if (!$payment_gateway_plugin instanceof OffsitePaymentGatewayInterface) {
+        throw new AccessException('The payment gateway for the order does not implement ' . OffsitePaymentGatewayInterface::class);
+      }
+      /** @var \Drupal\commerce_checkout\Entity\CheckoutFlowInterface $checkout_flow */
+      $checkout_flow = $order->get('checkout_flow')->entity;
+      $checkout_flow_plugin = $checkout_flow->getPlugin();
+
+      try {
+        $payment_gateway_plugin->onReturn($order, $request);
+        $redirect_step_id = $checkout_flow_plugin->getNextStepId($step_id);
+      }
+      catch (NeedsRedirectException $e) {
+        throw $e;
+      }
+      catch (PaymentGatewayException $e) {
+        $event = new FailedPaymentEvent($order, $payment_gateway, $e);
+        $this->eventDispatcher->dispatch($event, PaymentEvents::PAYMENT_FAILURE);
+        Error::logException($this->logger, $e);
+        $this->messenger->addError(t('Payment failed at the payment server. Please review your information and try again.'));
+        $redirect_step_id = $checkout_flow_plugin->getPreviousStepId($step_id);
+      }
+      catch (\Exception $e) {
+        Error::logException($this->logger, $e);
+        $this->messenger->addError(t('We encountered an issue recording your payment. Please contact customer service to resolve the issue.'));
+        $redirect_step_id = $checkout_flow_plugin->getPreviousStepId($step_id);
+      }
+      $checkout_flow_plugin->redirectToStep($redirect_step_id);
     }
-    catch (PaymentGatewayException $e) {
-      $event = new FailedPaymentEvent($order, $payment_gateway, $e);
-      $this->eventDispatcher->dispatch($event, PaymentEvents::PAYMENT_FAILURE);
-      Error::logException($this->logger, $e);
-      $this->messenger->addError(t('Payment failed at the payment server. Please review your information and try again.'));
-      $redirect_step_id = $checkout_flow_plugin->getPreviousStepId($step_id);
+    finally {
+      $order_storage->releaseLock($order->id());
     }
-    catch (\Exception $e) {
-      Error::logException($this->logger, $e);
-      $this->messenger->addError(t('We encountered an issue recording your payment. Please contact customer service to resolve the issue.'));
-      $redirect_step_id = $checkout_flow_plugin->getPreviousStepId($step_id);
-    }
-    $checkout_flow_plugin->redirectToStep($redirect_step_id);
   }
 
   /**

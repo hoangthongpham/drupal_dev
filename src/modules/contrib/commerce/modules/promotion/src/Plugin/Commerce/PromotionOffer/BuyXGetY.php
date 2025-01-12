@@ -2,24 +2,21 @@
 
 namespace Drupal\commerce_promotion\Plugin\Commerce\PromotionOffer;
 
+use Drupal\Component\Utility\Html;
+use Drupal\Component\Utility\NestedArray;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\commerce\ConditionGroup;
-use Drupal\commerce\ConditionManagerInterface;
 use Drupal\commerce\Context;
 use Drupal\commerce\Plugin\Commerce\Condition\PurchasableEntityConditionInterface;
 use Drupal\commerce\PurchasableEntityInterface;
 use Drupal\commerce_order\Adjustment;
 use Drupal\commerce_order\Entity\OrderItemInterface;
-use Drupal\commerce_order\PriceSplitterInterface;
 use Drupal\commerce_price\Calculator;
 use Drupal\commerce_price\Price;
-use Drupal\commerce_price\Resolver\ChainPriceResolverInterface;
-use Drupal\commerce_price\RounderInterface;
+use Drupal\commerce_promotion\Attribute\CommercePromotionOffer;
 use Drupal\commerce_promotion\Entity\PromotionInterface;
-use Drupal\Component\Utility\Html;
-use Drupal\Component\Utility\NestedArray;
-use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -33,13 +30,12 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * times ("Buy 3 Get 1" will discount 2 items when 6 are bought).
  *
  * Decimal quantities are supported.
- *
- * @CommercePromotionOffer(
- *   id = "order_buy_x_get_y",
- *   label = @Translation("Buy X Get Y"),
- *   entity_type = "commerce_order",
- * )
  */
+#[CommercePromotionOffer(
+  id: "order_buy_x_get_y",
+  label: new TranslatableMarkup("Buy X Get Y"),
+  entity_type: "commerce_order"
+)]
 class BuyXGetY extends OrderPromotionOfferBase {
 
   /**
@@ -64,47 +60,15 @@ class BuyXGetY extends OrderPromotionOfferBase {
   protected $entityTypeManager;
 
   /**
-   * Constructs a new BuyXGetY object.
-   *
-   * @param array $configuration
-   *   A configuration array containing information about the plugin instance.
-   * @param string $plugin_id
-   *   The pluginId for the plugin instance.
-   * @param mixed $plugin_definition
-   *   The plugin implementation definition.
-   * @param \Drupal\commerce_price\RounderInterface $rounder
-   *   The rounder.
-   * @param \Drupal\commerce_order\PriceSplitterInterface $splitter
-   *   The splitter.
-   * @param \Drupal\commerce\ConditionManagerInterface $condition_manager
-   *   The condition manager.
-   * @param \Drupal\commerce_price\Resolver\ChainPriceResolverInterface $chain_price_resolver
-   *   The chain price resolver.
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
-   *   The entity type manager.
-   */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, RounderInterface $rounder, PriceSplitterInterface $splitter, ConditionManagerInterface $condition_manager, ChainPriceResolverInterface $chain_price_resolver, EntityTypeManagerInterface $entity_type_manager) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition, $rounder, $splitter);
-
-    $this->conditionManager = $condition_manager;
-    $this->chainPriceResolver = $chain_price_resolver;
-    $this->entityTypeManager = $entity_type_manager;
-  }
-
-  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    return new static(
-      $configuration,
-      $plugin_id,
-      $plugin_definition,
-      $container->get('commerce_price.rounder'),
-      $container->get('commerce_order.price_splitter'),
-      $container->get('plugin.manager.commerce_condition'),
-      $container->get('commerce_price.chain_price_resolver'),
-      $container->get('entity_type.manager')
-    );
+    $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
+    $instance->conditionManager = $container->get('plugin.manager.commerce_condition');
+    $instance->chainPriceResolver = $container->get('commerce_price.chain_price_resolver');
+    $instance->entityTypeManager = $container->get('entity_type.manager');
+
+    return $instance;
   }
 
   /**
@@ -465,6 +429,9 @@ class BuyXGetY extends OrderPromotionOfferBase {
         'source_id' => $promotion->id(),
         'included' => !empty($this->configuration['display_inclusive']),
       ]));
+
+      // Save reference to source order items tied to this offer #3443703.
+      $order_item->setData('buy_order_items', array_keys($buy_order_items));
     }
   }
 

@@ -12,7 +12,6 @@ services:
   commerce_order.availability_manager:
     class: Drupal\commerce_order\AvailabilityManager
     tags:
-      - { name: service_collector, tag: commerce.availability_checker, call: addLegacyChecker }
       - { name: service_collector, tag: commerce_order.availability_checker, call: addChecker }
 
   commerce_order.chain_order_type_resolver:

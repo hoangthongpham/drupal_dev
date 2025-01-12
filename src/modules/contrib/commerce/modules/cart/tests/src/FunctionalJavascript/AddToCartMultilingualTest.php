@@ -2,11 +2,11 @@
 
 namespace Drupal\Tests\commerce_cart\FunctionalJavascript;
 
+use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\commerce_order\Entity\Order;
 use Drupal\commerce_product\Entity\Product;
 use Drupal\commerce_product\Entity\ProductVariation;
 use Drupal\commerce_product\Entity\ProductVariationType;
-use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\language\Entity\ConfigurableLanguage;
 
 /**

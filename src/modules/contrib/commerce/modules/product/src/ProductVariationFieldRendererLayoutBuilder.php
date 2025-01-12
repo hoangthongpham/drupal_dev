@@ -2,11 +2,11 @@
 
 namespace Drupal\commerce_product;
 
-use Drupal\commerce_product\Entity\ProductVariationInterface;
-use Drupal\commerce_product\Plugin\Block\VariationFieldBlock;
 use Drupal\Component\Plugin\PluginBase;
 use Drupal\Core\Entity\EntityDisplayRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\commerce_product\Entity\ProductVariationInterface;
+use Drupal\commerce_product\Plugin\Block\VariationFieldBlock;
 use Drupal\layout_builder\Entity\LayoutBuilderEntityViewDisplay;
 use Drupal\layout_builder\LayoutEntityHelperTrait;
 

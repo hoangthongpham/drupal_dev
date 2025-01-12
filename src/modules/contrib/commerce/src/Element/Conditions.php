@@ -5,8 +5,9 @@ namespace Drupal\commerce\Element;
 use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\Attribute\FormElement;
 use Drupal\Core\Render\Element;
-use Drupal\Core\Render\Element\FormElement;
+use Drupal\Core\Render\Element\FormElementBase;
 
 /**
  * Provides a form element for configuring conditions.
@@ -32,10 +33,11 @@ use Drupal\Core\Render\Element\FormElement;
  *   ],
  * ];
  * @endcode
- *
- * @FormElement("commerce_conditions")
  */
-class Conditions extends FormElement {
+#[FormElement(
+  id: "commerce_conditions",
+)]
+class Conditions extends FormElementBase {
 
   use CommerceElementTrait;
 
@@ -231,7 +233,7 @@ class Conditions extends FormElement {
     $value = [];
     // Transfer the configuration of each enabled plugin.
     foreach ($element['#categories'] as $category_id) {
-      foreach (Element::getVisibleChildren($element[$category_id]) as $plugin_id) {
+      foreach (Element::children($element[$category_id]) as $plugin_id) {
         $plugin_element = $element[$category_id][$plugin_id];
         $plugin_value = $form_state->getValue($plugin_element['#parents']);
         if ($plugin_value['enable']) {

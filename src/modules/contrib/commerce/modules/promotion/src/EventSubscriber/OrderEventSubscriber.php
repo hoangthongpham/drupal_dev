@@ -2,8 +2,8 @@
 
 namespace Drupal\commerce_promotion\EventSubscriber;
 
-use Drupal\commerce_promotion\PromotionUsageInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\commerce_promotion\PromotionUsageInterface;
 use Drupal\state_machine\Event\WorkflowTransitionEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -47,7 +47,7 @@ class OrderEventSubscriber implements EventSubscriberInterface {
   /**
    * {@inheritdoc}
    */
-  public static function getSubscribedEvents() {
+  public static function getSubscribedEvents(): array {
     $events = [
       'commerce_order.place.pre_transition' => 'registerUsage',
     ];

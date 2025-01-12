@@ -2,8 +2,8 @@
 
 namespace Drupal\commerce_payment\Entity;
 
-use Drupal\commerce_price\Price;
 use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\commerce_price\Price;
 
 /**
  * Defines the interface for payments.

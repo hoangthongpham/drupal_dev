@@ -2,14 +2,14 @@
 
 namespace Drupal\commerce_order;
 
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityStorageException;
+use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\commerce\CommerceContentEntityStorage;
 use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\commerce_order\Event\OrderEvent;
 use Drupal\commerce_order\Event\OrderEvents;
 use Drupal\commerce_order\Exception\OrderLockedSaveException;
-use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Entity\EntityStorageException;
-use Drupal\Core\Entity\EntityTypeInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -170,10 +170,7 @@ class OrderStorage extends CommerceContentEntityStorage implements OrderStorageI
     }
     finally {
       // Release the update lock if it was acquired for this entity.
-      if (isset($this->updateLocks[$entity->id()])) {
-        $this->lockBackend->release($this->getLockId($entity->id()));
-        unset($this->updateLocks[$entity->id()]);
-      }
+      $this->releaseLock($entity->id());
     }
   }
 
@@ -207,6 +204,16 @@ class OrderStorage extends CommerceContentEntityStorage implements OrderStorageI
    */
   protected function getLockId(int $order_id): string {
     return 'commerce_order_update:' . $order_id;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public function releaseLock(int $order_id): void {
+    if (isset($this->updateLocks[$order_id])) {
+      $this->lockBackend->release($this->getLockId($order_id));
+      unset($this->updateLocks[$order_id]);
+    }
   }
 
 }

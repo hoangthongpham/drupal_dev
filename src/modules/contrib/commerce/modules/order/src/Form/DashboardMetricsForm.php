@@ -2,12 +2,6 @@
 
 namespace Drupal\commerce_order\Form;
 
-use Drupal\commerce\AjaxFormTrait;
-use Drupal\commerce\EntityHelper;
-use Drupal\commerce_order\Entity\OrderItemType;
-use Drupal\commerce_order\Entity\OrderItemTypeInterface;
-use Drupal\commerce_price\Calculator;
-use Drupal\commerce_store\Entity\StoreInterface;
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Datetime\DrupalDateTime;
@@ -15,6 +9,12 @@ use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Site\Settings;
+use Drupal\commerce\AjaxFormTrait;
+use Drupal\commerce\EntityHelper;
+use Drupal\commerce_order\Entity\OrderItemType;
+use Drupal\commerce_order\Entity\OrderItemTypeInterface;
+use Drupal\commerce_price\Calculator;
+use Drupal\commerce_store\Entity\StoreInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -140,6 +140,11 @@ class DashboardMetricsForm extends FormBase {
       'month' => new DrupalDateTime('first day of this month'),
       'year' => new DrupalDateTime('first day of january this year'),
     ];
+    // In case the first day of the week is sunday, the "week" date time object
+    // can be instantiated for the wrong week.
+    if ($periods['week'] > $periods['day']) {
+      $periods['week'] = new DrupalDateTime(sprintf('%s last week', $first_day_of_week));
+    }
     $periods = array_map(function (DrupalDateTime $date) use ($active_store) {
       $date->setTime(0, 0, 0);
       if ($active_store instanceof StoreInterface) {
@@ -252,6 +257,10 @@ class DashboardMetricsForm extends FormBase {
       };
       $prior_period = new DrupalDateTime($prior_period, $periods['day']->getTimezone());
       $prior_period->setTime(0, 0, 0);
+      // If the period is 'week', we need to get the appropriate prior week.
+      if ($active_period === 'week' && $prior_period >= $periods[$active_period]) {
+        $prior_period->sub(new \DateInterval('P1W'));
+      }
       $prior_period_timestamp = $prior_period->getTimestamp();
       $form_state->set('prior_period_timestamp', $prior_period_timestamp);
       // We use the "BETWEEN" operator which is inclusive, we deduct 1 second
@@ -490,7 +499,7 @@ class DashboardMetricsForm extends FormBase {
    * @return int
    *   The carts count for the given period.
    */
-  protected function getCartsCountForPeriod(int|array $period, int $store_id = NULL): int {
+  protected function getCartsCountForPeriod(int|array $period, ?int $store_id = NULL): int {
     $carts_query = $this->connection->select('commerce_order');
     $period_operator = is_array($period) ? 'BETWEEN' : '>=';
     $or_condition = $carts_query->orConditionGroup();
@@ -531,7 +540,7 @@ class DashboardMetricsForm extends FormBase {
    *    - gross_total: The gross total.
    *    - gross_total: The gross total.
    */
-  protected function getOrderMetricsForPeriod(int|array $period, int $store_id = NULL): array {
+  protected function getOrderMetricsForPeriod(int|array $period, ?int $store_id = NULL): array {
     $query = $this->connection->select('commerce_order', 'co');
     $query->addField('co', 'total_price__currency_code', 'currency_code');
     $query->addExpression('COUNT(co.order_id)', 'count_orders');
@@ -561,7 +570,7 @@ class DashboardMetricsForm extends FormBase {
    * @return array
    *   An array keyed by product ID whose values are the product sold counts.
    */
-  protected function getBestSellingProductIds(int $period_timestamp, int $store_id = NULL): array {
+  protected function getBestSellingProductIds(int $period_timestamp, ?int $store_id = NULL): array {
     // Get the order item types referencing product variations.
     $qualifying_order_item_types = array_filter(OrderItemType::loadMultiple(), function (OrderItemTypeInterface $order_item_type) {
       return $order_item_type->getPurchasableEntityTypeId() === 'commerce_product_variation';
@@ -572,9 +581,9 @@ class DashboardMetricsForm extends FormBase {
     $query = $this->connection->select('commerce_order_item', 'coi');
     $query->addField('cpv', 'entity_id', 'product_id');
     $query->addExpression('SUM(coi.quantity)', 'count_sold');
-    $query->innerJoin('commerce_order__order_items', 'cooi', 'cooi.order_items_target_id = coi.order_item_id');
+    $query->innerJoin('commerce_order__order_items', 'commerce_order__order_items', 'commerce_order__order_items.order_items_target_id = coi.order_item_id');
     // Exclude canceled orders.
-    $query->innerJoin('commerce_order', 'co', 'co.order_id = cooi.entity_id AND co.state != :state', [
+    $query->innerJoin('commerce_order', 'co', 'co.order_id = commerce_order__order_items.entity_id AND co.state != :state', [
       ':state' => 'canceled',
     ]);
     $query->innerJoin('commerce_product__variations', 'cpv', 'cpv.variations_target_id = coi.purchased_entity');
@@ -602,7 +611,7 @@ class DashboardMetricsForm extends FormBase {
    * @return array
    *   An array keyed by promotion ID whose values are the promotion usage.
    */
-  protected function getMostUsedPromotionIds(int $period_timestamp, int $store_id = NULL): array {
+  protected function getMostUsedPromotionIds(int $period_timestamp, ?int $store_id = NULL): array {
     $query = $this->connection->select('commerce_promotion_usage', 'cpu');
     $query->addField('cpu', 'promotion_id');
     $query->addExpression('COUNT(cpu.usage_id)', 'usage_count');

@@ -1,11 +1,14 @@
 base:
-  version: VERSION
   css:
     base:
       css/commerce.base.css: {}
 
+admin-layout:
+  css:
+    layout:
+      css/commerce.admin-layout.css: {}
+
 dashboard:
-  version: VERSION
   css:
     component:
       css/commerce.management-links.css: {}
@@ -21,12 +24,13 @@ dashboard:
     js/commerce.management-links.js: {}
 
 conditions:
-  version: VERSION
   js:
     js/conditions.js: {}
+  dependencies:
+    - core/drupal
+    - core/jquery
 
 toolbar:
-  version: VERSION
   css:
     theme:
       css/commerce.toolbar.css: {}
@@ -34,7 +38,20 @@ toolbar:
     - commerce/base
 
 local-actions:
-  version: VERSION
   css:
     theme:
       css/commerce.local-actions.css: {}
+
+field-ui:
+  css:
+    theme:
+      css/commerce.field_ui.css: {}
+
+copy-link:
+  css:
+    theme:
+      css/commerce.copy-link.css: { }
+  js:
+    js/commerce.copy-link.js: { }
+  dependencies:
+    - commerce/base

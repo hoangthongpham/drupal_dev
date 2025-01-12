@@ -2,13 +2,13 @@
 
 namespace Drupal\commerce;
 
-use Drupal\commerce\Event\CommerceEvents;
-use Drupal\commerce\Event\PostMailSendEvent;
 use Drupal\Core\Language\LanguageDefault;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Mail\MailManagerInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslationManager;
+use Drupal\commerce\Event\CommerceEvents;
+use Drupal\commerce\Event\PostMailSendEvent;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class MailHandler implements MailHandlerInterface {

@@ -2,10 +2,10 @@
 
 namespace Drupal\commerce_store;
 
-use Drupal\commerce_store\Entity\StoreType;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityListBuilder;
 use Drupal\Core\Link;
+use Drupal\commerce_store\Entity\StoreType;
 
 /**
  * Defines the list builder for stores.

@@ -2,21 +2,22 @@
 
 namespace Drupal\commerce_promotion\Plugin\Commerce\InlineForm;
 
-use Drupal\commerce\Plugin\Commerce\InlineForm\InlineFormBase;
-use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\commerce\Attribute\CommerceInlineForm;
+use Drupal\commerce\Plugin\Commerce\InlineForm\InlineFormBase;
+use Drupal\commerce_order\Entity\OrderInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides an inline form for redeeming a coupon.
- *
- * @CommerceInlineForm(
- *   id = "coupon_redemption",
- *   label = @Translation("Coupon redemption"),
- * )
  */
+#[CommerceInlineForm(
+  id: "coupon_redemption",
+  label: new TranslatableMarkup("Coupon redemption"),
+)]
 class CouponRedemption extends InlineFormBase {
 
   /**

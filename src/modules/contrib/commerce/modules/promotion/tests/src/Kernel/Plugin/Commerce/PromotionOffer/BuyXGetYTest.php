@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\commerce_promotion\Kernel\Plugin\Commerce\PromotionOffer;
 
+use Drupal\Tests\commerce_order\Kernel\OrderKernelTestBase;
 use Drupal\commerce_order\Adjustment;
 use Drupal\commerce_order\Entity\Order;
 use Drupal\commerce_price\Calculator;
@@ -10,7 +11,6 @@ use Drupal\commerce_product\Entity\Product;
 use Drupal\commerce_product\Entity\ProductType;
 use Drupal\commerce_product\Entity\ProductVariation;
 use Drupal\commerce_promotion\Entity\Promotion;
-use Drupal\Tests\commerce_order\Kernel\OrderKernelTestBase;
 
 /**
  * Tests the "Buy X Get Y" offer.
@@ -64,7 +64,7 @@ class BuyXGetYTest extends OrderKernelTestBase {
     $product_type = ProductType::create([
       'id' => 'test',
       'label' => 'Test',
-      'variationType' => 'default',
+      'variationTypes' => ['default'],
     ]);
     $product_type->save();
 

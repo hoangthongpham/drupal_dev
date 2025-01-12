@@ -2,13 +2,13 @@
 
 namespace Drupal\commerce_checkout\Plugin\Commerce\CheckoutPane;
 
-use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\Component\Plugin\ConfigurableInterface;
 use Drupal\Component\Plugin\DependentPluginInterface;
 use Drupal\Component\Plugin\DerivativeInspectionInterface;
 use Drupal\Component\Plugin\PluginInspectionInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\PluginFormInterface;
+use Drupal\commerce_order\Entity\OrderInterface;
 
 /**
  * Defines the interface for checkout panes.

@@ -24,7 +24,7 @@
   margin-top: 0;
 }
 
-@media(min-width: 780px) {
+@media (min-width: 780px) {
   #edit-login {
     overflow: auto;
   }

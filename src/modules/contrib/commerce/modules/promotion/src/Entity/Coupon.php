@@ -2,13 +2,13 @@
 
 namespace Drupal\commerce_promotion\Entity;
 
-use Drupal\commerce\Entity\CommerceContentEntityBase;
-use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\commerce\Entity\CommerceContentEntityBase;
+use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
 
 /**
@@ -196,7 +196,7 @@ class Coupon extends CommerceContentEntityBase implements CouponInterface {
   /**
    * {@inheritdoc}
    */
-  public function setEndDate(DrupalDateTime $end_date = NULL) {
+  public function setEndDate(?DrupalDateTime $end_date = NULL) {
     $this->get('end_date')->value = NULL;
     if ($end_date) {
       $this->get('end_date')->value = $end_date->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT);
@@ -280,6 +280,7 @@ class Coupon extends CommerceContentEntityBase implements CouponInterface {
     /** @var \Drupal\commerce_promotion\PromotionUsageInterface $usage */
     $usage = \Drupal::service('commerce_promotion.usage');
     $usage->deleteByCoupon($entities);
+    $coupons_id = [];
     // Delete references to those coupons in promotions.
     foreach ($entities as $coupon) {
       $coupons_id[] = $coupon->id();
@@ -310,11 +311,12 @@ class Coupon extends CommerceContentEntityBase implements CouponInterface {
 
     $fields['code'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Coupon code'))
-      ->setDescription(t('The unique, machine-readable identifier for a coupon.'))
+      ->setDescription(t('The unique, machine-readable identifier for a coupon. Coupon code matching is case-insensitive.'))
       ->addConstraint('CouponCode')
       ->setSettings([
         'max_length' => 50,
         'text_processing' => 0,
+        'display_description' => TRUE,
       ])
       ->setDefaultValue('')
       ->setDisplayOptions('view', [

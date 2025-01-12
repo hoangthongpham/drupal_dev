@@ -37,9 +37,15 @@ services:
     tags:
       - { name: event_subscriber }
 
+  commerce_payment.zero_balance_order_subscriber:
+    class: Drupal\commerce_payment\EventSubscriber\ZeroBalanceOrderSubscriber
+    arguments: ['@entity_type.manager']
+    tags:
+      - { name: event_subscriber }
+
   commerce_payment.options_builder:
     class: Drupal\commerce_payment\PaymentOptionsBuilder
-    arguments: ['@entity_type.manager', '@string_translation']
+    arguments: ['@entity_type.manager', '@string_translation', '@event_dispatcher']
 
   commerce_payment.order_processor:
     class: Drupal\commerce_payment\PaymentOrderProcessor
