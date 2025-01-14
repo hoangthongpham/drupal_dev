@@ -390,6 +390,15 @@
                 0 => '11.1.1',
             ),
         ),
+        'drupal/debug_bar' => array(
+            'pretty_version' => '3.0.0-rc2',
+            'version' => '3.0.0.0-RC2',
+            'reference' => '3.0.0-rc2',
+            'type' => 'drupal-module',
+            'install_path' => __DIR__ . '/../../modules/contrib/debug_bar',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
         'drupal/entity' => array(
             'pretty_version' => '1.5.0',
             'version' => '1.5.0.0',

@@ -1,0 +1,19 @@
+{
+    "name": "drupal/debug_bar",
+    "type": "drupal-module",
+    "description": "A simple toolbar with debug information.",
+    "keywords": ["Drupal"],
+    "license": "GPL-2.0-or-later",
+    "homepage": "https://www.drupal.org/project/debug_bar",
+    "support": {
+        "issues": "https://www.drupal.org/project/issues/debug_bar",
+        "source": "https://git.drupalcode.org/project/debug_bar"
+    },
+    "require": {
+        "php": ">=8.3",
+        "drupal/core": "^10.3 || ^11.0",
+        "symfony/event-dispatcher": "^6.4 || ^7.1",
+        "symfony/http-foundation": "^6.4 || ^7.1",
+        "symfony/http-kernel": "^6.4 || ^7.1"
+    }
+}

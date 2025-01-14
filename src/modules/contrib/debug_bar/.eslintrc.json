@@ -1,0 +1,11 @@
+{
+  "parserOptions": {
+    "ecmaVersion": 2021
+  },
+  "rules": {
+    "prettier/prettier": ["off"],
+    "import/no-mutable-exports": ["warn"],
+    "func-names": ["error", "never"],
+    "strict": ["off"]
+  }
+}

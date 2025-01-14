@@ -36,7 +36,7 @@ services:
     volumes:
       - ./.docker/database:/var/lib/postgresql/data
     ports:
-      - '5432:5432'
+      - '5433:5432'
 
   webserver:
     container_name: drupal_dev_webserver

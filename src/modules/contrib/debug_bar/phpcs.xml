@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<ruleset name="Debug Bar">
+  <description>PHP CodeSniffer configuration for Debug Bar module.</description>
+  <arg name="extensions" value="php, module, yml"/>
+  <rule ref="Drupal"/>
+  <rule ref="DrupalPractice">
+    <exclude name="Drupal.Commenting.DocComment.ShortNotCapital"/>
+    <exclude name="Drupal.Commenting.DocComment.ShortFullStop"/>
+  </rule>
+</ruleset>

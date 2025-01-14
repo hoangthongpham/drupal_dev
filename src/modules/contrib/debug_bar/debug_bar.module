@@ -1,0 +1,56 @@
+<?php
+
+declare(strict_types=1);
+
+/**
+ * @file
+ * Primary module hooks for debug_bar module.
+ */
+
+use Drupal\debug_bar\Data\DebugBarItem;
+
+/**
+ * Implements hook_attachments().
+ *
+ * @phpstan-param array{'#attached': array{'#attached': array{'library': list<non-empty-string>}}} &$page
+ */
+function debug_bar_page_attachments(array &$page): void {
+  if (\Drupal::currentUser()->hasPermission('view debug bar')) {
+    $page['#attached']['library'][] = 'debug_bar/debug_bar';
+  }
+}
+
+/**
+ * Implements hook_theme().
+ *
+ * @phpstan-ignore-next-line
+ */
+function debug_bar_theme(): array {
+  return [
+    'debug_bar' => [
+      'variables' => [
+        'items' => [],
+        'attributes' => [],
+      ],
+    ],
+  ];
+}
+
+/**
+ * Implements hook_preprocess().
+ *
+ * @phpstan-ignore-next-line
+ */
+function template_preprocess_debug_bar(array &$variables): void {
+  $preprocess_item = static function (DebugBarItem $item): void {
+    $item->attributes->addClass('debug-bar__item');
+    if ($item->iconPath) {
+      $item->attributes->setAttribute('style', "background-image: url($item->iconPath);");
+      $item->attributes->addClass('debug-bar__icon-item');
+    }
+    if ($item->title) {
+      $item->attributes->setAttribute('title', (string) $item->title);
+    }
+  };
+  \array_walk($variables['items'], $preprocess_item);
+}

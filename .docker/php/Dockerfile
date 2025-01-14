@@ -21,7 +21,10 @@ RUN apk update && apk upgrade \
     libcurl \
     curl-dev \
     openssl-dev \
-    postgresql-dev
+    postgresql-dev \
+    libpng-dev \
+    libjpeg-turbo-dev \
+    freetype-dev
 
 # Install PHP extensions
 RUN docker-php-ext-install \
@@ -31,12 +34,11 @@ RUN docker-php-ext-install \
     opcache \
     pdo \
     pdo_pgsql \
-    pgsql \
-    gd
+    pgsql
 
-# Install PHP GD extension
-RUN apk add --no-cache libpng libpng-dev libjpeg-turbo libjpeg-turbo-dev freetype freetype-dev \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+# Configure and install GD extension
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) gd
 
-RUN mkdir -p /var/www/html
+# Set working directory
+WORKDIR /var/www/html

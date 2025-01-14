@@ -21,6 +21,7 @@
         "drupal/core-project-message": "^11.1",
         "drupal/core-recommended": "^11.1",
         "drupal/core-vendor-hardening": "^11.1",
+        "drupal/debug_bar": "^3.0@RC",
         "drupal/inline_entity_form": "^3.0@RC",
         "drush/drush": "13.3.3"
     },
