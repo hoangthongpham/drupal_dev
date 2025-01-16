@@ -33,12 +33,13 @@
     "config": {
         "allow-plugins": {
             "composer/installers": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true,
             "drupal/core-composer-scaffold": true,
             "drupal/core-project-message": true,
             "drupal/core-vendor-hardening": true,
+            "php-http/discovery": true,
             "phpstan/extension-installer": true,
-            "dealerdirect/phpcodesniffer-composer-installer": true,
-            "php-http/discovery": true
+            "tbachert/spi": true
         },
         "sort-packages": true
     },
@@ -100,6 +101,10 @@
         }
     },
     "require-dev": {
+        "behat/mink": "^1.12",
+        "drupal/core-dev": "^11.1",
+        "phpspec/prophecy": "^1.20",
+        "phpspec/prophecy-phpunit": "*",
         "phpunit/phpunit": "^10.5"
     }
 }

@@ -23,4 +23,22 @@ final class HomepageController extends ControllerBase {
     return $build;
   }
 
+  private $length = 0;
+
+  /**
+   * @param int $length
+   */
+  public function setLength(int $length) {
+    $this->length = $length;
+  }
+
+  /**
+   * @return int
+   *   The length of the unit.
+   */
+  public function getLength() {
+    return $this->length;
+  }
+  
+
 }

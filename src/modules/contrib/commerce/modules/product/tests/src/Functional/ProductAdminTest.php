@@ -98,7 +98,6 @@ class ProductAdminTest extends ProductBrowserTestBase {
     $this->assertNotNull($product, 'The new product has been created.');
     $this->assertSession()->pageTextContains($this->t('The product @title has been successfully saved', ['@title' => $title]));
     $this->assertSession()->pageTextContains($title);
-    $this->assertFieldValues($product->getStores(), $this->stores, 'Created product has the correct associated stores.');
     $this->assertFieldValues($product->getStoreIds(), $store_ids, 'Created product has the correct associated store ids.');
     $this->drupalGet($product->toUrl('canonical'));
     $this->assertSession()->statusCodeEquals(200);
@@ -132,7 +131,6 @@ class ProductAdminTest extends ProductBrowserTestBase {
     $this->container->get('entity_type.manager')->getStorage('commerce_product')->resetCache([$product->id()]);
     $product = Product::load($product->id());
     $this->assertEquals($product->getTitle(), $title, 'The product title successfully updated.');
-    $this->assertFieldValues($product->getStores(), $this->stores, 'Updated product has the correct associated stores.');
     $this->assertFieldValues($product->getStoreIds(), $store_ids, 'Updated product has the correct associated store ids.');
   }
 

@@ -24,7 +24,8 @@ RUN apk update && apk upgrade \
     postgresql-dev \
     libpng-dev \
     libjpeg-turbo-dev \
-    freetype-dev
+    freetype-dev \
+    libwebp-dev
 
 # Install PHP extensions
 RUN docker-php-ext-install \
@@ -37,7 +38,7 @@ RUN docker-php-ext-install \
     pgsql
 
 # Configure and install GD extension
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
     && docker-php-ext-install -j$(nproc) gd
 
 # Set working directory

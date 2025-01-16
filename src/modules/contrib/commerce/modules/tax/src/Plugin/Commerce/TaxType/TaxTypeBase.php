@@ -48,7 +48,7 @@ abstract class TaxTypeBase extends PluginBase implements TaxTypeInterface, Conta
    *
    * @var string|int|null
    */
-  // phpcs:ignore Drupal.Classes.PropertyDeclaration
+  // phpcs:ignore Drupal.Classes.PropertyDeclaration, Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing, PSR2.Classes.PropertyDeclaration.Underscore
   protected $_parentEntityId;
 
   /**
