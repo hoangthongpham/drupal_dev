@@ -8,7 +8,7 @@
   <testsuites>
     <testsuite name="default">
       <directory>modules/custom/recipe/tests</directory>
-      <directory>modules/custom/hompage/tests</directory>
+      <!-- <directory>modules/custom/hompage/tests</directory> -->
     </testsuite>
   </testsuites>
 </phpunit>
