@@ -181,7 +181,7 @@ class EntityRevisionTest extends UnitTestCase {
    *
    * @see \Drupal\Tests\migrate\Unit\Destination\EntityRevision
    *
-   * @param array $configuration
+   * @param $configuration
    *   Configuration for the destination.
    * @param string $plugin_id
    *   The plugin id.

@@ -31,11 +31,11 @@ abstract class ContentEntityBase extends EntityBase implements \IteratorAggregat
    * are keyed by language code, whereas LanguageInterface::LANGCODE_DEFAULT
    * is used for values in default language.
    *
-   * @var array
-   *
    * @todo Add methods for getting original fields and for determining
    * changes.
    * @todo Provide a better way for defining default values.
+   *
+   * @var array
    */
   protected $values = [];
 
@@ -49,9 +49,9 @@ abstract class ContentEntityBase extends EntityBase implements \IteratorAggregat
   /**
    * Local cache for field definitions.
    *
-   * @var array
-   *
    * @see ContentEntityBase::getFieldDefinitions()
+   *
+   * @var array
    */
   protected $fieldDefinitions;
 
@@ -546,7 +546,7 @@ abstract class ContentEntityBase extends EntityBase implements \IteratorAggregat
   /**
    * {@inheritdoc}
    */
-  public function __sleep(): array {
+  public function __sleep() {
     // Get the values of instantiated field objects, only serialize the values.
     foreach ($this->fields as $name => $fields) {
       foreach ($fields as $langcode => $field) {
@@ -687,7 +687,8 @@ abstract class ContentEntityBase extends EntityBase implements \IteratorAggregat
   /**
    * {@inheritdoc}
    */
-  public function getIterator(): \ArrayIterator {
+  #[\ReturnTypeWillChange]
+  public function getIterator() {
     return new \ArrayIterator($this->getFields());
   }
 

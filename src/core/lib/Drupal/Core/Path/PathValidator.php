@@ -166,16 +166,16 @@ class PathValidator implements PathValidatorInterface {
       $router->setContext((new RequestContext())->fromRequest($request));
       $result = $router->match($path);
     }
-    catch (ResourceNotFoundException) {
+    catch (ResourceNotFoundException $e) {
       $result = FALSE;
     }
-    catch (ParamNotConvertedException) {
+    catch (ParamNotConvertedException $e) {
       $result = FALSE;
     }
-    catch (AccessDeniedHttpException) {
+    catch (AccessDeniedHttpException $e) {
       $result = FALSE;
     }
-    catch (MethodNotAllowedException) {
+    catch (MethodNotAllowedException $e) {
       $result = FALSE;
     }
     catch (BadRequestException) {

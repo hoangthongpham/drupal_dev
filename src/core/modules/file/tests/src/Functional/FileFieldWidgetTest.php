@@ -559,7 +559,7 @@ class FileFieldWidgetTest extends FileFieldTestBase {
    * @param \Drupal\user\UserInterface $attacker_user
    *   The attacker user.
    */
-  protected function doTestTemporaryFileRemovalExploit(UserInterface $victim_user, UserInterface $attacker_user): void {
+  protected function doTestTemporaryFileRemovalExploit(UserInterface $victim_user, UserInterface $attacker_user) {
     $type_name = 'article';
     $field_name = 'test_file_field';
     $this->createFileField($field_name, 'node', $type_name);

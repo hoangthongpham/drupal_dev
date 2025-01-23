@@ -55,7 +55,7 @@ class PathAliasTest extends ResourceTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUpAuthorization($method): void {
+  protected function setUpAuthorization($method) {
     $this->grantPermissionsToTestedRole(['administer url aliases']);
   }
 
@@ -75,7 +75,7 @@ class PathAliasTest extends ResourceTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function getExpectedDocument(): array {
+  protected function getExpectedDocument() {
     $base_url = Url::fromUri('base:/jsonapi/path_alias/path_alias/' . $this->entity->uuid())->setAbsolute();
     $self_url = clone $base_url;
     $version_identifier = 'id:' . $this->entity->getRevisionId();
@@ -113,7 +113,7 @@ class PathAliasTest extends ResourceTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function getPostDocument(): array {
+  protected function getPostDocument() {
     return [
       'data' => [
         'type' => static::$resourceTypeName,

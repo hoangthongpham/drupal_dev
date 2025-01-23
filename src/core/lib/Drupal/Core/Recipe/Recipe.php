@@ -9,7 +9,6 @@ use Drupal\Core\Extension\Dependency;
 use Drupal\Core\Extension\ModuleExtensionList;
 use Drupal\Core\Extension\ThemeExtensionList;
 use Drupal\Component\Serialization\Yaml;
-use Drupal\Core\Render\Element;
 use Drupal\Core\TypedData\PrimitiveInterface;
 use Drupal\Core\Validation\Plugin\Validation\Constraint\RegexConstraint;
 use Symfony\Component\Validator\Constraints\All;
@@ -181,7 +180,7 @@ final class Recipe {
         ]),
       ]),
       'input' => new Optional([
-        new Type('associative_array'),
+        new Type('array'),
         new All([
           new Collection(
             fields: [
@@ -193,7 +192,7 @@ final class Recipe {
               // There can be an optional set of constraints, which is an
               // associative array of arrays, as in config schema.
               'constraints' => new Optional([
-                new Type('associative_array'),
+                new Type('array'),
               ]),
               'data_type' => [
                 // The data type must be known to the typed data system.
@@ -204,29 +203,16 @@ final class Recipe {
                   'interface' => PrimitiveInterface::class,
                 ]),
               ],
-              // The `prompt` and `form` elements, though optional, have their
-              // own sets of constraints,
+              // If there is a `prompt` element, it has its own set of
+              // constraints.
               'prompt' => new Optional([
                 new Collection([
                   'method' => [
                     new Choice(['ask', 'askHidden', 'confirm', 'choice']),
                   ],
                   'arguments' => new Optional([
-                    new Type('associative_array'),
+                    new Type('array'),
                   ]),
-                ]),
-              ]),
-              'form' => new Optional([
-                new Sequentially([
-                  new Type('associative_array'),
-                  // Every element in the `form` array has to be a form API
-                  // property, prefixed with `#`. Because recipe inputs can only
-                  // be primitive data types, child elements aren't allowed.
-                  new Callback(function (array $element, ExecutionContextInterface $context): void {
-                    if (Element::children($element)) {
-                      $context->addViolation('Form elements for recipe inputs cannot have child elements.');
-                    }
-                  }),
                 ]),
               ]),
               // Every input must define a default value.
@@ -238,7 +224,7 @@ final class Recipe {
                   'value' => new Optional(),
                   'config' => new Optional([
                     new Sequentially([
-                      new Type('list'),
+                      new Type('array'),
                       new Count(2),
                       new All([
                         new Type('string'),

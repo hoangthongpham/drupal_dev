@@ -116,7 +116,7 @@ class ResponsiveImageFieldDisplayTest extends ImageFieldTestBase {
    * @param bool $empty_styles
    *   If true, the image style mappings will get empty image styles.
    */
-  protected function addTestImageStyleMappings($empty_styles = FALSE): void {
+  protected function addTestImageStyleMappings($empty_styles = FALSE) {
     if ($empty_styles) {
       $this->responsiveImgStyle
         ->addImageStyleMapping('responsive_image_test_module.mobile', '1x', [
@@ -185,7 +185,7 @@ class ResponsiveImageFieldDisplayTest extends ImageFieldTestBase {
    *   If true, use an empty string for image style names.
    *   Defaults to false.
    */
-  protected function doTestResponsiveImageFieldFormatters($scheme, $empty_styles = FALSE): void {
+  protected function doTestResponsiveImageFieldFormatters($scheme, $empty_styles = FALSE) {
     /** @var \Drupal\Core\Render\RendererInterface $renderer */
     $renderer = $this->container->get('renderer');
     $node_storage = $this->container->get('entity_type.manager')->getStorage('node');
@@ -427,7 +427,6 @@ class ResponsiveImageFieldDisplayTest extends ImageFieldTestBase {
     assert($large_style instanceof ImageStyleInterface);
     $large_style->addImageEffect([
       'id' => 'image_resize',
-      'weight' => 0,
       'data' => [
         'width' => '480',
         'height' => '480',
@@ -438,7 +437,6 @@ class ResponsiveImageFieldDisplayTest extends ImageFieldTestBase {
     assert($medium_style instanceof ImageStyleInterface);
     $medium_style->addImageEffect([
       'id' => 'image_resize',
-      'weight' => 0,
       'data' => [
         'width' => '220',
         'height' => '220',

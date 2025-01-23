@@ -9,8 +9,8 @@
 
 'use strict';
 
-const fs = require('node:fs');
-const path = require('node:path');
+const fs = require('fs');
+const path = require('path');
 const chokidar = require('chokidar');
 
 const changeOrAdded = require('./changeOrAdded');

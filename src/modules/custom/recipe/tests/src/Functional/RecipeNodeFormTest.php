@@ -5,71 +5,62 @@ namespace Drupal\Tests\recipe\Functional;
 use Drupal\Tests\BrowserTestBase;
 
 /**
- * Test case for adding a node of type "recipe".
+ * Tests the functionality of the Recipe content type.
  *
  * @group recipe
  */
-class RecipeNodeFormTest extends BrowserTestBase {
+class RecipeNodeFormTest extends BrowserTestBase
+{
+    /**
+     * Theme to enable.
+     *
+     * @var string
+     */
+    protected $defaultTheme = 'stark';
 
+    /**
+     * Modules to enable.
+     *
+     * @var array
+     */
+    protected static $modules = ['node', 'rules'];
 
-  /**
-   * Theme to enable.
-   *
-   * @var string
-   */
-  protected $defaultTheme = 'bootstrap_barrio_subtheme';
-  /**
-   * Modules to enable.
-   *
-   * @var array
-   */
-  protected static $modules = ['node', 'recipe'];
+    /**
+     * A user with permissions to create and view Recipe content.
+     *
+     * @var \Drupal\user\Entity\User
+     */
+    protected $recipeUser;
 
-  /**
-   * A user with permission to create and manage recipe nodes.
-   *
-   * @var \Drupal\user\Entity\User
-   */
-  protected $recipeUser;
+    /**
+     * {@inheritdoc}
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
 
-  /**
-   * Set up the environment for the test.
-   */
-  protected function setUp(): void {
-    parent::setUp();
+        // Create an article content type that we will use for testing.
+        $type = $this->container->get('entity_type.manager')->getStorage('node_type')
+        ->create([
+            'type' => 'article',
+            'name' => 'Article',
+        ]);
+        $type->save();
+        $this->container->get('router.builder')->rebuild();
+    }
 
-    // Create a user with permissions to create and edit recipe nodes.
-    $this->recipeUser = $this->drupalCreateUser([
-      'create recipe content',
-      'edit own recipe content',
-      'access content',
-    ]);
-  }
+    /**
+     * Tests that the reaction rule listing page works.
+     */
+    public function testReactionRulePage()
+    {
+        $account = $this->drupalCreateUser(['administer rules']);
+        $this->drupalLogin($account);
 
-  /**
-   * Tests the recipe add form.
-   */
-  public function testRecipeNodeAddForm() {
-    // Log in as the user with recipe permissions.
-    $this->drupalLogin($this->recipeUser);
+        $this->drupalGet('admin/config/workflow/rules');
+        $this->assertSession()->statusCodeEquals(200);
 
-    // Visit the add recipe form.
-    $this->drupalGet('node/add/recipe');
-
-    // Assert that the page contains the expected form elements.
-    $this->assertSession()->statusCodeEquals(200);
-    $this->assertSession()->fieldExists('title[0][value]');
-    $this->assertSession()->fieldExists('body[0][value]');
-    
-    // Submit the form with test data.
-    $edit = [
-      'title[0][value]' => 'Test Recipe',
-      'body[0][value]' => 'This is a test recipe body content.',
-    ];
-    $this->submitForm($edit, ('Save'));
-
-    // Assert that the node was created.
-    $this->assertSession()->pageTextContains('Test Recipe has been created.');
-  }
-
+        // Test that there is an empty reaction rule listing.
+        $this->assertSession()->pageTextContains('There is no Reaction Rule yet.');
+    }
 }

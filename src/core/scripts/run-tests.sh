@@ -29,14 +29,11 @@ use Drupal\BuildTests\Framework\BuildTestBase;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\Tests\BrowserTestBase;
-
+use Drupal\TestTools\PhpUnitCompatibility\ClassWriter;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Runner\Version;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Process\Process;
-
-// cspell:ignore exitcode wwwrun
 
 // Define some colors for display.
 // A nice calming green.
@@ -370,8 +367,7 @@ sudo -u [wwwrun|www-data|etc] php ./core/scripts/{$args['script']}
   --url http://example.com/ --class Drupal\Tests\block\Functional\BlockTest
 
 Without a preinstalled Drupal site, specify a SQLite database pathname to create
-(for the test runner) and the default database connection info (for Drupal) to
-use in tests:
+and the default database connection info to use in tests:
 
 sudo -u [wwwrun|www-data|etc] php ./core/scripts/{$args['script']}
   --sqlite /tmpfs/drupal/test.sqlite
@@ -519,6 +515,7 @@ function simpletest_script_init() {
   $autoloader = require_once __DIR__ . '/../../autoload.php';
   // The PHPUnit compatibility layer needs to be available to autoload tests.
   $autoloader->add('Drupal\\TestTools', __DIR__ . '/../tests');
+  ClassWriter::mutateTestBase($autoloader);
 
   // Get URL from arguments.
   if (!empty($args['url'])) {
@@ -755,12 +752,9 @@ function simpletest_script_execute_batch(TestRunResultsStorageInterface $test_ru
       $test_class = array_shift($test_classes);
       // Fork a child process.
       $command = simpletest_script_command($test_run, $test_class);
-      try {
-        $process = new Process($command);
-        $process->start();
-      }
-      catch (\Exception $e) {
-        echo get_class($e) . ": " . $e->getMessage() . "\n";
+      $process = proc_open($command, [], $pipes, NULL, NULL, ['bypass_shell' => TRUE]);
+
+      if (!is_resource($process)) {
         echo "Unable to fork test process. Aborting.\n";
         exit(SIMPLETEST_SCRIPT_EXIT_SUCCESS);
       }
@@ -770,6 +764,7 @@ function simpletest_script_execute_batch(TestRunResultsStorageInterface $test_ru
         'process' => $process,
         'test_run' => $test_run,
         'class' => $test_class,
+        'pipes' => $pipes,
       ];
     }
 
@@ -778,18 +773,15 @@ function simpletest_script_execute_batch(TestRunResultsStorageInterface $test_ru
 
     // Check if some children finished.
     foreach ($children as $cid => $child) {
-      if ($child['process']->isTerminated()) {
-        // The child exited.
-        echo $child['process']->getOutput();
-        $errorOutput = $child['process']->getErrorOutput();
-        if ($errorOutput) {
-          echo 'ERROR: ' . $errorOutput;
+      $status = proc_get_status($child['process']);
+      if (empty($status['running'])) {
+        // The child exited, unregister it.
+        proc_close($child['process']);
+        if ($status['exitcode'] === SIMPLETEST_SCRIPT_EXIT_FAILURE) {
+          $total_status = max($status['exitcode'], $total_status);
         }
-        if ($child['process']->getExitCode() === SIMPLETEST_SCRIPT_EXIT_FAILURE) {
-          $total_status = max($child['process']->getExitCode(), $total_status);
-        }
-        elseif ($child['process']->getExitCode()) {
-          $message = 'FATAL ' . $child['class'] . ': test runner returned a non-zero error code (' . $child['process']->getExitCode() . ').';
+        elseif ($status['exitcode']) {
+          $message = 'FATAL ' . $child['class'] . ': test runner returned a non-zero error code (' . $status['exitcode'] . ').';
           echo $message . "\n";
           // @todo Return SIMPLETEST_SCRIPT_EXIT_EXCEPTION instead, when
           // DrupalCI supports this.
@@ -829,18 +821,18 @@ function simpletest_script_execute_batch(TestRunResultsStorageInterface $test_ru
  * Run a PHPUnit-based test.
  */
 function simpletest_script_run_phpunit(TestRun $test_run, $class) {
-  global $args;
+  $reflection = new \ReflectionClass($class);
+  if ($reflection->hasProperty('runLimit')) {
+    set_time_limit($reflection->getStaticPropertyValue('runLimit'));
+  }
 
   $runner = PhpUnitTestRunner::create(\Drupal::getContainer());
-  $start = microtime(TRUE);
-  $results = $runner->execute($test_run, $class, $status, $args['color']);
-  $time = microtime(TRUE) - $start;
-
+  $results = $runner->execute($test_run, [$class], $status);
   $runner->processPhpUnitResults($test_run, $results);
 
   $summaries = $runner->summarizeResults($results);
   foreach ($summaries as $class => $summary) {
-    simpletest_script_reporter_display_summary($class, $summary, $time);
+    simpletest_script_reporter_display_summary($class, $summary);
   }
   return $status;
 }
@@ -874,38 +866,29 @@ function simpletest_script_run_one_test(TestRun $test_run, $test_class) {
  * @param string $test_class
  *   The name of the test class to run.
  *
- * @return list<string>
- *   The list of command-line elements.
+ * @return string
+ *   The assembled command string.
  */
-function simpletest_script_command(TestRun $test_run, string $test_class): array {
+function simpletest_script_command(TestRun $test_run, $test_class) {
   global $args, $php;
 
-  $command = [];
-  $command[] = $php;
-  $command[] = './core/scripts/' . $args['script'];
-  $command[] = '--url';
-  $command[] = $args['url'];
+  $command = escapeshellarg($php) . ' ' . escapeshellarg('./core/scripts/' . $args['script']);
+  $command .= ' --url ' . escapeshellarg($args['url']);
   if (!empty($args['sqlite'])) {
-    $command[] = '--sqlite';
-    $command[] = $args['sqlite'];
+    $command .= ' --sqlite ' . escapeshellarg($args['sqlite']);
   }
   if (!empty($args['dburl'])) {
-    $command[] = '--dburl';
-    $command[] = $args['dburl'];
+    $command .= ' --dburl ' . escapeshellarg($args['dburl']);
   }
-  $command[] = '--php';
-  $command[] = $php;
-  $command[] = '--test-id';
-  $command[] = $test_run->id();
+  $command .= ' --php ' . escapeshellarg($php);
+  $command .= " --test-id {$test_run->id()}";
   foreach (['verbose', 'keep-results', 'color', 'die-on-fail', 'suppress-deprecations'] as $arg) {
     if ($args[$arg]) {
-      $command[] = '--' . $arg;
+      $command .= ' --' . $arg;
     }
   }
   // --execute-test and class name needs to come last.
-  $command[] = '--execute-test';
-  $command[] = $test_class;
-
+  $command .= ' --execute-test ' . escapeshellarg($test_class);
   return $command;
 }
 
@@ -1147,7 +1130,7 @@ function get_test_class_method_count(string $class): int {
  * @return array
  *   An associative array of bins and the test class names in each bin.
  */
-function place_tests_into_bins(array $tests, int $bin_count) {
+ function place_tests_into_bins(array $tests, int $bin_count) {
   // Create a bin corresponding to each parallel test job.
   $bins = array_fill(0, $bin_count, []);
   // Go through each test and add them to one bin at a time.
@@ -1203,17 +1186,14 @@ function simpletest_script_reporter_init() {
  *   The test class name that was run.
  * @param array $results
  *   The assertion results using #pass, #fail, #exception, #debug array keys.
- * @param int|null $duration
- *   The time taken for the test to complete.
  */
-function simpletest_script_reporter_display_summary($class, $results, $duration = NULL) {
+function simpletest_script_reporter_display_summary($class, $results) {
   // Output all test results vertically aligned.
   // Cut off the class name after 60 chars, and pad each group with 3 digits
   // by default (more than 999 assertions are rare).
-  $output = vsprintf('%-60.60s %10s %5s %9s %14s %12s', [
+  $output = vsprintf('%-60.60s %10s %9s %14s %12s', [
     $class,
     $results['#pass'] . ' passes',
-    isset($duration) ? ceil($duration) . 's' : '',
     !$results['#fail'] ? '' : $results['#fail'] . ' fails',
     !$results['#exception'] ? '' : $results['#exception'] . ' exceptions',
     !$results['#debug'] ? '' : $results['#debug'] . ' messages',
@@ -1371,7 +1351,7 @@ function simpletest_script_format_result($result) {
   if ($args['non-html']) {
     $message = Html::decodeEntities($message);
   }
-  $lines = explode("\n", $message);
+  $lines = explode("\n", wordwrap($message), 76);
   foreach ($lines as $line) {
     echo "    $line\n";
   }

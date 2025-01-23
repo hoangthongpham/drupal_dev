@@ -329,7 +329,7 @@ function _drupal_get_error_level() {
   try {
     $error_level = \Drupal::config('system.logging')->get('error_level');
   }
-  catch (\Exception) {
+  catch (\Exception $e) {
     $error_level = $GLOBALS['config']['system.logging']['error_level'] ?? ERROR_REPORTING_HIDE;
   }
 

@@ -202,7 +202,7 @@ class TestDrupalSqlBase extends DrupalSqlBase {
    *
    * @see \Drupal\Tests\migrate\Unit\MigrateSourceSqlTestCase
    */
-  public function setDatabase(Connection $database): void {
+  public function setDatabase(Connection $database) {
     $this->database = $database;
   }
 

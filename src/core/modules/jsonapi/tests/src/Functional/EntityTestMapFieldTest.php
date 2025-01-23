@@ -66,7 +66,7 @@ class EntityTestMapFieldTest extends ResourceTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUpAuthorization($method): void {
+  protected function setUpAuthorization($method) {
     $this->grantPermissionsToTestedRole(['administer entity_test content']);
   }
 
@@ -89,7 +89,7 @@ class EntityTestMapFieldTest extends ResourceTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function getExpectedDocument(): array {
+  protected function getExpectedDocument() {
     $self_url = Url::fromUri('base:/jsonapi/entity_test_map_field/entity_test_map_field/' . $this->entity->uuid())->setAbsolute()->toString(TRUE)->getGeneratedUrl();
     $author = User::load(0);
     return [
@@ -139,7 +139,7 @@ class EntityTestMapFieldTest extends ResourceTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function getPostDocument(): array {
+  protected function getPostDocument() {
     return [
       'data' => [
         'type' => 'entity_test_map_field--entity_test_map_field',
@@ -161,7 +161,7 @@ class EntityTestMapFieldTest extends ResourceTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function getSparseFieldSets(): array {
+  protected function getSparseFieldSets() {
     // EntityTestMapField's owner field name is `user_id`, not `uid`, which
     // breaks nested sparse fieldset tests.
     return array_diff_key(parent::getSparseFieldSets(), array_flip([

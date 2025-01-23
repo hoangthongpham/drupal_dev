@@ -119,7 +119,7 @@ class EditModeTest extends WebDriverTestBase {
   /**
    * Presses the toolbar edit mode.
    */
-  protected function pressToolbarEditButton(): void {
+  protected function pressToolbarEditButton() {
     $edit_button = $this->getSession()->getPage()->find('css', '#toolbar-bar div.contextual-toolbar-tab button');
     $edit_button->press();
   }
@@ -159,7 +159,7 @@ class EditModeTest extends WebDriverTestBase {
    * @return int
    *   The number of tabbable elements.
    */
-  protected function getTabbableElementsCount(): int {
+  protected function getTabbableElementsCount() {
     // Mark all tabbable elements.
     $this->getSession()->executeScript("jQuery(window.tabbable.tabbable(document.body)).attr('data-marked', '');");
     // Count all marked elements.

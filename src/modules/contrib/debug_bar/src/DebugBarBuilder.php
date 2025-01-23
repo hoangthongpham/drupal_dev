@@ -24,8 +24,8 @@ use Drupal\debug_bar\Data\DebugBarItem;
  */
 final readonly class DebugBarBuilder {
 
-  public const string CRON_KEY = 'debug-bar-cron';
-  public const string CACHE_KEY = 'debug-bar-cache';
+  public const CRON_KEY = 'debug-bar-cron';
+  public const CACHE_KEY = 'debug-bar-cache';
 
   /**
    * {@selfdoc}

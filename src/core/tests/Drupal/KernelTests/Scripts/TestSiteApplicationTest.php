@@ -27,7 +27,6 @@ use Symfony\Component\Process\Process;
  * @see \Drupal\TestSite\Commands\TestSiteTearDownCommand
  *
  * @group Setup
- * @group #slow
  * @preserveGlobalState disabled
  */
 class TestSiteApplicationTest extends KernelTestBase {

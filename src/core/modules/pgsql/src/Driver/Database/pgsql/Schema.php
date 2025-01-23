@@ -28,9 +28,8 @@ class Schema extends DatabaseSchema {
    * This is collected by Schema::queryTableInformation(), by introspecting the
    * database.
    *
-   * @var array
-   *
    * @see \Drupal\pgsql\Driver\Database\pgsql\Schema::queryTableInformation()
+   * @var array
    */
   protected $tableInformation = [];
 

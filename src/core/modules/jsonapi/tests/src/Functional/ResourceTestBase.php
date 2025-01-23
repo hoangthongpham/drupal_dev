@@ -260,7 +260,7 @@ abstract class ResourceTestBase extends BrowserTestBase {
    *
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
-  protected function setUpFields(EntityInterface $entity, UserInterface $account): EntityInterface {
+  protected function setUpFields(EntityInterface $entity, UserInterface $account) {
     if (!$entity instanceof FieldableEntityInterface) {
       return $entity;
     }
@@ -3483,7 +3483,7 @@ abstract class ResourceTestBase extends BrowserTestBase {
    *   TRUE if the field definition is found to be a reference field. FALSE
    *   otherwise.
    */
-  protected static function isReferenceFieldDefinition(FieldDefinitionInterface $field_definition): bool {
+  protected static function isReferenceFieldDefinition(FieldDefinitionInterface $field_definition) {
     /** @var \Drupal\Core\Field\TypedData\FieldItemDataDefinition $item_definition */
     $item_definition = $field_definition->getItemDefinition();
     $main_property = $item_definition->getMainPropertyName();

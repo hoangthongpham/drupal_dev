@@ -21,7 +21,7 @@ class InstallerExistingConfigNoConfigTest extends InstallerConfigDirectoryTestBa
   /**
    * Final installer step: Configure site.
    */
-  protected function setUpSite(): void {
+  protected function setUpSite() {
     // There are errors therefore there is nothing to do here.
   }
 

@@ -107,7 +107,7 @@ class QueryGroupByTest extends ViewsKernelTestBase {
    * @param array $values
    *   The expected views result.
    */
-  public function groupByTestHelper($aggregation_function, $values): void {
+  public function groupByTestHelper($aggregation_function, $values) {
     $this->setupTestEntities();
 
     $view = Views::getView('test_group_by_count');
@@ -138,7 +138,7 @@ class QueryGroupByTest extends ViewsKernelTestBase {
   /**
    * Helper method that creates some test entities.
    */
-  protected function setupTestEntities(): void {
+  protected function setupTestEntities() {
     // Create 4 entities with name1 and 3 entities with name2.
     $entity_1 = [
       'name' => 'name1',

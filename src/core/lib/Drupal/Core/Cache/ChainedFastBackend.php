@@ -142,7 +142,7 @@ class ChainedFastBackend implements CacheBackendInterface, CacheTagsInvalidatorI
       try {
         $items = $this->fastBackend->getMultiple($cids, $allow_invalid);
       }
-      catch (\Exception) {
+      catch (\Exception $e) {
         $cids = $cids_copy;
         $items = [];
       }

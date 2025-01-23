@@ -1,11 +1,6 @@
 name: 'Experimental test'
 type: theme
 description: 'Experimental test theme.'
-# version: VERSION
+version: VERSION
 base theme: false
 lifecycle: experimental
-
-# Information added by Drupal.org packaging script on 2025-01-06
-version: '11.1.1'
-project: 'drupal'
-datestamp: 1736204908

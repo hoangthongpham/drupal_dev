@@ -1,8 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
-namespace Drupal\driver_test\Driver\Database\DriverTestPgsql\Install;
+namespace Drupal\driver_test\Driver\Database\DrivertestPgsql\Install;
 
 use Drupal\pgsql\Driver\Database\pgsql\Install\Tasks as CoreTasks;
 

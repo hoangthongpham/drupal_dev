@@ -818,7 +818,7 @@ $databases['default']['default'] = array (
   'username' => 'postgres',
   'password' => '123456',
   'prefix' => '',
-  'host' => 'drupal_dev_db',
+  'host' => 'localhost',
   'port' => '5432',
   'namespace' => 'Drupal\\pgsql\\Driver\\Database\\pgsql',
   'driver' => 'pgsql',
@@ -826,6 +826,6 @@ $databases['default']['default'] = array (
 );
 $settings['config_sync_directory'] = 'sites/default/files/config_Dz4XPtgvZeUv3L1eNG1DcgP2UTjD7fQZV3BiYliHleaPjMAHuAHzu9RU_Zk_KsIr78JX237jIQ/sync';
 
-$settings['trusted_host_patterns'] = ['localhost'];
+$settings['trusted_host_patterns'] = ['drupal_dev.local'];
 $settings['state_cache'] = true;
 

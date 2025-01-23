@@ -83,7 +83,7 @@ abstract class ConfigEntityBase extends EntityBase implements ConfigEntityInterf
    *
    * @var array
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   protected $third_party_settings = [];
 
   /**
@@ -95,7 +95,7 @@ abstract class ConfigEntityBase extends EntityBase implements ConfigEntityInterf
    *
    * @var array
    */
-  // phpcs:ignore Drupal.Classes.PropertyDeclaration, Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
+  // phpcs:ignore Drupal.Classes.PropertyDeclaration, Drupal.NamingConventions.ValidVariableName.LowerCamelName
   protected $_core = [];
 
   /**
@@ -140,7 +140,7 @@ abstract class ConfigEntityBase extends EntityBase implements ConfigEntityInterf
   }
 
   /**
-   * Overrides EntityBase::isNew().
+   * Overrides Entity::isNew().
    *
    * EntityInterface::enforceIsNew() is only supported for newly created
    * configuration entities but has no effect after saving, since each
@@ -347,7 +347,7 @@ abstract class ConfigEntityBase extends EntityBase implements ConfigEntityInterf
   /**
    * {@inheritdoc}
    */
-  public function __sleep(): array {
+  public function __sleep() {
     $keys_to_unset = [];
     if ($this instanceof EntityWithPluginCollectionInterface) {
       // Get the plugin collections first, so that the properties are

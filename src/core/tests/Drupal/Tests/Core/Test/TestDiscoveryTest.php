@@ -231,7 +231,7 @@ EOT;
     $this->assertEmpty($info['description']);
   }
 
-  protected function setupVfsWithTestClasses(): void {
+  protected function setupVfsWithTestClasses() {
     vfsStream::setup('drupal');
 
     $test_file = <<<EOF
