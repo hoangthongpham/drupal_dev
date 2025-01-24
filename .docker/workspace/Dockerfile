@@ -1,4 +1,4 @@
-FROM php:8.3
+FROM php:8.2
 
 LABEL maintainer="PHT <phamhoangthongxyz@gmail.com>"
 
