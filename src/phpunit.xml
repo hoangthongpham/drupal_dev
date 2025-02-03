@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit bootstrap="core/tests/bootstrap.php" colors="true">
   <php>
-    <env name="SIMPLETEST_BASE_URL" value="https://drupal_dev.local"/>
-    <env name="SIMPLETEST_DB" value="pgsql://postgres:123456@localhost:5432/drupal_dev_db"/>
-    <env name="BROWSERTEST_OUTPUT_DIRECTORY" value="sites/simpletest/browser_output"/>
+    <env name="SIMPLETEST_BASE_URL" value="http://drupal_dev.local"/>
+    <env name="SIMPLETEST_DB" value="pgsql://postgres:123456@drupal_dev_db:5432/drupal_dev_db"/>
+    <env name="BROWSERTEST_OUTPUT_DIRECTORY" value="/var/www/html/sites/simpletest/browser_output"/>
   </php>
   <testsuites>
     <testsuite name="default">
       <directory>modules/custom/recipe/tests</directory>
-      <!-- <directory>modules/custom/hompage/tests</directory> -->
     </testsuite>
   </testsuites>
 </phpunit>

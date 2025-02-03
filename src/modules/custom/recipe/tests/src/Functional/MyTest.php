@@ -18,41 +18,35 @@ class MyTest extends BrowserTestBase
     protected $profile = 'standard';
 
     /**
-     * A user account with the 'administrator' role.
+     * Tài khoản người dùng test.
      *
-     * @var \Drupal\user\UserInterface
+     * @var \Drupal\user\Entity\User
      */
-    protected $adminUser;
+    protected $user;
 
     /**
      * {@inheritdoc}
      */
-    public function setUp() :void
-    {
+
+    /**
+     * Thiết lập test.
+     */
+    protected function setUp(): void {
         parent::setUp();
 
-        // Create an admin user.
-        $this->adminUser = $this->drupalCreateUser([
-            'administer site configuration',
-            'access content',
-        ]);
-
-        // Log in as the admin user.
-        $this->drupalLogin($this->adminUser);
+        // Tạo tài khoản user có quyền truy cập.
+        $this->user = $this->drupalCreateUser(['access content']);
     }
 
     /**
-     * Test to check if a page exists and contains expected content.
+     * Kiểm tra xem trang chính có tải đúng không.
      */
-    public function testPageContent()
-    {
-        // Visit a page.
-        $this->drupalGet('admin/config'); // Replace with the path of the page to test.
+    public function testHomePageLoads() {
+        // Đăng nhập với tài khoản test.
+        $this->drupalLogin($this->user);
 
-        // Assert that the page is returned successfully (status code 200).
-        $this->assertSession()->statusCodeEquals(403);
-
-        // Check if specific text is present on the page.
-        // $this->assertSession()->pageTextContains('Configuration'); // Replace with the text you expect.
+        // Truy cập trang chủ.
+        $this->drupalGet('<front>');
+        $this->assertSession()->statusCodeEquals(200);
     }
 }
