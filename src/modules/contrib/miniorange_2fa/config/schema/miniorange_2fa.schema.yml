@@ -1,0 +1,100 @@
+miniorange_2fa.settings:
+  type: mapping
+  label: Settings
+  mapping:
+    mo_auth_selected_2fa_methods:
+      type: string
+    mo_auth_enforce_inline_registration:
+      type: boolean
+    mo_auth_2fa_license_type:
+      type: string
+    mo_2fa_domain_and_role_rule:
+      type: string
+    mo_auth_use_only_2nd_factor:
+      type: boolean
+    mo_auth_enable_backdoor: 
+      type: boolean
+    mo_auth_enable_domain_based_2fa:
+      type: boolean
+    mo_auth_redirect_user_after_login:
+      type: string
+    mo_auth_enable_role_based_2fa:
+      type: boolean
+    mo_auth_customer_api_key: 
+      type: string
+    mo_auth_rba:
+      type: string
+    allow_end_users_to_decide:
+      type: boolean
+    mo_auth_custom_organization_name:
+      type: string
+    mo_auth_2fa_kba_questions:
+      type: integer
+    mo_auth_rba_duration:
+      type: integer
+    rba_allowed_devices:
+      type: integer
+    mo_auth_customer_admin_email:
+      type: string
+    mo_auth_customer_admin_phone:
+      type: string
+    mo_auth_customer_id:
+      type: string
+    mo_auth_customer_token_key:
+      type: string
+    mo_auth_customer_app_secret: 
+      type: string
+    mo_auth_firstuser_id:
+      type: string
+    mo_auth_status:
+      type: string
+    mo_auth_2fa_license_plan:
+      type: string
+    mo_auth_2fa_license_no_of_users:
+      type: integer
+    mo_auth_2fa_ivr_remaining:
+      type: integer
+    mo_auth_2fa_sms_remaining:
+      type: integer
+    mo_auth_2fa_email_remaining:
+      type: integer
+    mo_auth_2fa_license_expiry:
+      type: string
+    mo_auth_2fa_support_expiry:
+      type: string
+    mo_auth_enable_two_factor:
+      type: boolean
+    mo_auth_2fa_allow_reconfigure_2fa:
+      type: string
+    mo_auth_role_based_2fa_roles:
+      type: string
+    mo_auth_domain_based_2fa_domains:
+      type: string
+    mo_auth_enable_login_with_email:
+      type: boolean
+    mo_auth_enable_login_with_phone:
+      type: boolean
+    mo_auth_override_login_labels:
+      type: boolean
+    mo_auth_username_title: 
+      type: integer 
+    mo_auth_username_description:
+      type: string
+    mo_auth_enable_trusted_IPs:
+      type: boolean
+    mo_auth_trusted_IP_address:
+      type: string
+    mo_auth_google_auth_app_name:
+      type: string
+    mo_auth_enable_2fa_for_password_reset:
+      type: boolean
+    auto_fetch_phone_number:
+      type: boolean
+    phone_number_field_machine_name:
+      type: string
+    auto_fetch_phone_number_country_code:
+      type: string
+    txId_Value:
+      type: string
+
+    

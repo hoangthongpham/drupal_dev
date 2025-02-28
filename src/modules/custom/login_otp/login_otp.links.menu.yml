@@ -1,0 +1,10 @@
+login.otp_form:
+  title: 'Login with OTP'
+  description: 'Login using a one-time password'
+  route_name: login.otp_form
+  menu_name: main
+  weight: -10 # Places it at the top
+  expanded: true
+  options:
+    attributes:
+      class: ['nav-item', 'nav-link']

@@ -1,0 +1,7 @@
+login.otp_form:
+  path: '/login-otp'
+  defaults:
+    _form: '\Drupal\login_otp\Form\OTPForm'
+    _title: 'OTP Verification'
+  requirements:
+    _permission: 'access content'

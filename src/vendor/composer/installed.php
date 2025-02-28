@@ -556,6 +556,15 @@
                 0 => '10.4.1',
             ),
         ),
+        'drupal/dynamic_entity_reference' => array(
+            'pretty_version' => '3.2.1',
+            'version' => '3.2.1.0',
+            'reference' => '3.2.1',
+            'type' => 'drupal-module',
+            'install_path' => __DIR__ . '/../../modules/contrib/dynamic_entity_reference',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
         'drupal/gin' => array(
             'pretty_version' => '4.0.0',
             'version' => '4.0.0.0',
@@ -583,6 +592,15 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
+        'drupal/miniorange_2fa' => array(
+            'pretty_version' => '5.1.10',
+            'version' => '5.1.10.0',
+            'reference' => '5.1.10',
+            'type' => 'drupal-module',
+            'install_path' => __DIR__ . '/../../modules/contrib/miniorange_2fa',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
         'drupal/rules' => array(
             'pretty_version' => '4.0.0',
             'version' => '4.0.0.0',
@@ -598,6 +616,48 @@
             'reference' => '1.0.0',
             'type' => 'drupal-theme',
             'install_path' => __DIR__ . '/../../themes/contrib/seven',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'drupal/sms_blast' => array(
+            'dev_requirement' => false,
+            'replaced' => array(
+                0 => '2.3.0',
+            ),
+        ),
+        'drupal/sms_devel' => array(
+            'dev_requirement' => false,
+            'replaced' => array(
+                0 => '2.3.0',
+            ),
+        ),
+        'drupal/sms_sendtophone' => array(
+            'dev_requirement' => false,
+            'replaced' => array(
+                0 => '2.3.0',
+            ),
+        ),
+        'drupal/sms_user' => array(
+            'dev_requirement' => false,
+            'replaced' => array(
+                0 => '2.3.0',
+            ),
+        ),
+        'drupal/smsframework' => array(
+            'pretty_version' => '2.3.0',
+            'version' => '2.3.0.0',
+            'reference' => '2.3.0',
+            'type' => 'drupal-module',
+            'install_path' => __DIR__ . '/../../modules/contrib/smsframework',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'drupal/smtp' => array(
+            'pretty_version' => '1.4.0',
+            'version' => '1.4.0.0',
+            'reference' => '8.x-1.4',
+            'type' => 'drupal-module',
+            'install_path' => __DIR__ . '/../../modules/contrib/smtp',
             'aliases' => array(),
             'dev_requirement' => false,
         ),
@@ -1073,6 +1133,15 @@
             'install_path' => __DIR__ . '/../phpdocumentor/type-resolver',
             'aliases' => array(),
             'dev_requirement' => true,
+        ),
+        'phpmailer/phpmailer' => array(
+            'pretty_version' => 'v6.9.3',
+            'version' => '6.9.3.0',
+            'reference' => '2f5c94fe7493efc213f643c23b1b1c249d40f47e',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../phpmailer/phpmailer',
+            'aliases' => array(),
+            'dev_requirement' => false,
         ),
         'phpowermove/docblock' => array(
             'pretty_version' => 'v4.0',

@@ -5,3 +5,20 @@ mini.store.homepage:
     _title: 'Home page'
   requirements:
     _permission: 'some permission'
+
+homepage.login:
+  path: '/custom-login'
+  defaults:
+    _controller: 'Drupal\homepage\Controller\LoginController::loginPage'
+    _title: 'Custom Login'
+  requirements:
+    _permission: 'access content'
+
+
+otp_only_login:
+  path: '/otp-login'
+  defaults:
+    _form: '\Drupal\homepage\Form\OtpLoginForm'
+    _title: 'OTP Login'
+  requirements:
+    _permission: 'access content'

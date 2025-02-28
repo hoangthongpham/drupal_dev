@@ -1,0 +1,71 @@
+<?php
+
+use Drupal\Core\Render\Markup;
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+use Drupal\Core\Logger\LoggerChannelFactoryInterface;
+
+/**
+ * Function to send an email.
+ */
+function homepage_send_email($to, $subject, $message) {
+
+    $mail = new PHPMailer(true);
+    try {
+        // SMTP Configuration
+        $mail->isSMTP();
+        $mail->Host = 'smtp.gmail.com';  // Use your SMTP server (Outlook, Gmail, etc.)
+        $mail->SMTPAuth = true;
+        $mail->Username = 'phamhoangthong@kng.vn';  // Your SMTP email
+        $mail->Password = 'lmpr wjrk ssim fvuo';    // Your SMTP password or App Password
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // TLS encryption
+        $mail->Port = 587; // Port for TLS
+
+        // Email headers
+        $mail->setFrom('phamhoangthong@kng.vn', 'Your Name');
+        $mail->addAddress($to);
+        $mail->Subject = $subject;
+        $mail->isHTML(true);
+        $mail->Body = $message;
+
+        // Send email
+        if ($mail->send()) {
+            \Drupal::logger('mymodule')->notice('Email sent successfully to %to.', ['%to' => $to]);
+            \Drupal::messenger()->addStatus(t('Email sent successfully to %to.', ['%to' => $to]));
+            return TRUE;
+        } else {
+            \Drupal::logger('mymodule')->error('Email failed to %to: %error', ['%to' => $to, '%error' => $mail->ErrorInfo]);
+            \Drupal::messenger()->addError(t('Email sending failed.'));
+            return FALSE;
+        }
+    } catch (Exception $e) {
+        \Drupal::logger('mymodule')->error('SMTP Error: %error', ['%error' => $mail->ErrorInfo]);
+        return FALSE;
+    }
+}
+
+
+/**
+ * Implements hook_theme().
+ */
+function homepage_theme($existing, $type, $theme, $path) {
+  return [
+    'custom_login_page' => [
+      'variables' => ['login_form' => NULL, 'register_link' => NULL],
+      'template' => 'custom-login-page',
+    ],
+  ];
+}
+
+function homepage_find_username_by_email($email) {
+    $users = \Drupal::entityTypeManager()
+        ->getStorage('user')
+        ->loadByProperties(['mail' => $email]);
+
+    if ($users) {
+        $user = reset($users);
+        return $user->getAccountName();
+    }
+
+    return NULL;
+}

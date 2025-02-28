@@ -26,7 +26,11 @@
         "drupal/core-vendor-hardening": "^10.4",
         "drupal/gin": "^4.0",
         "drupal/gin_toolbar": "^1.0@rc",
-        "drupal/rules": "^4.0"
+        "drupal/miniorange_2fa": "^5.1",
+        "drupal/rules": "^4.0",
+        "drupal/smsframework": "^2.3",
+        "drupal/smtp": "^1.4",
+        "phpmailer/phpmailer": "^6.9"
     },
     "conflict": {
         "drupal/drupal": "*"

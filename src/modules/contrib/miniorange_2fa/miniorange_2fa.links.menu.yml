@@ -1,0 +1,47 @@
+miniorange_2fa.customer_setup:
+  route_name: miniorange_2fa.customer_setup
+  title: 'miniOrange Second Factor Authentication'
+  description: 'Two Factor Authentication (2FA) module adds a second layer of authentication to secure your Drupal accounts.'
+  parent: user.admin_index
+
+miniorange_2fa.register_login:
+  route_name: miniorange_2fa.customer_setup
+  title: 'Register/Login'
+  weight: 10
+  description: 'Setup Two Factor Tab'
+  parent: miniorange_2fa.customer_setup
+
+miniorange_2fa.setup_twofactor:
+  route_name: miniorange_2fa.setup_twofactor
+  title: '2FA for Primary Admin'
+  weight: 20
+  description: 'Setup Two Factor Tab'
+  parent: miniorange_2fa.customer_setup
+
+miniorange_2fa.login_settings:
+  route_name: miniorange_2fa.login_settings
+  title: '2FA Policy for End Users'
+  weight: 30
+  description: 'Login Settings Tab'
+  parent: miniorange_2fa.customer_setup
+
+miniorange_2fa.user_management:
+  route_name: miniorange_2fa.user_management
+  weight: 40
+  title: 'User Management'
+  description: 'User Management Tab'
+  parent: miniorange_2fa.customer_setup
+
+miniorange_2fa.headless:
+  route_name: miniorange_2fa.headless
+  weight: 50
+  title: 'Headless 2FA Setup'
+  description: 'Headless 2FA Tab'
+  parent: miniorange_2fa.customer_setup
+
+miniorange_2fa.licensing:
+  route_name: miniorange_2fa.licensing
+  weight: 60
+  title: 'Upgrade Plans'
+  description: 'Upgrade Plans Tab'
+  parent: miniorange_2fa.customer_setup

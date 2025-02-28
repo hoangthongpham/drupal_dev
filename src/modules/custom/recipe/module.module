@@ -1,6 +1,7 @@
 <?php
 function recipe_page_attachments(array &$attachments)
 {
+  die('11');
     $attachments['#attached']['library'][] = 'recipe/bootstrap';
 }
 

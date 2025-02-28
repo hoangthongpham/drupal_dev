@@ -1,0 +1,4 @@
+services:
+  login_otp.email_helper:
+    class: 'Drupal\login_otp\Service\EmailHelper'
+    arguments: ['@logger.factory', '@messenger']
