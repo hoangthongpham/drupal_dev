@@ -30,7 +30,8 @@
         "drupal/rules": "^4.0",
         "drupal/smsframework": "^2.3",
         "drupal/smtp": "^1.4",
-        "phpmailer/phpmailer": "^6.9"
+        "phpmailer/phpmailer": "^6.9",
+        "spomky-labs/otphp": "^11.3"
     },
     "conflict": {
         "drupal/drupal": "*"

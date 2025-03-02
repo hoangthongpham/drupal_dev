@@ -1,0 +1,24 @@
+<div class="layout-container">
+  <aside class="sidebar-left">
+    {{ left_sidebar }}
+  </aside>
+  <main class="main-content">
+    {{ content }}
+  </main>
+</div>
+
+<style>
+  .layout-container {
+    display: flex;
+  }
+  .sidebar-left {
+    width: 250px;
+    padding: 15px;
+    background-color: #f7f7f7;
+    border-right: 1px solid #ddd;
+  }
+  .main-content {
+    flex-grow: 1;
+    padding: 15px;
+  }
+</style>

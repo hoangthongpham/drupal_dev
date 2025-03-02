@@ -1,0 +1,4 @@
+services:
+  login_tfa.email_helper:
+    class: 'Drupal\login_tfa\Service\EmailHelper'
+    arguments: ['@logger.factory', '@messenger']

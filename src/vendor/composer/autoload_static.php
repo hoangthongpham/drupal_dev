@@ -130,6 +130,7 @@ class ComposerStaticInitd837bf1192245035928469429709316e
             'Prophecy\\' => 9,
             'PhpParser\\' => 10,
             'Peast\\' => 6,
+            'ParagonIE\\ConstantTime\\' => 23,
             'PHPStan\\PhpDocParser\\' => 21,
             'PHPStan\\ExtensionInstaller\\' => 27,
             'PHPStan\\' => 8,
@@ -144,6 +145,7 @@ class ComposerStaticInitd837bf1192245035928469429709316e
             'OpenTelemetry\\Contrib\\Otlp\\' => 27,
             'OpenTelemetry\\Context\\' => 22,
             'OpenTelemetry\\API\\' => 18,
+            'OTPHP\\' => 6,
         ),
         'N' => 
         array (
@@ -473,6 +475,10 @@ class ComposerStaticInitd837bf1192245035928469429709316e
         array (
             0 => __DIR__ . '/..' . '/mck89/peast/lib/Peast',
         ),
+        'ParagonIE\\ConstantTime\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/paragonie/constant_time_encoding/src',
+        ),
         'PHPStan\\PhpDocParser\\' => 
         array (
             0 => __DIR__ . '/..' . '/phpstan/phpdoc-parser/src',
@@ -517,6 +523,10 @@ class ComposerStaticInitd837bf1192245035928469429709316e
         'OpenTelemetry\\API\\' => 
         array (
             0 => __DIR__ . '/..' . '/open-telemetry/api',
+        ),
+        'OTPHP\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/spomky-labs/otphp/src',
         ),
         'Nyholm\\Psr7Server\\' => 
         array (

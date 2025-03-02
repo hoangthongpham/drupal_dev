@@ -1,6 +1,6 @@
-name: 'Login OTP'
+name: Login TFA
 type: module
-description: 'Login using OTP sent via email.'
+description: Custom Login with TFA
 core_version_requirement: ^9 || ^10 || ^11
 package: Custom
 dependencies:

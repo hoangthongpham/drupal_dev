@@ -1,0 +1,34 @@
+<?php
+
+use Drupal\user\Entity\User;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Hook vào quá trình login để yêu cầu nhập mã 2FA nếu được bật.
+ */
+function account_info_user_login($account) {
+  $user = User::load($account->id());
+
+  // Kiểm tra nếu user đã bật 2FA
+  if ($user->get('field_2fa_enabled')->value) {
+    $response = new RedirectResponse('/account-info/2fa/verify');
+    $response->send();
+    exit;
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function account_info_theme()
+{
+  return [
+    'two_column_layout' => [
+      'variables' => [
+        'left_sidebar' => NULL,
+        'content' => NULL,
+      ],
+    ],
+  ];
+}

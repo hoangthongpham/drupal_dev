@@ -1,0 +1,9 @@
+name: 'Account Info'
+type: module
+description: 'A module to display user information, enable 2FA, and provide logout functionality.'
+core_version_requirement: ^9 || ^10
+package: Custom
+dependencies:
+  - drupal:user
+  - drupal:system
+  - drupal:toolbar

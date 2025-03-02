@@ -1,0 +1,15 @@
+login_tfa.otp:
+  path: '/login-otp'
+  defaults:
+    _form: '\Drupal\login_tfa\Form\OTPForm'
+    _title: 'OTP Verification'
+  requirements:
+    _access: 'TRUE'
+
+login_tfa.login:
+  path: '/user/login'
+  defaults:
+    _form: '\Drupal\login_tfa\Form\LoginTfaForm'
+    _title: 'Login TFA'
+  requirements:
+    _access: 'TRUE'

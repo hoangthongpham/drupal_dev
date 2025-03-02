@@ -2,7 +2,20 @@
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Url;
 
-function login_otp_mail($key, &$message, $params) {
+/**
+ * Implements hook_form_alter().
+ */
+function login_tfa_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id)
+{
+  if ($form_id == 'user_login_form') {
+    // Tùy chỉnh form đăng nhập ở đây
+    $form['name']['#title'] = t('Tên đăng nhập của bạn');
+    $form['pass']['#title'] = t('Mật khẩu của bạn');
+    $form['actions']['submit']['#value'] = t('Đăng nhập ngay');
+  }
+}
+
+function login_tfa_mail($key, &$message, $params) {
     switch ($key) {
         case 'send_otp':
             $message['subject'] = $params['subject'];
@@ -14,7 +27,7 @@ function login_otp_mail($key, &$message, $params) {
 /**
  * Implements hook_preprocess_HOOK() to modify the menu.
  */
-function login_otp_preprocess_menu__main(&$variables) {
+function login_tfa_preprocess_menu__main(&$variables) {
     $user = \Drupal::currentUser();
     $items = &$variables['items'];
 
@@ -29,7 +42,7 @@ function login_otp_preprocess_menu__main(&$variables) {
         // Add Login with OTP link
         $items[] = [
             'title' => t('Login with OTP'),
-            'url' => Url::fromRoute('login.otp_form'),
+            'url' => Url::fromRoute('login_tfa.otp'),
             'attributes' => ['class' => ['nav-item', 'nav-link']],
         ];
     } else {

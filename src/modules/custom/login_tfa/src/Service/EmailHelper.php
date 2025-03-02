@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\login_otp\Service;
+namespace Drupal\login_tfa\Service;
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -20,7 +20,7 @@ class EmailHelper {
     protected $messenger;
 
     public function __construct(LoggerChannelFactoryInterface $logger_factory, MessengerInterface $messenger) {
-        $this->logger = $logger_factory->get('login_otp');
+        $this->logger = $logger_factory->get('login_tfa');
         $this->messenger = $messenger;
     }
 

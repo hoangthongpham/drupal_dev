@@ -1,0 +1,41 @@
+account_info.user_info:
+  path: '/account-info'
+  defaults:
+    _controller: '\Drupal\account_info\Controller\AccountInfoController::userInfo'
+    _title: 'User Account Information'
+  requirements:
+    _permission: 'access content'
+
+account_info.2fa_settings:
+  path: '/account-info/2fa'
+  defaults:
+    _controller: '\Drupal\account_info\Controller\AccountInfoController::twoFactorSettings'
+    _title: 'Two-Factor Authentication Settings'
+  requirements:
+    _permission: 'access content'
+
+account_info.2fa_toggle:
+  path: '/account-info/2fa/toggle'
+  defaults:
+    _controller: '\Drupal\account_info\Controller\AccountInfoController::toggleTwoFactor'
+    _title: 'Toggle Two-Factor Authentication'
+  requirements:
+    _permission: 'access content'
+  methods: ['POST']
+
+account_info.2fa_verify:
+  path: '/account-info/2fa/verify'
+  defaults:
+    _form: '\Drupal\account_info\Form\TwoFactorVerifyForm'
+    _title: 'Verify Two-Factor Authentication'
+  requirements:
+    _permission: 'access content'
+
+account_info.custom_login:
+  path: '/custom-login'
+  defaults:
+    _form: '\Drupal\account_info\Form\CustomLoginForm'
+    _title: 'Custom Login'
+  requirements:
+    _permission: 'access content'
+

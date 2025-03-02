@@ -1,12 +1,12 @@
 <?php
 
-namespace Drupal\login_otp\Form;
+namespace Drupal\login_tfa\Form;
 
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Mail\MailManagerInterface;
 use Drupal\Component\Utility\Random;
-use Drupal\login_otp\Service\EmailHelper;
+use Drupal\login_tfa\Service\EmailHelper;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\TempStore\PrivateTempStoreFactory;
 use Drupal\Core\Session\AccountProxyInterface;
@@ -30,7 +30,7 @@ class OTPForm extends FormBase
         LanguageManagerInterface $language_manager)
     {
         $this->emailHelper = $email_helper;
-        $this->tempStore = $temp_store->get('login_otp');
+        $this->tempStore = $temp_store->get('login_tfa');
         $this->currentUser = $current_user;
         $this->languageManager = $language_manager;
     }
@@ -38,7 +38,7 @@ class OTPForm extends FormBase
     public static function create(ContainerInterface $container)
     {
         return new static(
-            $container->get('login_otp.email_helper'),
+            $container->get('login_tfa.email_helper'),
             $container->get('tempstore.private'),
             $container->get('current_user'),
             $container->get('language_manager')
@@ -50,7 +50,7 @@ class OTPForm extends FormBase
      */
     public function getFormId()
     {
-        return 'login_otp_form';
+        return 'login_tfa_form';
     }
 
     public function buildForm(array $form, FormStateInterface $form_state)
