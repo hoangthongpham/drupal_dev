@@ -15,7 +15,7 @@
 }
 .checkout-pane-overview .pane-configuration-summary {
   float: left; /* LTR */
-  font-size: 0.9em;
+  font-size: .9em;
 }
 [dir="rtl"] .checkout-pane-overview .pane-configuration-summary {
   float: right;
@@ -23,7 +23,7 @@
 .checkout-pane-overview .pane-configuration-summary-cell .warning {
   display: block;
   float: left; /* LTR */
-  margin-right: 0.5em;
+  margin-right: .5em;
 }
 [dir="rtl"] .checkout-pane-overview .pane-configuration-summary-cell .warning {
   float: right;
@@ -45,10 +45,10 @@
 }
 
 .checkout-pane-overview tr.pane-configuration-changed {
-  background: #ffb;
+  background: #ffffbb;
 }
 .checkout-pane-overview tr.drag {
-  background: #fe7;
+  background: #ffee77;
 }
 .checkout-pane-overview tr.pane-configuration-editing {
   background: #d5e9f2;

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\block\Unit;
 
 use Drupal\Component\Utility\Html;
@@ -22,16 +20,11 @@ class CategoryAutocompleteTest extends UnitTestCase {
    */
   protected $autocompleteController;
 
-  /**
-   * {@inheritdoc}
-   */
   protected function setUp(): void {
-    parent::setUp();
-
     $block_manager = $this->createMock('Drupal\Core\Block\BlockManagerInterface');
     $block_manager->expects($this->any())
       ->method('getCategories')
-      ->willReturn(['Comment', 'Node', 'None & Such', 'User']);
+      ->will($this->returnValue(['Comment', 'Node', 'None & Such', 'User']));
 
     $this->autocompleteController = new CategoryAutocompleteController($block_manager);
   }
@@ -48,7 +41,7 @@ class CategoryAutocompleteTest extends UnitTestCase {
    *
    * @dataProvider providerTestAutocompleteSuggestions
    */
-  public function testAutocompleteSuggestions($string, $suggestions): void {
+  public function testAutocompleteSuggestions($string, $suggestions) {
     $suggestions = array_map(function ($suggestion) {
       return ['value' => $suggestion, 'label' => Html::escape($suggestion)];
     }, $suggestions);
@@ -61,7 +54,7 @@ class CategoryAutocompleteTest extends UnitTestCase {
    *
    * @return array
    */
-  public static function providerTestAutocompleteSuggestions() {
+  public function providerTestAutocompleteSuggestions() {
     $test_parameters = [];
     $test_parameters[] = [
       'string' => 'Com',

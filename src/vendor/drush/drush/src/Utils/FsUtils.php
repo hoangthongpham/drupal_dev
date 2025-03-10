@@ -1,29 +1,28 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drush\Utils;
 
 use Drush\Drush;
 use Drush\Sql\SqlBase;
 use finfo;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Filesystem\Path;
+use Webmozart\PathUtil\Path;
 
-final class FsUtils
+class FsUtils
 {
-    // @var null|string[] List of directories to delete
-    private static $deletionList;
 
     /**
-     * Return path to the backup directory.
+     * Decide where our backup directory should go
      *
      * @param string $subdir
      *   The name of the desired subdirectory(s) under drush-backups.
      *   Usually a database name.
+     *
+     * @return
+     *   A path to the backup directory.
      * @throws \Exception
      */
-    public static function getBackupDir(?string $subdir = null): string
+    public static function getBackupDir($subdir = null)
     {
         $parent = self::getBackupDirParent();
 
@@ -42,13 +41,20 @@ final class FsUtils
 
         // Save the date to be used in the backup directory's path name.
         $date = gmdate('YmdHis', $_SERVER['REQUEST_TIME']);
-        return Path::join($parent, $date);
+        return Path::join(
+            $parent,
+            $date
+        );
     }
 
     /**
-     * Get the base dir where our backup directories will be stored. Also stores CLI history file.
+     * Get the base dir where our backup directories will be stored
+     *
+     * @return
+     *   A path to the backup directory parent
+     * @throws \Exception
      */
-    public static function getBackupDirParent()
+    protected static function getBackupDirParent()
     {
         // Try in order:
         //  1. The user-specified backup directory from drush.yml config file
@@ -77,18 +83,17 @@ final class FsUtils
     }
 
     /**
-     * Determine if the specified location is writable, or if a writable
-     *   directory could be created at that path.
-     *
-     * @param $dir
+     * Description
+     * @param string $dir
      *   Path to directory that we are considering using
-     *
-     * @return bool|string
+     * @return bool
+     *   True if the specified location is writable, or if a writable
+     *   directory could be created at that path.
      */
-    public static function isUsableDirectory(?string $dir)
+    public static function isUsableDirectory($dir)
     {
         // This directory is not usable if it is empty or if it is the root.
-        if (empty($dir) || (dirname($dir) === $dir)) {
+        if (empty($dir) || (dirname($dir) == $dir)) {
             return false;
         }
 
@@ -108,70 +113,16 @@ final class FsUtils
     }
 
     /**
-     * Prepare a temporary directory that will be deleted on exit.
-     *
-     * @param string $subdir
-     *   A string naming the subdirectory of the backup directory.
-     * @return string
-     *   Path to the specified backup directory.
-     * @throws \Exception
-     */
-    public static function tmpDir($subdir = null): string
-    {
-        $parent = self::getBackupDirParent();
-        $fs = new Filesystem();
-        $dir = $fs->tempnam($parent, $subdir ?? 'drush');
-        unlink($dir);
-        $fs->mkdir($dir);
-        static::registerForDeletion($dir);
-        return $dir;
-    }
-
-    /**
-     * Add the given directory to a list to be deleted on exit.
-     *
-     * @param string $dir
-     *   Path to directory to be deleted later.
-     */
-    public static function registerForDeletion(string $dir)
-    {
-        if (!isset(static::$deletionList)) {
-            static::$deletionList = [];
-            register_shutdown_function([static::class, 'cleanup']);
-        }
-
-        static::$deletionList[] = $dir;
-    }
-
-    /**
-     * Delete all of the files registered for deletion.
-     */
-    public static function cleanup()
-    {
-        if (!isset(static::$deletionList)) {
-            return;
-        }
-
-        $fs = new Filesystem();
-        foreach (static::$deletionList as $dir) {
-            try {
-                $fs->remove($dir);
-            } catch (\Exception $e) {
-              // No action taken if someone already deleted the directory
-            }
-        }
-    }
-
-    /**
      * Prepare a backup directory.
      *
      * @param string $subdir
      *   A string naming the subdirectory of the backup directory.
+     *
      * @return string
      *   Path to the specified backup directory.
      * @throws \Exception
      */
-    public static function prepareBackupDir($subdir = null): string
+    public static function prepareBackupDir($subdir = null)
     {
         $fs = new Filesystem();
         $backup_dir = self::getBackupDir($subdir);
@@ -187,10 +138,11 @@ final class FsUtils
      *
      * @param string $path
      *   The path being checked.
+     *
      * @return string
      *   The canonicalized absolute pathname.
      */
-    public static function realpath(string $path): string
+    public static function realpath($path)
     {
         $realpath = realpath($path);
         return $realpath ?: $path;
@@ -199,11 +151,12 @@ final class FsUtils
     /**
      * Check whether a file is a supported tarball.
      *
+     * @param string $path
      *
      * @return string|bool
      *   The file content type if it's a tarball. FALSE otherwise.
      */
-    public static function isTarball(string $path)
+    public static function isTarball($path)
     {
         $content_type = self::getMimeContentType($path);
         $supported = [
@@ -227,11 +180,12 @@ final class FsUtils
      * has either mime_content_type() or finfo installed -- if not, only tar,
      * gz, zip and bzip2 types can be detected.
      *
+     * @param string $path
      *
      * @return string|bool|null
      *   The MIME content type of the file.
      */
-    public static function getMimeContentType(string $path)
+    public static function getMimeContentType($path)
     {
         $content_type = false;
         if (class_exists('finfo')) {
@@ -298,7 +252,7 @@ final class FsUtils
                 '.sql'     => 'application/octet-stream',
             ];
             foreach ($extension_mimetype as $extension => $ct) {
-                if (str_ends_with($path, $extension)) {
+                if (substr($path, -strlen($extension)) === $extension) {
                     $content_type = $ct;
                     break;
                 }

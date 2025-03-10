@@ -2,16 +2,14 @@
 
 namespace Drupal\commerce_checkout\Plugin\Commerce\CheckoutFlow;
 
-use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\commerce_checkout\Attribute\CommerceCheckoutFlow;
-
 /**
  * Provides the default multistep checkout flow.
+ *
+ * @CommerceCheckoutFlow(
+ *   id = "multistep_default",
+ *   label = "Multistep - Default",
+ * )
  */
-#[CommerceCheckoutFlow(
-  id: "multistep_default",
-  label: new TranslatableMarkup("Multistep - Default"),
-)]
 class MultistepDefault extends CheckoutFlowWithPanesBase {
 
   /**
@@ -23,7 +21,7 @@ class MultistepDefault extends CheckoutFlowWithPanesBase {
     // when going back to the step, or proceeding to the step.
     return [
       'login' => [
-        'label' => $this->t('Log in'),
+        'label' => $this->t('Login'),
         'previous_label' => $this->t('Go back'),
         'has_sidebar' => FALSE,
       ],

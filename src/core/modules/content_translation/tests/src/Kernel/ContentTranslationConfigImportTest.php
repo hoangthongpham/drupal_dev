@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\content_translation\Kernel;
 
 use Drupal\Core\Config\ConfigImporter;
@@ -23,7 +21,9 @@ class ContentTranslationConfigImportTest extends KernelTestBase {
   protected $configImporter;
 
   /**
-   * {@inheritdoc}
+   * Modules to enable.
+   *
+   * @var array
    */
   protected static $modules = [
     'system',
@@ -58,15 +58,14 @@ class ContentTranslationConfigImportTest extends KernelTestBase {
       $this->container->get('module_installer'),
       $this->container->get('theme_handler'),
       $this->container->get('string_translation'),
-      $this->container->get('extension.list.module'),
-      $this->container->get('extension.list.theme')
+      $this->container->get('extension.list.module')
     );
   }
 
   /**
    * Tests config import updates.
    */
-  public function testConfigImportUpdates(): void {
+  public function testConfigImportUpdates() {
     $entity_type_id = 'entity_test_mul';
     $config_id = $entity_type_id . '.' . $entity_type_id;
     $config_name = 'language.content_settings.' . $config_id;

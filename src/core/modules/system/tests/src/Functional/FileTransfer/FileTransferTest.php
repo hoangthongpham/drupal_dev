@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\system\Functional\FileTransfer;
 
 use Drupal\Core\FileTransfer\FileTransferException;
@@ -9,28 +7,25 @@ use Drupal\Core\StreamWrapper\PublicStream;
 use Drupal\Tests\BrowserTestBase;
 
 /**
- * Tests recursive file copy operations with the file transfer jail.
+ * Tests that the jail is respected and that protocols using recursive file move
+ * operations work.
  *
  * @group FileTransfer
  */
 class FileTransferTest extends BrowserTestBase {
+  protected $hostname = 'localhost';
+  protected $username = 'drupal';
+  protected $password = 'password';
+  protected $port = '42';
 
   /**
    * {@inheritdoc}
    */
   protected $defaultTheme = 'stark';
 
-  /**
-   * @var \Drupal\Tests\system\Functional\FileTransfer\TestFileTransfer
-   */
-  protected TestFileTransfer $testConnection;
-
-  /**
-   * {@inheritdoc}
-   */
   protected function setUp(): void {
     parent::setUp();
-    $this->testConnection = TestFileTransfer::factory($this->root, []);
+    $this->testConnection = TestFileTransfer::factory($this->root, ['hostname' => $this->hostname, 'username' => $this->username, 'password' => $this->password, 'port' => $this->port]);
   }
 
   public function _getFakeModuleFiles() {
@@ -54,7 +49,7 @@ class FileTransferTest extends BrowserTestBase {
       $output = [];
       exec('rm -Rf ' . escapeshellarg($location), $output, $ret);
       if ($ret != 0) {
-        throw new \Exception('Error removing fake module directory.');
+        throw new Exception('Error removing fake module directory.');
       }
     }
 
@@ -70,34 +65,34 @@ class FileTransferTest extends BrowserTestBase {
         $this->_writeDirectory($base . DIRECTORY_SEPARATOR . $key, $file);
       }
       else {
-        // Just write the filename into the file
+        // just write the filename into the file
         file_put_contents($base . DIRECTORY_SEPARATOR . $file, $file);
       }
     }
   }
 
-  public function testJail(): void {
+  public function testJail() {
     $source = $this->_buildFakeModule();
 
     // This convoluted piece of code is here because our testing framework does
     // not support expecting exceptions.
-    $got_it = FALSE;
+    $gotit = FALSE;
     try {
       $this->testConnection->copyDirectory($source, sys_get_temp_dir());
     }
     catch (FileTransferException $e) {
-      $got_it = TRUE;
+      $gotit = TRUE;
     }
-    $this->assertTrue($got_it, 'Was not able to copy a directory outside of the jailed area.');
+    $this->assertTrue($gotit, 'Was not able to copy a directory outside of the jailed area.');
 
-    $got_it = TRUE;
+    $gotit = TRUE;
     try {
       $this->testConnection->copyDirectory($source, $this->root . '/' . PublicStream::basePath());
     }
     catch (FileTransferException $e) {
-      $got_it = FALSE;
+      $gotit = FALSE;
     }
-    $this->assertTrue($got_it, 'Was able to copy a directory inside of the jailed area');
+    $this->assertTrue($gotit, 'Was able to copy a directory inside of the jailed area');
   }
 
 }

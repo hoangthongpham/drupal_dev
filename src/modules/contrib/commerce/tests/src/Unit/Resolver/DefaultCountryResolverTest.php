@@ -2,8 +2,8 @@
 
 namespace Drupal\Tests\commerce\Unit\Resolver;
 
-use Drupal\Tests\UnitTestCase;
 use Drupal\commerce\Resolver\DefaultCountryResolver;
+use Drupal\Tests\UnitTestCase;
 
 /**
  * @coversDefaultClass \Drupal\commerce\Resolver\DefaultCountryResolver
@@ -22,20 +22,19 @@ class DefaultCountryResolverTest extends UnitTestCase {
    * {@inheritdoc}
    */
   protected function setUp(): void {
-    parent::setUp();
     $config = $this->getMockBuilder('Drupal\Core\Config\Config')
       ->disableOriginalConstructor()
       ->getMock();
     $config->expects($this->once())
       ->method('get')
       ->with('country.default')
-      ->willReturn('RS');
+      ->will($this->returnValue('RS'));
 
     $config_factory = $this->createMock('Drupal\Core\Config\ConfigFactoryInterface');
     $config_factory->expects($this->once())
       ->method('get')
       ->with('system.date')
-      ->willReturn($config);
+      ->will($this->returnValue($config));
 
     $this->resolver = new DefaultCountryResolver($config_factory);
   }

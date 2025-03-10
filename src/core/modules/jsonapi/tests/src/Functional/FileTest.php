@@ -1,9 +1,8 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\jsonapi\Functional;
 
+use Drupal\Component\Serialization\Json;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Url;
 use Drupal\file\Entity\File;
@@ -76,15 +75,12 @@ class FileTest extends ResourceTestBase {
         break;
 
       case 'PATCH':
-        // \Drupal\file\FileAccessControlHandler::checkAccess() grants 'update'
-        // access only to the user that owns the file. So there is no permission
-        // to grant: instead, the file owner must be changed from its default
-        // (user 1) to the current user.
-        $this->makeCurrentUserFileOwner();
-        return;
-
       case 'DELETE':
-        $this->grantPermissionsToTestedRole(['delete any file']);
+        // \Drupal\file\FileAccessControlHandler::checkAccess() grants 'update'
+        // and 'delete' access only to the user that owns the file. So there is
+        // no permission to grant: instead, the file owner must be changed from
+        // its default (user 1) to the current user.
+        $this->makeCurrentUserFileOwner();
         break;
     }
   }
@@ -200,34 +196,30 @@ class FileTest extends ResourceTestBase {
   }
 
   /**
-   * Tests POST/PATCH/DELETE for an individual resource.
+   * {@inheritdoc}
    */
-  public function testIndividual(): void {
+  public function testPostIndividual() {
     // @todo https://www.drupal.org/node/1927648
-    // Add doTestPostIndividual().
-    $this->doTestPatchIndividual();
-    $this->entity = $this->resaveEntity($this->entity, $this->account);
-    $this->revokePermissions();
-    $this->config('jsonapi.settings')->set('read_only', TRUE)->save(TRUE);
-    $this->doTestDeleteIndividual();
+    $this->markTestSkipped();
   }
 
   /**
    * {@inheritdoc}
    */
   protected function getExpectedUnauthorizedAccessMessage($method) {
-    return match($method) {
-      'GET' => "The 'access content' permission is required.",
-      'PATCH' => "Only the file owner can update the file entity.",
-      'DELETE' => "The 'delete any file' permission is required.",
-      default =>  parent::getExpectedUnauthorizedAccessMessage($method),
-    };
+    if ($method === 'GET') {
+      return "The 'access content' permission is required.";
+    }
+    if ($method === 'PATCH' || $method === 'DELETE') {
+      return "Only the file owner can update or delete the file entity.";
+    }
+    return parent::getExpectedUnauthorizedAccessMessage($method);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function testCollectionFilterAccess(): void {
+  public function testCollectionFilterAccess() {
     $label_field_name = 'filename';
     // Verify the expected behavior in the common case: when the file is public.
     $this->doTestCollectionFilterAccessBasedOnPermissions($label_field_name, 'access content');
@@ -244,7 +236,7 @@ class FileTest extends ResourceTestBase {
     $this->entity->setOwner($this->account);
     $this->entity->save();
     $response = $this->request('GET', $collection_filter_url, $request_options);
-    $doc = $this->getDocumentFromResponse($response);
+    $doc = Json::decode((string) $response->getBody());
     $this->assertCount(1, $doc['data']);
 
     // 0 results because the current user is no longer the file owner and the
@@ -252,7 +244,7 @@ class FileTest extends ResourceTestBase {
     $this->entity->setOwner(User::load(0));
     $this->entity->save();
     $response = $this->request('GET', $collection_filter_url, $request_options);
-    $doc = $this->getDocumentFromResponse($response);
+    $doc = Json::decode((string) $response->getBody());
     $this->assertCount(0, $doc['data']);
   }
 

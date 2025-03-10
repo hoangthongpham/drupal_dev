@@ -13,15 +13,13 @@ class TraversableObjectNormalizer extends NormalizerBase {
   /**
    * {@inheritdoc}
    */
-  public function normalize($object, $format = NULL, array $context = []): array|string|int|float|bool|\ArrayObject|NULL {
-    return $object->property;
-  }
+  protected $supportedInterfaceOrClass = TraversableObject::class;
 
   /**
    * {@inheritdoc}
    */
-  public function getSupportedTypes(?string $format): array {
-    return [TraversableObject::class => TRUE];
+  public function normalize($object, $format = NULL, array $context = []) {
+    return $object->property;
   }
 
 }

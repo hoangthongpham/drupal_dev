@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\node\Kernel;
 
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
@@ -16,7 +14,9 @@ use Drupal\node\Entity\NodeType;
 class NodeValidationTest extends EntityKernelTestBase {
 
   /**
-   * {@inheritdoc}
+   * Modules to enable.
+   *
+   * @var array
    */
   protected static $modules = ['node'];
 
@@ -34,7 +34,7 @@ class NodeValidationTest extends EntityKernelTestBase {
   /**
    * Tests the node validation constraints.
    */
-  public function testValidation(): void {
+  public function testValidation() {
     $this->createUser();
     $node = Node::create(['type' => 'page', 'title' => 'test', 'uid' => 1]);
     $violations = $node->validate();
@@ -44,7 +44,7 @@ class NodeValidationTest extends EntityKernelTestBase {
     $violations = $node->validate();
     $this->assertCount(1, $violations, 'Violation found when title is too long.');
     $this->assertEquals('title.0.value', $violations[0]->getPropertyPath());
-    $this->assertEquals('Title: may not be longer than 255 characters.', $violations[0]->getMessage());
+    $this->assertEquals('<em class="placeholder">Title</em>: may not be longer than 255 characters.', $violations[0]->getMessage());
 
     $node->set('title', NULL);
     $violations = $node->validate();

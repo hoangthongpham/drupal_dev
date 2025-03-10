@@ -2,11 +2,9 @@
 
 namespace Drupal\commerce\Plugin\Commerce\InlineForm;
 
+use Drupal\commerce\Element\CommerceElementTrait;
 use Drupal\Component\Plugin\PluginManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\commerce\Attribute\CommerceInlineForm;
-use Drupal\commerce\Element\CommerceElementTrait;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -16,11 +14,12 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * responsibility to set the submitted configuration on the entity's plugin.
  *
  * @see \Drupal\commerce_payment\Form\PaymentGatewayForm::submitForm()
+ *
+ * @CommerceInlineForm(
+ *   id = "plugin_configuration",
+ *   label = @Translation("Plugin configuration"),
+ * )
  */
-#[CommerceInlineForm(
-  id: "plugin_configuration",
-  label: new TranslatableMarkup("Plugin configuration"),
-)]
 class PluginConfiguration extends InlineFormBase {
 
   use CommerceElementTrait;

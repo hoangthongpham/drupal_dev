@@ -2,8 +2,8 @@
 
 namespace Drupal\Tests\commerce\Unit;
 
-use Drupal\Tests\UnitTestCase;
 use Drupal\commerce\UrlData;
+use Drupal\Tests\UnitTestCase;
 
 /**
  * @coversDefaultClass \Drupal\commerce\UrlData

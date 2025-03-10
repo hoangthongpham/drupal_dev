@@ -1,0 +1,34 @@
+<div class="layout-container">
+  <aside class="sidebar-left">
+    {{ left_sidebar }}
+  </aside>
+  <main class="main-content">
+    <p>User ID: {{ content['#user_id'] }}</p>
+    
+    {% if content['#qr_code'] %}
+      <p><strong>2FA is enabled.</strong></p>
+      <img src="data:image/png;base64,{{ content['#qr_code'] }}" alt="Scan QR Code">
+      <p>Scan this QR Code with Google Authenticator.</p>
+    {% else %}
+      <p>2FA is disabled.</p>
+    {% endif %}
+    
+    {{ content['#form'] }}
+  </main>
+</div>
+
+<style>
+  .layout-container {
+    display: flex;
+  }
+  .sidebar-left {
+    width: 250px;
+    padding: 15px;
+    background-color: #f7f7f7;
+    border-right: 1px solid #ddd;
+  }
+  .main-content {
+    flex-grow: 1;
+    padding: 15px;
+  }
+</style>

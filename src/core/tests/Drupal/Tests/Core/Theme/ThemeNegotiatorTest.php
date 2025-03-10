@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\Core\Theme;
 
 use Drupal\Core\DependencyInjection\ClassResolver;
@@ -49,8 +47,6 @@ class ThemeNegotiatorTest extends UnitTestCase {
    * {@inheritdoc}
    */
   protected function setUp(): void {
-    parent::setUp();
-
     $this->themeAccessCheck = $this->getMockBuilder('\Drupal\Core\Theme\ThemeAccessCheck')
       ->disableOriginalConstructor()
       ->getMock();
@@ -62,14 +58,14 @@ class ThemeNegotiatorTest extends UnitTestCase {
    *
    * @see \Drupal\Core\Theme\ThemeNegotiator::determineActiveTheme()
    */
-  public function testDetermineActiveTheme(): void {
+  public function testDetermineActiveTheme() {
     $negotiator = $this->createMock('Drupal\Core\Theme\ThemeNegotiatorInterface');
     $negotiator->expects($this->once())
       ->method('determineActiveTheme')
-      ->willReturn('example_test');
+      ->will($this->returnValue('example_test'));
     $negotiator->expects($this->once())
       ->method('applies')
-      ->willReturn(TRUE);
+      ->will($this->returnValue(TRUE));
 
     $this->container->set('test_negotiator', $negotiator);
 
@@ -77,7 +73,7 @@ class ThemeNegotiatorTest extends UnitTestCase {
 
     $this->themeAccessCheck->expects($this->any())
       ->method('checkAccess')
-      ->willReturn(TRUE);
+      ->will($this->returnValue(TRUE));
 
     $route_match = new RouteMatch('test_route', new Route('/test-route'), [], []);
     $theme = $this->createThemeNegotiator($negotiators)->determineActiveTheme($route_match);
@@ -90,16 +86,16 @@ class ThemeNegotiatorTest extends UnitTestCase {
    *
    * @see \Drupal\Core\Theme\ThemeNegotiator::determineActiveTheme()
    */
-  public function testDetermineActiveThemeWithPriority(): void {
+  public function testDetermineActiveThemeWithPriority() {
     $negotiators = [];
 
     $negotiator = $this->createMock('Drupal\Core\Theme\ThemeNegotiatorInterface');
     $negotiator->expects($this->once())
       ->method('determineActiveTheme')
-      ->willReturn('example_test');
+      ->will($this->returnValue('example_test'));
     $negotiator->expects($this->once())
       ->method('applies')
-      ->willReturn(TRUE);
+      ->will($this->returnValue(TRUE));
 
     $negotiators['test_negotiator_1'] = $negotiator;
 
@@ -117,7 +113,7 @@ class ThemeNegotiatorTest extends UnitTestCase {
 
     $this->themeAccessCheck->expects($this->any())
       ->method('checkAccess')
-      ->willReturn(TRUE);
+      ->will($this->returnValue(TRUE));
 
     $route_match = new RouteMatch('test_route', new Route('/test-route'), [], []);
     $theme = $this->createThemeNegotiator(array_keys($negotiators))->determineActiveTheme($route_match);
@@ -130,26 +126,26 @@ class ThemeNegotiatorTest extends UnitTestCase {
    *
    * @see \Drupal\Core\Theme\ThemeNegotiator::determineActiveTheme()
    */
-  public function testDetermineActiveThemeWithAccessCheck(): void {
+  public function testDetermineActiveThemeWithAccessCheck() {
     $negotiators = [];
 
     $negotiator = $this->createMock('Drupal\Core\Theme\ThemeNegotiatorInterface');
     $negotiator->expects($this->once())
       ->method('determineActiveTheme')
-      ->willReturn('example_test');
+      ->will($this->returnValue('example_test'));
     $negotiator->expects($this->once())
       ->method('applies')
-      ->willReturn(TRUE);
+      ->will($this->returnValue(TRUE));
 
     $negotiators['test_negotiator_1'] = $negotiator;
 
     $negotiator = $this->createMock('Drupal\Core\Theme\ThemeNegotiatorInterface');
     $negotiator->expects($this->once())
       ->method('determineActiveTheme')
-      ->willReturn('example_test2');
+      ->will($this->returnValue('example_test2'));
     $negotiator->expects($this->once())
       ->method('applies')
-      ->willReturn(TRUE);
+      ->will($this->returnValue(TRUE));
 
     $negotiators['test_negotiator_2'] = $negotiator;
 
@@ -175,7 +171,7 @@ class ThemeNegotiatorTest extends UnitTestCase {
    *
    * @see \Drupal\Core\Theme\ThemeNegotiatorInterface
    */
-  public function testDetermineActiveThemeWithNotApplyingNegotiator(): void {
+  public function testDetermineActiveThemeWithNotApplyingNegotiator() {
     $negotiators = [];
 
     $negotiator = $this->createMock('Drupal\Core\Theme\ThemeNegotiatorInterface');
@@ -183,17 +179,17 @@ class ThemeNegotiatorTest extends UnitTestCase {
       ->method('determineActiveTheme');
     $negotiator->expects($this->once())
       ->method('applies')
-      ->willReturn(FALSE);
+      ->will($this->returnValue(FALSE));
 
     $negotiators['test_negotiator_1'] = $negotiator;
 
     $negotiator = $this->createMock('Drupal\Core\Theme\ThemeNegotiatorInterface');
     $negotiator->expects($this->once())
       ->method('determineActiveTheme')
-      ->willReturn('example_test2');
+      ->will($this->returnValue('example_test2'));
     $negotiator->expects($this->once())
       ->method('applies')
-      ->willReturn(TRUE);
+      ->will($this->returnValue(TRUE));
 
     $negotiators['test_negotiator_2'] = $negotiator;
 
@@ -203,7 +199,7 @@ class ThemeNegotiatorTest extends UnitTestCase {
 
     $this->themeAccessCheck->expects($this->any())
       ->method('checkAccess')
-      ->willReturn(TRUE);
+      ->will($this->returnValue(TRUE));
 
     $route_match = new RouteMatch('test_route', new Route('/test-route'), [], []);
     $theme = $this->createThemeNegotiator(array_keys($negotiators))->determineActiveTheme($route_match);
@@ -220,7 +216,8 @@ class ThemeNegotiatorTest extends UnitTestCase {
    * @return \Drupal\Core\Theme\ThemeNegotiator
    */
   protected function createThemeNegotiator(array $negotiators) {
-    $resolver = new ClassResolver($this->container);
+    $resolver = new ClassResolver();
+    $resolver->setContainer($this->container);
     $theme_negotiator = new ThemeNegotiator($this->themeAccessCheck, $resolver, $negotiators);
     return $theme_negotiator;
   }

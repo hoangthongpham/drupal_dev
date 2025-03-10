@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\field\Kernel;
 
 /**
@@ -26,9 +24,6 @@ class FieldValidationTest extends FieldKernelTestBase {
    */
   private $entity;
 
-  /**
-   * {@inheritdoc}
-   */
   protected function setUp(): void {
     parent::setUp();
 
@@ -47,7 +42,7 @@ class FieldValidationTest extends FieldKernelTestBase {
   /**
    * Tests that the number of values is validated against the field cardinality.
    */
-  public function testCardinalityConstraint(): void {
+  public function testCardinalityConstraint() {
     $cardinality = $this->fieldTestData->field_storage->getCardinality();
     $entity = $this->entity;
 
@@ -61,13 +56,13 @@ class FieldValidationTest extends FieldKernelTestBase {
     // Check that the expected constraint violations are reported.
     $this->assertCount(1, $violations);
     $this->assertEquals('', $violations[0]->getPropertyPath());
-    $this->assertEquals(sprintf('%s: this field cannot hold more than %s values.', $this->fieldTestData->field->getLabel(), $cardinality), $violations[0]->getMessage());
+    $this->assertEquals(t('%name: this field cannot hold more than @count values.', ['%name' => $this->fieldTestData->field->getLabel(), '@count' => $cardinality]), $violations[0]->getMessage());
   }
 
   /**
    * Tests that constraints defined by the field type are validated.
    */
-  public function testFieldConstraints(): void {
+  public function testFieldConstraints() {
     $cardinality = $this->fieldTestData->field_storage->getCardinality();
     $entity = $this->entity;
 

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\layout_builder\Functional\Rest;
 
 use Drupal\Core\Url;
@@ -30,7 +28,7 @@ class OverrideSectionsTest extends LayoutRestTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp(): void {
+  public function setUp(): void {
     parent::setUp();
     // @todo Figure why field definitions have to cleared in
     //   https://www.drupal.org/project/drupal/issues/2985882.
@@ -40,7 +38,7 @@ class OverrideSectionsTest extends LayoutRestTestBase {
   /**
    * Tests that the layout override field is not normalized.
    */
-  public function testOverrideField(): void {
+  public function testOverrideField() {
     $this->assertCount(1, $this->node->get(OverridesSectionStorage::FIELD_NAME));
 
     // Make a GET request and ensure override field is not included.

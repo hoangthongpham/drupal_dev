@@ -2,25 +2,26 @@
 
 namespace Drupal\image\Plugin\Field\FieldWidget;
 
-use Drupal\Core\Field\Attribute\FieldWidget;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Image\ImageFactory;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\ElementInfoManagerInterface;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\file\Entity\File;
 use Drupal\file\Plugin\Field\FieldWidget\FileWidget;
 use Drupal\image\Entity\ImageStyle;
 
 /**
  * Plugin implementation of the 'image_image' widget.
+ *
+ * @FieldWidget(
+ *   id = "image_image",
+ *   label = @Translation("Image"),
+ *   field_types = {
+ *     "image"
+ *   }
+ * )
  */
-#[FieldWidget(
-  id: 'image_image',
-  label: new TranslatableMarkup('Image'),
-  field_types: ['image'],
-)]
 class ImageWidget extends FileWidget {
 
   /**
@@ -34,7 +35,7 @@ class ImageWidget extends FileWidget {
    * Constructs an ImageWidget object.
    *
    * @param string $plugin_id
-   *   The plugin ID for the widget.
+   *   The plugin_id for the widget.
    * @param mixed $plugin_definition
    *   The plugin implementation definition.
    * @param \Drupal\Core\Field\FieldDefinitionInterface $field_definition
@@ -48,7 +49,7 @@ class ImageWidget extends FileWidget {
    * @param \Drupal\Core\Image\ImageFactory $image_factory
    *   The image factory service.
    */
-  public function __construct($plugin_id, $plugin_definition, FieldDefinitionInterface $field_definition, array $settings, array $third_party_settings, ElementInfoManagerInterface $element_info, ?ImageFactory $image_factory = NULL) {
+  public function __construct($plugin_id, $plugin_definition, FieldDefinitionInterface $field_definition, array $settings, array $third_party_settings, ElementInfoManagerInterface $element_info, ImageFactory $image_factory = NULL) {
     parent::__construct($plugin_id, $plugin_definition, $field_definition, $settings, $third_party_settings, $element_info);
     $this->imageFactory = $image_factory ?: \Drupal::service('image.factory');
   }
@@ -70,12 +71,12 @@ class ImageWidget extends FileWidget {
     $element = parent::settingsForm($form, $form_state);
 
     $element['preview_image_style'] = [
-      '#title' => $this->t('Preview image style'),
+      '#title' => t('Preview image style'),
       '#type' => 'select',
       '#options' => image_style_options(FALSE),
-      '#empty_option' => '<' . $this->t('no preview') . '>',
+      '#empty_option' => '<' . t('no preview') . '>',
       '#default_value' => $this->getSetting('preview_image_style'),
-      '#description' => $this->t('The preview image will be shown while editing the content.'),
+      '#description' => t('The preview image will be shown while editing the content.'),
       '#weight' => 15,
     ];
 
@@ -95,10 +96,10 @@ class ImageWidget extends FileWidget {
     // their styles in code.
     $image_style_setting = $this->getSetting('preview_image_style');
     if (isset($image_styles[$image_style_setting])) {
-      $preview_image_style = $this->t('Preview image style: @style', ['@style' => $image_styles[$image_style_setting]]);
+      $preview_image_style = t('Preview image style: @style', ['@style' => $image_styles[$image_style_setting]]);
     }
     else {
-      $preview_image_style = $this->t('No preview');
+      $preview_image_style = t('No preview');
     }
 
     array_unshift($summary, $preview_image_style);
@@ -125,7 +126,7 @@ class ImageWidget extends FileWidget {
       // If there's only one field, return it as delta 0.
       if (empty($elements[0]['#default_value']['fids'])) {
         $file_upload_help['#description'] = $this->getFilteredDescription();
-        $elements[0]['#description'] = \Drupal::service('renderer')->renderInIsolation($file_upload_help);
+        $elements[0]['#description'] = \Drupal::service('renderer')->renderPlain($file_upload_help);
       }
     }
     else {
@@ -144,14 +145,11 @@ class ImageWidget extends FileWidget {
     $field_settings = $this->getFieldSettings();
 
     // Add image validation.
-    $element['#upload_validators']['FileIsImage'] = [];
+    $element['#upload_validators']['file_validate_is_image'] = [];
 
-    // Add upload dimensions validation.
+    // Add upload resolution validation.
     if ($field_settings['max_resolution'] || $field_settings['min_resolution']) {
-      $element['#upload_validators']['FileImageDimensions'] = [
-        'maxDimensions' => $field_settings['max_resolution'],
-        'minDimensions' => $field_settings['min_resolution'],
-      ];
+      $element['#upload_validators']['file_validate_image_resolution'] = [$field_settings['max_resolution'], $field_settings['min_resolution']];
     }
 
     $extensions = $field_settings['file_extensions'];
@@ -161,7 +159,7 @@ class ImageWidget extends FileWidget {
     // supported by the current image toolkit. Otherwise, validate against all
     // toolkit supported extensions.
     $extensions = !empty($extensions) ? array_intersect(explode(' ', $extensions), $supported_extensions) : $supported_extensions;
-    $element['#upload_validators']['FileExtension']['extensions'] = implode(' ', $extensions);
+    $element['#upload_validators']['file_validate_extensions'][0] = implode(' ', $extensions);
 
     // Add mobile device image capture acceptance.
     $element['#accept'] = 'image/*';
@@ -258,10 +256,10 @@ class ImageWidget extends FileWidget {
 
     // Add the additional alt and title fields.
     $element['alt'] = [
-      '#title' => new TranslatableMarkup('Alternative text'),
+      '#title' => t('Alternative text'),
       '#type' => 'textfield',
       '#default_value' => $item['alt'] ?? '',
-      '#description' => new TranslatableMarkup('Short description of the image used by screen readers and displayed when the image is not loaded. This is important for accessibility.'),
+      '#description' => t('Short description of the image used by screen readers and displayed when the image is not loaded. This is important for accessibility.'),
       // @see https://www.drupal.org/node/465106#alt-text
       '#maxlength' => 512,
       '#weight' => -12,
@@ -271,9 +269,9 @@ class ImageWidget extends FileWidget {
     ];
     $element['title'] = [
       '#type' => 'textfield',
-      '#title' => new TranslatableMarkup('Title'),
+      '#title' => t('Title'),
       '#default_value' => $item['title'] ?? '',
-      '#description' => new TranslatableMarkup('The title is used as a tool tip when the user hovers the mouse over the image.'),
+      '#description' => t('The title is used as a tool tip when the user hovers the mouse over the image.'),
       '#maxlength' => 1024,
       '#weight' => -11,
       '#access' => (bool) $item['fids'] && $element['#title_field'],

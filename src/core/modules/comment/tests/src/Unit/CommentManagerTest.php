@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\comment\Unit;
 
 use Drupal\comment\CommentManager;
@@ -23,33 +21,33 @@ class CommentManagerTest extends UnitTestCase {
    *
    * @covers ::getFields
    */
-  public function testGetFields(): void {
+  public function testGetFields() {
     // Set up a content entity type.
     $entity_type = $this->createMock('Drupal\Core\Entity\ContentEntityTypeInterface');
     $entity_type->expects($this->any())
       ->method('getClass')
-      ->willReturn('Node');
+      ->will($this->returnValue('Node'));
     $entity_type->expects($this->any())
       ->method('entityClassImplements')
       ->with(FieldableEntityInterface::class)
-      ->willReturn(TRUE);
+      ->will($this->returnValue(TRUE));
 
     $entity_field_manager = $this->createMock(EntityFieldManagerInterface::class);
     $entity_type_manager = $this->createMock(EntityTypeManagerInterface::class);
 
     $entity_field_manager->expects($this->once())
       ->method('getFieldMapByFieldType')
-      ->willReturn([
+      ->will($this->returnValue([
         'node' => [
           'field_foobar' => [
             'type' => 'comment',
           ],
         ],
-      ]);
+      ]));
 
     $entity_type_manager->expects($this->any())
       ->method('getDefinition')
-      ->willReturn($entity_type);
+      ->will($this->returnValue($entity_type));
 
     $comment_manager = new CommentManager(
       $entity_type_manager,

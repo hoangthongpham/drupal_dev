@@ -1,13 +1,10 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\Core\Database;
 
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Database\Query\Condition;
 use Drupal\Core\Database\Query\PlaceholderInterface;
-use Drupal\Tests\Core\Database\Stub\StubCondition;
 use Drupal\Tests\Core\Database\Stub\StubConnection;
 use Drupal\Tests\Core\Database\Stub\StubPDO;
 use Drupal\Tests\UnitTestCase;
@@ -27,7 +24,7 @@ class ConditionTest extends UnitTestCase {
    *   - Expected result for the string version of the condition.
    *   - The field name to input in the condition.
    */
-  public static function providerSimpleCondition() {
+  public function providerSimpleCondition() {
     return [
       ['name = :db_condition_placeholder_0', 'name'],
       ['name123 = :db_condition_placeholder_0', 'name-123'],
@@ -36,15 +33,15 @@ class ConditionTest extends UnitTestCase {
 
   /**
    * @covers ::compile
-   * @dataProvider providerSimpleCondition
+   * @dataProvider providerSimpleCondition()
    */
-  public function testSimpleCondition($expected, $field_name): void {
+  public function testSimpleCondition($expected, $field_name) {
     $connection = $this->prophesize(Connection::class);
     $connection->escapeField($field_name)->will(function ($args) {
       return preg_replace('/[^A-Za-z0-9_.]+/', '', $args[0]);
     });
     $connection->mapConditionOperator('=')->willReturn(['operator' => '=']);
-    $connection->condition('AND')->willReturn(new Condition('AND'));
+    $connection->condition('AND')->willReturn(new Condition('AND', FALSE));
     $connection = $connection->reveal();
 
     $query_placeholder = $this->prophesize(PlaceholderInterface::class);
@@ -57,7 +54,7 @@ class ConditionTest extends UnitTestCase {
     $query_placeholder = $query_placeholder->reveal();
 
     $condition = $connection->condition('AND');
-    $condition->condition($field_name, 'value');
+    $condition->condition($field_name, ['value']);
     $condition->compile($connection, $query_placeholder);
 
     $this->assertEquals($expected, $condition->__toString());
@@ -67,7 +64,7 @@ class ConditionTest extends UnitTestCase {
   /**
    * @covers ::compile
    *
-   * @dataProvider dataProviderTestCompileWithKnownOperators
+   * @dataProvider dataProviderTestCompileWithKnownOperators()
    *
    * @param string $expected
    *   The expected generated SQL condition.
@@ -80,13 +77,13 @@ class ConditionTest extends UnitTestCase {
    * @param mixed $expected_arguments
    *   (optional) The expected set arguments.
    */
-  public function testCompileWithKnownOperators($expected, $field, $value, $operator, $expected_arguments = NULL): void {
+  public function testCompileWithKnownOperators($expected, $field, $value, $operator, $expected_arguments = NULL) {
     $connection = $this->prophesize(Connection::class);
     $connection->escapeField(Argument::any())->will(function ($args) {
       return preg_replace('/[^A-Za-z0-9_.]+/', '', $args[0]);
     });
     $connection->mapConditionOperator(Argument::any())->willReturn(NULL);
-    $connection->condition('AND')->willReturn(new Condition('AND'));
+    $connection->condition('AND')->willReturn(new Condition('AND', FALSE));
     $connection = $connection->reveal();
 
     $query_placeholder = $this->prophesize(PlaceholderInterface::class);
@@ -113,7 +110,7 @@ class ConditionTest extends UnitTestCase {
    *
    * @return array
    */
-  public static function dataProviderTestCompileWithKnownOperators() {
+  public function dataProviderTestCompileWithKnownOperators() {
     // Below are a list of commented out test cases, which should work but
     // aren't directly supported by core, but instead need manual handling with
     // prefix/suffix at the moment.
@@ -149,13 +146,13 @@ class ConditionTest extends UnitTestCase {
    *
    * @dataProvider providerTestCompileWithSqlInjectionForOperator
    */
-  public function testCompileWithSqlInjectionForOperator($operator): void {
+  public function testCompileWithSqlInjectionForOperator($operator) {
     $connection = $this->prophesize(Connection::class);
     $connection->escapeField(Argument::any())->will(function ($args) {
       return preg_replace('/[^A-Za-z0-9_.]+/', '', $args[0]);
     });
     $connection->mapConditionOperator(Argument::any())->willReturn(NULL);
-    $connection->condition('AND')->willReturn(new Condition('AND'));
+    $connection->condition('AND')->willReturn(new Condition('AND', FALSE));
     $connection = $connection->reveal();
 
     $query_placeholder = $this->prophesize(PlaceholderInterface::class);
@@ -173,7 +170,7 @@ class ConditionTest extends UnitTestCase {
     $condition->compile($connection, $query_placeholder);
   }
 
-  public static function providerTestCompileWithSqlInjectionForOperator() {
+  public function providerTestCompileWithSqlInjectionForOperator() {
     $data = [];
     $data[] = ["IS NOT NULL) ;INSERT INTO {test} (name) VALUES ('test12345678'); -- "];
     $data[] = ["IS NOT NULL) UNION ALL SELECT name, pass FROM {users_field_data} -- "];
@@ -186,13 +183,35 @@ class ConditionTest extends UnitTestCase {
   /**
    * Tests that the core Condition can be overridden.
    */
-  public function testContribCondition(): void {
-    $connection = new StubConnection($this->createMock(StubPDO::class), [
-      'namespace' => 'Drupal\mock\Driver\Database\mock',
-      'prefix' => '',
-    ]);
+  public function testContribCondition() {
+    $mockCondition = $this->getMockBuilder(Condition::class)
+      ->setMockClassName('MockCondition')
+      ->setConstructorArgs([NULL])
+      ->disableOriginalConstructor()
+      ->getMock();
+    $contrib_namespace = 'Drupal\mock\Driver\Database\mock';
+    $mocked_namespace = $contrib_namespace . '\\Condition';
+    class_alias('MockCondition', $mocked_namespace);
+
+    $options['namespace'] = $contrib_namespace;
+    $options['prefix'] = '';
+
+    $mockPdo = $this->createMock(StubPDO::class);
+
+    $connection = new StubConnection($mockPdo, $options);
     $condition = $connection->condition('AND');
-    $this->assertSame(StubCondition::class, get_class($condition));
+    $this->assertSame('MockCondition', get_class($condition));
+  }
+
+  /**
+   * Tests the deprecation of the class Condition.
+   *
+   * @group legacy
+   */
+  public function testConditionClassDeprecation() {
+    $this->expectDeprecation('Creating an instance of this class is deprecated in drupal:9.1.0 and is removed in drupal:10.0.0. Use Database::getConnection()->condition() instead. See https://www.drupal.org/node/3159568');
+    $condition = new Condition('OR');
+    $this->assertSame('Drupal\Core\Database\Query\Condition', get_class($condition));
   }
 
 }

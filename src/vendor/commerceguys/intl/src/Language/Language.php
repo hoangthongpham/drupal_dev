@@ -12,21 +12,21 @@ final class Language
      *
      * @var string
      */
-    protected string $languageCode;
+    protected $languageCode;
 
     /**
      * The language name.
      *
      * @var string
      */
-    protected string $name;
+    protected $name;
 
     /**
      * The locale (i.e. "en-US").
      *
      * @var string
      */
-    protected string $locale;
+    protected $locale;
 
     /**
      * Creates a new Language instance.
@@ -51,7 +51,7 @@ final class Language
      *
      * @return string
      */
-    public function __toString(): string
+    public function __toString()
     {
         return $this->languageCode;
     }
@@ -61,7 +61,7 @@ final class Language
      *
      * @return string
      */
-    public function getLanguageCode(): string
+    public function getLanguageCode()
     {
         return $this->languageCode;
     }
@@ -73,7 +73,7 @@ final class Language
      *
      * @return string
      */
-    public function getName(): string
+    public function getName()
     {
         return $this->name;
     }
@@ -85,7 +85,7 @@ final class Language
      *
      * @return string
      */
-    public function getLocale(): string
+    public function getLocale()
     {
         return $this->locale;
     }

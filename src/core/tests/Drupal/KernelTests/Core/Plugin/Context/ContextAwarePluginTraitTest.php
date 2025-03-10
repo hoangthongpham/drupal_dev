@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\KernelTests\Core\Plugin\Context;
 
 use Drupal\Component\Plugin\ConfigurableInterface;
@@ -19,6 +17,7 @@ use Drupal\Core\TypedData\DataDefinition;
 use Drupal\Core\TypedData\Plugin\DataType\StringData;
 use Drupal\Core\TypedData\TypedDataManagerInterface;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\Tests\Traits\ExpectDeprecationTrait;
 
 /**
  * @coversDefaultClass \Drupal\Core\Plugin\ContextAwarePluginTrait
@@ -27,24 +26,26 @@ use Drupal\KernelTests\KernelTestBase;
  */
 class ContextAwarePluginTraitTest extends KernelTestBase {
 
+  use ExpectDeprecationTrait;
+
   /**
    * The plugin instance under test.
    *
-   * @var \Drupal\KernelTests\Core\Plugin\Context\TestContextAwarePlugin
+   * @var \Drupal\Core\Plugin\ContextAwarePluginTrait
    */
   private $plugin;
 
   /**
    * The configurable plugin instance under test.
    *
-   * @var \Drupal\KernelTests\Core\Plugin\Context\TestConfigurableContextAwarePlugin
+   * @var \Drupal\Core\Plugin\ContextAwarePluginTrait
    */
   private $configurablePlugin;
 
   /**
    * {@inheritdoc}
    */
-  protected function setUp(): void {
+  public function setUp(): void {
     parent::setUp();
     $plugin_definition = new TestContextAwarePluginDefinition();
     $plugin_definition->addContextDefinition('nato_letter', ContextDefinition::create('string'));
@@ -55,14 +56,14 @@ class ContextAwarePluginTraitTest extends KernelTestBase {
   /**
    * @covers ::getContextDefinitions
    */
-  public function testGetContextDefinitions(): void {
+  public function testGetContextDefinitions() {
     $this->assertIsArray($this->plugin->getContextDefinitions());
   }
 
   /**
    * @covers ::getContextDefinition
    */
-  public function testGetContextDefinition(): void {
+  public function testGetContextDefinition() {
     // The context is not defined, so an exception will be thrown.
     $this->expectException(ContextException::class);
     $this->expectExceptionMessage('The person context is not a valid context.');
@@ -72,15 +73,43 @@ class ContextAwarePluginTraitTest extends KernelTestBase {
   /**
    * @covers ::getContextValue
    */
-  public function testGetContextValue(): void {
+  public function testGetContextValue() {
     $this->plugin->setContextValue('nato_letter', 'Alpha');
     $this->assertSame('Alpha', $this->plugin->getContextValue('nato_letter'));
   }
 
   /**
+   * @covers ::getContextValue
+   * @group legacy
+   */
+  public function testGetContextValueFromConfiguration() {
+    $this->expectDeprecation('Passing context values to plugins via configuration is deprecated in drupal:9.1.0 and will be removed before drupal:10.0.0. Instead, call ::setContextValue() on the plugin itself. See https://www.drupal.org/node/3120980');
+    $configuration = [
+      'context' => [
+        'nato_letter' => 'Alpha',
+      ],
+    ];
+    $this->plugin = new TestContextAwarePlugin($configuration, 'the_sisko', $this->plugin->getPluginDefinition());
+    // Assert that the context value passed in the plugin configuration is
+    // available.
+    $this->assertSame('Alpha', $this->plugin->getContextValue('nato_letter'));
+  }
+
+  /**
+   * @covers ::getContextValue
+   * @group legacy
+   */
+  public function testConfigurableGetContextValueFromConfiguration() {
+    $this->expectDeprecation('Passing context values to plugins via configuration is deprecated in drupal:9.1.0 and will be removed before drupal:10.0.0. Instead, call ::setContextValue() on the plugin itself. See https://www.drupal.org/node/3120980');
+    // Assert that the context value passed in the plugin configuration is
+    // available.
+    $this->assertSame('Alpha', $this->configurablePlugin->getContextValue('nato_letter'));
+  }
+
+  /**
    * @covers ::setContextValue
    */
-  public function testSetContextValue(): void {
+  public function testSetContextValue() {
     $typed_data_manager = $this->prophesize(TypedDataManagerInterface::class);
     $container = new ContainerBuilder();
     $container->set('typed_data_manager', $typed_data_manager->reveal());

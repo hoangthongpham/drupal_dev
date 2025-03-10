@@ -56,6 +56,9 @@
 	"BGN": {
 		"name": "Bolgariya levi"
 	},
+	"VED": {
+		"name": "Bolívar Soberano"
+	},
 	"BOB": {
 		"name": "Boliviya bolivianosi"
 	},
@@ -335,6 +338,9 @@
 	"RON": {
 		"name": "Ruminiya leyi"
 	},
+	"SVC": {
+		"name": "Salvadoran Colón"
+	},
 	"WST": {
 		"name": "Samoa talasi"
 	},
@@ -349,6 +355,9 @@
 	},
 	"SCR": {
 		"name": "Seyshel rupiyasi"
+	},
+	"SLE": {
+		"name": "Sierra Leonean Leone"
 	},
 	"SGD": {
 		"name": "Singapur dollari"
@@ -371,7 +380,7 @@
 	"SZL": {
 		"name": "Svazilend lilangenisi"
 	},
-	"SLE": {
+	"SLL": {
 		"name": "Syerra-Leone leonesi"
 	},
 	"THB": {
@@ -406,6 +415,9 @@
 	},
 	"OMR": {
 		"name": "Ummon riyoli"
+	},
+	"UYW": {
+		"name": "Uruguayan Nominal Wage Index Unit"
 	},
 	"UYU": {
 		"name": "Urugvay pesosi"
@@ -451,6 +463,9 @@
 	},
 	"ZMW": {
 		"name": "Zambiya kvachasi"
+	},
+	"ZWL": {
+		"name": "Zimbabwean Dollar (2009)"
 	},
 	"UZS": {
 		"name": "O‘zbekiston so‘mi",

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\views\Unit;
 
 use Drupal\Tests\UnitTestCase;
@@ -40,13 +38,13 @@ class ViewsDataHelperTest extends UnitTestCase {
   /**
    * Tests fetchFields.
    */
-  public function testFetchFields(): void {
+  public function testFetchFields() {
     $views_data = $this->getMockBuilder('Drupal\views\ViewsData')
       ->disableOriginalConstructor()
       ->getMock();
     $views_data->expects($this->once())
       ->method('getAll')
-      ->willReturn($this->viewsData());
+      ->will($this->returnValue($this->viewsData()));
 
     $data_helper = new ViewsDataHelper($views_data);
 

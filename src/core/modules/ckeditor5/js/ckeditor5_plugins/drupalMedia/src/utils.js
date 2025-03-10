@@ -1,5 +1,5 @@
 /* eslint-disable import/no-extraneous-dependencies */
-// cspell:ignore documentselection
+// cSpell:words documentselection
 import { isWidget } from 'ckeditor5/src/widget';
 
 /**
@@ -8,9 +8,9 @@ import { isWidget } from 'ckeditor5/src/widget';
  * @param {module:engine/model/element~Element} modelElement
  *   The model element to be checked.
  * @return {boolean}
- *   A boolean indicating if the element is a drupalMedia element.
+ *   A boolean indicating whether element is drupalMedia element.
  *
- * @private
+ * @internal
  */
 export function isDrupalMedia(modelElement) {
   return !!modelElement && modelElement.is('element', 'drupalMedia');
@@ -22,9 +22,9 @@ export function isDrupalMedia(modelElement) {
  * @param {module:engine/view/element~Element} viewElement
  *   The view element.
  * @return {boolean}
- *   A boolean indicating if the element is a <drupal-media> element.
+ *   A boolean indicating whether element is <drupal-media> element.
  *
- * @private
+ * @internal
  */
 export function isDrupalMediaWidget(viewElement) {
   return (
@@ -37,12 +37,12 @@ export function isDrupalMediaWidget(viewElement) {
  *
  * @param {module:engine/model/selection~Selection|module:engine/model/documentselection~DocumentSelection} selection
  *   The current selection.
- * @return {module:engine/model/element~Element|null}
+ * @returns {module:engine/model/element~Element|null}
  *   The `drupalMedia` element which could be either the current selected an
  *   ancestor of the selection. Returns null if the selection has no Drupal
  *   Media element.
  *
- * @private
+ * @internal
  */
 export function getClosestSelectedDrupalMediaElement(selection) {
   const selectedElement = selection.getSelectedElement();
@@ -60,17 +60,12 @@ export function getClosestSelectedDrupalMediaElement(selection) {
  * @return {module:engine/view/element~Element|null}
  *   The currently selected Drupal Media widget or null.
  *
- * @private
+ * @internal
  */
 export function getClosestSelectedDrupalMediaWidget(selection) {
   const viewElement = selection.getSelectedElement();
   if (viewElement && isDrupalMediaWidget(viewElement)) {
     return viewElement;
-  }
-
-  // Perhaps nothing is selected.
-  if (selection.getFirstPosition() === null) {
-    return null;
   }
 
   let parent = selection.getFirstPosition().parent;
@@ -103,7 +98,7 @@ export function isObject(value) {
 }
 
 /**
- * Gets the preview container element from the media element.
+ * Gets preview container element from the media element.
  *
  * @param {Iterable.<module:engine/view/element~Element>} children
  *   The child elements.
@@ -128,23 +123,4 @@ export function getPreviewContainer(children) {
   }
 
   return null;
-}
-
-/**
- * Gets model attribute key based on Drupal Element Style group.
- *
- * @example
- *    Example: 'align' -> 'drupalElementStyleAlign'
- *
- * @param {string} group
- *   The name of the group (ex. 'align', 'viewMode').
- * @return {string}
- *   Model attribute key.
- *
- * @internal
- */
-export function groupNameToModelAttributeKey(group) {
-  // Manipulate string to have first letter capitalized to append in camel case.
-  const capitalizedFirst = group[0].toUpperCase() + group.substring(1);
-  return `drupalElementStyle${capitalizedFirst}`;
 }

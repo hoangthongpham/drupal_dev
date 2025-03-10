@@ -3,7 +3,6 @@
 namespace Drupal\Core\Render\Element;
 
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Render\Attribute\FormElement;
 use Drupal\Core\Render\Element;
 use Drupal\Component\Utility\Html as HtmlUtility;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
@@ -34,24 +33,23 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
  * $options = [
  *   1 => ['color' => 'Red', 'shape' => 'Triangle'],
  *   2 => ['color' => 'Green', 'shape' => 'Square'],
- *   // Prevent users from selecting a row by adding a '#disabled' property set
- *   // to TRUE.
- *   3 => ['color' => 'Blue', 'shape' => 'Hexagon', '#disabled' => TRUE],
+ *   3 => ['color' => 'Blue', 'shape' => 'Hexagon'],
  * ];
  *
- * $form['table'] = [
+ * $form['table'] = array(
  *   '#type' => 'tableselect',
  *   '#header' => $header,
  *   '#options' => $options,
  *   '#empty' => $this->t('No shapes found'),
- * ];
+ * );
  * @endcode
  *
  * See https://www.drupal.org/node/945102 for a full explanation.
  *
  * @see \Drupal\Core\Render\Element\Table
+ *
+ * @FormElement("tableselect")
  */
-#[FormElement('tableselect')]
 class Tableselect extends Table {
 
   /**
@@ -118,31 +116,31 @@ class Tableselect extends Table {
    *   table row's HTML attributes; see table.html.twig. An example of per-row
    *   options:
    *   @code
-   *     $options = [
-   *       [
+   *     $options = array(
+   *       array(
    *         'title' => $this->t('How to Learn Drupal'),
    *         'content_type' => $this->t('Article'),
    *         'status' => 'published',
-   *         '#attributes' => ['class' => ['article-row']],
-   *       ],
-   *       [
+   *         '#attributes' => array('class' => array('article-row')),
+   *       ),
+   *       array(
    *         'title' => $this->t('Privacy Policy'),
    *         'content_type' => $this->t('Page'),
    *         'status' => 'published',
-   *         '#attributes' => ['class' => ['page-row']],
-   *       ],
-   *     ];
-   *     $header = [
+   *         '#attributes' => array('class' => array('page-row')),
+   *       ),
+   *     );
+   *     $header = array(
    *       'title' => $this->t('Title'),
    *       'content_type' => $this->t('Content type'),
    *       'status' => $this->t('Status'),
-   *     ];
-   *     $form['table'] = [
+   *     );
+   *     $form['table'] = array(
    *       '#type' => 'tableselect',
    *       '#header' => $header,
    *       '#options' => $options,
    *       '#empty' => $this->t('No content available.'),
-   *     ];
+   *     );
    *   @endcode
    *
    * @return array
@@ -181,9 +179,6 @@ class Tableselect extends Table {
               $row['data'][] = $element['#options'][$key][$fieldname];
             }
           }
-        }
-        if (!empty($element['#options'][$key]['#disabled'])) {
-          $row['class'][] = 'disabled';
         }
         $rows[] = $row;
       }
@@ -243,7 +238,6 @@ class Tableselect extends Table {
       foreach ($element['#options'] as $key => $choice) {
         // Do not overwrite manually created children.
         if (!isset($element[$key])) {
-          $disabled = !empty($element['#options'][$key]['#disabled']);
           if ($element['#multiple']) {
             $title = '';
             if (isset($element['#options'][$key]['title']) && is_array($element['#options'][$key]['title'])) {
@@ -260,7 +254,6 @@ class Tableselect extends Table {
               '#return_value' => $key,
               '#default_value' => isset($value[$key]) ? $key : NULL,
               '#attributes' => $element['#attributes'],
-              '#disabled' => $disabled,
               '#ajax' => $element['#ajax'] ?? NULL,
             ];
           }
@@ -276,7 +269,6 @@ class Tableselect extends Table {
               '#attributes' => $element['#attributes'],
               '#parents' => $element['#parents'],
               '#id' => HtmlUtility::getUniqueId('edit-' . implode('-', $parents_for_id)),
-              '#disabled' => $disabled,
               '#ajax' => $element['#ajax'] ?? NULL,
             ];
           }

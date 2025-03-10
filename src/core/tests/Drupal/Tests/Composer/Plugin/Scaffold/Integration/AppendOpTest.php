@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\Composer\Plugin\Scaffold\Integration;
 
 use Drupal\Composer\Plugin\Scaffold\Operations\AppendOp;
@@ -21,7 +19,7 @@ class AppendOpTest extends TestCase {
   /**
    * @covers ::process
    */
-  public function testProcess(): void {
+  public function testProcess() {
     $fixtures = new Fixtures();
     $destination = $fixtures->destinationPath('[web-root]/robots.txt');
     $options = ScaffoldOptions::create([]);

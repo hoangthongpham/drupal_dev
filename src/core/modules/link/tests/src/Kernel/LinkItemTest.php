@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\link\Kernel;
 
 use Drupal\Component\Utility\UrlHelper;
@@ -22,13 +20,12 @@ use Drupal\link\LinkItemInterface;
 class LinkItemTest extends FieldKernelTestBase {
 
   /**
-   * {@inheritdoc}
+   * Modules to enable.
+   *
+   * @var array
    */
   protected static $modules = ['link'];
 
-  /**
-   * {@inheritdoc}
-   */
   protected function setUp(): void {
     parent::setUp();
 
@@ -71,7 +68,7 @@ class LinkItemTest extends FieldKernelTestBase {
   /**
    * Tests using entity fields of the link field type.
    */
-  public function testLinkItem(): void {
+  public function testLinkItem() {
     // Create entity.
     $entity = EntityTest::create();
     $url = 'https://www.drupal.org?test_param=test_value';
@@ -101,7 +98,6 @@ class LinkItemTest extends FieldKernelTestBase {
     $this->assertEquals($parsed_url['path'], $entity->field_test[0]->uri);
     $this->assertEquals($title, $entity->field_test->title);
     $this->assertEquals($title, $entity->field_test[0]->title);
-    $this->assertEquals($title, $entity->field_test[0]->getTitle());
     $this->assertEquals($class, $entity->field_test->options['attributes']['class']);
     $this->assertEquals($parsed_url['query'], $entity->field_test->options['query']);
 

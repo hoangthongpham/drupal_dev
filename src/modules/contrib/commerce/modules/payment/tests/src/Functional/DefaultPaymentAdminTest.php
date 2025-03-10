@@ -2,11 +2,11 @@
 
 namespace Drupal\Tests\commerce_payment\Functional;
 
-use Drupal\Core\Url;
-use Drupal\Tests\commerce\Functional\CommerceBrowserTestBase;
 use Drupal\commerce_order\Entity\OrderItemType;
 use Drupal\commerce_payment\Entity\Payment;
 use Drupal\commerce_price\Price;
+use Drupal\Core\Url;
+use Drupal\Tests\commerce\Functional\CommerceBrowserTestBase;
 
 /**
  * Tests the admin UI for payments of type 'payment_default'.
@@ -124,15 +124,9 @@ class DefaultPaymentAdminTest extends CommerceBrowserTestBase {
       'store_id' => $this->store,
     ]);
 
-    $this->paymentUri = Url::fromRoute(
-      'entity.commerce_payment.collection',
-      [
-        'commerce_order' => $this->order->id(),
-      ],
-      [
-        'absolute' => TRUE,
-      ],
-    )->toString();
+    $this->paymentUri = Url::fromRoute('entity.commerce_payment.collection', [
+      'commerce_order' => $this->order->id(),
+    ])->toString();
   }
 
   /**
@@ -142,6 +136,7 @@ class DefaultPaymentAdminTest extends CommerceBrowserTestBase {
     // Confirm that the tab is visible on the order page.
     $this->drupalGet($this->order->toUrl());
     $this->assertSession()->linkExists('Payments');
+    $this->assertSession()->linkByHrefExists($this->paymentUri);
 
     // Confirm that a payment is visible.
     $this->createEntity('commerce_payment', [

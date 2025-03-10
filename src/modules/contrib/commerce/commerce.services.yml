@@ -37,9 +37,14 @@ services:
     tags:
       - { name: commerce.locale_resolver, priority: -100 }
 
+  commerce.availability_manager:
+    class: Drupal\commerce\AvailabilityManager
+    tags:
+      - { name: service_collector, tag: commerce.availability_checker, call: addChecker }
+
   commerce.config_updater:
     class: Drupal\commerce\Config\ConfigUpdater
-    arguments: ['@entity_type.manager', '@config.storage', '@config.factory', '%install_profile%']
+    arguments: ['@entity_type.manager', '@config.storage', '@config.factory']
 
   commerce.entity_uuid_mapper:
     class: Drupal\commerce\EntityUuidMapper
@@ -80,20 +85,3 @@ services:
     class: Drupal\commerce\EventSubscriber\ResponseSubscriber
     tags:
       - { name: event_subscriber }
-
-  commerce.inbox_message_storage:
-    class: Drupal\commerce\InboxMessageStorage
-    arguments: ['@database']
-
-  commerce.inbox_message_fetcher:
-    class: Drupal\commerce\InboxMessageFetcher
-    arguments: ['@http_client', '@commerce.logger', '@module_handler', '@commerce.inbox_message_storage', '@date.formatter', '@state', '@datetime.time']
-
-  commerce.logger:
-    class: Drupal\Core\Logger\LoggerChannel
-    factory: logger.factory:get
-    arguments: ['commerce']
-
-  commerce.lazy_builders:
-    class: Drupal\commerce\LazyBuilders
-    arguments: [ '@plugin.manager.element_info', '@commerce.inbox_message_storage']

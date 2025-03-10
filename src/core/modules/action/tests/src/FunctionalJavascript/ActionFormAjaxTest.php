@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\action\FunctionalJavascript;
 
 use Drupal\Core\Url;
@@ -12,7 +10,6 @@ use Drupal\system\Entity\Action;
  * Tests action plugins using JavaScript.
  *
  * @group action
- * @group legacy
  */
 class ActionFormAjaxTest extends WebDriverTestBase {
 
@@ -38,7 +35,7 @@ class ActionFormAjaxTest extends WebDriverTestBase {
   /**
    * Tests action plugins with AJAX save their configuration.
    */
-  public function testActionConfigurationWithAjax(): void {
+  public function testActionConfigurationWithAjax() {
     $url = Url::fromRoute('action.admin_add', ['action_id' => 'action_form_ajax_test']);
     $this->drupalGet($url);
     $page = $this->getSession()->getPage();

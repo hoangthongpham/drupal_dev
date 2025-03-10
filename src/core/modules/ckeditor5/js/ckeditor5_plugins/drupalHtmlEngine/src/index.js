@@ -1,8 +1,8 @@
-// cspell:ignore drupalhtmlengine
+// cspell:ignore drupalengine drupalhtmlengine
 import DrupalHtmlEngine from './drupalhtmlengine';
 
 /**
- * @private
+ * @internal
  */
 export default {
   DrupalHtmlEngine,

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\views\Functional\Plugin;
 
 use Drupal\Tests\views\Functional\ViewTestBase;
@@ -18,10 +16,12 @@ class ViewsBulkTest extends ViewTestBase {
    *
    * @var \Drupal\user\UserInterface
    */
-  protected $adminUser;
+  protected $admin_user;
 
   /**
-   * {@inheritdoc}
+   * Modules to enable.
+   *
+   * @var array
    */
   protected static $modules = ['node', 'views'];
 
@@ -30,20 +30,17 @@ class ViewsBulkTest extends ViewTestBase {
    */
   protected $defaultTheme = 'stark';
 
-  /**
-   * {@inheritdoc}
-   */
-  protected function setUp($import_test_views = TRUE, $modules = ['views_test_config']): void {
-    parent::setUp($import_test_views, $modules);
+  public function setUp($import_test_views = TRUE): void {
+    parent::setUp($import_test_views);
 
     $this->drupalCreateContentType(['type' => 'page']);
-    $this->adminUser = $this->createUser(['bypass node access', 'administer nodes', 'access content overview']);
+    $this->admin_user = $this->createUser(['bypass node access', 'administer nodes', 'access content overview']);
   }
 
   /**
    * Tests bulk selection.
    */
-  public function testBulkSelection(): void {
+  public function testBulkSelection() {
 
     // Create first node, set updated time to the past.
     $node_1 = $this->drupalCreateNode([
@@ -53,7 +50,7 @@ class ViewsBulkTest extends ViewTestBase {
     ]);
 
     // Login as administrator and go to admin/content.
-    $this->drupalLogin($this->adminUser);
+    $this->drupalLogin($this->admin_user);
     $this->drupalGet('admin/content');
     $this->assertSession()->pageTextContains($node_1->getTitle());
 
@@ -63,11 +60,6 @@ class ViewsBulkTest extends ViewTestBase {
       'title' => 'The second node',
       'changed' => \Drupal::time()->getRequestTime() - 120,
     ]);
-
-    // Select the node deletion action.
-    $action_select = $this->getSession()->getPage()->findField('edit-action');
-    $action_select_name = $action_select->getAttribute('name');
-    $this->getSession()->getPage()->selectFieldOption($action_select_name, 'node_delete_action');
 
     // Now click 'Apply to selected items' and assert the first node is selected
     // on the confirm form.
@@ -86,9 +78,6 @@ class ViewsBulkTest extends ViewTestBase {
       'type' => 'page',
       'title' => 'The third node',
     ]);
-
-    // Select the node deletion action.
-    $this->getSession()->getPage()->selectFieldOption($action_select_name, 'node_delete_action');
 
     // Now click 'Apply to selected items' and assert the second node is
     // selected on the confirm form.

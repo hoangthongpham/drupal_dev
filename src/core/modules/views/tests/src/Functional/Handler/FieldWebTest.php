@@ -1,9 +1,8 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\views\Functional\Handler;
 
+use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Render\RenderContext;
@@ -49,11 +48,8 @@ class FieldWebTest extends ViewTestBase {
     'views_test_data_name' => 'name',
   ];
 
-  /**
-   * {@inheritdoc}
-   */
-  protected function setUp($import_test_views = TRUE, $modules = ['views_test_config']): void {
-    parent::setUp($import_test_views, $modules);
+  protected function setUp($import_test_views = TRUE): void {
+    parent::setUp($import_test_views);
 
     $this->enableViewsTestModule();
   }
@@ -70,7 +66,7 @@ class FieldWebTest extends ViewTestBase {
   /**
    * Tests the click sorting functionality.
    */
-  public function testClickSorting(): void {
+  public function testClickSorting() {
     $this->drupalGet('test_click_sort');
     $this->assertSession()->statusCodeEquals(200);
 
@@ -106,7 +102,7 @@ class FieldWebTest extends ViewTestBase {
   /**
    * Tests the default click sorting functionality with distinct.
    */
-  public function testClickSortingDistinct(): void {
+  public function testClickSortingDistinct() {
     ConfigurableLanguage::createFromLangcode('es')->save();
     $node = $this->drupalCreateNode();
     $this->drupalGet('test_distinct_click_sorting');
@@ -178,7 +174,8 @@ class FieldWebTest extends ViewTestBase {
    *   An array containing simplexml objects.
    */
   protected function parseContent($content) {
-    $htmlDom = Html::load($content);
+    $htmlDom = new \DOMDocument();
+    @$htmlDom->loadHTML('<?xml encoding="UTF-8">' . $content);
     $elements = simplexml_import_dom($htmlDom);
 
     return $elements;
@@ -218,7 +215,7 @@ class FieldWebTest extends ViewTestBase {
   /**
    * Tests rewriting the output to a link.
    */
-  public function testAlterUrl(): void {
+  public function testAlterUrl() {
     /** @var \Drupal\Core\Render\RendererInterface $renderer */
     $renderer = \Drupal::service('renderer');
 
@@ -236,7 +233,7 @@ class FieldWebTest extends ViewTestBase {
     // Tests that the suffix/prefix appears on the output.
     $id_field->options['alter']['prefix'] = $prefix = $this->randomMachineName();
     $id_field->options['alter']['suffix'] = $suffix = $this->randomMachineName();
-    $output = (string) $renderer->executeInRenderContext(new RenderContext(), function () use ($id_field, $row) {
+    $output = $renderer->executeInRenderContext(new RenderContext(), function () use ($id_field, $row) {
       return $id_field->theme($row);
     });
     $this->assertSubString($output, $prefix);
@@ -244,7 +241,7 @@ class FieldWebTest extends ViewTestBase {
     unset($id_field->options['alter']['prefix']);
     unset($id_field->options['alter']['suffix']);
 
-    $output = (string) $renderer->executeInRenderContext(new RenderContext(), function () use ($id_field, $row) {
+    $output = $renderer->executeInRenderContext(new RenderContext(), function () use ($id_field, $row) {
       return $id_field->theme($row);
     });
     $this->assertSubString($output, $path, 'Make sure that the path is part of the output');
@@ -257,28 +254,28 @@ class FieldWebTest extends ViewTestBase {
 
       $expected_result = Url::fromRoute('entity.node.canonical', ['node' => '123'], ['absolute' => $absolute])->toString();
       $alter['absolute'] = $absolute;
-      $result = (string) $renderer->executeInRenderContext(new RenderContext(), function () use ($id_field, $row) {
+      $result = $renderer->executeInRenderContext(new RenderContext(), function () use ($id_field, $row) {
         return $id_field->theme($row);
       });
       $this->assertSubString($result, $expected_result);
 
       $expected_result = Url::fromRoute('entity.node.canonical', ['node' => '123'], ['fragment' => 'foo', 'absolute' => $absolute])->toString();
       $alter['path'] = 'node/123#foo';
-      $result = (string) $renderer->executeInRenderContext(new RenderContext(), function () use ($id_field, $row) {
+      $result = $renderer->executeInRenderContext(new RenderContext(), function () use ($id_field, $row) {
         return $id_field->theme($row);
       });
       $this->assertSubString($result, $expected_result);
 
       $expected_result = Url::fromRoute('entity.node.canonical', ['node' => '123'], ['query' => ['foo' => NULL], 'absolute' => $absolute])->toString();
       $alter['path'] = 'node/123?foo';
-      $result = (string) $renderer->executeInRenderContext(new RenderContext(), function () use ($id_field, $row) {
+      $result = $renderer->executeInRenderContext(new RenderContext(), function () use ($id_field, $row) {
         return $id_field->theme($row);
       });
       $this->assertSubString($result, $expected_result);
 
       $expected_result = Url::fromRoute('entity.node.canonical', ['node' => '123'], ['query' => ['foo' => 'bar', 'bar' => 'baz'], 'absolute' => $absolute])->toString();
       $alter['path'] = 'node/123?foo=bar&bar=baz';
-      $result = (string) $renderer->executeInRenderContext(new RenderContext(), function () use ($id_field, $row) {
+      $result = $renderer->executeInRenderContext(new RenderContext(), function () use ($id_field, $row) {
         return $id_field->theme($row);
       });
       $this->assertSubString(Html::decodeEntities($result), Html::decodeEntities($expected_result));
@@ -287,14 +284,14 @@ class FieldWebTest extends ViewTestBase {
       // $expected_result = Url::fromRoute('entity.node.canonical', ['node' => '123'], ['query' => ['foo' => NULL], 'fragment' => 'bar', 'absolute' => $absolute])->toString();
       $expected_result = Url::fromUserInput('/node/123', ['query' => ['foo' => NULL], 'fragment' => 'bar', 'absolute' => $absolute])->toString();
       $alter['path'] = 'node/123?foo#bar';
-      $result = (string) $renderer->executeInRenderContext(new RenderContext(), function () use ($id_field, $row) {
+      $result = $renderer->executeInRenderContext(new RenderContext(), function () use ($id_field, $row) {
         return $id_field->theme($row);
       });
       $this->assertSubString(Html::decodeEntities($result), Html::decodeEntities($expected_result));
 
       $expected_result = Url::fromRoute('<front>', [], ['absolute' => $absolute])->toString();
       $alter['path'] = '<front>';
-      $result = (string) $renderer->executeInRenderContext(new RenderContext(), function () use ($id_field, $row) {
+      $result = $renderer->executeInRenderContext(new RenderContext(), function () use ($id_field, $row) {
         return $id_field->theme($row);
       });
       $this->assertSubString($result, $expected_result);
@@ -303,50 +300,50 @@ class FieldWebTest extends ViewTestBase {
     // Tests the replace spaces with dashes feature.
     $id_field->options['alter']['replace_spaces'] = TRUE;
     $id_field->options['alter']['path'] = $path = $this->randomMachineName() . ' ' . $this->randomMachineName();
-    $output = (string) $renderer->executeInRenderContext(new RenderContext(), function () use ($id_field, $row) {
+    $output = $renderer->executeInRenderContext(new RenderContext(), function () use ($id_field, $row) {
       return $id_field->theme($row);
     });
     $this->assertSubString($output, str_replace(' ', '-', $path));
     $id_field->options['alter']['replace_spaces'] = FALSE;
-    $output = (string) $renderer->executeInRenderContext(new RenderContext(), function () use ($id_field, $row) {
+    $output = $renderer->executeInRenderContext(new RenderContext(), function () use ($id_field, $row) {
       return $id_field->theme($row);
     });
-    // The URL has a space in it, so to check we have to decode the URL output.
+    // The url has a space in it, so to check we have to decode the url output.
     $this->assertSubString(urldecode($output), $path);
 
     // Tests the external flag.
-    // Switch on the external flag should output an external URL as well.
+    // Switch on the external flag should output an external url as well.
     $id_field->options['alter']['external'] = TRUE;
-    $id_field->options['alter']['path'] = $path = 'www.example.com';
-    $output = (string) $renderer->executeInRenderContext(new RenderContext(), function () use ($id_field, $row) {
+    $id_field->options['alter']['path'] = $path = 'www.drupal.org';
+    $output = $renderer->executeInRenderContext(new RenderContext(), function () use ($id_field, $row) {
       return $id_field->theme($row);
     });
-    $this->assertSubString($output, 'http://www.example.com');
+    $this->assertSubString($output, 'http://www.drupal.org');
 
-    // Setup a not external URL, which shouldn't lead to an external URL.
+    // Setup a not external url, which shouldn't lead to an external url.
     $id_field->options['alter']['external'] = FALSE;
-    $id_field->options['alter']['path'] = $path = 'www.example.com';
-    $output = (string) $renderer->executeInRenderContext(new RenderContext(), function () use ($id_field, $row) {
+    $id_field->options['alter']['path'] = $path = 'www.drupal.org';
+    $output = $renderer->executeInRenderContext(new RenderContext(), function () use ($id_field, $row) {
       return $id_field->theme($row);
     });
-    $this->assertNotSubString($output, 'http://www.example.com');
+    $this->assertNotSubString($output, 'http://www.drupal.org');
 
     // Tests the transforming of the case setting.
     $id_field->options['alter']['path'] = $path = $this->randomMachineName();
     $id_field->options['alter']['path_case'] = 'none';
-    $output = (string) $renderer->executeInRenderContext(new RenderContext(), function () use ($id_field, $row) {
+    $output = $renderer->executeInRenderContext(new RenderContext(), function () use ($id_field, $row) {
       return $id_field->theme($row);
     });
     $this->assertSubString($output, $path);
 
     // Switch to uppercase and lowercase.
     $id_field->options['alter']['path_case'] = 'upper';
-    $output = (string) $renderer->executeInRenderContext(new RenderContext(), function () use ($id_field, $row) {
+    $output = $renderer->executeInRenderContext(new RenderContext(), function () use ($id_field, $row) {
       return $id_field->theme($row);
     });
     $this->assertSubString($output, strtoupper($path));
     $id_field->options['alter']['path_case'] = 'lower';
-    $output = (string) $renderer->executeInRenderContext(new RenderContext(), function () use ($id_field, $row) {
+    $output = $renderer->executeInRenderContext(new RenderContext(), function () use ($id_field, $row) {
       return $id_field->theme($row);
     });
     $this->assertSubString($output, strtolower($path));
@@ -354,13 +351,13 @@ class FieldWebTest extends ViewTestBase {
     // Switch to ucfirst and ucwords.
     $id_field->options['alter']['path_case'] = 'ucfirst';
     $id_field->options['alter']['path'] = 'drupal has a great community';
-    $output = (string) $renderer->executeInRenderContext(new RenderContext(), function () use ($id_field, $row) {
+    $output = $renderer->executeInRenderContext(new RenderContext(), function () use ($id_field, $row) {
       return $id_field->theme($row);
     });
     $this->assertSubString($output, UrlHelper::encodePath('Drupal has a great community'));
 
     $id_field->options['alter']['path_case'] = 'ucwords';
-    $output = (string) $renderer->executeInRenderContext(new RenderContext(), function () use ($id_field, $row) {
+    $output = $renderer->executeInRenderContext(new RenderContext(), function () use ($id_field, $row) {
       return $id_field->theme($row);
     });
     $this->assertSubString($output, UrlHelper::encodePath('Drupal Has A Great Community'));
@@ -369,7 +366,7 @@ class FieldWebTest extends ViewTestBase {
     // Tests the link_class setting and see whether it actually exists in the
     // output.
     $id_field->options['alter']['link_class'] = $class = $this->randomMachineName();
-    $output = (string) $renderer->executeInRenderContext(new RenderContext(), function () use ($id_field, $row) {
+    $output = $renderer->executeInRenderContext(new RenderContext(), function () use ($id_field, $row) {
       return $id_field->theme($row);
     });
     $elements = $this->xpathContent($output, '//a[contains(@class, :class)]', [':class' => $class]);
@@ -379,7 +376,7 @@ class FieldWebTest extends ViewTestBase {
 
     // Tests the alt setting.
     $id_field->options['alter']['alt'] = $rel = $this->randomMachineName();
-    $output = (string) $renderer->executeInRenderContext(new RenderContext(), function () use ($id_field, $row) {
+    $output = $renderer->executeInRenderContext(new RenderContext(), function () use ($id_field, $row) {
       return $id_field->theme($row);
     });
     $elements = $this->xpathContent($output, '//a[contains(@title, :alt)]', [':alt' => $rel]);
@@ -388,7 +385,7 @@ class FieldWebTest extends ViewTestBase {
 
     // Tests the rel setting.
     $id_field->options['alter']['rel'] = $rel = $this->randomMachineName();
-    $output = (string) $renderer->executeInRenderContext(new RenderContext(), function () use ($id_field, $row) {
+    $output = $renderer->executeInRenderContext(new RenderContext(), function () use ($id_field, $row) {
       return $id_field->theme($row);
     });
     $elements = $this->xpathContent($output, '//a[contains(@rel, :rel)]', [':rel' => $rel]);
@@ -397,7 +394,7 @@ class FieldWebTest extends ViewTestBase {
 
     // Tests the target setting.
     $id_field->options['alter']['target'] = $target = $this->randomMachineName();
-    $output = (string) $renderer->executeInRenderContext(new RenderContext(), function () use ($id_field, $row) {
+    $output = $renderer->executeInRenderContext(new RenderContext(), function () use ($id_field, $row) {
       return $id_field->theme($row);
     });
     $elements = $this->xpathContent($output, '//a[contains(@target, :target)]', [':target' => $target]);
@@ -408,7 +405,7 @@ class FieldWebTest extends ViewTestBase {
   /**
    * Tests the field/label/wrapper classes.
    */
-  public function testFieldClasses(): void {
+  public function testFieldClasses() {
     /** @var \Drupal\Core\Render\RendererInterface $renderer */
     $renderer = $this->container->get('renderer');
     $view = Views::getView('test_field_classes');
@@ -421,13 +418,13 @@ class FieldWebTest extends ViewTestBase {
     // Setup some kind of label by default.
     $id_field->options['label'] = $this->randomMachineName();
     $output = $view->preview();
-    $output = (string) $renderer->renderRoot($output);
+    $output = $renderer->renderRoot($output);
     $this->assertEmpty($this->xpathContent($output, '//div[contains(@class, :class)]', [':class' => 'field-content']));
     $this->assertEmpty($this->xpathContent($output, '//div[contains(@class, :class)]', [':class' => 'field__label']));
 
     $id_field->options['element_default_classes'] = TRUE;
     $output = $view->preview();
-    $output = (string) $renderer->renderRoot($output);
+    $output = $renderer->renderRoot($output);
     // Per default the label and the element of the field are spans.
     $this->assertNotEmpty($this->xpathContent($output, '//span[contains(@class, :class)]', [':class' => 'field-content']));
     $this->assertNotEmpty($this->xpathContent($output, '//span[contains(@class, :class)]', [':class' => 'views-label']));
@@ -443,13 +440,13 @@ class FieldWebTest extends ViewTestBase {
       // Set a custom wrapper element css class.
       $id_field->options['element_wrapper_class'] = $random_class;
       $output = $view->preview();
-      $output = (string) $renderer->renderRoot($output);
+      $output = $renderer->renderRoot($output);
       $this->assertNotEmpty($this->xpathContent($output, "//{$element_type}[contains(@class, :class)]", [':class' => $random_class]));
 
       // Set no custom css class.
       $id_field->options['element_wrapper_class'] = '';
       $output = $view->preview();
-      $output = (string) $renderer->renderRoot($output);
+      $output = $renderer->renderRoot($output);
       $this->assertEmpty($this->xpathContent($output, "//{$element_type}[contains(@class, :class)]", [':class' => $random_class]));
       $this->assertNotEmpty($this->xpathContent($output, "//li[contains(@class, views-row)]/{$element_type}"));
     }
@@ -463,13 +460,13 @@ class FieldWebTest extends ViewTestBase {
       // Set a custom label element css class.
       $id_field->options['element_label_class'] = $random_class;
       $output = $view->preview();
-      $output = (string) $renderer->renderRoot($output);
+      $output = $renderer->renderRoot($output);
       $this->assertNotEmpty($this->xpathContent($output, "//li[contains(@class, views-row)]//{$element_type}[contains(@class, :class)]", [':class' => $random_class]));
 
       // Set no custom css class.
       $id_field->options['element_label_class'] = '';
       $output = $view->preview();
-      $output = (string) $renderer->renderRoot($output);
+      $output = $renderer->renderRoot($output);
       $this->assertEmpty($this->xpathContent($output, "//li[contains(@class, views-row)]//{$element_type}[contains(@class, :class)]", [':class' => $random_class]));
       $this->assertNotEmpty($this->xpathContent($output, "//li[contains(@class, views-row)]//{$element_type}"));
     }
@@ -483,13 +480,13 @@ class FieldWebTest extends ViewTestBase {
       // Set a custom label element css class.
       $id_field->options['element_class'] = $random_class;
       $output = $view->preview();
-      $output = (string) $renderer->renderRoot($output);
+      $output = $renderer->renderRoot($output);
       $this->assertNotEmpty($this->xpathContent($output, "//li[contains(@class, views-row)]//div[contains(@class, views-field)]//{$element_type}[contains(@class, :class)]", [':class' => $random_class]));
 
       // Set no custom css class.
       $id_field->options['element_class'] = '';
       $output = $view->preview();
-      $output = (string) $renderer->renderRoot($output);
+      $output = $renderer->renderRoot($output);
       $this->assertEmpty($this->xpathContent($output, "//li[contains(@class, views-row)]//div[contains(@class, views-field)]//{$element_type}[contains(@class, :class)]", [':class' => $random_class]));
       $this->assertNotEmpty($this->xpathContent($output, "//li[contains(@class, views-row)]//div[contains(@class, views-field)]//{$element_type}"));
     }
@@ -519,7 +516,7 @@ class FieldWebTest extends ViewTestBase {
   /**
    * Tests trimming/read-more/ellipses.
    */
-  public function testTextRendering(): void {
+  public function testTextRendering() {
     /** @var \Drupal\Core\Render\RendererInterface $renderer */
     $renderer = \Drupal::service('renderer');
 
@@ -535,7 +532,7 @@ class FieldWebTest extends ViewTestBase {
     $row = $view->result[0];
 
     $name_field->options['alter']['strip_tags'] = TRUE;
-    $output = (string) $renderer->executeInRenderContext(new RenderContext(), function () use ($name_field, $row) {
+    $output = $renderer->executeInRenderContext(new RenderContext(), function () use ($name_field, $row) {
       return $name_field->advancedRender($row);
     });
     $this->assertSubString($output, $random_text, 'Find text without html if stripping of views field output is enabled.');
@@ -543,14 +540,14 @@ class FieldWebTest extends ViewTestBase {
 
     // Tests preserving of html tags.
     $name_field->options['alter']['preserve_tags'] = '<div>';
-    $output = (string) $renderer->executeInRenderContext(new RenderContext(), function () use ($name_field, $row) {
+    $output = $renderer->executeInRenderContext(new RenderContext(), function () use ($name_field, $row) {
       return $name_field->advancedRender($row);
     });
     $this->assertSubString($output, $random_text, 'Find text without html if stripping of views field output is enabled but a div is allowed.');
     $this->assertSubString($output, $html_text, 'Find text with the html if stripping of views field output is enabled but a div is allowed.');
 
     $name_field->options['alter']['strip_tags'] = FALSE;
-    $output = (string) $renderer->executeInRenderContext(new RenderContext(), function () use ($name_field, $row) {
+    $output = $renderer->executeInRenderContext(new RenderContext(), function () use ($name_field, $row) {
       return $name_field->advancedRender($row);
     });
     $this->assertSubString($output, $random_text, 'Find text without html if stripping of views field output is disabled.');
@@ -561,7 +558,7 @@ class FieldWebTest extends ViewTestBase {
     $views_test_data_name = $row->views_test_data_name;
     $row->views_test_data_name = '  ' . $views_test_data_name . '     ';
     $name_field->options['alter']['trim_whitespace'] = TRUE;
-    $output = (string) $renderer->executeInRenderContext(new RenderContext(), function () use ($name_field, $row) {
+    $output = $renderer->executeInRenderContext(new RenderContext(), function () use ($name_field, $row) {
       return $name_field->advancedRender($row);
     });
 
@@ -569,7 +566,7 @@ class FieldWebTest extends ViewTestBase {
     $this->assertNotSubString($output, $row->views_test_data_name, 'Make sure the untrimmed text can be found if trimming is enabled.');
 
     $name_field->options['alter']['trim_whitespace'] = FALSE;
-    $output = (string) $renderer->executeInRenderContext(new RenderContext(), function () use ($name_field, $row) {
+    $output = $renderer->executeInRenderContext(new RenderContext(), function () use ($name_field, $row) {
       return $name_field->advancedRender($row);
     });
     $this->assertSubString($output, $views_test_data_name, 'Make sure the trimmed text can be found if trimming is disabled.');
@@ -584,17 +581,17 @@ class FieldWebTest extends ViewTestBase {
     $name_field->options['alter']['max_length'] = 5;
     $trimmed_name = mb_substr($row->views_test_data_name, 0, 5);
 
-    $output = (string) $renderer->executeInRenderContext(new RenderContext(), function () use ($name_field, $row) {
+    $output = $renderer->executeInRenderContext(new RenderContext(), function () use ($name_field, $row) {
       return $name_field->advancedRender($row);
     });
-    $this->assertSubString($output, $trimmed_name, "Make sure the trimmed output ($trimmed_name) appears in the rendered output ($output).");
-    $this->assertNotSubString($output, $row->views_test_data_name, "Make sure the untrimmed value ($row->views_test_data_name) shouldn't appear in the rendered output ($output).");
+    $this->assertSubString($output, $trimmed_name, new FormattableMarkup('Make sure the trimmed output (@trimmed) appears in the rendered output (@output).', ['@trimmed' => $trimmed_name, '@output' => $output]));
+    $this->assertNotSubString($output, $row->views_test_data_name, new FormattableMarkup("Make sure the untrimmed value (@untrimmed) shouldn't appear in the rendered output (@output).", ['@untrimmed' => $row->views_test_data_name, '@output' => $output]));
 
     $name_field->options['alter']['max_length'] = 9;
-    $output = (string) $renderer->executeInRenderContext(new RenderContext(), function () use ($name_field, $row) {
+    $output = $renderer->executeInRenderContext(new RenderContext(), function () use ($name_field, $row) {
       return $name_field->advancedRender($row);
     });
-    $this->assertSubString($output, $trimmed_name, "Make sure the untrimmed ($trimmed_name) output appears in the rendered output  ($output).");
+    $this->assertSubString($output, $trimmed_name, new FormattableMarkup('Make sure the untrimmed (@untrimmed) output appears in the rendered output  (@output).', ['@trimmed' => $trimmed_name, '@output' => $output]));
 
     // Take word_boundary into account for the tests.
     $name_field->options['alter']['max_length'] = 5;
@@ -633,15 +630,15 @@ class FieldWebTest extends ViewTestBase {
 
     foreach ($tuples as $tuple) {
       $row->views_test_data_name = $tuple['value'];
-      $output = (string) $renderer->executeInRenderContext(new RenderContext(), function () use ($name_field, $row) {
+      $output = $renderer->executeInRenderContext(new RenderContext(), function () use ($name_field, $row) {
         return $name_field->advancedRender($row);
       });
 
       if ($tuple['trimmed']) {
-        $this->assertNotSubString($output, $tuple['value'], "The untrimmed value ({$tuple['value']}) should not appear in the trimmed output ($output).");
+        $this->assertNotSubString($output, $tuple['value'], new FormattableMarkup('The untrimmed value (@untrimmed) should not appear in the trimmed output (@output).', ['@untrimmed' => $tuple['value'], '@output' => $output]));
       }
       if (!empty($tuple['trimmed_value'])) {
-        $this->assertSubString($output, $tuple['trimmed_value'], "The trimmed value ({$tuple['trimmed_value']}) should appear in the trimmed output ($output).");
+        $this->assertSubString($output, $tuple['trimmed_value'], new FormattableMarkup('The trimmed value (@trimmed) should appear in the trimmed output (@output).', ['@trimmed' => $tuple['trimmed_value'], '@output' => $output]));
       }
     }
 
@@ -652,14 +649,14 @@ class FieldWebTest extends ViewTestBase {
     $name_field->options['alter']['more_link_text'] = $more_text = $this->randomMachineName();
     $name_field->options['alter']['more_link_path'] = $more_path = $this->randomMachineName();
 
-    $output = (string) $renderer->executeInRenderContext(new RenderContext(), function () use ($name_field, $row) {
+    $output = $renderer->executeInRenderContext(new RenderContext(), function () use ($name_field, $row) {
       return $name_field->advancedRender($row);
     });
     $this->assertSubString($output, $more_text, 'Make sure a read more text is displayed if the output got trimmed');
     $this->assertNotEmpty($this->xpathContent($output, '//a[contains(@href, :path)]', [':path' => $more_path]), 'Make sure the read more link points to the right destination.');
 
     $name_field->options['alter']['more_link'] = FALSE;
-    $output = (string) $renderer->executeInRenderContext(new RenderContext(), function () use ($name_field, $row) {
+    $output = $renderer->executeInRenderContext(new RenderContext(), function () use ($name_field, $row) {
       return $name_field->advancedRender($row);
     });
     $this->assertNotSubString($output, $more_text, 'Make sure no read more text appears.');
@@ -668,12 +665,12 @@ class FieldWebTest extends ViewTestBase {
     // Check for the ellipses.
     $row->views_test_data_name = $this->randomMachineName(8);
     $name_field->options['alter']['max_length'] = 5;
-    $output = (string) $renderer->executeInRenderContext(new RenderContext(), function () use ($name_field, $row) {
+    $output = $renderer->executeInRenderContext(new RenderContext(), function () use ($name_field, $row) {
       return $name_field->advancedRender($row);
     });
     $this->assertSubString($output, '…', 'An ellipsis should appear if the output is trimmed');
     $name_field->options['alter']['max_length'] = 10;
-    $output = (string) $renderer->executeInRenderContext(new RenderContext(), function () use ($name_field, $row) {
+    $output = $renderer->executeInRenderContext(new RenderContext(), function () use ($name_field, $row) {
       return $name_field->advancedRender($row);
     });
     $this->assertNotSubString($output, '…', 'No ellipsis should appear if the output is not trimmed');

@@ -10,9 +10,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Provides a console command to generate proxy classes.
- *
- * @see lazy_services
- * @see core/scripts/generate-proxy.sh
  */
 class GenerateProxyClassCommand extends Command {
 
@@ -47,13 +44,13 @@ class GenerateProxyClassCommand extends Command {
       ->setDescription('Dumps a generated proxy class into its appropriate namespace.')
       ->addUsage('\'Drupal\Core\Batch\BatchStorage\' "core/lib/Drupal/Core"')
       ->addUsage('\'Drupal\block\BlockRepository\' "core/modules/block/src"')
-      ->addUsage('\'Drupal\my_module\MyClass\' "modules/contrib/my_module/src"');
+      ->addUsage('\'Drupal\mymodule\MyClass\' "modules/contrib/mymodule/src"');
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function execute(InputInterface $input, OutputInterface $output): int {
+  protected function execute(InputInterface $input, OutputInterface $output) {
     $class_name = ltrim($input->getArgument('class_name'), '\\');
     $namespace_root = $input->getArgument('namespace_root_path');
 

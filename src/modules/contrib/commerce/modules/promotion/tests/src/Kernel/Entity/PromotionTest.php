@@ -2,13 +2,14 @@
 
 namespace Drupal\Tests\commerce_promotion\Kernel\Entity;
 
-use Drupal\Core\Datetime\DrupalDateTime;
-use Drupal\Tests\commerce_order\Kernel\OrderKernelTestBase;
 use Drupal\commerce_order\Entity\OrderType;
+use Drupal\commerce_price\RounderInterface;
 use Drupal\commerce_promotion\Entity\Coupon;
 use Drupal\commerce_promotion\Entity\Promotion;
 use Drupal\commerce_promotion\Plugin\Commerce\PromotionOffer\OrderItemPercentageOff;
+use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
+use Drupal\Tests\commerce_order\Kernel\OrderKernelTestBase;
 
 /**
  * Tests the Promotion entity.
@@ -115,7 +116,8 @@ class PromotionTest extends OrderKernelTestBase {
     $promotion->setStoreIds([$this->store->id()]);
     $this->assertEquals([$this->store->id()], $promotion->getStoreIds());
 
-    $offer = new OrderItemPercentageOff(['percentage' => '0.5'], 'order_percentage_off', []);
+    $rounder = $this->prophesize(RounderInterface::class)->reveal();
+    $offer = new OrderItemPercentageOff(['percentage' => '0.5'], 'order_percentage_off', [], $rounder);
     $promotion->setOffer($offer);
     $this->assertEquals($offer->getPluginId(), $promotion->getOffer()->getPluginId());
     $this->assertEquals($offer->getConfiguration(), $promotion->getOffer()->getConfiguration());

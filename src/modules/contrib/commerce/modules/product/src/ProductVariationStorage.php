@@ -2,11 +2,11 @@
 
 namespace Drupal\commerce_product;
 
-use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\commerce\CommerceContentEntityStorage;
 use Drupal\commerce_product\Entity\ProductInterface;
 use Drupal\commerce_product\Event\FilterVariationsEvent;
 use Drupal\commerce_product\Event\ProductEvents;
+use Drupal\Core\Entity\EntityTypeInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -75,10 +75,6 @@ class ProductVariationStorage extends CommerceContentEntityStorage implements Pr
     $ids = [];
     foreach ($product->variations as $variation) {
       $ids[$variation->target_id] = $variation->target_id;
-    }
-    if (empty($ids)) {
-      $this->enabledVariations[$product->id()] = [];
-      return [];
     }
     // Speed up loading by filtering out the IDs of disabled variations.
     $query = $this->getQuery()

@@ -2,29 +2,24 @@
 
 namespace Drupal\telephone\Plugin\Field\FieldType;
 
-use Drupal\Core\Field\Attribute\FieldType;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemBase;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\TypedData\DataDefinition;
 
 /**
  * Plugin implementation of the 'telephone' field type.
+ *
+ * @FieldType(
+ *   id = "telephone",
+ *   label = @Translation("Telephone number"),
+ *   description = @Translation("This field stores a telephone number in the database."),
+ *   category = @Translation("Number"),
+ *   default_widget = "telephone_default",
+ *   default_formatter = "basic_string"
+ * )
  */
-#[FieldType(
-  id: "telephone",
-  label: new TranslatableMarkup("Telephone number"),
-  description: new TranslatableMarkup("This field stores a telephone number."),
-  default_widget: "telephone_default",
-  default_formatter: "basic_string"
-)]
 class TelephoneItem extends FieldItemBase {
-
-  /**
-   * The maximum length for a telephone value.
-   */
-  const MAX_LENGTH = 256;
 
   /**
    * {@inheritdoc}
@@ -34,7 +29,7 @@ class TelephoneItem extends FieldItemBase {
       'columns' => [
         'value' => [
           'type' => 'varchar',
-          'length' => self::MAX_LENGTH,
+          'length' => 256,
         ],
       ],
     ];
@@ -45,7 +40,7 @@ class TelephoneItem extends FieldItemBase {
    */
   public static function propertyDefinitions(FieldStorageDefinitionInterface $field_definition) {
     $properties['value'] = DataDefinition::create('string')
-      ->setLabel(new TranslatableMarkup('Telephone number'))
+      ->setLabel(t('Telephone number'))
       ->setRequired(TRUE);
 
     return $properties;
@@ -66,11 +61,12 @@ class TelephoneItem extends FieldItemBase {
     $constraint_manager = \Drupal::typedDataManager()->getValidationConstraintManager();
     $constraints = parent::getConstraints();
 
+    $max_length = 256;
     $constraints[] = $constraint_manager->create('ComplexData', [
       'value' => [
         'Length' => [
-          'max' => self::MAX_LENGTH,
-          'maxMessage' => $this->t('%name: the telephone number may not be longer than @max characters.', ['%name' => $this->getFieldDefinition()->getLabel(), '@max' => self::MAX_LENGTH]),
+          'max' => $max_length,
+          'maxMessage' => t('%name: the telephone number may not be longer than @max characters.', ['%name' => $this->getFieldDefinition()->getLabel(), '@max' => $max_length]),
         ],
       ],
     ]);

@@ -1,13 +1,14 @@
 <?php
 
-declare(strict_types=1);
+/**
+ * @file
+ * Contains \Drush\Psysh\DrushCommand.
+ */
 
 namespace Drush\Psysh;
 
-use Drush\Commands\DrushCommands;
-use Psy\Command\Command;
 use Psy\Command\Command as BaseCommand;
-use Psy\Output\ShellOutput;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Formatter\OutputFormatter;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -22,15 +23,23 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class DrushHelpCommand extends BaseCommand
 {
+
     /**
      * Label for PsySH commands.
      */
     const PSYSH_CATEGORY = 'PsySH';
 
     /**
+     * The currently set subcommand.
+     *
+     * @var \Symfony\Component\Console\Command\Command
+     */
+    protected $command;
+
+    /**
      * {@inheritdoc}
      */
-    protected function configure(): void
+    protected function configure()
     {
         $this
         ->setName('help')
@@ -42,17 +51,27 @@ class DrushHelpCommand extends BaseCommand
     }
 
     /**
+     * Helper for setting a subcommand to retrieve help for.
+     *
+     * @param \Symfony\Component\Console\Command\Command $command
+     */
+    public function setCommand(Command $command)
+    {
+        $this->command = $command;
+    }
+
+    /**
      * {@inheritdoc}
      */
-    protected function execute(InputInterface $input, OutputInterface $output): int
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
-        assert($output instanceof ShellOutput);
-
-        if ($name = $input->getArgument('command_name')) {
+        if ($this->command !== null) {
             // Help for an individual command.
-            /** @var Command $command */
-            $command = $this->getApplication()->get($name);
-            $output->page($command->asText());
+            $output->page($this->command->asText());
+            $this->command = null;
+        } elseif ($name = $input->getArgument('command_name')) {
+            // Help for an individual command.
+            $output->page($this->getApplication()->get($name)->asText());
         } else {
             $namespaces = [];
 
@@ -62,7 +81,7 @@ class DrushHelpCommand extends BaseCommand
             // Find the alignment width.
             $width = 0;
             foreach ($commands as $command) {
-                $width = max(strlen($command->getName()), $width);
+                $width = strlen($command->getName()) > $width ? strlen($command->getName()) : $width;
             }
             $width += 2;
 
@@ -90,7 +109,7 @@ class DrushHelpCommand extends BaseCommand
                     $namespaces[$namespace] = [];
                 }
 
-                $namespaces[$namespace][] = sprintf("    <info>%-{$width}s</info> %s%s", $name, $command->getDescription(), $aliases);
+                $namespaces[$namespace][] = sprintf("    <info>%-${width}s</info> %s%s", $name, $command->getDescription(), $aliases);
             }
 
             $messages = [];
@@ -105,6 +124,5 @@ class DrushHelpCommand extends BaseCommand
 
             $output->page($messages);
         }
-        return DrushCommands::EXIT_SUCCESS;
     }
 }

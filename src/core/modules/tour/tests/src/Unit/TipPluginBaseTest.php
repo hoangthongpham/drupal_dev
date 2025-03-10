@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\tour\Unit;
 
 use Drupal\Tests\UnitTestCase;
@@ -11,14 +9,13 @@ use Drupal\tour\TipPluginBase;
  * @coversDefaultClass \Drupal\tour\TipPluginBase
  *
  * @group tour
- * @group legacy
  */
 class TipPluginBaseTest extends UnitTestCase {
 
   /**
    * @covers ::getLocation
    */
-  public function testGetLocationAssertion(): void {
+  public function testGetLocationAssertion() {
     $base_plugin = $this->getMockForAbstractClass(TipPluginBase::class, [], '', FALSE);
 
     $base_plugin->set('position', 'right');

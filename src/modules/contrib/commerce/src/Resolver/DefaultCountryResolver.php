@@ -32,9 +32,7 @@ class DefaultCountryResolver implements CountryResolverInterface {
    */
   public function resolve() {
     $country_code = $this->configFactory->get('system.date')->get('country.default');
-    if ($country_code && is_string($country_code)) {
-      return new Country($country_code);
-    }
+    return new Country($country_code);
   }
 
 }

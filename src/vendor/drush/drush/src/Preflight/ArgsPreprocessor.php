@@ -1,7 +1,4 @@
 <?php
-
-declare(strict_types=1);
-
 namespace Drush\Preflight;
 
 use Consolidation\SiteAlias\SiteAliasName;
@@ -17,8 +14,10 @@ use Consolidation\SiteAlias\SiteSpecParser;
  */
 class ArgsPreprocessor
 {
-    protected ?SiteSpecParser $specParser;
-    protected ?ArgsRemapper $remapper;
+    /** @var SiteSpecParser */
+    protected $specParser;
+    /** @var ArgsRemapper */
+    protected $remapper;
 
     /**
      * ArgsPreprocessor constructor
@@ -28,7 +27,7 @@ class ArgsPreprocessor
         $this->specParser = new SiteSpecParser();
     }
 
-    public function setArgsRemapper(ArgsRemapper $remapper): void
+    public function setArgsRemapper(ArgsRemapper $remapper)
     {
         $this->remapper = $remapper;
     }
@@ -39,10 +38,11 @@ class ArgsPreprocessor
      * @param string[] $argv
      *   Commandline arguments. The first element is
      *   the path to the application, which we will ignore.
+     * @param PreflightArgsInterface $storage
      *   A storage object to hold the arguments we remove
      *   from argv, plus the remaining argv arguments.
      */
-    public function parse(array $argv, PreflightArgsInterface $storage)
+    public function parse($argv, PreflightArgsInterface $storage)
     {
         $sawArg = false;
 
@@ -51,7 +51,7 @@ class ArgsPreprocessor
         $appName = array_shift($argv);
         $storage->addArg($appName);
 
-        if (isset($this->remapper)) {
+        if ($this->remapper) {
             $argv = $this->remapper->remap($argv);
         }
 
@@ -94,7 +94,7 @@ class ArgsPreprocessor
      * nextCouldBeValue determines whether there is a next argument that
      * exists and does not begin with a `-`.
      */
-    protected static function nextCouldBeValue($argv): bool
+    protected static function nextCouldBeValue($argv)
     {
         if (empty($argv)) {
             return false;
@@ -108,8 +108,9 @@ class ArgsPreprocessor
      *
      * @param string $arg
      *   Argument to test.
+     * @return bool
      */
-    protected function isAliasOrSiteSpec(string $arg): bool
+    protected function isAliasOrSiteSpec($arg)
     {
         if (SiteAliasName::isAliasName($arg)) {
             return true;
@@ -124,13 +125,12 @@ class ArgsPreprocessor
      * @param $optionsTable Table of option names and the name of the
      *   method that should be called to process that option.
      * @param $opt The option string to check
-     * @return array
-     *   [$methodName, $optionValue, $acceptsValueFromNextArg]
+     * @return [$methodName, $optionValue, $acceptsValueFromNextArg]
      */
-    protected function findMethodForOptionWithValues(array $optionsTable, string $opt): array
+    protected function findMethodForOptionWithValues($optionsTable, $opt)
     {
         // Skip $opt if it is empty, or if it is not an option.
-        if (empty($opt) || ($opt[0] !== '-')) {
+        if (empty($opt) || ($opt[0] != '-')) {
             return [false, false, false];
         }
 
@@ -155,19 +155,18 @@ class ArgsPreprocessor
      *   '--'.  If $key ends with '=', then the option must have a value.
      *   Otherwise, it cannot be supplied with a value, and always defaults
      *   to 'true'.
-     * @return array
-     *   [$methodName, $optionValue, $acceptsValueFromNextArg]
+     * @return [$methodName, $optionValue, $acceptsValueFromNextArg]
      */
-    protected function checkMatchingOption(string $opt, string $keyParam, string $methodName): array
+    protected function checkMatchingOption($opt, $keyParam, $methodName)
     {
         // Test to see if $key ends in '='; remove the character if present.
         // If the char is removed, it means the option accepts a value.
         $key = rtrim($keyParam, '=~');
-        $acceptsValue = $key !== $keyParam;
-        $acceptsValueFromNextArg = $keyParam[strlen($keyParam) - 1] !== '~';
+        $acceptsValue = $key != $keyParam;
+        $acceptsValueFromNextArg = $keyParam[strlen($keyParam) - 1] != '~';
 
         // If $opt does not begin with $key, then it cannot be a match.
-        if (!str_starts_with($opt, $key)) {
+        if ($key != substr($opt, 0, strlen($key))) {
             return [false, false, false];
         }
 
@@ -176,14 +175,14 @@ class ArgsPreprocessor
         // a value; in this case, the value will be provided from the next
         // argument in the calling function. If this option does not take a
         // supplied value, then we set its value to 'true'
-        if (strlen($key) === strlen($opt)) {
-            return [$methodName, $acceptsValue ? null : true, $acceptsValueFromNextArg];
+        if (strlen($key) == strlen($opt)) {
+            return [$methodName, $acceptsValue ? null: true, $acceptsValueFromNextArg];
         }
 
         // If the option is not an exact match for the key, then the next
         // character in the option after the key name must be an '='. Otherwise,
         // we might confuse `--locale` for `--local`, etc.
-        if ($opt[strlen($key)] !== '=') {
+        if ($opt[strlen($key)] != '=') {
             return [false, false, false];
         }
 
@@ -198,7 +197,7 @@ class ArgsPreprocessor
 
         // If $opt is a double-dash option, and it contains an '=', then
         // the option value is everything after the '='.
-        if ((strlen($key) < strlen($opt)) && ($opt[1] === '-') && ($opt[strlen($key)] === '=')) {
+        if ((strlen($key) < strlen($opt)) && ($opt[1] == '-') && ($opt[strlen($key)] == '=')) {
             $value = substr($opt, strlen($key) + 1);
             return [$methodName, $value, false];
         }

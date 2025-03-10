@@ -2,16 +2,16 @@
 
 namespace Drupal\commerce_tax\Plugin\Commerce\TaxType;
 
+use Drupal\commerce_order\Entity\OrderInterface;
+use Drupal\commerce_order\Entity\OrderItemInterface;
+use Drupal\commerce_tax\Event\TaxEvents;
+use Drupal\commerce_tax\Event\CustomerProfileEvent;
+use Drupal\commerce_tax\TaxableType;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\PluginBase;
-use Drupal\commerce_order\Entity\OrderInterface;
-use Drupal\commerce_order\Entity\OrderItemInterface;
-use Drupal\commerce_tax\Event\CustomerProfileEvent;
-use Drupal\commerce_tax\Event\TaxEvents;
-use Drupal\commerce_tax\TaxableType;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -48,8 +48,18 @@ abstract class TaxTypeBase extends PluginBase implements TaxTypeInterface, Conta
    *
    * @var string|int|null
    */
-  // phpcs:ignore Drupal.Classes.PropertyDeclaration, Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing, PSR2.Classes.PropertyDeclaration.Underscore
+  // phpcs:ignore Drupal.Classes.PropertyDeclaration
   protected $_parentEntityId;
+
+  /**
+   * The ID of the parent config entity.
+   *
+   * @deprecated in commerce:8.x-2.16 and is removed from commerce:3.x.
+   *   Use $this->parentEntity->id() instead.
+   *
+   * @var string
+   */
+  protected $entityId;
 
   /**
    * A cache of prepared customer profiles, keyed by order ID.
@@ -79,6 +89,7 @@ abstract class TaxTypeBase extends PluginBase implements TaxTypeInterface, Conta
     $this->eventDispatcher = $event_dispatcher;
     if (array_key_exists('_entity', $configuration)) {
       $this->parentEntity = $configuration['_entity'];
+      $this->entityId = $this->parentEntity->id();
       unset($configuration['_entity']);
     }
     $this->setConfiguration($configuration);
@@ -100,7 +111,7 @@ abstract class TaxTypeBase extends PluginBase implements TaxTypeInterface, Conta
   /**
    * {@inheritdoc}
    */
-  public function __sleep(): array {
+  public function __sleep() {
     if (!empty($this->parentEntity)) {
       $this->_parentEntityId = $this->parentEntity->id();
       unset($this->parentEntity);
@@ -113,7 +124,7 @@ abstract class TaxTypeBase extends PluginBase implements TaxTypeInterface, Conta
   /**
    * {@inheritdoc}
    */
-  public function __wakeup(): void {
+  public function __wakeup() {
     parent::__wakeup();
 
     if (!empty($this->_parentEntityId)) {
@@ -244,7 +255,7 @@ abstract class TaxTypeBase extends PluginBase implements TaxTypeInterface, Conta
     }
     $customer_profile = $this->buildCustomerProfile($order);
     // Allow the customer profile to be altered, per order item.
-    $event = new CustomerProfileEvent($order_item, $customer_profile);
+    $event = new CustomerProfileEvent($customer_profile, $order_item);
     $this->eventDispatcher->dispatch($event, TaxEvents::CUSTOMER_PROFILE);
     $customer_profile = $event->getCustomerProfile();
 

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\filter\Functional;
 
 use Drupal\filter\Entity\FilterFormat;
@@ -10,14 +8,18 @@ use Drupal\filter\Plugin\FilterInterface;
 use Drupal\user\RoleInterface;
 
 /**
- * Tests HTML filtering with missing or skipped filters or text formats.
+ * Tests the behavior of check_markup() when a filter or text format vanishes,
+ * or when check_markup() is called in such a way that it is instructed to skip
+ * all filters of the "FilterInterface::TYPE_HTML_RESTRICTOR" type.
  *
  * @group filter
  */
 class FilterSecurityTest extends BrowserTestBase {
 
   /**
-   * {@inheritdoc}
+   * Modules to enable.
+   *
+   * @var array
    */
   protected static $modules = ['node', 'filter_test'];
 
@@ -33,9 +35,6 @@ class FilterSecurityTest extends BrowserTestBase {
    */
   protected $adminUser;
 
-  /**
-   * {@inheritdoc}
-   */
   protected function setUp(): void {
     parent::setUp();
 
@@ -61,7 +60,7 @@ class FilterSecurityTest extends BrowserTestBase {
    * Tests that filtered content is emptied when an actively used filter module
    * is disabled.
    */
-  public function testDisableFilterModule(): void {
+  public function testDisableFilterModule() {
     // Create a new node.
     $node = $this->drupalCreateNode(['promote' => 1]);
     $body_raw = $node->body->value;
@@ -93,11 +92,11 @@ class FilterSecurityTest extends BrowserTestBase {
   /**
    * Tests that security filters are enforced even when marked to be skipped.
    */
-  public function testSkipSecurityFilters(): void {
+  public function testSkipSecurityFilters() {
     $text = "Text with some disallowed tags: <script />, <p><object>unicorn</object></p>, <i><table></i>.";
     $expected_filtered_text = "Text with some disallowed tags: , <p>unicorn</p>, .";
-    $this->assertSame($expected_filtered_text, (string) check_markup($text, 'filtered_html', '', []), 'Expected filter result.');
-    $this->assertSame($expected_filtered_text, (string) check_markup($text, 'filtered_html', '', [FilterInterface::TYPE_HTML_RESTRICTOR]), 'Expected filter result, even when trying to disable filters of the FilterInterface::TYPE_HTML_RESTRICTOR type.');
+    $this->assertEquals($expected_filtered_text, check_markup($text, 'filtered_html', '', []), 'Expected filter result.');
+    $this->assertEquals($expected_filtered_text, check_markup($text, 'filtered_html', '', [FilterInterface::TYPE_HTML_RESTRICTOR]), 'Expected filter result, even when trying to disable filters of the FilterInterface::TYPE_HTML_RESTRICTOR type.');
   }
 
 }

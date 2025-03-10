@@ -2,15 +2,12 @@
 
 namespace Drupal\views\Plugin\views\display;
 
-use Drupal\Component\Utility\Unicode;
 use Drupal\Component\Utility\Xss;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Menu\MenuParentFormSelectorInterface;
 use Drupal\Core\State\StateInterface;
 use Drupal\Core\Routing\RouteProviderInterface;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\views\Attribute\ViewsDisplay;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Routing\Route;
 
@@ -18,17 +15,18 @@ use Symfony\Component\Routing\Route;
  * The plugin that handles a full page.
  *
  * @ingroup views_display_plugins
+ *
+ * @ViewsDisplay(
+ *   id = "page",
+ *   title = @Translation("Page"),
+ *   help = @Translation("Display the view as a page, with a URL and menu links."),
+ *   uses_menu_links = TRUE,
+ *   uses_route = TRUE,
+ *   contextual_links_locations = {"page"},
+ *   theme = "views_view",
+ *   admin = @Translation("Page")
+ * )
  */
-#[ViewsDisplay(
-  id: "page",
-  title: new TranslatableMarkup("Page"),
-  help: new TranslatableMarkup("Display the view as a page, with a URL and menu links."),
-  uses_menu_links: TRUE,
-  uses_route: TRUE,
-  contextual_links_locations: ["page"],
-  theme: "views_view",
-  admin: new TranslatableMarkup("Page"),
-)]
 class Page extends PathPluginBase {
 
   /**
@@ -65,7 +63,7 @@ class Page extends PathPluginBase {
    * @param array $configuration
    *   A configuration array containing information about the plugin instance.
    * @param string $plugin_id
-   *   The plugin ID for the plugin instance.
+   *   The plugin_id for the plugin instance.
    * @param mixed $plugin_definition
    *   The plugin implementation definition.
    * @param \Drupal\Core\Routing\RouteProviderInterface $route_provider
@@ -77,9 +75,13 @@ class Page extends PathPluginBase {
    * @param \Drupal\Core\Menu\MenuParentFormSelectorInterface $parent_form_selector
    *   The parent form selector service.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, RouteProviderInterface $route_provider, StateInterface $state, EntityStorageInterface $menu_storage, MenuParentFormSelectorInterface $parent_form_selector) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, RouteProviderInterface $route_provider, StateInterface $state, EntityStorageInterface $menu_storage, MenuParentFormSelectorInterface $parent_form_selector = NULL) {
     parent::__construct($configuration, $plugin_id, $plugin_definition, $route_provider, $state);
     $this->menuStorage = $menu_storage;
+    if (!$parent_form_selector) {
+      @trigger_error('Calling ' . __METHOD__ . '() without the $parent_form_selector argument is deprecated in drupal:9.3.0 and the $parent_form_selector argument will be required in drupal:10.0.0. See https://www.drupal.org/node/3027559', E_USER_DEPRECATED);
+      $parent_form_selector = \Drupal::service('menu.parent_form_selector');
+    }
     $this->parentFormSelector = $parent_form_selector;
   }
 
@@ -107,10 +109,6 @@ class Page extends PathPluginBase {
     // Explicitly set HTML as the format for Page displays.
     $route->setRequirement('_format', 'html');
 
-    if ($this->getOption('use_admin_theme')) {
-      $route->setOption('_admin_route', TRUE);
-    }
-
     return $route;
   }
 
@@ -124,7 +122,7 @@ class Page extends PathPluginBase {
    * @return array
    *   The page render array.
    */
-  public static function &setPageRenderArray(?array &$element = NULL) {
+  public static function &setPageRenderArray(array &$element = NULL) {
     if (isset($element)) {
       static::$pageRenderArray = &$element;
     }
@@ -176,7 +174,7 @@ class Page extends PathPluginBase {
   /**
    * {@inheritdoc}
    */
-  public static function buildBasicRenderable($view_id, $display_id, array $args = [], ?Route $route = NULL) {
+  public static function buildBasicRenderable($view_id, $display_id, array $args = [], Route $route = NULL) {
     $build = parent::buildBasicRenderable($view_id, $display_id, $args);
 
     if ($route) {
@@ -241,7 +239,7 @@ class Page extends PathPluginBase {
     $options['menu'] = [
       'category' => 'page',
       'title' => $this->t('Menu'),
-      'value' => Unicode::truncate($menu_str, 24, FALSE, TRUE),
+      'value' => views_ui_truncate($menu_str, 24),
     ];
 
     // This adds a 'Settings' link to the style_options setting if the style
@@ -250,26 +248,6 @@ class Page extends PathPluginBase {
       $options['menu']['setting'] = $this->t('Parent menu link');
       $options['menu']['links']['tab_options'] = $this->t('Change settings for the parent menu');
     }
-
-    // If the display path starts with 'admin/' the page will be rendered with
-    // the Administration theme regardless of the 'use_admin_theme' option
-    // therefore, we need to set the summary message to reflect this.
-    if (str_starts_with($this->getOption('path') ?? '', 'admin/')) {
-      $admin_theme_text = $this->t('Yes (admin path)');
-    }
-    elseif ($this->getOption('use_admin_theme')) {
-      $admin_theme_text = $this->t('Yes');
-    }
-    else {
-      $admin_theme_text = $this->t('No');
-    }
-
-    $options['use_admin_theme'] = [
-      'category' => 'page',
-      'title' => $this->t('Administration theme'),
-      'value' => $admin_theme_text,
-      'desc' => $this->t('Use the administration theme when rendering this display.'),
-    ];
   }
 
   /**
@@ -471,20 +449,6 @@ class Page extends PathPluginBase {
           ],
         ];
         break;
-
-      case 'use_admin_theme':
-        $form['#title'] .= $this->t('Administration theme');
-        $form['use_admin_theme'] = [
-          '#type' => 'checkbox',
-          '#title' => $this->t('Use the administration theme'),
-          '#default_value' => $this->getOption('use_admin_theme'),
-        ];
-        if (str_starts_with($this->getOption('path') ?? '', 'admin/')) {
-          $form['use_admin_theme']['#description'] = $this->t('Paths starting with "@admin" always use the administration theme.', ['@admin' => 'admin/']);
-          $form['use_admin_theme']['#default_value'] = TRUE;
-          $form['use_admin_theme']['#attributes'] = ['disabled' => 'disabled'];
-        }
-        break;
     }
   }
 
@@ -497,7 +461,7 @@ class Page extends PathPluginBase {
     if ($form_state->get('section') == 'menu') {
       $path = $this->getOption('path');
       $menu_type = $form_state->getValue(['menu', 'type']);
-      if ($menu_type == 'normal' && str_contains($path, '%')) {
+      if ($menu_type == 'normal' && strpos($path, '%') !== FALSE) {
         $form_state->setError($form['menu']['type'], $this->t('Views cannot create normal menu links for paths with a % in them.'));
       }
 
@@ -526,7 +490,7 @@ class Page extends PathPluginBase {
         $menu = $form_state->getValue('menu');
         [$menu['menu_name'], $menu['parent']] = explode(':', $menu['parent'], 2);
         $this->setOption('menu', $menu);
-        // Send ajax form to options page if we use it.
+        // send ajax form to options page if we use it.
         if ($form_state->getValue(['menu', 'type']) == 'default tab') {
           $form_state->get('view')->addFormToStack('display', $this->display['id'], 'tab_options');
         }
@@ -534,16 +498,6 @@ class Page extends PathPluginBase {
 
       case 'tab_options':
         $this->setOption('tab_options', $form_state->getValue('tab_options'));
-        break;
-
-      case 'use_admin_theme':
-        if ($form_state->getValue('use_admin_theme')) {
-          $this->setOption('use_admin_theme', $form_state->getValue('use_admin_theme'));
-        }
-        else {
-          unset($this->options['use_admin_theme']);
-          unset($this->display['display_options']['use_admin_theme']);
-        }
         break;
     }
   }

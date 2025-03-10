@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\search\Functional;
 
 use Drupal\Tests\BrowserTestBase;
@@ -33,9 +31,6 @@ class SearchPageOverrideTest extends BrowserTestBase {
    */
   public $searchUser;
 
-  /**
-   * {@inheritdoc}
-   */
   protected function setUp(): void {
     parent::setUp();
 
@@ -47,7 +42,7 @@ class SearchPageOverrideTest extends BrowserTestBase {
     $this->drupalLogin($this->searchUser);
   }
 
-  public function testSearchPageHook(): void {
+  public function testSearchPageHook() {
     $keys = 'bike shed ' . $this->randomMachineName();
     $this->drupalGet("search/dummy_path", ['query' => ['keys' => $keys]]);
     $this->assertSession()->pageTextContains('Dummy search snippet');

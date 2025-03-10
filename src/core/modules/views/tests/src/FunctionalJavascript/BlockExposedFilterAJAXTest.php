@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\views\FunctionalJavascript;
 
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
@@ -34,7 +32,7 @@ class BlockExposedFilterAJAXTest extends WebDriverTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp(): void {
+  public function setUp(): void {
     parent::setUp();
     ViewTestData::createTestViews(self::class, ['views_test_config']);
     $this->createContentType(['type' => 'page']);
@@ -51,7 +49,7 @@ class BlockExposedFilterAJAXTest extends WebDriverTestBase {
   /**
    * Tests if exposed filtering and reset works with a views block and ajax.
    */
-  public function testExposedFilteringAndReset(): void {
+  public function testExposedFilteringAndReset() {
     $node = $this->createNode();
     $block = $this->drupalPlaceBlock('views_block:test_block_exposed_ajax-block_1');
     $this->drupalGet($node->toUrl());

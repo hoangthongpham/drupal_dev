@@ -24,6 +24,11 @@ use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 class ResourceIdentifierNormalizer extends NormalizerBase implements DenormalizerInterface {
 
   /**
+   * {@inheritdoc}
+   */
+  protected $supportedInterfaceOrClass = ResourceIdentifier::class;
+
+  /**
    * The entity field manager.
    *
    * @var \Drupal\Core\Entity\EntityFieldManagerInterface
@@ -43,7 +48,7 @@ class ResourceIdentifierNormalizer extends NormalizerBase implements Denormalize
   /**
    * {@inheritdoc}
    */
-  public function normalize($object, $format = NULL, array $context = []): array|string|int|float|bool|\ArrayObject|NULL {
+  public function normalize($object, $format = NULL, array $context = []) {
     assert($object instanceof ResourceIdentifier);
     $normalization = [
       'type' => $object->getTypeName(),
@@ -58,7 +63,7 @@ class ResourceIdentifierNormalizer extends NormalizerBase implements Denormalize
   /**
    * {@inheritdoc}
    */
-  public function denormalize($data, $class, $format = NULL, array $context = []): mixed {
+  public function denormalize($data, $class, $format = NULL, array $context = []) {
     // If we get here, it's via a relationship POST/PATCH.
     /** @var \Drupal\jsonapi\ResourceType\ResourceType $resource_type */
     $resource_type = $context['resource_type'];
@@ -72,6 +77,9 @@ class ResourceIdentifierNormalizer extends NormalizerBase implements Denormalize
     }
     /** @var \Drupal\field\Entity\FieldConfig $field_definition */
     $field_definition = $field_definitions[$context['related']];
+    // This is typically 'target_id'.
+    $item_definition = $field_definition->getItemDefinition();
+    $property_key = $item_definition->getMainPropertyName();
     $target_resource_types = $resource_type->getRelatableResourceTypesByField($resource_type->getPublicName($context['related']));
     $target_resource_type_names = array_map(function (ResourceType $resource_type) {
       return $resource_type->getTypeName();
@@ -79,7 +87,7 @@ class ResourceIdentifierNormalizer extends NormalizerBase implements Denormalize
 
     $is_multiple = $field_definition->getFieldStorageDefinition()->isMultiple();
     $data = $this->massageRelationshipInput($data, $is_multiple);
-    $resource_identifiers = array_map(function ($value) use ($target_resource_type_names) {
+    $resource_identifiers = array_map(function ($value) use ($property_key, $target_resource_type_names) {
       // Make sure that the provided type is compatible with the targeted
       // resource.
       if (!in_array($value['type'], $target_resource_type_names)) {
@@ -132,24 +140,6 @@ class ResourceIdentifierNormalizer extends NormalizerBase implements Denormalize
       $data['data'] = [$data['data']];
     }
     return $data;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function hasCacheableSupportsMethod(): bool {
-    @trigger_error(__METHOD__ . '() is deprecated in drupal:10.1.0 and is removed from drupal:11.0.0. Use getSupportedTypes() instead. See https://www.drupal.org/node/3359695', E_USER_DEPRECATED);
-
-    return TRUE;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getSupportedTypes(?string $format): array {
-    return [
-      ResourceIdentifier::class => TRUE,
-    ];
   }
 
 }

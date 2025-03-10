@@ -2,12 +2,12 @@
 
 namespace Drupal\commerce_order\Form;
 
-use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\Core\Form\FormStateInterface;
 use Drupal\commerce\EntityHelper;
 use Drupal\commerce\EntityTraitManagerInterface;
-use Drupal\commerce\Form\CommerceBundleEntityFormBase;
 use Drupal\commerce_order\Entity\OrderType;
+use Drupal\commerce\Form\CommerceBundleEntityFormBase;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\entity\Form\EntityDuplicateFormTrait;
 use Drupal\state_machine\WorkflowManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -144,7 +144,7 @@ class OrderTypeForm extends CommerceBundleEntityFormBase {
       '#tree' => FALSE,
     ];
     $form['emails']['notice'] = [
-      '#markup' => '<p>' . $this->t('Emails are sent in the HTML format. You will need a module such as <a href="https://www.drupal.org/project/symfony_mailer">Drupal Symfony Mailer</a> to send HTML emails.') . '</p>',
+      '#markup' => '<p>' . $this->t('Emails are sent in the HTML format. You will need a module such as <a href="https://www.drupal.org/project/swiftmailer">Swiftmailer</a> to send HTML emails.') . '</p>',
     ];
     $form['emails']['sendReceipt'] = [
       '#type' => 'checkbox',
@@ -160,24 +160,6 @@ class OrderTypeForm extends CommerceBundleEntityFormBase {
           ':input[name="sendReceipt"]' => ['checked' => TRUE],
         ],
       ],
-    ];
-    $default_subject = $this->t('Order #@number confirmed', [
-      '@number' => '[commerce_order:order_number]',
-    ]);
-    $form['emails']['receiptSubject'] = [
-      '#type' => 'textfield',
-      '#title' => $this->t('Subject for the order receipt email:'),
-      '#description' => $this->t('Leave blank to use default value: @default_subject', [
-        '@default_subject' => $default_subject,
-      ]),
-      '#default_value' => $order_type->isNew() ? '' : $order_type->getReceiptSubject(),
-      '#element_validate' => ['token_element_validate'],
-      '#token_types' => ['commerce_order'],
-    ];
-    $form['emails']['receiptSubject_help'] = [
-      '#theme' => 'token_tree_link',
-      '#token_types' => ['commerce_order'],
-      '#global_types' => FALSE,
     ];
 
     return $form;
@@ -212,13 +194,12 @@ class OrderTypeForm extends CommerceBundleEntityFormBase {
    * {@inheritdoc}
    */
   public function save(array $form, FormStateInterface $form_state) {
-    $status = $this->entity->save();
+    $this->entity->save();
     $this->postSave($this->entity, $this->operation);
     $this->submitTraitForm($form, $form_state);
 
     $this->messenger()->addMessage($this->t('Saved the %label order type.', ['%label' => $this->entity->label()]));
     $form_state->setRedirect('entity.commerce_order_type.collection');
-    return $status;
   }
 
 }

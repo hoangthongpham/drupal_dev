@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\jsonapi\Functional;
 
 use Drupal\Core\Url;
@@ -12,7 +10,7 @@ use Drupal\responsive_image\Entity\ResponsiveImageStyle;
  *
  * @group jsonapi
  */
-class ResponsiveImageStyleTest extends ConfigEntityResourceTestBase {
+class ResponsiveImageStyleTest extends ResourceTestBase {
 
   /**
    * {@inheritdoc}
@@ -144,7 +142,6 @@ class ResponsiveImageStyleTest extends ConfigEntityResourceTestBase {
    */
   protected function getPostDocument() {
     // @todo Update in https://www.drupal.org/node/2300677.
-    return [];
   }
 
 }

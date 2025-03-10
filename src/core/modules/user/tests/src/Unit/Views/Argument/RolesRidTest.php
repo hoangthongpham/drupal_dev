@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\user\Unit\Views\Argument;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
@@ -21,7 +19,7 @@ class RolesRidTest extends UnitTestCase {
    *
    * @covers ::titleQuery
    */
-  public function testTitleQuery(): void {
+  public function testTitleQuery() {
     $role1 = new Role([
       'id' => 'test_rid_1',
       'label' => 'test rid 1',
@@ -32,7 +30,7 @@ class RolesRidTest extends UnitTestCase {
     ], 'user_role');
 
     // Creates a stub entity storage;
-    $role_storage = $this->createMock('Drupal\Core\Entity\EntityStorageInterface');
+    $role_storage = $this->getMockForAbstractClass('Drupal\Core\Entity\EntityStorageInterface');
     $role_storage->expects($this->any())
       ->method('loadMultiple')
       ->willReturnMap([
@@ -48,19 +46,19 @@ class RolesRidTest extends UnitTestCase {
     $entity_type->expects($this->any())
       ->method('getKey')
       ->with('label')
-      ->willReturn('label');
+      ->will($this->returnValue('label'));
 
     $entity_type_manager = $this->createMock(EntityTypeManagerInterface::class);
     $entity_type_manager->expects($this->any())
       ->method('getDefinition')
       ->with($this->equalTo('user_role'))
-      ->willReturn($entity_type);
+      ->will($this->returnValue($entity_type));
 
     $entity_type_manager
       ->expects($this->once())
       ->method('getStorage')
       ->with($this->equalTo('user_role'))
-      ->willReturn($role_storage);
+      ->will($this->returnValue($role_storage));
 
     // Set up a minimal container to satisfy Drupal\Core\Entity\EntityBase's
     // dependency on it.

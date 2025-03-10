@@ -26,7 +26,7 @@ use Symfony\Component\Process\Process;
 class Robo
 {
     const APPLICATION_NAME = 'Robo';
-    private const VERSION = '4.0.6';
+    const VERSION = '3.0.12';
 
     /**
      * The currently active container object, or NULL if not initialized yet.
@@ -53,16 +53,6 @@ class Robo
         $runner->setSelfUpdateRepository($repository);
         $statusCode = $runner->execute($argv, $appName, $appVersion, $output);
         return $statusCode;
-    }
-
-    /**
-     * Only provide access to the Robo version via Robo::version() so that
-     * roave/backward-compatibility-check does not complain about b/c breaks
-     * when the version number changes.
-     */
-    public static function version()
-    {
-        return self::VERSION;
     }
 
     /**
@@ -381,7 +371,7 @@ class Robo
     public static function createDefaultApplication($appName = null, $appVersion = null)
     {
         $appName = $appName ?: self::APPLICATION_NAME;
-        $appVersion = $appVersion ?: self::version();
+        $appVersion = $appVersion ?: self::VERSION;
 
         $app = new \Robo\Application($appName, $appVersion);
         $app->setAutoExit(false);
@@ -517,28 +507,11 @@ class Robo
      * @param \Robo\Application $app
      * @param string|object $handler
      *
-     * @return array
-     */
-    public static function register($app, $handlers)
-    {
-        if (!is_array($handlers)) {
-            $handlers = [ $handlers ];
-        }
-
-        foreach ($handlers as $handler) {
-            static::registerSingle($app, $handler);
-        }
-    }
-
-    /**
-     * @param \Robo\Application $app
-     * @param string|object $handler
-     *
      * @return null|object
      */
-    protected static function registerSingle($app, $handler)
+    public static function register($app, $handler)
     {
-        $container = static::getContainer();
+        $container = Robo::getContainer();
         $instance = static::instantiate($handler);
         if (!$instance) {
             return;
@@ -565,7 +538,7 @@ class Robo
      *
      * @return null|object
      */
-    public static function instantiate($handler)
+    protected static function instantiate($handler)
     {
         $container = Robo::getContainer();
 

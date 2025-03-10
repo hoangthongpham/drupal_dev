@@ -1,12 +1,9 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\system\Functional\System;
 
 use Drupal\Tests\BrowserTestBase;
 use Drupal\Tests\Traits\Core\CronRunTrait;
-use Drupal\Tests\WaitTerminateTestTrait;
 
 /**
  * Tests cron runs.
@@ -16,10 +13,11 @@ use Drupal\Tests\WaitTerminateTestTrait;
 class CronRunTest extends BrowserTestBase {
 
   use CronRunTrait;
-  use WaitTerminateTestTrait;
 
   /**
-   * {@inheritdoc}
+   * Modules to enable.
+   *
+   * @var array
    */
   protected static $modules = [
     'common_test',
@@ -35,7 +33,7 @@ class CronRunTest extends BrowserTestBase {
   /**
    * Tests cron runs.
    */
-  public function testCronRun(): void {
+  public function testCronRun() {
     // Run cron anonymously without any cron key.
     $this->drupalGet('cron');
     $this->assertSession()->statusCodeEquals(404);
@@ -54,16 +52,11 @@ class CronRunTest extends BrowserTestBase {
   /**
    * Ensure that the automated cron run module is working.
    *
-   * In these tests we do not use \Drupal::time()->getRequestTime() to track start time, because we
+   * In these tests we do not use REQUEST_TIME to track start time, because we
    * need the exact time when cron is triggered.
    */
-  public function testAutomatedCron(): void {
-    // To prevent race conditions between the admin_user login triggering cron
-    // and updating its state, and this test doing the same thing, we use
-    // \Drupal\Tests\WaitTerminateTestTrait::setWaitForTerminate.
-    $this->setWaitForTerminate();
-
-    // Test with a logged-in user; anonymous users likely don't cause Drupal to
+  public function testAutomatedCron() {
+    // Test with a logged in user; anonymous users likely don't cause Drupal to
     // fully bootstrap, because of the internal page cache or an external
     // reverse proxy. Reuse this user for disabling cron later in the test.
     $admin_user = $this->drupalCreateUser(['administer site configuration']);
@@ -104,7 +97,7 @@ class CronRunTest extends BrowserTestBase {
   /**
    * Make sure exceptions thrown on hook_cron() don't affect other modules.
    */
-  public function testCronExceptions(): void {
+  public function testCronExceptions() {
     \Drupal::state()->delete('common_test.cron');
     // The common_test module throws an exception. If it isn't caught, the tests
     // won't finish successfully.
@@ -117,7 +110,7 @@ class CronRunTest extends BrowserTestBase {
   /**
    * Make sure the cron UI reads from the state storage.
    */
-  public function testCronUI(): void {
+  public function testCronUI() {
     $admin_user = $this->drupalCreateUser(['administer site configuration']);
     $this->drupalLogin($admin_user);
     $this->drupalGet('admin/config/system/cron');
@@ -145,7 +138,7 @@ class CronRunTest extends BrowserTestBase {
   /**
    * Ensure that the manual cron run is working.
    */
-  public function testManualCron(): void {
+  public function testManualCron() {
     $admin_user = $this->drupalCreateUser(['administer site configuration']);
     $this->drupalLogin($admin_user);
 

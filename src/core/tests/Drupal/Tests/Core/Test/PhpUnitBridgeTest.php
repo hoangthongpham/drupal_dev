@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\Core\Test;
 
 use Drupal\Tests\UnitTestCase;
@@ -18,13 +16,13 @@ class PhpUnitBridgeTest extends UnitTestCase {
   /**
    * Tests class-level deprecation.
    */
-  public function testDeprecatedClass(): void {
+  public function testDeprecatedClass() {
     $this->expectDeprecation('Drupal\deprecation_test\Deprecation\FixtureDeprecatedClass is deprecated.');
     $deprecated = new FixtureDeprecatedClass();
     $this->assertEquals('test', $deprecated->testFunction());
   }
 
-  public function testDeprecatedFunction(): void {
+  public function testDeprecatedFunction() {
     $this->markTestIncomplete('Modules are not loaded for unit tests, so deprecated_test_function() will not be available.');
     $this->assertEquals('known_return_value', \deprecation_test_function());
   }

@@ -60,7 +60,6 @@ class EntityTestWithBundle extends ContentEntityBase {
       ->setDescription(t('The name of the test entity.'))
       ->setTranslatable(TRUE)
       ->setSetting('max_length', 32)
-      ->setDisplayConfigurable('view', TRUE)
       ->setDisplayOptions('view', [
         'label' => 'hidden',
         'type' => 'string',

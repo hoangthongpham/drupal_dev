@@ -2,10 +2,9 @@
 
 namespace Drupal\commerce_store\Plugin\views\field;
 
+use Drupal\views\Plugin\views\field\EntityField;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\views\Attribute\ViewsField;
-use Drupal\views\Plugin\views\field\EntityField;
 
 /**
  * Displays the store.
@@ -13,8 +12,9 @@ use Drupal\views\Plugin\views\field\EntityField;
  * Can be configured to show nothing when there's only one possible store.
  *
  * @ingroup views_field_handlers
+ *
+ * @ViewsField("commerce_store")
  */
-#[ViewsField("commerce_store")]
 class Store extends EntityField {
 
   /**

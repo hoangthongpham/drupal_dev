@@ -1,6 +1,9 @@
 <?php
 
-declare(strict_types=1);
+/**
+ * @file
+ * Contains \Drupal\KernelTests\Core\Theme\TwigMarkupInterfaceTest.
+ */
 
 namespace Drupal\KernelTests\Core\Theme;
 
@@ -22,7 +25,9 @@ use Drupal\KernelTests\KernelTestBase;
 class TwigMarkupInterfaceTest extends KernelTestBase {
 
   /**
-   * {@inheritdoc}
+   * Modules to enable.
+   *
+   * @var array
    */
   protected static $modules = [
     'language',
@@ -31,14 +36,14 @@ class TwigMarkupInterfaceTest extends KernelTestBase {
   /**
    * @dataProvider providerTestMarkupInterfaceEmpty
    */
-  public function testMarkupInterfaceEmpty($expected, $variable): void {
-    $this->assertSame($expected, (string) $this->renderObjectWithTwig($variable));
+  public function testMarkupInterfaceEmpty($expected, $variable) {
+    $this->assertEquals($expected, $this->renderObjectWithTwig($variable));
   }
 
   /**
    * Provide test examples.
    */
-  public static function providerTestMarkupInterfaceEmpty() {
+  public function providerTestMarkupInterfaceEmpty() {
     return [
       // The first argument to \Drupal\Core\StringTranslation\TranslatableMarkup
       // is not supposed to be an empty string.
@@ -59,17 +64,17 @@ class TwigMarkupInterfaceTest extends KernelTestBase {
   /**
    * Tests behavior if a string is translated to become an empty string.
    */
-  public function testEmptyTranslation(): void {
+  public function testEmptyTranslation() {
     $settings = Settings::getAll();
     $settings['locale_custom_strings_en'] = ['' => ['test' => '']];
     // Recreate the settings static.
     new Settings($settings);
 
     $variable = new TranslatableMarkup('test');
-    $this->assertEquals('', (string) $this->renderObjectWithTwig($variable));
+    $this->assertEquals('', $this->renderObjectWithTwig($variable));
 
     $variable = new TranslatableMarkup('test', [], ['langcode' => 'de']);
-    $this->assertEquals('<span>test</span>', (string) $this->renderObjectWithTwig($variable));
+    $this->assertEquals('<span>test</span>', $this->renderObjectWithTwig($variable));
   }
 
   /**

@@ -1,18 +1,16 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\tracker\Kernel\Migrate\d7;
 
+use Drupal\Tests\migrate_drupal\Kernel\d7\MigrateDrupal7TestBase;
 use Drupal\Core\Database\Database;
 
 /**
  * Tests migration of tracker_user.
  *
  * @group tracker
- * @group legacy
  */
-class MigrateTrackerUserTest extends MigrateDrupalTestBase {
+class MigrateTrackerUserTest extends MigrateDrupal7TestBase {
 
   /**
    * {@inheritdoc}
@@ -46,7 +44,7 @@ class MigrateTrackerUserTest extends MigrateDrupalTestBase {
   /**
    * Tests migration of tracker user table.
    */
-  public function testMigrateTrackerUser(): void {
+  public function testMigrateTrackerUser() {
     $connection = Database::getConnection('default', 'migrate');
     $num_rows = $connection
       ->select('tracker_user', 'tn')

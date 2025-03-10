@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\search\Functional;
 
 use Drupal\Core\Language\LanguageInterface;
@@ -61,9 +59,6 @@ class SearchNumberMatchingTest extends BrowserTestBase {
    */
   protected $nodes;
 
-  /**
-   * {@inheritdoc}
-   */
   protected function setUp(): void {
     parent::setUp();
 
@@ -95,7 +90,7 @@ class SearchNumberMatchingTest extends BrowserTestBase {
   /**
    * Tests that all the numbers can be searched.
    */
-  public function testNumberSearching(): void {
+  public function testNumberSearching() {
     for ($i = 0; $i < count($this->numbers); $i++) {
       $node = $this->nodes[$i];
 

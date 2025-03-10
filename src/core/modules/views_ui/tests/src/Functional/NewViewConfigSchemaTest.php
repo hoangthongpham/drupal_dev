@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\views_ui\Functional;
 
 /**
@@ -12,7 +10,9 @@ namespace Drupal\Tests\views_ui\Functional;
 class NewViewConfigSchemaTest extends UITestBase {
 
   /**
-   * {@inheritdoc}
+   * Modules to enable.
+   *
+   * @var array
    */
   protected static $modules = [
     'views_ui',
@@ -21,6 +21,7 @@ class NewViewConfigSchemaTest extends UITestBase {
     'file',
     'taxonomy',
     'dblog',
+    'aggregator',
   ];
 
   /**
@@ -31,7 +32,7 @@ class NewViewConfigSchemaTest extends UITestBase {
   /**
    * Tests creating brand new views.
    */
-  public function testNewViews(): void {
+  public function testNewViews() {
     $this->drupalLogin($this->drupalCreateUser(['administer views']));
 
     // Create views with all core Views wizards.
@@ -44,11 +45,14 @@ class NewViewConfigSchemaTest extends UITestBase {
       'file_managed',
       'taxonomy_term',
       'watchdog',
+      // Standard derivative classes.
+      'standard:aggregator_feed',
+      'standard:aggregator_item',
     ];
     foreach ($wizards as $wizard_key) {
       $edit = [];
       $edit['label'] = $this->randomString();
-      $edit['id'] = $this->randomMachineName();
+      $edit['id'] = strtolower($this->randomMachineName());
       $edit['show[wizard_key]'] = $wizard_key;
       $edit['description'] = $this->randomString();
       $this->drupalGet('admin/structure/views/add');

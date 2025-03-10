@@ -2,13 +2,13 @@
 
 namespace Drupal\commerce_payment\Entity;
 
+use Drupal\commerce\EntityOwnerTrait;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityMalformedException;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
-use Drupal\commerce\EntityOwnerTrait;
 use Drupal\profile\Entity\ProfileInterface;
 
 /**

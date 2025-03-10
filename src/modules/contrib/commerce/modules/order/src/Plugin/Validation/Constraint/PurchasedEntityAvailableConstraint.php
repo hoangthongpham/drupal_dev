@@ -2,18 +2,17 @@
 
 namespace Drupal\commerce_order\Plugin\Validation\Constraint;
 
-use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\Core\Validation\Attribute\Constraint;
-use Symfony\Component\Validator\Constraint as SymfonyConstraint;
+use Symfony\Component\Validator\Constraint;
 
 /**
  * Purchasable entity available reference constraint.
+ *
+ * @Constraint(
+ *   id = "PurchasedEntityAvailable",
+ *   label = @Translation("Purchasable entity available", context = "Validation")
+ * )
  */
-#[Constraint(
-  id: "PurchasedEntityAvailable",
-  label: new TranslatableMarkup("Purchasable entity available", [], ["context" => "Validation"]),
-)]
-class PurchasedEntityAvailableConstraint extends SymfonyConstraint {
+class PurchasedEntityAvailableConstraint extends Constraint {
 
   /**
    * The default violation message.
@@ -29,7 +28,7 @@ class PurchasedEntityAvailableConstraint extends SymfonyConstraint {
    * simplifies the ability to customize the $message property without having
    * to override this method and define the constraint validator.
    */
-  public function validatedBy(): string {
+  public function validatedBy() {
     return PurchasedEntityAvailableConstraintValidator::class;
   }
 

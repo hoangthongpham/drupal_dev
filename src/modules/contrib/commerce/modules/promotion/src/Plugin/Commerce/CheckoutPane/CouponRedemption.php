@@ -2,22 +2,23 @@
 
 namespace Drupal\commerce_promotion\Plugin\Commerce\CheckoutPane;
 
-use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\commerce_checkout\Attribute\CommerceCheckoutPane;
+use Drupal\commerce\InlineFormManager;
 use Drupal\commerce_checkout\Plugin\Commerce\CheckoutFlow\CheckoutFlowInterface;
 use Drupal\commerce_checkout\Plugin\Commerce\CheckoutPane\CheckoutPaneBase;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides the coupon redemption pane.
+ *
+ * @CommerceCheckoutPane(
+ *   id = "coupon_redemption",
+ *   label = @Translation("Coupon redemption"),
+ *   default_step = "_sidebar",
+ *   wrapper_element = "container",
+ * )
  */
-#[CommerceCheckoutPane(
-  id: "coupon_redemption",
-  label: new TranslatableMarkup("Coupon redemption"),
-  default_step: "_sidebar",
-  wrapper_element: "container",
-)]
 class CouponRedemption extends CheckoutPaneBase {
 
   /**
@@ -28,12 +29,39 @@ class CouponRedemption extends CheckoutPaneBase {
   protected $inlineFormManager;
 
   /**
+   * Constructs a new CouponRedemption object.
+   *
+   * @param array $configuration
+   *   A configuration array containing information about the plugin instance.
+   * @param string $plugin_id
+   *   The plugin_id for the plugin instance.
+   * @param mixed $plugin_definition
+   *   The plugin implementation definition.
+   * @param \Drupal\commerce_checkout\Plugin\Commerce\CheckoutFlow\CheckoutFlowInterface $checkout_flow
+   *   The parent checkout flow.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   The entity type manager.
+   * @param \Drupal\commerce\InlineFormManager $inline_form_manager
+   *   The inline form manager.
+   */
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, CheckoutFlowInterface $checkout_flow, EntityTypeManagerInterface $entity_type_manager, InlineFormManager $inline_form_manager) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition, $checkout_flow, $entity_type_manager);
+
+    $this->inlineFormManager = $inline_form_manager;
+  }
+
+  /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition, ?CheckoutFlowInterface $checkout_flow = NULL) {
-    $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition, $checkout_flow);
-    $instance->inlineFormManager = $container->get('plugin.manager.commerce_inline_form');
-    return $instance;
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition, CheckoutFlowInterface $checkout_flow = NULL) {
+    return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $checkout_flow,
+      $container->get('entity_type.manager'),
+      $container->get('plugin.manager.commerce_inline_form')
+    );
   }
 
   /**
@@ -49,7 +77,6 @@ class CouponRedemption extends CheckoutPaneBase {
    * {@inheritdoc}
    */
   public function buildConfigurationSummary() {
-    $parent_summary = parent::buildConfigurationSummary();
     if ($this->configuration['allow_multiple']) {
       $summary = $this->t('Allows multiple coupons: Yes');
     }
@@ -57,7 +84,7 @@ class CouponRedemption extends CheckoutPaneBase {
       $summary = $this->t('Allows multiple coupons: No');
     }
 
-    return $parent_summary ? implode('<br>', [$parent_summary, $summary]) : $summary;
+    return $summary;
   }
 
   /**

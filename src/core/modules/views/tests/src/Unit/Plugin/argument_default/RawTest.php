@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\views\Unit\Plugin\argument_default;
 
 use Drupal\Core\Path\CurrentPathStack;
@@ -22,7 +20,7 @@ class RawTest extends UnitTestCase {
    *
    * @see \Drupal\views\Plugin\views\argument_default\Raw::getArgument()
    */
-  public function testGetArgument(): void {
+  public function testGetArgument() {
     $view = $this->getMockBuilder('Drupal\views\ViewExecutable')
       ->disableOriginalConstructor()
       ->getMock();
@@ -35,7 +33,7 @@ class RawTest extends UnitTestCase {
     $current_path->setPath('/test/example', $request);
     $view->expects($this->any())
       ->method('getRequest')
-      ->willReturn($request);
+      ->will($this->returnValue($request));
     $alias_manager = $this->createMock(AliasManagerInterface::class);
     $alias_manager->expects($this->never())
       ->method('getAliasByPath');
@@ -78,7 +76,7 @@ class RawTest extends UnitTestCase {
     $alias_manager->expects($this->any())
       ->method('getAliasByPath')
       ->with($this->equalTo('/test/example'))
-      ->willReturn('/other/example');
+      ->will($this->returnValue('/other/example'));
 
     $raw = new Raw([], 'raw', [], $alias_manager, $current_path);
     $options = [

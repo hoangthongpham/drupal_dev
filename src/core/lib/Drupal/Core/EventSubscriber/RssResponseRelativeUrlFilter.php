@@ -57,12 +57,10 @@ class RssResponseRelativeUrlFilter implements EventSubscriberInterface {
 
     // Invoke Html::transformRootRelativeUrlsToAbsolute() on all HTML content
     // embedded in this RSS feed.
-    foreach ($rss_dom->getElementsByTagName('item') as $item) {
-      foreach ($item->getElementsByTagName('description') as $node) {
-        $html_markup = $node->nodeValue;
-        if (!empty($html_markup)) {
-          $node->replaceChild($rss_dom->createTextNode(Html::transformRootRelativeUrlsToAbsolute($html_markup, $request->getSchemeAndHttpHost())), $node->firstChild);
-        }
+    foreach ($rss_dom->getElementsByTagName('description') as $node) {
+      $html_markup = $node->nodeValue;
+      if (!empty($html_markup)) {
+        $node->nodeValue = Html::transformRootRelativeUrlsToAbsolute($html_markup, $request->getSchemeAndHttpHost());
       }
     }
 
@@ -72,9 +70,8 @@ class RssResponseRelativeUrlFilter implements EventSubscriberInterface {
   /**
    * {@inheritdoc}
    */
-  public static function getSubscribedEvents(): array {
+  public static function getSubscribedEvents() {
     // Should run after any other response subscriber that modifies the markup.
-    // Only the CDATA wrapper should run after this filter.
     // @see \Drupal\Core\EventSubscriber\ActiveLinkResponseFilter
     $events[KernelEvents::RESPONSE][] = ['onResponse', -512];
 

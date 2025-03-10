@@ -34,7 +34,7 @@ class EntityDuplicateTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected static $modules = ['entity_module_test', 'user', 'entity', 'block', 'views'];
+  protected static $modules = ['entity_module_test', 'user', 'entity', 'block'];
 
   /**
    * {@inheritdoc}

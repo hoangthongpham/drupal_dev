@@ -3,19 +3,18 @@
 namespace Drupal\user\Plugin\views\field;
 
 use Drupal\Core\Database\Connection;
-use Drupal\views\Attribute\ViewsField;
 use Drupal\views\Plugin\views\display\DisplayPluginBase;
 use Drupal\views\ViewExecutable;
 use Drupal\views\Plugin\views\field\PrerenderList;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\user\Entity\Role;
 
 /**
  * Field handler to provide a list of roles.
  *
  * @ingroup views_field_handlers
+ *
+ * @ViewsField("user_roles")
  */
-#[ViewsField("user_roles")]
 class Roles extends PrerenderList {
 
   /**
@@ -31,7 +30,7 @@ class Roles extends PrerenderList {
    * @param array $configuration
    *   A configuration array containing information about the plugin instance.
    * @param string $plugin_id
-   *   The plugin ID for the plugin instance.
+   *   The plugin_id for the plugin instance.
    * @param mixed $plugin_definition
    *   The plugin implementation definition.
    * @param \Drupal\Core\Database\Connection $database
@@ -53,7 +52,7 @@ class Roles extends PrerenderList {
   /**
    * {@inheritdoc}
    */
-  public function init(ViewExecutable $view, DisplayPluginBase $display, ?array &$options = NULL) {
+  public function init(ViewExecutable $view, DisplayPluginBase $display, array &$options = NULL) {
     parent::init($view, $display, $options);
 
     $this->additional_fields['uid'] = ['table' => 'users_field_data', 'field' => 'uid'];
@@ -73,7 +72,7 @@ class Roles extends PrerenderList {
     }
 
     if ($uids) {
-      $roles = Role::loadMultiple();
+      $roles = user_roles();
       $result = $this->database->query('SELECT [u].[entity_id] AS [uid], [u].[roles_target_id] AS [rid] FROM {user__roles} [u] WHERE [u].[entity_id] IN ( :uids[] ) AND [u].[roles_target_id] IN ( :rids[] )', [':uids[]' => $uids, ':rids[]' => array_keys($roles)]);
       foreach ($result as $role) {
         $this->items[$role->uid][$role->rid]['role'] = $roles[$role->rid]->label();
@@ -86,7 +85,7 @@ class Roles extends PrerenderList {
         $sorted_keys = array_intersect_key($ordered_roles, $user_roles);
         // Merge with the unsorted array of role information which has the
         // effect of sorting it.
-        $user_roles = array_replace($sorted_keys, $user_roles);
+        $user_roles = array_merge($sorted_keys, $user_roles);
       }
     }
   }

@@ -1,13 +1,11 @@
 /* eslint-disable import/no-extraneous-dependencies */
-/* cspell:ignore simpleuploadadapter filerepository */
+/* cspell:words simpleuploadadapter filerepository */
 
 /**
- * Upload adapter.
+ * Upload adapter. Copied from @ckeditor5/ckeditor5-upload/src/adapters/simpleuploadadapter
  *
- * Copied from @ckeditor5/ckeditor5-upload/src/adapters/simpleuploadadapter
- *
- * @private
- * @implements module:upload/filerepository~UploadAdapter
+ * @internal
+ * @implements {module:upload/filerepository~UploadAdapter}
  */
 export default class DrupalImageUploadAdapter {
   /**
@@ -80,13 +78,9 @@ export default class DrupalImageUploadAdapter {
    * Initializes XMLHttpRequest listeners
    *
    * @private
-   *
-   * @param {Function} resolve
-   *  Callback function to be called when the request is successful.
-   * @param {Function} reject
-   *  Callback function to be called when the request cannot be completed.
-   * @param {File} file
-   *  Native File object.
+   * @param {Function} resolve Callback function to be called when the request is successful.
+   * @param {Function} reject Callback function to be called when the request cannot be completed.
+   * @param {File} file Native File object.
    */
   _initListeners(resolve, reject, file) {
     const xhr = this.xhr;
@@ -105,11 +99,11 @@ export default class DrupalImageUploadAdapter {
             : genericErrorText,
         );
       }
-      // Resolve with the `urls` property and pass the response
-      // to allow customizing the behavior of features relying on the upload adapters.
+
       resolve({
-        response,
         urls: { default: response.url },
+        dataEntityUuid: response.uuid ? response.uuid : '',
+        dataEntityType: response.entity_type ? response.entity_type : '',
       });
     });
 

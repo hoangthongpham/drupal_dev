@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\editor\Functional;
 
 use Drupal\Core\Url;
@@ -20,7 +18,7 @@ class EditorDialogAccessTest extends BrowserTestBase {
    *
    * @var array
    */
-  protected static $modules = ['editor', 'filter', 'text', 'editor_test'];
+  protected static $modules = ['editor', 'filter', 'ckeditor'];
 
   /**
    * {@inheritdoc}
@@ -30,7 +28,7 @@ class EditorDialogAccessTest extends BrowserTestBase {
   /**
    * Tests access to the editor image dialog.
    */
-  public function testEditorImageDialogAccess(): void {
+  public function testEditorImageDialogAccess() {
     $url = Url::fromRoute('editor.image_dialog', ['editor' => 'plain_text']);
     $session = $this->assertSession();
 
@@ -41,10 +39,32 @@ class EditorDialogAccessTest extends BrowserTestBase {
     // With a text editor but without image upload settings, expect a 200, but
     // there should not be an input[type=file].
     $editor = Editor::create([
-      'editor' => 'unicorn',
+      'editor' => 'ckeditor',
       'format' => 'plain_text',
+      'settings' => [
+        'toolbar' => [
+          'rows' => [
+            [
+              [
+                'name' => 'Media',
+                'items' => [
+                  'DrupalImage',
+                ],
+              ],
+            ],
+          ],
+        ],
+        'plugins' => [],
+      ],
       'image_upload' => [
         'status' => FALSE,
+        'scheme' => 'public',
+        'directory' => 'inline-images',
+        'max_size' => '',
+        'max_dimensions' => [
+          'width' => 0,
+          'height' => 0,
+        ],
       ],
     ]);
     $editor->save();
@@ -56,16 +76,8 @@ class EditorDialogAccessTest extends BrowserTestBase {
 
     // With image upload settings, expect a 200, and now there should be an
     // input[type=file].
-    $editor->setImageUploadSettings([
-      'status' => TRUE,
-      'scheme' => 'public',
-      'directory' => 'inline-images',
-      'max_size' => NULL,
-      'max_dimensions' => [
-        'width' => NULL,
-        'height' => NULL,
-      ],
-    ])->save();
+    $editor->setImageUploadSettings(['status' => TRUE] + $editor->getImageUploadSettings())
+      ->save();
     $this->resetAll();
     $this->drupalGet($url);
     $this->assertEmpty($this->cssSelect('input[type=text][name="attributes[src]"]'), 'Image uploads enabled: input[type=text][name="attributes[src]"] is absent.');

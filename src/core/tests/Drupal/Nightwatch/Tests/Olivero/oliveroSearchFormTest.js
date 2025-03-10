@@ -28,7 +28,7 @@ module.exports = {
   },
   'search wide form is accessible and altered': (browser) => {
     browser
-      .setWindowSize(1400, 800)
+      .resizeWindow(1400, 800)
       .drupalRelativeURL('/')
       .waitForElementVisible(searchButtonSelector)
       .assert.attributeEquals(searchButtonSelector, 'aria-expanded', 'false')
@@ -73,27 +73,20 @@ module.exports = {
         },
       )
       // Assert that search form is still visible when focus is on disclosure button.
-      .perform(function () {
-        return this.actions()
-          .keyDown(browser.Keys.SHIFT)
-          .sendKeys(browser.Keys.TAB);
-      })
+      .keys(browser.Keys.SHIFT)
+      .keys(browser.Keys.TAB)
       .pause(50)
       .isVisible(searchWideSelector)
       // Assert that search form is NOT visible when focus moves back to menu item.
-      .perform(function () {
-        return this.actions().sendKeys(browser.Keys.TAB);
-      })
+      .keys(browser.Keys.TAB)
       .pause(50)
       .waitForElementNotVisible(searchWideSelector)
-      // Release SHIFT key.
-      .perform(function () {
-        return this.actions().keyUp(browser.Keys.SHIFT);
-      });
+      // Release all keys.
+      .keys(browser.Keys.NULL);
   },
   'search narrow form is accessible': (browser) => {
     browser
-      .setWindowSize(1000, 800)
+      .resizeWindow(1000, 800)
       .drupalRelativeURL('/')
       .click(mobileNavButtonSelector)
       .waitForElementVisible(headerNavSelector)
@@ -101,7 +94,7 @@ module.exports = {
   },
   'submit button styled as primary on forms with <= 2 actions': (browser) => {
     browser
-      .setWindowSize(1400, 800)
+      .resizeWindow(1400, 800)
       .drupalRelativeURL('/form-test/object-controller-builder')
       .assert.elementPresent(
         '#edit-actions input[type=submit].button--primary',
@@ -109,7 +102,7 @@ module.exports = {
   },
   'search page is altered': (browser) => {
     browser
-      .setWindowSize(1400, 800)
+      .resizeWindow(1400, 800)
       .drupalRelativeURL('/search')
       .assert.attributeContains(
         '.search-form input[name=keys]',

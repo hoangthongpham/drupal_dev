@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\system\Kernel\Plugin\migrate\source\d7;
 
 use Drupal\Tests\migrate\Kernel\MigrateSqlSourceTestBase;
@@ -23,7 +21,7 @@ class ThemeSettingsTest extends MigrateSqlSourceTestBase {
   /**
    * {@inheritdoc}
    */
-  public static function providerSource() {
+  public function providerSource() {
     $tests = [];
 
     // The source data.
@@ -48,7 +46,7 @@ class ThemeSettingsTest extends MigrateSqlSourceTestBase {
 
     $tests[0]['source_data']['variable'] = [
       [
-        'name' => 'theme_olivero_settings',
+        'name' => 'theme_bartik_settings',
         'value' => serialize($value),
       ],
     ];
@@ -56,7 +54,7 @@ class ThemeSettingsTest extends MigrateSqlSourceTestBase {
     // The expected results are nearly identical to the source data.
     $tests[0]['expected_data'] = [
       [
-        'name' => 'theme_olivero_settings',
+        'name' => 'theme_bartik_settings',
         'value' => $value,
       ],
     ];

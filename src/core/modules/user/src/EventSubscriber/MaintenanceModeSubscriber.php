@@ -2,11 +2,14 @@
 
 namespace Drupal\user\EventSubscriber;
 
+use Drupal\Core\Routing\RouteMatch;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\Core\Site\MaintenanceModeEvents;
 use Drupal\Core\Site\MaintenanceModeInterface;
+use Drupal\Core\Url;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
+use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
  * Maintenance mode subscriber to log out users.
@@ -41,26 +44,31 @@ class MaintenanceModeSubscriber implements EventSubscriberInterface {
   }
 
   /**
-   * Logout users if site is in maintenance mode and user is not exempt.
+   * Logout users if site is in maintenance mode.
    *
    * @param \Symfony\Component\HttpKernel\Event\RequestEvent $event
    *   The event to process.
    */
-  public function onMaintenanceModeRequest(RequestEvent $event) {
-    // If the site is offline, log out unprivileged users.
-    if ($this->account->isAuthenticated()) {
-      user_logout();
+  public function onKernelRequestMaintenance(RequestEvent $event) {
+    $request = $event->getRequest();
+    $route_match = RouteMatch::createFromRequest($request);
+    if ($this->maintenanceMode->applies($route_match)) {
+      // If the site is offline, log out unprivileged users.
+      if ($this->account->isAuthenticated() && !$this->maintenanceMode->exempt($this->account)) {
+        user_logout();
+        // Redirect to homepage.
+        $event->setResponse(
+          new RedirectResponse(Url::fromRoute('<front>')->toString())
+        );
+      }
     }
   }
 
   /**
    * {@inheritdoc}
    */
-  public static function getSubscribedEvents(): array {
-    $events[MaintenanceModeEvents::MAINTENANCE_MODE_REQUEST][] = [
-      'onMaintenanceModeRequest',
-      -900,
-    ];
+  public static function getSubscribedEvents() {
+    $events[KernelEvents::REQUEST][] = ['onKernelRequestMaintenance', 31];
     return $events;
   }
 

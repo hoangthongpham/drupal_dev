@@ -7,20 +7,19 @@ use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
-use Drupal\views\Attribute\ViewsRow;
 use Drupal\views\Entity\Render\EntityTranslationRenderTrait;
-use Drupal\views\Plugin\Derivative\ViewsEntityRow;
 use Drupal\views\Plugin\views\display\DisplayPluginBase;
 use Drupal\views\ViewExecutable;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Generic entity row plugin to provide a common base for all entity types.
+ *
+ * @ViewsRow(
+ *   id = "entity",
+ *   deriver = "Drupal\views\Plugin\Derivative\ViewsEntityRow"
+ * )
  */
-#[ViewsRow(
-  id: "entity",
-  deriver: ViewsEntityRow::class
-)]
 class EntityRow extends RowPluginBase {
   use EntityTranslationRenderTrait;
 
@@ -29,8 +28,14 @@ class EntityRow extends RowPluginBase {
    *
    * @var string
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   public $base_table;
+
+  /**
+   * The actual field which is used for the entity id.
+   *
+   * @var string
+   */
+  public $base_field;
 
   /**
    * Stores the entity type ID of the result entities.
@@ -80,7 +85,7 @@ class EntityRow extends RowPluginBase {
    * @param array $configuration
    *   A configuration array containing information about the plugin instance.
    * @param string $plugin_id
-   *   The plugin ID for the plugin instance.
+   *   The plugin_id for the plugin instance.
    * @param array $plugin_definition
    *   The plugin implementation definition.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
@@ -92,7 +97,7 @@ class EntityRow extends RowPluginBase {
    * @param \Drupal\Core\Entity\EntityDisplayRepositoryInterface $entity_display_repository
    *   The entity display repository.
    */
-  public function __construct(array $configuration, $plugin_id, array $plugin_definition, EntityTypeManagerInterface $entity_type_manager, LanguageManagerInterface $language_manager, ?EntityRepositoryInterface $entity_repository = NULL, ?EntityDisplayRepositoryInterface $entity_display_repository = NULL) {
+  public function __construct(array $configuration, $plugin_id, array $plugin_definition, EntityTypeManagerInterface $entity_type_manager, LanguageManagerInterface $language_manager, EntityRepositoryInterface $entity_repository = NULL, EntityDisplayRepositoryInterface $entity_display_repository = NULL) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
 
     $this->entityTypeManager = $entity_type_manager;
@@ -104,7 +109,7 @@ class EntityRow extends RowPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function init(ViewExecutable $view, DisplayPluginBase $display, ?array &$options = NULL) {
+  public function init(ViewExecutable $view, DisplayPluginBase $display, array &$options = NULL) {
     parent::init($view, $display, $options);
 
     $this->entityTypeId = $this->definition['entity_type'];
@@ -204,11 +209,7 @@ class EntityRow extends RowPluginBase {
    */
   public function query() {
     parent::query();
-    $relationship_table = NULL;
-    if (isset($this->options['relationship'], $this->view->relationship[$this->options['relationship']])) {
-      $relationship_table = $this->view->relationship[$this->options['relationship']]->alias;
-    }
-    $this->getEntityTranslationRenderer()->query($this->view->getQuery(), $relationship_table);
+    $this->getEntityTranslationRenderer()->query($this->view->getQuery());
   }
 
   /**
@@ -217,7 +218,7 @@ class EntityRow extends RowPluginBase {
   public function preRender($result) {
     parent::preRender($result);
     if ($result) {
-      $this->getEntityTranslationRenderer()->preRenderByRelationship($result, $this->options['relationship'] ?? 'none');
+      $this->getEntityTranslationRenderer()->preRender($result);
     }
   }
 
@@ -225,7 +226,7 @@ class EntityRow extends RowPluginBase {
    * {@inheritdoc}
    */
   public function render($row) {
-    return $this->getEntityTranslationRenderer()->renderByRelationship($row, $this->options['relationship'] ?? 'none');
+    return $this->getEntityTranslationRenderer()->render($row);
   }
 
   /**

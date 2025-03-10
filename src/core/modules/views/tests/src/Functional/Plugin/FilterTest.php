@@ -1,9 +1,8 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\views\Functional\Plugin;
 
+use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Tests\views\Functional\ViewTestBase;
 use Drupal\views\Views;
 use Drupal\views_test_data\Plugin\views\filter\FilterTest as FilterPlugin;
@@ -24,7 +23,9 @@ class FilterTest extends ViewTestBase {
   public static $testViews = ['test_filter', 'test_filter_in_operator_ui'];
 
   /**
-   * {@inheritdoc}
+   * Modules to enable.
+   *
+   * @var array
    */
   protected static $modules = ['views_ui', 'node'];
 
@@ -33,15 +34,13 @@ class FilterTest extends ViewTestBase {
    */
   protected $defaultTheme = 'stark';
 
-  /**
-   * {@inheritdoc}
-   */
-  protected function setUp($import_test_views = TRUE, $modules = ['views_test_config']): void {
-    parent::setUp($import_test_views, $modules);
+  protected function setUp($import_test_views = TRUE): void {
+    parent::setUp($import_test_views);
 
     $this->enableViewsTestModule();
 
-    $this->drupalLogin($this->drupalCreateUser(['administer views']));
+    $this->adminUser = $this->drupalCreateUser(['administer views']);
+    $this->drupalLogin($this->adminUser);
     $this->drupalCreateContentType(['type' => 'article', 'name' => 'Article']);
     $this->drupalCreateContentType(['type' => 'page', 'name' => 'Page']);
   }
@@ -59,7 +58,7 @@ class FilterTest extends ViewTestBase {
   /**
    * Tests query of the row plugin.
    */
-  public function testFilterQuery(): void {
+  public function testFilterQuery() {
     // Check that we can find the test filter plugin.
     $plugin = $this->container->get('plugin.manager.views.filter')->createInstance('test_filter');
     $this->assertInstanceOf(FilterPlugin::class, $plugin);
@@ -98,7 +97,7 @@ class FilterTest extends ViewTestBase {
 
     // Check that we have a single element, as a result of applying the '= John'
     // filter.
-    $this->assertCount(1, $view->result, 'Results were returned. ' . count($view->result) . ' results.');
+    $this->assertCount(1, $view->result, new FormattableMarkup('Results were returned. @count results.', ['@count' => count($view->result)]));
 
     $view->destroy();
 
@@ -124,7 +123,7 @@ class FilterTest extends ViewTestBase {
 
     // Check if we have the other elements in the dataset, as a result of
     // applying the '<> John' filter.
-    $this->assertCount(4, $view->result, 'Results were returned. ' . count($view->result) . ' results.');
+    $this->assertCount(4, $view->result, new FormattableMarkup('Results were returned. @count results.', ['@count' => count($view->result)]));
 
     $view->destroy();
     $view->initDisplay();
@@ -148,13 +147,14 @@ class FilterTest extends ViewTestBase {
     $this->executeView($view);
 
     // Check if we have all 5 results.
-    $this->assertCount(5, $view->result, 'All ' . count($view->displayHandlers) . ' results returned');
+    $this->assertCount(5, $view->result, new FormattableMarkup('All @count results returned', ['@count' => count($view->displayHandlers)]));
   }
 
   /**
-   * Tests an exposed filter when all options are selected.
+   * Tests no error message is displayed when all options are selected in an
+   * exposed filter.
    */
-  public function testInOperatorSelectAllOptions(): void {
+  public function testInOperatorSelectAllOptions() {
     $row['row[type]'] = 'fields';
     $this->drupalGet('admin/structure/views/nojs/display/test_filter_in_operator_ui/default/row');
     $this->submitForm($row, 'Apply');
@@ -171,13 +171,13 @@ class FilterTest extends ViewTestBase {
     $this->drupalGet('admin/structure/views/view/test_filter_in_operator_ui/edit/default');
     $this->submitForm([], 'Save');
     $this->submitForm([], 'Update preview');
-    $this->assertSession()->pageTextNotContains('The submitted value "page" in the Type element is not allowed.');
+    $this->assertSession()->pageTextNotContains('An illegal choice has been detected.');
   }
 
   /**
    * Tests the limit of the expose operator functionality.
    */
-  public function testLimitExposedOperators(): void {
+  public function testLimitExposedOperators() {
 
     $this->drupalGet('test_filter_in_operator_ui');
     $this->assertSession()->statusCodeEquals(200);

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\Core\Transliteration;
 
 use Drupal\Component\Utility\Random;
@@ -32,7 +30,7 @@ class PhpTransliterationTest extends UnitTestCase {
    *
    * @dataProvider providerTestPhpTransliterationWithAlter
    */
-  public function testPhpTransliterationWithAlter($langcode, $original, $expected, $printable = NULL): void {
+  public function testPhpTransliterationWithAlter($langcode, $original, $expected, $printable = NULL) {
     if ($printable === NULL) {
       $printable = $original;
     }
@@ -63,7 +61,7 @@ class PhpTransliterationTest extends UnitTestCase {
    *
    * @return array
    */
-  public static function providerTestPhpTransliterationWithAlter() {
+  public function providerTestPhpTransliterationWithAlter() {
     $random_generator = new Random();
     $random = $random_generator->string(10);
     // Make some strings with two, three, and four-byte characters for testing.

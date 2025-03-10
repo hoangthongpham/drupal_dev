@@ -2,19 +2,18 @@
 
 namespace Drupal\commerce_checkout_test\Plugin\Commerce\CheckoutPane;
 
-use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\commerce_checkout\Attribute\CommerceCheckoutPane;
 use Drupal\commerce_checkout\Plugin\Commerce\CheckoutPane\CheckoutPaneBase;
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Provides a test pane used in test to test the dependency removal.
+ *
+ * @CommerceCheckoutPane(
+ *   id = "checkout_test",
+ *   label = @Translation("Checkout test"),
+ *   default_step = "review",
+ * )
  */
-#[CommerceCheckoutPane(
-  id: "checkout_test",
-  label: new TranslatableMarkup("Checkout test"),
-  default_step: "review",
-)]
 class CheckoutTest extends CheckoutPaneBase {
 
   /**

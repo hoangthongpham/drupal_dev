@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\KernelTests\Core\KeyValueStore;
 
 use Drupal\KernelTests\KernelTestBase;
@@ -32,10 +30,7 @@ abstract class StorageTestBase extends KernelTestBase {
    */
   protected $factory = 'keyvalue';
 
-  /**
-   * {@inheritdoc}
-   */
-  protected function setUp(): void {
+  protected function setUp() {
     parent::setUp();
 
     // Define two data collections,
@@ -50,7 +45,7 @@ abstract class StorageTestBase extends KernelTestBase {
   /**
    * Tests CRUD operations.
    */
-  public function testCRUD(): void {
+  public function testCRUD() {
     $stores = $this->createStorage();
     // Verify that each store returns its own collection name.
     $this->assertSame($this->collections[0], $stores[0]->getCollectionName());
@@ -129,7 +124,7 @@ abstract class StorageTestBase extends KernelTestBase {
   /**
    * Tests expected behavior for non-existing keys.
    */
-  public function testNonExistingKeys(): void {
+  public function testNonExistingKeys() {
 
     $stores = $this->createStorage();
 
@@ -157,7 +152,7 @@ abstract class StorageTestBase extends KernelTestBase {
   /**
    * Tests the setIfNotExists() method.
    */
-  public function testSetIfNotExists(): void {
+  public function testSetIfNotExists() {
     $stores = $this->createStorage();
 
     $key = $this->randomMachineName();
@@ -183,7 +178,7 @@ abstract class StorageTestBase extends KernelTestBase {
   /**
    * Tests the rename operation.
    */
-  public function testRename(): void {
+  public function testRename() {
     $stores = $this->createStorage();
     $store = $stores[0];
 
@@ -192,19 +187,6 @@ abstract class StorageTestBase extends KernelTestBase {
     $store->rename('old', 'new');
     $this->assertSame('thing', $store->get('new'));
     $this->assertNull($store->get('old'));
-  }
-
-  /**
-   * Tests the rename operation.
-   */
-  public function testRenameNoChange(): void {
-    $stores = $this->createStorage();
-    $store = $stores[0];
-
-    $store->set('old', 'thing');
-    $this->assertSame($store->get('old'), 'thing');
-    $store->rename('old', 'old');
-    $this->assertSame($store->get('old'), 'thing');
   }
 
   /**

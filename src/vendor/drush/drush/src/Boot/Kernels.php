@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drush\Boot;
 
 use Drush\Drupal\DrupalKernel as DrushDrupalKernel;
@@ -13,6 +11,7 @@ use Drush\Drupal\InstallerKernel as DrushInstallerKernel;
  */
 final class Kernels
 {
+
     /**
      * The default kernel that is used on standard requests.
      *
@@ -37,7 +36,7 @@ final class Kernels
     /**
      * Returns the available kernels.
      */
-    public static function availableKernels(): array
+    public static function availableKernels()
     {
         return [
             static::DRUPAL,
@@ -52,9 +51,10 @@ final class Kernels
      * @param string $kernel
      *   The kernel to retrieve.
      *
+     * @return callable
      *   The factory method.
      */
-    public static function getKernelFactory(string $kernel): array
+    public static function getKernelFactory($kernel)
     {
         $factories = [
             Kernels::DRUPAL => [DrushDrupalKernel::class, 'createFromRequest'],

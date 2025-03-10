@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\Core\Extension;
 
 use Drupal\Core\Extension\ModuleExtensionList;
@@ -49,10 +47,10 @@ class ModuleRequiredByThemesUninstallValidatorTest extends UnitTestCase {
   /**
    * @covers ::validate
    */
-  public function testValidateNoThemeDependency(): void {
+  public function testValidateNoThemeDependency() {
     $this->themeExtensionList->getAllInstalledInfo()->willReturn([
-      'stable9' => [
-        'name' => 'Stable 9',
+      'stable' => [
+        'name' => 'Stable',
         'dependencies' => [],
       ],
       'claro' => [
@@ -70,14 +68,14 @@ class ModuleRequiredByThemesUninstallValidatorTest extends UnitTestCase {
   /**
    * @covers ::validate
    */
-  public function testValidateOneThemeDependency(): void {
+  public function testValidateOneThemeDependency() {
     $module = 'single_module';
     $module_name = 'Single Module';
     $theme = 'one_theme';
     $theme_name = 'One Theme';
     $this->themeExtensionList->getAllInstalledInfo()->willReturn([
-      'stable9' => [
-        'name' => 'Stable 9',
+      'stable' => [
+        'name' => 'Stable',
         'dependencies' => [],
       ],
       'claro' => [
@@ -109,7 +107,7 @@ class ModuleRequiredByThemesUninstallValidatorTest extends UnitTestCase {
   /**
    * @covers ::validate
    */
-  public function testValidateTwoThemeDependencies(): void {
+  public function testValidateTwoThemeDependencies() {
     $module = 'popular_module';
     $module_name = 'Popular Module';
     $theme1 = 'first_theme';
@@ -117,8 +115,8 @@ class ModuleRequiredByThemesUninstallValidatorTest extends UnitTestCase {
     $theme_name_1 = 'First Theme';
     $theme_name_2 = 'Second Theme';
     $this->themeExtensionList->getAllInstalledInfo()->willReturn([
-      'stable9' => [
-        'name' => 'Stable 9',
+      'stable' => [
+        'name' => 'Stable',
         'dependencies' => [],
       ],
       'claro' => [

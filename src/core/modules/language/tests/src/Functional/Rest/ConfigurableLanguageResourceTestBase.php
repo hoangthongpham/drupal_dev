@@ -1,15 +1,13 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\language\Functional\Rest;
 
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Url;
-use Drupal\Tests\rest\Functional\EntityResource\ConfigEntityResourceTestBase;
+use Drupal\Tests\rest\Functional\EntityResource\EntityResourceTestBase;
 use Drupal\language\Entity\ConfigurableLanguage;
 
-abstract class ConfigurableLanguageResourceTestBase extends ConfigEntityResourceTestBase {
+abstract class ConfigurableLanguageResourceTestBase extends EntityResourceTestBase {
 
   /**
    * {@inheritdoc}
@@ -75,7 +73,6 @@ abstract class ConfigurableLanguageResourceTestBase extends ConfigEntityResource
    */
   protected function getNormalizedPostEntity() {
     // @todo Update in https://www.drupal.org/node/2300677.
-    return [];
   }
 
   /**
@@ -83,7 +80,7 @@ abstract class ConfigurableLanguageResourceTestBase extends ConfigEntityResource
    *
    * @see https://www.drupal.org/node/2915414
    */
-  public function testGetDefaultConfig(): void {
+  public function testGetDefaultConfig() {
     $this->initAuthentication();
     $url = Url::fromUri('base:/entity/configurable_language/en')->setOption('query', ['_format' => static::$format]);
     $request_options = $this->getAuthenticationRequestOptions('GET');

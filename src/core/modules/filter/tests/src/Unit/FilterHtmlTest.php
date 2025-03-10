@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\filter\Unit;
 
 use Drupal\Tests\UnitTestCase;
@@ -42,23 +40,25 @@ class FilterHtmlTest extends UnitTestCase {
    * @param string $expected
    *   The expected output string.
    */
-  public function testFilterAttributes($html, $expected): void {
+  public function testfilterAttributes($html, $expected) {
     $this->assertSame($expected, $this->filter->filterAttributes($html));
   }
 
   /**
-   * Provides data for testFilterAttributes.
+   * Provides data for testfilterAttributes.
    *
    * @return array
    *   An array of test data.
    */
-  public static function providerFilterAttributes() {
+  public function providerFilterAttributes() {
     return [
       ['<a href="/blog" title="Blog">Blog</a>', '<a href="/blog">Blog</a>'],
       ['<p dir="rtl" />', '<p dir="rtl"></p>'],
       ['<p dir="bogus" />', '<p></p>'],
       ['<p id="first" />', '<p></p>'],
-      ['<p id="first" lang="en">text</p>', '<p lang="en">text</p>'],
+      // The addition of xml:lang isn't especially desired, but is still valid
+      // HTML5. See https://www.drupal.org/node/1333730.
+      ['<p id="first" lang="en">text</p>', '<p lang="en" xml:lang="en">text</p>'],
       ['<p style="display: none;" />', '<p></p>'],
       ['<code class="pretty invalid">foreach ($a as $b) {}</code>', '<code class="pretty">foreach ($a as $b) {}</code>'],
       ['<code class="boring pretty">foreach ($a as $b) {}</code>', '<code class="boring pretty">foreach ($a as $b) {}</code>'],
@@ -82,7 +82,7 @@ class FilterHtmlTest extends UnitTestCase {
   /**
    * @covers ::setConfiguration
    */
-  public function testSetConfiguration(): void {
+  public function testSetConfiguration() {
     $configuration['settings'] = [
       // New lines and spaces are replaced with a single space.
       'allowed_html' => "<a>  <br>\r\n  <p>",

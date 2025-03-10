@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drush\Boot;
 
 use Psr\Log\LoggerAwareInterface;
@@ -11,47 +9,51 @@ abstract class BaseBoot implements Boot, LoggerAwareInterface
 {
     use LoggerAwareTrait;
 
-    protected string|bool $uri = false;
-    protected int $phase = DrupalBootLevels::NONE;
+    protected $uri = false;
+    protected $phase = false;
 
     public function __construct()
     {
         register_shutdown_function([$this, 'terminate']);
     }
 
-    public function findUri($root, $uri): string
+    public function findUri($root, $uri)
     {
         return 'default';
     }
 
-    public function getUri(): string
+    public function getUri()
     {
         return $this->uri;
     }
 
-    public function setUri($uri): void
+    public function setUri($uri)
     {
         $this->uri = $uri;
     }
 
-    public function getPhase(): int
+    /**
+     * @return int
+     */
+    public function getPhase()
     {
         return $this->phase;
     }
 
-    public function setPhase(int $phase): void
+    /**
+     * @param int $phase
+     */
+    public function setPhase($phase)
     {
         $this->phase = $phase;
     }
 
-    public function validRoot(?string $path): bool
+    public function validRoot($path)
     {
-        return false;
     }
 
-    public function getVersion(string $root)
+    public function getVersion($root)
     {
-        return null;
     }
 
     public function commandDefaults()
@@ -63,32 +65,36 @@ abstract class BaseBoot implements Boot, LoggerAwareInterface
         // No longer used.
     }
 
-    public function bootstrapPhaseMap(): array
+    public function bootstrapPhases()
     {
         return [
-            'none' => DrupalBootLevels::NONE,
-            'drush' => DrupalBootLevels::NONE,
-            'max' => DrupalBootLevels::MAX,
-            'root' => DrupalBootLevels::ROOT,
-            'site' => DrupalBootLevels::SITE,
-            'configuration' => DrupalBootLevels::CONFIGURATION,
-            'database' => DrupalBootLevels::DATABASE,
-            'full' => DrupalBootLevels::FULL
+            DRUSH_BOOTSTRAP_DRUSH => 'bootstrapDrush',
         ];
     }
 
-    public function lookUpPhaseIndex($phase): ?int
+    public function bootstrapPhaseMap()
     {
-        if (is_numeric($phase)) {
-            return (int) $phase;
-        }
+        return [
+            'none' => DRUSH_BOOTSTRAP_DRUSH,
+            'drush' => DRUSH_BOOTSTRAP_DRUSH,
+            'max' => DRUSH_BOOTSTRAP_MAX,
+            'root' => DRUSH_BOOTSTRAP_DRUPAL_ROOT,
+            'site' => DRUSH_BOOTSTRAP_DRUPAL_SITE,
+            'configuration' => DRUSH_BOOTSTRAP_DRUPAL_CONFIGURATION,
+            'database' => DRUSH_BOOTSTRAP_DRUPAL_DATABASE,
+            'full' => DRUSH_BOOTSTRAP_DRUPAL_FULL
+        ];
+    }
+
+    public function lookUpPhaseIndex($phase)
+    {
         $phaseMap = $this->bootstrapPhaseMap();
         if (isset($phaseMap[$phase])) {
             return $phaseMap[$phase];
         }
 
-        if ((!str_starts_with($phase, 'DRUSH_BOOTSTRAP_')) || (!defined($phase))) {
-            return null;
+        if ((substr($phase, 0, 16) != 'DRUSH_BOOTSTRAP_') || (!defined($phase))) {
+            return;
         }
         return constant($phase);
     }
@@ -97,7 +103,7 @@ abstract class BaseBoot implements Boot, LoggerAwareInterface
     {
     }
 
-    protected function hasRegisteredSymfonyCommand($application, $name): bool
+    protected function hasRegisteredSymfonyCommand($application, $name)
     {
         try {
             $application->get($name);

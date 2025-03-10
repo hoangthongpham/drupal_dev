@@ -2,12 +2,12 @@
 
 namespace Drupal\commerce_payment\Entity;
 
+use Drupal\commerce_price\Price;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityMalformedException;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
-use Drupal\commerce_price\Price;
 
 /**
  * Defines the payment entity class.

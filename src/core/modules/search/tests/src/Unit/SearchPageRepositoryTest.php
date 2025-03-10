@@ -1,10 +1,12 @@
 <?php
 
-declare(strict_types=1);
+/**
+ * @file
+ * Contains \Drupal\Tests\search\Unit\SearchPageRepositoryTest.
+ */
 
 namespace Drupal\Tests\search\Unit;
 
-use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\search\Entity\SearchPage;
 use Drupal\search\SearchPageRepository;
@@ -48,20 +50,18 @@ class SearchPageRepositoryTest extends UnitTestCase {
    * {@inheritdoc}
    */
   protected function setUp(): void {
-    parent::setUp();
-
     $this->query = $this->createMock('Drupal\Core\Entity\Query\QueryInterface');
 
     $this->storage = $this->createMock('Drupal\Core\Config\Entity\ConfigEntityStorageInterface');
     $this->storage->expects($this->any())
       ->method('getQuery')
-      ->willReturn($this->query);
+      ->will($this->returnValue($this->query));
 
     /** @var \Drupal\Core\Entity\EntityTypeManagerInterface|\PHPUnit\Framework\MockObject\MockObject $entity_type_manager */
     $entity_type_manager = $this->createMock(EntityTypeManagerInterface::class);
     $entity_type_manager->expects($this->any())
       ->method('getStorage')
-      ->willReturn($this->storage);
+      ->will($this->returnValue($this->storage));
 
     $this->configFactory = $this->createMock('Drupal\Core\Config\ConfigFactoryInterface');
     $this->searchPageRepository = new SearchPageRepository($this->configFactory, $entity_type_manager);
@@ -70,14 +70,14 @@ class SearchPageRepositoryTest extends UnitTestCase {
   /**
    * Tests the getActiveSearchPages() method.
    */
-  public function testGetActiveSearchPages(): void {
+  public function testGetActiveSearchPages() {
     $this->query->expects($this->once())
       ->method('condition')
       ->with('status', TRUE)
-      ->willReturn($this->query);
+      ->will($this->returnValue($this->query));
     $this->query->expects($this->once())
       ->method('execute')
-      ->willReturn(['test' => 'test', 'other_test' => 'other_test']);
+      ->will($this->returnValue(['test' => 'test', 'other_test' => 'other_test']));
 
     $entities = [];
     $entities['test'] = $this->createMock('Drupal\search\SearchPageInterface');
@@ -85,7 +85,7 @@ class SearchPageRepositoryTest extends UnitTestCase {
     $this->storage->expects($this->once())
       ->method('loadMultiple')
       ->with(['test' => 'test', 'other_test' => 'other_test'])
-      ->willReturn($entities);
+      ->will($this->returnValue($entities));
 
     $result = $this->searchPageRepository->getActiveSearchPages();
     $this->assertSame($entities, $result);
@@ -94,18 +94,18 @@ class SearchPageRepositoryTest extends UnitTestCase {
   /**
    * Tests the isSearchActive() method.
    */
-  public function testIsSearchActive(): void {
+  public function testIsSearchActive() {
     $this->query->expects($this->once())
       ->method('condition')
       ->with('status', TRUE)
-      ->willReturn($this->query);
+      ->will($this->returnValue($this->query));
     $this->query->expects($this->once())
       ->method('range')
       ->with(0, 1)
-      ->willReturn($this->query);
+      ->will($this->returnValue($this->query));
     $this->query->expects($this->once())
       ->method('execute')
-      ->willReturn(['test' => 'test']);
+      ->will($this->returnValue(['test' => 'test']));
 
     $this->assertTrue($this->searchPageRepository->isSearchActive());
   }
@@ -113,28 +113,28 @@ class SearchPageRepositoryTest extends UnitTestCase {
   /**
    * Tests the getIndexableSearchPages() method.
    */
-  public function testGetIndexableSearchPages(): void {
+  public function testGetIndexableSearchPages() {
     $this->query->expects($this->once())
       ->method('condition')
       ->with('status', TRUE)
-      ->willReturn($this->query);
+      ->will($this->returnValue($this->query));
     $this->query->expects($this->once())
       ->method('execute')
-      ->willReturn(['test' => 'test', 'other_test' => 'other_test']);
+      ->will($this->returnValue(['test' => 'test', 'other_test' => 'other_test']));
 
     $entities = [];
     $entities['test'] = $this->createMock('Drupal\search\SearchPageInterface');
     $entities['test']->expects($this->once())
       ->method('isIndexable')
-      ->willReturn(TRUE);
+      ->will($this->returnValue(TRUE));
     $entities['other_test'] = $this->createMock('Drupal\search\SearchPageInterface');
     $entities['other_test']->expects($this->once())
       ->method('isIndexable')
-      ->willReturn(FALSE);
+      ->will($this->returnValue(FALSE));
     $this->storage->expects($this->once())
       ->method('loadMultiple')
       ->with(['test' => 'test', 'other_test' => 'other_test'])
-      ->willReturn($entities);
+      ->will($this->returnValue($entities));
 
     $result = $this->searchPageRepository->getIndexableSearchPages();
     $this->assertCount(1, $result);
@@ -144,32 +144,32 @@ class SearchPageRepositoryTest extends UnitTestCase {
   /**
    * Tests the clearDefaultSearchPage() method.
    */
-  public function testClearDefaultSearchPage(): void {
+  public function testClearDefaultSearchPage() {
     $config = $this->getMockBuilder('Drupal\Core\Config\Config')
       ->disableOriginalConstructor()
       ->getMock();
     $config->expects($this->once())
       ->method('clear')
       ->with('default_page')
-      ->willReturn($config);
+      ->will($this->returnValue($config));
     $this->configFactory->expects($this->once())
       ->method('getEditable')
       ->with('search.settings')
-      ->willReturn($config);
+      ->will($this->returnValue($config));
     $this->searchPageRepository->clearDefaultSearchPage();
   }
 
   /**
    * Tests the getDefaultSearchPage() method when the default is active.
    */
-  public function testGetDefaultSearchPageWithActiveDefault(): void {
+  public function testGetDefaultSearchPageWithActiveDefault() {
     $this->query->expects($this->once())
       ->method('condition')
       ->with('status', TRUE)
-      ->willReturn($this->query);
+      ->will($this->returnValue($this->query));
     $this->query->expects($this->once())
       ->method('execute')
-      ->willReturn(['test' => 'test', 'other_test' => 'other_test']);
+      ->will($this->returnValue(['test' => 'test', 'other_test' => 'other_test']));
 
     $config = $this->getMockBuilder('Drupal\Core\Config\Config')
       ->disableOriginalConstructor()
@@ -177,11 +177,11 @@ class SearchPageRepositoryTest extends UnitTestCase {
     $config->expects($this->once())
       ->method('get')
       ->with('default_page')
-      ->willReturn('test');
+      ->will($this->returnValue('test'));
     $this->configFactory->expects($this->once())
       ->method('get')
       ->with('search.settings')
-      ->willReturn($config);
+      ->will($this->returnValue($config));
 
     $this->assertSame('test', $this->searchPageRepository->getDefaultSearchPage());
   }
@@ -189,14 +189,14 @@ class SearchPageRepositoryTest extends UnitTestCase {
   /**
    * Tests the getDefaultSearchPage() method when the default is inactive.
    */
-  public function testGetDefaultSearchPageWithInactiveDefault(): void {
+  public function testGetDefaultSearchPageWithInactiveDefault() {
     $this->query->expects($this->once())
       ->method('condition')
       ->with('status', TRUE)
-      ->willReturn($this->query);
+      ->will($this->returnValue($this->query));
     $this->query->expects($this->once())
       ->method('execute')
-      ->willReturn(['test' => 'test']);
+      ->will($this->returnValue(['test' => 'test']));
 
     $config = $this->getMockBuilder('Drupal\Core\Config\Config')
       ->disableOriginalConstructor()
@@ -204,11 +204,11 @@ class SearchPageRepositoryTest extends UnitTestCase {
     $config->expects($this->once())
       ->method('get')
       ->with('default_page')
-      ->willReturn('other_test');
+      ->will($this->returnValue('other_test'));
     $this->configFactory->expects($this->once())
       ->method('get')
       ->with('search.settings')
-      ->willReturn($config);
+      ->will($this->returnValue($config));
 
     $this->assertSame('test', $this->searchPageRepository->getDefaultSearchPage());
   }
@@ -216,7 +216,7 @@ class SearchPageRepositoryTest extends UnitTestCase {
   /**
    * Tests the setDefaultSearchPage() method.
    */
-  public function testSetDefaultSearchPage(): void {
+  public function testSetDefaultSearchPage() {
     $id = 'bananas';
     $config = $this->getMockBuilder('Drupal\Core\Config\Config')
       ->disableOriginalConstructor()
@@ -224,88 +224,52 @@ class SearchPageRepositoryTest extends UnitTestCase {
     $config->expects($this->once())
       ->method('set')
       ->with('default_page', $id)
-      ->willReturn($config);
+      ->will($this->returnValue($config));
     $config->expects($this->once())
       ->method('save')
-      ->willReturn($config);
+      ->will($this->returnValue($config));
     $this->configFactory->expects($this->once())
       ->method('getEditable')
       ->with('search.settings')
-      ->willReturn($config);
+      ->will($this->returnValue($config));
 
     $search_page = $this->createMock('Drupal\search\SearchPageInterface');
     $search_page->expects($this->once())
       ->method('id')
-      ->willReturn($id);
+      ->will($this->returnValue($id));
     $search_page->expects($this->once())
       ->method('enable')
-      ->willReturn($search_page);
+      ->will($this->returnValue($search_page));
     $search_page->expects($this->once())
       ->method('save')
-      ->willReturn($search_page);
+      ->will($this->returnValue($search_page));
     $this->searchPageRepository->setDefaultSearchPage($search_page);
   }
 
   /**
    * Tests the sortSearchPages() method.
    */
-  public function testSortSearchPages(): void {
-    $entity_type = $this->createMock(EntityTypeInterface::class);
-    $entity_type
+  public function testSortSearchPages() {
+    $entity_type = $this->createMock('Drupal\Core\Entity\EntityTypeInterface');
+    $entity_type->expects($this->any())
       ->method('getClass')
-      ->willReturn(TestSearchPage::class);
+      ->will($this->returnValue('Drupal\Tests\search\Unit\TestSearchPage'));
     $this->storage->expects($this->once())
       ->method('getEntityType')
-      ->willReturn($entity_type);
+      ->will($this->returnValue($entity_type));
 
-    // Declare entities out of their expected order, so we can be sure they were
-    // sorted.
-    $entity_test4 = $this->createMock(TestSearchPage::class);
-    $entity_test4
-      ->method('label')
-      ->willReturn('Test4');
-    $entity_test4
-      ->method('status')
-      ->willReturn(FALSE);
-    $entity_test4
-      ->method('getWeight')
-      ->willReturn(0);
-    $entity_test3 = $this->createMock(TestSearchPage::class);
-    $entity_test3
-      ->method('label')
-      ->willReturn('Test3');
-    $entity_test3
-      ->method('status')
-      ->willReturn(FALSE);
-    $entity_test3
-      ->method('getWeight')
-      ->willReturn(10);
-    $entity_test2 = $this->createMock(TestSearchPage::class);
-    $entity_test2
-      ->method('label')
-      ->willReturn('Test2');
-    $entity_test2
-      ->method('status')
-      ->willReturn(TRUE);
-    $entity_test2
-      ->method('getWeight')
-      ->willReturn(0);
-    $entity_test1 = $this->createMock(TestSearchPage::class);
-    $entity_test1
-      ->method('label')
-      ->willReturn('Test1');
-    $entity_test1
-      ->method('status')
-      ->willReturn(TRUE);
-    $entity_test1
-      ->method('getWeight')
-      ->willReturn(0);
-
-    $unsorted_entities = [$entity_test4, $entity_test3, $entity_test2, $entity_test1];
-    $expected = [$entity_test1, $entity_test2, $entity_test3, $entity_test4];
+    // Declare entities out of their expected order so we can be sure they were
+    // sorted. We cannot mock these because of uasort(), see
+    // https://bugs.php.net/bug.php?id=50688.
+    $unsorted_entities['test4'] = new TestSearchPage(['weight' => 0, 'status' => FALSE, 'label' => 'Test4']);
+    $unsorted_entities['test3'] = new TestSearchPage(['weight' => 10, 'status' => TRUE, 'label' => 'Test3']);
+    $unsorted_entities['test2'] = new TestSearchPage(['weight' => 0, 'status' => TRUE, 'label' => 'Test2']);
+    $unsorted_entities['test1'] = new TestSearchPage(['weight' => 0, 'status' => TRUE, 'label' => 'Test1']);
+    $expected = $unsorted_entities;
+    ksort($expected);
 
     $sorted_entities = $this->searchPageRepository->sortSearchPages($unsorted_entities);
-    $this->assertSame($expected, array_values($sorted_entities));
+    $this->assertSame($expected, $sorted_entities);
   }
 
 }

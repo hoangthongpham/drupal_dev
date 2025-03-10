@@ -1,10 +1,7 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\locale\Functional;
 
-use Drupal\Core\Url;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\Tests\RequirementsPageTrait;
@@ -19,19 +16,16 @@ class LocaleTranslatedSchemaDefinitionTest extends BrowserTestBase {
   use RequirementsPageTrait;
 
   /**
-   * {@inheritdoc}
+   * Modules to enable.
+   *
+   * @var array
    */
   protected static $modules = ['language', 'locale', 'node'];
 
   /**
    * {@inheritdoc}
    */
-  protected $defaultTheme = 'stark';
-
-  /**
-   * {@inheritdoc}
-   */
-  protected bool $useOneTimeLoginLinks = FALSE;
+  protected $defaultTheme = 'classy';
 
   /**
    * {@inheritdoc}
@@ -49,7 +43,7 @@ class LocaleTranslatedSchemaDefinitionTest extends BrowserTestBase {
   /**
    * Tests that translated field descriptions do not affect the update system.
    */
-  public function testTranslatedSchemaDefinition(): void {
+  public function testTranslatedSchemaDefinition() {
     /** @var \Drupal\locale\StringDatabaseStorage $stringStorage */
     $stringStorage = \Drupal::service('locale.storage');
 
@@ -73,11 +67,11 @@ class LocaleTranslatedSchemaDefinitionTest extends BrowserTestBase {
   /**
    * Tests that translations do not affect the update system.
    */
-  public function testTranslatedUpdate(): void {
+  public function testTranslatedUpdate() {
     // Visit the update page to collect any strings that may be translatable.
     $user = $this->drupalCreateUser(['administer software updates']);
     $this->drupalLogin($user);
-    $update_url = Url::fromRoute('system.db_update')->setAbsolute()->toString();
+    $update_url = $GLOBALS['base_url'] . '/update.php';
 
     // Collect strings from the PHP warning page, if applicable, as well as the
     // main update page.
@@ -101,7 +95,7 @@ class LocaleTranslatedSchemaDefinitionTest extends BrowserTestBase {
     // markup and a link instead of specific text because text may be
     // translated.
     $this->drupalGet($update_url . '/selection', ['external' => TRUE]);
-    $this->assertSession()->statusMessageExists('status');
+    $this->assertSession()->responseContains('messages--status');
     $this->assertSession()->linkByHrefNotExists('fr/update.php/run', 'No link to run updates.');
   }
 

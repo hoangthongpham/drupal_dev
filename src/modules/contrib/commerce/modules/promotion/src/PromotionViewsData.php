@@ -2,8 +2,8 @@
 
 namespace Drupal\commerce_promotion;
 
-use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\commerce\CommerceEntityViewsData;
+use Drupal\Core\Field\FieldDefinitionInterface;
 
 /**
  * Provides views data for promotions.

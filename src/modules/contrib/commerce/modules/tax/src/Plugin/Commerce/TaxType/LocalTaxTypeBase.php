@@ -4,7 +4,6 @@ namespace Drupal\commerce_tax\Plugin\Commerce\TaxType;
 
 use CommerceGuys\Addressing\Address;
 use CommerceGuys\Addressing\AddressInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\commerce_order\Adjustment;
 use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\commerce_order\Entity\OrderItemInterface;
@@ -12,8 +11,9 @@ use Drupal\commerce_price\RounderInterface;
 use Drupal\commerce_store\Entity\StoreInterface;
 use Drupal\commerce_tax\Event\BuildZonesEvent;
 use Drupal\commerce_tax\Event\TaxEvents;
-use Drupal\commerce_tax\Resolver\ChainTaxRateResolverInterface;
 use Drupal\commerce_tax\TaxZone;
+use Drupal\commerce_tax\Resolver\ChainTaxRateResolverInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\profile\Entity\ProfileInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\system\Functional\Entity;
 
 use Drupal\Core\Language\LanguageInterface;
@@ -32,15 +30,16 @@ class EntityListBuilderTest extends BrowserTestBase {
     parent::setUp();
 
     // Create and log in user.
-    $this->drupalLogin($this->drupalCreateUser([
+    $this->webUser = $this->drupalCreateUser([
       'administer entity_test content',
-    ]));
+    ]);
+    $this->drupalLogin($this->webUser);
   }
 
   /**
    * Tests paging.
    */
-  public function testPager(): void {
+  public function testPager() {
     // Create 51 test entities.
     for ($i = 1; $i < 52; $i++) {
       EntityTest::create(['name' => 'Test entity ' . $i])->save();
@@ -62,7 +61,7 @@ class EntityListBuilderTest extends BrowserTestBase {
   /**
    * Tests that the correct cache contexts are set.
    */
-  public function testCacheContexts(): void {
+  public function testCacheContexts() {
     /** @var \Drupal\Core\Entity\EntityListBuilderInterface $list_builder */
     $list_builder = $this->container->get('entity_type.manager')->getListBuilder('entity_test');
 
@@ -75,7 +74,7 @@ class EntityListBuilderTest extends BrowserTestBase {
   /**
    * Tests if the list cache tags are set.
    */
-  public function testCacheTags(): void {
+  public function testCacheTags() {
     $this->drupalGet('entity_test/list');
     $this->assertSession()->responseHeaderContains('X-Drupal-Cache-Tags', 'entity_test_list');
   }

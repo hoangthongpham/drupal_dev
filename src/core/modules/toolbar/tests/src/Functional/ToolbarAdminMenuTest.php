@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\toolbar\Functional;
 
 use Drupal\Core\EventSubscriber\MainContentViewSubscriber;
@@ -53,7 +51,9 @@ class ToolbarAdminMenuTest extends BrowserTestBase {
   protected $hash;
 
   /**
-   * {@inheritdoc}
+   * Modules to enable.
+   *
+   * @var array
    */
   protected static $modules = [
     'node',
@@ -65,7 +65,6 @@ class ToolbarAdminMenuTest extends BrowserTestBase {
     'language',
     'test_page_test',
     'locale',
-    'search',
   ];
 
   /**
@@ -73,9 +72,6 @@ class ToolbarAdminMenuTest extends BrowserTestBase {
    */
   protected $defaultTheme = 'stark';
 
-  /**
-   * {@inheritdoc}
-   */
   protected function setUp(): void {
     parent::setUp();
 
@@ -96,7 +92,6 @@ class ToolbarAdminMenuTest extends BrowserTestBase {
       'administer taxonomy',
       'administer languages',
       'translate interface',
-      'administer search',
     ];
 
     // Create an administrative user and log it in.
@@ -116,12 +111,10 @@ class ToolbarAdminMenuTest extends BrowserTestBase {
   }
 
   /**
-   * Tests Toolbar's responses to installing and uninstalling modules.
-   *
-   * @see toolbar_modules_installed()
-   * @see toolbar_modules_uninstalled()
+   * Tests the toolbar_modules_installed() and toolbar_modules_uninstalled() hook
+   * implementations.
    */
-  public function testModuleStatusChangeSubtreesHashCacheClear(): void {
+  public function testModuleStatusChangeSubtreesHashCacheClear() {
     // Use an admin role to ensure the user has all available permissions. This
     // results in the admin menu links changing as the taxonomy module is
     // installed and uninstalled because the role will always have the
@@ -129,7 +122,8 @@ class ToolbarAdminMenuTest extends BrowserTestBase {
     $role = Role::load($this->createRole([]));
     $role->setIsAdmin(TRUE);
     $role->save();
-    $this->adminUser->addRole($role->id())->save();
+    $this->adminUser->addRole($role->id());
+    $this->adminUser->save();
 
     // Uninstall a module.
     $edit = [];
@@ -159,7 +153,7 @@ class ToolbarAdminMenuTest extends BrowserTestBase {
   /**
    * Tests toolbar cache tags implementation.
    */
-  public function testMenuLinkUpdateSubtreesHashCacheClear(): void {
+  public function testMenuLinkUpdateSubtreesHashCacheClear() {
     // The ID of (any) admin menu link.
     $admin_menu_link_id = 'system.admin_config_development';
 
@@ -177,12 +171,10 @@ class ToolbarAdminMenuTest extends BrowserTestBase {
   }
 
   /**
-   * Tests Toolbar's responses to user data updates.
-   *
-   * @see toolbar_user_role_update()
-   * @see toolbar_user_update()
+   * Exercises the toolbar_user_role_update() and toolbar_user_update() hook
+   * implementations.
    */
-  public function testUserRoleUpdateSubtreesHashCacheClear(): void {
+  public function testUserRoleUpdateSubtreesHashCacheClear() {
     // Find the new role ID.
     $all_rids = $this->adminUser->getRoles();
     unset($all_rids[array_search(RoleInterface::AUTHENTICATED_ID, $all_rids)]);
@@ -245,9 +237,10 @@ class ToolbarAdminMenuTest extends BrowserTestBase {
   }
 
   /**
-   * Tests cache invalidation when one user modifies another user.
+   * Tests that changes to a user account by another user clears the changed
+   * account's toolbar cached, not the user's who took the action.
    */
-  public function testNonCurrentUserAccountUpdates(): void {
+  public function testNonCurrentUserAccountUpdates() {
     $admin_user_id = $this->adminUser->id();
     $this->hash = $this->getSubtreesHash();
 
@@ -283,7 +276,7 @@ class ToolbarAdminMenuTest extends BrowserTestBase {
   /**
    * Tests that toolbar cache is cleared when string translations are made.
    */
-  public function testLocaleTranslationSubtreesHashCacheClear(): void {
+  public function testLocaleTranslationSubtreesHashCacheClear() {
     $admin_user = $this->adminUser;
     // User to translate and delete string.
     $translate_user = $this->drupalCreateUser([
@@ -330,8 +323,6 @@ class ToolbarAdminMenuTest extends BrowserTestBase {
     // should create a new menu hash if the toolbar subtrees cache is correctly
     // invalidated.
     $this->drupalLogin($translate_user);
-    // We need to visit the page to get the string to be translated.
-    $this->drupalGet($langcode . '/admin/config');
     $search = [
       'string' => 'Search and metadata',
       'langcode' => $langcode,
@@ -361,7 +352,6 @@ class ToolbarAdminMenuTest extends BrowserTestBase {
     // of the link items in the Structure tree (Menus) has had its text
     // translated.
     $this->drupalLogin($admin_user);
-    $this->drupalGet('admin/config');
     // Have the adminUser request a page in the new language.
     $this->drupalGet($langcode . '/test-page');
     $this->assertSession()->statusCodeEquals(200);
@@ -376,13 +366,13 @@ class ToolbarAdminMenuTest extends BrowserTestBase {
   /**
    * Tests that the 'toolbar/subtrees/{hash}' is reachable and correct.
    */
-  public function testSubtreesJsonRequest(): void {
+  public function testSubtreesJsonRequest() {
     $admin_user = $this->adminUser;
     $this->drupalLogin($admin_user);
     // Request a new page to refresh the drupalSettings object.
     $subtrees_hash = $this->getSubtreesHash();
 
-    $this->drupalGet('toolbar/subtrees/' . $subtrees_hash, ['query' => [MainContentViewSubscriber::WRAPPER_FORMAT => 'drupal_ajax']], ['X-Requested-With' => 'XMLHttpRequest']);
+    $this->drupalGet('toolbar/subtrees/' . $subtrees_hash, ['query' => [MainContentViewSubscriber::WRAPPER_FORMAT => 'drupal_ajax']], ['X-Requested-With: XMLHttpRequest']);
     $ajax_result = json_decode($this->getSession()->getPage()->getContent(), TRUE);
     $this->assertEquals('setToolbarSubtrees', $ajax_result[0]['command'], 'Subtrees response uses the correct command.');
     $this->assertEquals(['system-admin_content', 'system-admin_structure', 'system-themes_page', 'system-modules_list', 'system-admin_config', 'entity-user-collection', 'front'], array_keys($ajax_result[0]['subtrees']), 'Correct subtrees returned.');
@@ -391,7 +381,7 @@ class ToolbarAdminMenuTest extends BrowserTestBase {
   /**
    * Tests that subtrees hashes vary by the language of the page.
    */
-  public function testLanguageSwitching(): void {
+  public function testLanguageSwitching() {
     // Create a new language with the langcode 'xx'.
     $langcode = 'xx';
     $language = ConfigurableLanguage::createFromLangcode($langcode);
@@ -415,7 +405,7 @@ class ToolbarAdminMenuTest extends BrowserTestBase {
   /**
    * Tests that back to site link exists on admin pages, not on content pages.
    */
-  public function testBackToSiteLink(): void {
+  public function testBackToSiteLink() {
     // Back to site link should exist in the markup.
     $this->drupalGet('test-page');
     $back_link = $this->cssSelect('.home-toolbar-tab');
@@ -425,7 +415,7 @@ class ToolbarAdminMenuTest extends BrowserTestBase {
   /**
    * Tests that external links added to the menu appear in the toolbar.
    */
-  public function testExternalLink(): void {
+  public function testExternalLink() {
     $edit = [
       'title[0][value]' => 'External URL',
       'link[0][uri]' => 'http://example.org',
@@ -461,10 +451,8 @@ class ToolbarAdminMenuTest extends BrowserTestBase {
   }
 
   /**
-   * Checks the subtree hash of the current page with that of the previous page.
-   *
-   * Asserts that the subtrees hash on a fresh page GET is different from the
-   * subtree hash from the previous page GET.
+   * Asserts the subtrees hash on a fresh page GET is different from the hash
+   * from the previous page GET.
    *
    * @internal
    */

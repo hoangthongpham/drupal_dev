@@ -2,9 +2,6 @@
 
 namespace Drupal\Component\Utility;
 
-use Masterminds\HTML5;
-use Masterminds\HTML5\Serializer\Traverser;
-
 /**
  * Provides DOMDocument helpers for parsing and serializing HTML strings.
  *
@@ -85,7 +82,7 @@ class Html {
    * Link below shows the syntax for valid CSS identifiers (including element
    * names, classes, and IDs in selectors).
    *
-   * @see https://www.w3.org/TR/CSS21/syndata.html#characters
+   * @see http://www.w3.org/TR/CSS21/syndata.html#characters
    *
    * @param string $identifier
    *   The identifier to clean.
@@ -95,16 +92,13 @@ class Html {
    * @return string
    *   The cleaned identifier.
    */
-  public static function cleanCssIdentifier(
-    $identifier,
-    array $filter = [
-      ' ' => '-',
-      '_' => '-',
-      '/' => '-',
-      '[' => '-',
-      ']' => '',
-    ],
-  ) {
+  public static function cleanCssIdentifier($identifier, array $filter = [
+    ' ' => '-',
+    '_' => '-',
+    '/' => '-',
+    '[' => '-',
+    ']' => '',
+  ]) {
     // We could also use strtr() here but its much slower than str_replace(). In
     // order to keep '__' to stay '__' we first replace it with a different
     // placeholder after checking that it is not defined as a filter.
@@ -152,7 +146,7 @@ class Html {
    * This function ensures that each passed HTML ID value only exists once on
    * the page. By tracking the already returned ids, this function enables
    * forms, blocks, and other content to be output multiple times on the same
-   * page, without breaking HTML validation.
+   * page, without breaking (X)HTML validation.
    *
    * For already existing IDs, a counter is appended to the ID string.
    * Therefore, JavaScript and CSS code should not rely on any value that was
@@ -224,11 +218,11 @@ class Html {
   public static function getId($id) {
     $id = str_replace([' ', '_', '[', ']'], ['-', '-', '-', ''], mb_strtolower($id));
 
-    // As defined in https://www.w3.org/TR/html4/types.html#type-name, HTML IDs can
+    // As defined in http://www.w3.org/TR/html4/types.html#type-name, HTML IDs can
     // only contain letters, digits ([0-9]), hyphens ("-"), underscores ("_"),
     // colons (":"), and periods ("."). We strip out any character not in that
     // list. Note that the CSS spec doesn't allow colons or periods in identifiers
-    // (https://www.w3.org/TR/CSS21/syndata.html#characters), so we strip those two
+    // (http://www.w3.org/TR/CSS21/syndata.html#characters), so we strip those two
     // characters as well.
     $id = preg_replace('/[^A-Za-z0-9\-_]/', '', $id);
 
@@ -264,34 +258,44 @@ class Html {
   /**
    * Parses an HTML snippet and returns it as a DOM object.
    *
-   * This function loads the body part of a partial HTML document and returns a
-   * full \DOMDocument object that represents this document.
+   * This function loads the body part of a partial (X)HTML document and returns
+   * a full \DOMDocument object that represents this document.
    *
    * Use \Drupal\Component\Utility\Html::serialize() to serialize this
    * \DOMDocument back to a string.
    *
    * @param string $html
-   *   The partial HTML snippet to load. Invalid markup will be corrected on
+   *   The partial (X)HTML snippet to load. Invalid markup will be corrected on
    *   import.
    *
    * @return \DOMDocument
-   *   A \DOMDocument that represents the loaded HTML snippet.
+   *   A \DOMDocument that represents the loaded (X)HTML snippet.
    */
   public static function load($html) {
-    // Instantiate the HTML5 parser, but without the HTML5 namespace being
-    // added to the DOM document.
-    $html5 = new HTML5(['disable_html_ns' => TRUE, 'encoding' => 'UTF-8']);
+    $document = <<<EOD
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /></head>
+<body>!html</body>
+</html>
+EOD;
+    // PHP's \DOMDocument serialization adds extra whitespace when the markup
+    // of the wrapping document contains newlines, so ensure we remove all
+    // newlines before injecting the actual HTML body to be processed.
+    $document = strtr($document, ["\n" => '', '!html' => $html]);
 
-    // Attach the provided HTML inside the body. Rely on the HTML5 parser to
-    // close the body tag.
-    return $html5->loadHTML('<body>' . $html);
+    $dom = new \DOMDocument();
+    // Ignore warnings during HTML soup loading.
+    @$dom->loadHTML($document);
+
+    return $dom;
   }
 
   /**
    * Converts the body of a \DOMDocument back to an HTML snippet.
    *
-   * The function serializes the body part of a \DOMDocument back to an HTML
-   * snippet. The resulting HTML snippet will be properly formatted to be
+   * The function serializes the body part of a \DOMDocument back to an (X)HTML
+   * snippet. The resulting (X)HTML snippet will be properly formatted to be
    * compatible with HTML user agents.
    *
    * @param \DOMDocument $document
@@ -299,7 +303,7 @@ class Html {
    *   node will be converted.
    *
    * @return string
-   *   A valid HTML snippet, as a string.
+   *   A valid (X)HTML snippet, as a string.
    */
   public static function serialize(\DOMDocument $document) {
     $body_node = $document->getElementsByTagName('body')->item(0);
@@ -312,23 +316,10 @@ class Html {
       foreach ($body_node->getElementsByTagName('style') as $node) {
         static::escapeCdataElement($node, '/*', '*/');
       }
-
-      // Serialize the body using our custom set of rules.
-      // @see \Masterminds\HTML5::saveHTML()
-      $stream = fopen('php://temp', 'wb');
-      $rules = new HtmlSerializerRules($stream);
       foreach ($body_node->childNodes as $node) {
-        $traverser = new Traverser($node, $stream, $rules);
-        $traverser->walk();
+        $html .= $document->saveXML($node);
       }
-      $rules->unsetTraverser();
-      $html = stream_get_contents($stream, -1, 0);
-      fclose($stream);
     }
-
-    // Normalize all newlines.
-    $html = str_replace(["\r\n", "\r"], "\n", $html);
-
     return $html;
   }
 
@@ -354,16 +345,17 @@ class Html {
   public static function escapeCdataElement(\DOMNode $node, $comment_start = '//', $comment_end = '') {
     foreach ($node->childNodes as $child_node) {
       if ($child_node instanceof \DOMCdataSection) {
-        $data = $child_node->data;
-        if (!str_contains($child_node->data, 'CDATA')) {
-          $embed_prefix = "\n{$comment_start}<![CDATA[{$comment_end}\n";
-          $embed_suffix = "\n{$comment_start}]]>{$comment_end}\n";
+        $embed_prefix = "\n<!--{$comment_start}--><![CDATA[{$comment_start} ><!--{$comment_end}\n";
+        $embed_suffix = "\n{$comment_start}--><!]]>{$comment_end}\n";
 
-          $data = $embed_prefix . $data . $embed_suffix;
-        }
+        // Prevent invalid cdata escaping as this would throw a DOM error.
+        // This is the same behavior as found in libxml2.
+        // Related W3C standard: http://www.w3.org/TR/REC-xml/#dt-cdsection
+        // Fix explanation: http://wikipedia.org/wiki/CDATA#Nesting
+        $data = str_replace(']]>', ']]]]><![CDATA[>', $child_node->data);
 
         $fragment = $node->ownerDocument->createDocumentFragment();
-        $fragment->appendXML($data);
+        $fragment->appendXML($embed_prefix . $data . $embed_suffix);
         $node->appendChild($fragment);
         $node->removeChild($child_node);
       }
@@ -390,11 +382,7 @@ class Html {
    * @see html_entity_decode()
    * @see \Drupal\Component\Utility\Html::escape()
    */
-  public static function decodeEntities($text): string {
-    if (is_null($text)) {
-      @trigger_error('Passing NULL to ' . __METHOD__ . ' is deprecated in drupal:9.5.0 and will trigger a PHP error from drupal:11.0.0. Pass a string instead. See https://www.drupal.org/node/3318826', E_USER_DEPRECATED);
-      return '';
-    }
+  public static function decodeEntities($text) {
     return html_entity_decode($text, ENT_QUOTES, 'UTF-8');
   }
 
@@ -432,11 +420,7 @@ class Html {
    *
    * @ingroup sanitization
    */
-  public static function escape($text): string {
-    if (is_null($text)) {
-      @trigger_error('Passing NULL to ' . __METHOD__ . ' is deprecated in drupal:9.5.0 and will trigger a PHP error from drupal:11.0.0. Pass a string instead. See https://www.drupal.org/node/3318826', E_USER_DEPRECATED);
-      return '';
-    }
+  public static function escape($text) {
     return htmlspecialchars($text, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
   }
 
@@ -456,16 +440,16 @@ class Html {
    * transformed and should generally be avoided.
    *
    * Necessary for HTML that is served outside of a website, for example, RSS
-   * and email.
+   * and e-mail.
    *
    * @param string $html
-   *   The partial HTML snippet to load. Invalid markup will be corrected on
+   *   The partial (X)HTML snippet to load. Invalid markup will be corrected on
    *   import.
    * @param string $scheme_and_host
    *   The root URL, which has a URI scheme, host and optional port.
    *
    * @return string
-   *   The updated HTML snippet.
+   *   The updated (X)HTML snippet.
    */
   public static function transformRootRelativeUrlsToAbsolute($html, $scheme_and_host) {
     assert(empty(array_diff(array_keys(parse_url($scheme_and_host)), ["scheme", "host", "port"])), '$scheme_and_host contains scheme, host and port at most.');
@@ -476,24 +460,23 @@ class Html {
     $xpath = new \DOMXpath($html_dom);
 
     // Update all root-relative URLs to absolute URLs in the given HTML.
-    // Perform on attributes that may contain a single URI.
     foreach (static::$uriAttributes as $attr) {
       foreach ($xpath->query("//*[starts-with(@$attr, '/') and not(starts-with(@$attr, '//'))]") as $node) {
         $node->setAttribute($attr, $scheme_and_host . $node->getAttribute($attr));
       }
-    }
-    // Perform on each URI within "srcset" attributes.
-    foreach ($xpath->query("//*[@srcset]") as $node) {
-      // @see https://html.spec.whatwg.org/multipage/embedded-content.html#attr-img-srcset
-      // @see https://html.spec.whatwg.org/multipage/embedded-content.html#image-candidate-string
-      $image_candidate_strings = explode(',', $node->getAttribute('srcset'));
-      $image_candidate_strings = array_filter(array_map('trim', $image_candidate_strings));
-      foreach ($image_candidate_strings as $key => $image_candidate_string) {
-        if ($image_candidate_string[0] === '/' && $image_candidate_string[1] !== '/') {
-          $image_candidate_strings[$key] = $scheme_and_host . $image_candidate_string;
+      foreach ($xpath->query("//*[@srcset]") as $node) {
+        // @see https://html.spec.whatwg.org/multipage/embedded-content.html#attr-img-srcset
+        // @see https://html.spec.whatwg.org/multipage/embedded-content.html#image-candidate-string
+        $image_candidate_strings = explode(',', $node->getAttribute('srcset'));
+        $image_candidate_strings = array_map('trim', $image_candidate_strings);
+        for ($i = 0; $i < count($image_candidate_strings); $i++) {
+          $image_candidate_string = $image_candidate_strings[$i];
+          if ($image_candidate_string[0] === '/' && $image_candidate_string[1] !== '/') {
+            $image_candidate_strings[$i] = $scheme_and_host . $image_candidate_string;
+          }
         }
+        $node->setAttribute('srcset', implode(', ', $image_candidate_strings));
       }
-      $node->setAttribute('srcset', implode(', ', $image_candidate_strings));
     }
     return Html::serialize($html_dom);
   }

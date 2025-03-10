@@ -1,22 +1,17 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\KernelTests\Core\Cache;
 
-use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Cache\DatabaseBackendFactory;
-use Drupal\Core\Database\Database;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\user\Entity\User;
 use Symfony\Component\DependencyInjection\Reference;
-use Drupal\Component\Serialization\PhpSerialize;
 
 /**
- * Tests delaying of cache tag invalidation queries to the end of transactions.
+ * Tests that cache tag invalidation queries are delayed to the end of transactions.
  *
  * @group Cache
  */
@@ -38,6 +33,13 @@ class EndOfTransactionQueriesTest extends KernelTestBase {
   protected function setUp(): void {
     parent::setUp();
 
+    // This can only be checked after installing Drupal as it requires functions
+    // from bootstrap.inc.
+    if (!class_exists($this->getDatabaseConnectionInfo()['default']['namespace'] . '\Connection')) {
+      $this->markTestSkipped(sprintf('No logging override exists for the %s database driver. Create it, subclass this test class and override ::getDatabaseConnectionInfo().', $this->getDatabaseConnectionInfo()['default']['driver']));
+    }
+
+    $this->installSchema('system', 'sequences');
     $this->installEntitySchema('entity_test');
     $this->installEntitySchema('user');
 
@@ -51,46 +53,33 @@ class EndOfTransactionQueriesTest extends KernelTestBase {
   public function register(ContainerBuilder $container) {
     parent::register($container);
 
-    $container->register('serializer', PhpSerialize::class);
     // Register a database cache backend rather than memory-based.
     $container->register('cache_factory', DatabaseBackendFactory::class)
       ->addArgument(new Reference('database'))
       ->addArgument(new Reference('cache_tags.invalidator.checksum'))
-      ->addArgument(new Reference('settings'))
-      ->addArgument(new Reference('serializer'))
-      ->addArgument(new Reference(TimeInterface::class));
+      ->addArgument(new Reference('settings'));
   }
 
   /**
-   * Tests an entity save.
+   * {@inheritdoc}
    */
-  public function testEntitySave(): void {
+  public function testEntitySave() {
     \Drupal::cache()->set('test_cache_pretransaction_foobar', 'something', Cache::PERMANENT, ['foobar']);
     \Drupal::cache()->set('test_cache_pretransaction_entity_test_list', 'something', Cache::PERMANENT, ['entity_test_list']);
 
     $entity = EntityTest::create(['name' => $this->randomString()]);
+    \Drupal::database()->resetLoggedStatements();
 
-    Database::startLog('testEntitySave');
     $entity->save();
 
-    $executed_statements = [];
-    foreach (Database::getLog('testEntitySave') as $log) {
-      // Exclude transaction related statements from the log.
-      if (
-        str_starts_with($log['query'], 'ROLLBACK TO SAVEPOINT ') ||
-        str_starts_with($log['query'], 'RELEASE SAVEPOINT ') ||
-        str_starts_with($log['query'], 'SAVEPOINT ')
-      ) {
-        continue;
-      }
-      $executed_statements[] = $log['query'];
-    }
+    $executed_statements = \Drupal::database()->getLoggedStatements();
     $last_statement_index = max(array_keys($executed_statements));
-    $cachetag_statements = array_keys($this->getStatementsForTable($executed_statements, 'cachetags'));
+
+    $cachetag_statements = array_keys($this->getStatementsForTable(\Drupal::database()->getLoggedStatements(), 'cachetags'));
     $this->assertSame($last_statement_index - count($cachetag_statements) + 1, min($cachetag_statements), 'All of the last queries in the transaction are for the "cachetags" table.');
 
     // Verify that a nested entity save occurred.
-    $this->assertSame('john doe', User::load(1)->getAccountName());
+    $this->assertSame('johndoe', User::load(1)->getAccountName());
 
     // Cache reads occurring during a transaction that DO NOT depend on
     // invalidated cache tags result in cache HITs. Similarly, cache writes that
@@ -114,9 +103,9 @@ class EndOfTransactionQueriesTest extends KernelTestBase {
   }
 
   /**
-   * Tests an entity save rollback.
+   * {@inheritdoc}
    */
-  public function testEntitySaveRollback(): void {
+  public function testEntitySaveRollback() {
     \Drupal::cache()
       ->set('test_cache_pretransaction_entity_test_list', 'something', Cache::PERMANENT, ['entity_test_list']);
     \Drupal::cache()
@@ -139,7 +128,7 @@ class EndOfTransactionQueriesTest extends KernelTestBase {
     // Save a user, that should invalidate the cache tagged with user_list but
     // not the one with entity_test_list.
     User::create([
-      'name' => 'john doe',
+      'name' => 'johndoe',
       'status' => 1,
     ])->save();
 
@@ -159,29 +148,44 @@ class EndOfTransactionQueriesTest extends KernelTestBase {
    *   Filtered statement list.
    */
   protected function getStatementsForTable(array $statements, $table_name) {
-    return array_filter($statements, function ($statement) use ($table_name) {
-      return $this->isStatementRelatedToTable($statement, $table_name);
+    $tables = array_filter(array_map([$this, 'statementToTableName'], $statements));
+    return array_filter($tables, function ($table_for_statement) use ($table_name) {
+      return $table_for_statement === $table_name;
     });
   }
 
   /**
-   * Determines if a statement is relative to a specified table.
-   *
-   * Non-core database drivers can override this method if they have different
-   * patterns to identify table related statements.
+   * Returns the table name for a statement.
    *
    * @param string $statement
    *   The query statement.
-   * @param string $tableName
-   *   The table name, Drupal style, without curly brackets or prefix.
    *
-   * @return bool
-   *   TRUE if the statement is relative to the table, FALSE otherwise.
+   * @return string|null
+   *   The name of the table or NULL if none was found.
    */
-  protected static function isStatementRelatedToTable(string $statement, string $tableName): bool {
-    $realTableIdentifier = Database::getConnection()->prefixTables('{' . $tableName . '}');
-    $pattern = '/.*(INTO|FROM|UPDATE)( |\n)' . preg_quote($realTableIdentifier, '/') . '/';
-    return preg_match($pattern, $statement) === 1 ? TRUE : FALSE;
+  protected static function statementToTableName($statement) {
+    if (preg_match('/.*\{([^\}]+)\}.*/', $statement, $matches)) {
+      return $matches[1];
+    }
+    else {
+      return NULL;
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getDatabaseConnectionInfo() {
+    $info = parent::getDatabaseConnectionInfo();
+    // Override default database driver to one that does logging. Third-party
+    // (non-core) database drivers can achieve the same test coverage by
+    // subclassing this test class and overriding only this method.
+    // @see \Drupal\database_statement_monitoring_test\LoggedStatementsTrait
+    // @see \Drupal\database_statement_monitoring_test\mysql\Connection
+    // @see \Drupal\database_statement_monitoring_test\pgsql\Connection
+    // @see \Drupal\database_statement_monitoring_test\sqlite\Connection
+    $info['default']['namespace'] = '\Drupal\database_statement_monitoring_test\\' . $info['default']['driver'];
+    return $info;
   }
 
 }

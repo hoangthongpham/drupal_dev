@@ -1,13 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\node\Functional;
 
 use Drupal\node\Entity\NodeType;
 
 /**
- * Tests node access rebuild functions with multiple node access modules.
+ * Ensures that node access rebuild functions work correctly even
+ * when other modules implements hook_node_grants().
  *
  * @group node
  */
@@ -42,7 +41,6 @@ class NodeAccessRebuildNodeGrantsTest extends NodeTestBase {
       'administer site configuration',
       'access administration pages',
       'access site reports',
-      'administer nodes',
     ]);
     $this->drupalLogin($this->adminUser);
 
@@ -52,7 +50,7 @@ class NodeAccessRebuildNodeGrantsTest extends NodeTestBase {
   /**
    * Tests rebuilding the node access permissions table with content.
    */
-  public function testNodeAccessRebuildNodeGrants(): void {
+  public function testNodeAccessRebuildNodeGrants() {
     \Drupal::service('module_installer')->install(['node_access_test']);
     \Drupal::state()->set('node_access_test.private', TRUE);
     node_access_test_add_field(NodeType::load('page'));
@@ -108,7 +106,7 @@ class NodeAccessRebuildNodeGrantsTest extends NodeTestBase {
   /**
    * Tests rebuilding the node access permissions table with no content.
    */
-  public function testNodeAccessRebuildNoAccessModules(): void {
+  public function testNodeAccessRebuildNoAccessModules() {
     // Default realm access is present.
     $this->assertEquals(1, \Drupal::service('node.grant_storage')->count(), 'There is an all realm access record');
 

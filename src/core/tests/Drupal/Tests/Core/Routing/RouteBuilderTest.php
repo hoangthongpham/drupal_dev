@@ -1,6 +1,9 @@
 <?php
 
-declare(strict_types=1);
+/**
+ * @file
+ * Contains \Drupal\Tests\Core\Routing\RouteBuilderTest.
+ */
 
 namespace Drupal\Tests\Core\Routing;
 
@@ -11,7 +14,6 @@ use Drupal\Core\Routing\RouteBuildEvent;
 use Drupal\Core\Routing\RouteCompiler;
 use Drupal\Core\Routing\RoutingEvents;
 use Drupal\Tests\UnitTestCase;
-use Prophecy\Argument;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 
@@ -45,7 +47,7 @@ class RouteBuilderTest extends UnitTestCase {
   /**
    * The mocked event dispatcher.
    *
-   * @var \Symfony\Contracts\EventDispatcher\EventDispatcherInterface|\Prophecy\Prophecy\ObjectProphecy
+   * @var \Symfony\Contracts\EventDispatcher\EventDispatcherInterface|\PHPUnit\Framework\MockObject\MockObject
    */
   protected $dispatcher;
 
@@ -75,16 +77,10 @@ class RouteBuilderTest extends UnitTestCase {
    */
   protected $checkProvider;
 
-  /**
-   * {@inheritdoc}
-   */
   protected function setUp(): void {
-    parent::setUp();
-
     $this->dumper = $this->createMock('Drupal\Core\Routing\MatcherDumperInterface');
     $this->lock = $this->createMock('Drupal\Core\Lock\LockBackendInterface');
-    $this->dispatcher = $this->prophesize('\Symfony\Contracts\EventDispatcher\EventDispatcherInterface');
-    $this->dispatcher->dispatch(Argument::cetera(), Argument::cetera())->willReturnArgument(0);
+    $this->dispatcher = $this->createMock('\Symfony\Contracts\EventDispatcher\EventDispatcherInterface');
     $this->moduleHandler = $this->createMock('Drupal\Core\Extension\ModuleHandlerInterface');
     $this->controllerResolver = $this->createMock('Drupal\Core\Controller\ControllerResolverInterface');
     $this->yamlDiscovery = $this->getMockBuilder('\Drupal\Core\Discovery\YamlDiscovery')
@@ -92,18 +88,18 @@ class RouteBuilderTest extends UnitTestCase {
       ->getMock();
     $this->checkProvider = $this->createMock('\Drupal\Core\Access\CheckProviderInterface');
 
-    $this->routeBuilder = new TestRouteBuilder($this->dumper, $this->lock, $this->dispatcher->reveal(), $this->moduleHandler, $this->controllerResolver, $this->checkProvider);
+    $this->routeBuilder = new TestRouteBuilder($this->dumper, $this->lock, $this->dispatcher, $this->moduleHandler, $this->controllerResolver, $this->checkProvider);
     $this->routeBuilder->setYamlDiscovery($this->yamlDiscovery);
   }
 
   /**
    * Tests that the route rebuilding both locks and unlocks.
    */
-  public function testRebuildLockingUnlocking(): void {
+  public function testRebuildLockingUnlocking() {
     $this->lock->expects($this->once())
       ->method('acquire')
       ->with('router_rebuild')
-      ->willReturn(TRUE);
+      ->will($this->returnValue(TRUE));
 
     $this->lock->expects($this->once())
       ->method('release')
@@ -111,7 +107,7 @@ class RouteBuilderTest extends UnitTestCase {
 
     $this->yamlDiscovery->expects($this->any())
       ->method('findAll')
-      ->willReturn([]);
+      ->will($this->returnValue([]));
 
     $this->assertTrue($this->routeBuilder->rebuild());
   }
@@ -119,11 +115,11 @@ class RouteBuilderTest extends UnitTestCase {
   /**
    * Tests route rebuilding with a blocking lock.
    */
-  public function testRebuildBlockingLock(): void {
+  public function testRebuildBlockingLock() {
     $this->lock->expects($this->once())
       ->method('acquire')
       ->with('router_rebuild')
-      ->willReturn(FALSE);
+      ->will($this->returnValue(FALSE));
 
     $this->lock->expects($this->once())
       ->method('wait')
@@ -143,18 +139,18 @@ class RouteBuilderTest extends UnitTestCase {
    *
    * @see \Drupal\Core\Routing\RouteBuilder::rebuild()
    */
-  public function testRebuildWithStaticModuleRoutes(): void {
+  public function testRebuildWithStaticModuleRoutes() {
     $this->lock->expects($this->once())
       ->method('acquire')
       ->with('router_rebuild')
-      ->willReturn(TRUE);
+      ->will($this->returnValue(TRUE));
 
     $routing_fixtures = new RoutingFixtures();
     $routes = $routing_fixtures->staticSampleRouteCollection();
 
     $this->yamlDiscovery->expects($this->once())
       ->method('findAll')
-      ->willReturn(['test_module' => $routes]);
+      ->will($this->returnValue(['test_module' => $routes]));
 
     $route_collection = $routing_fixtures->sampleRouteCollection();
     foreach ($route_collection->all() as $route) {
@@ -163,10 +159,12 @@ class RouteBuilderTest extends UnitTestCase {
     $route_build_event = new RouteBuildEvent($route_collection);
 
     // Ensure that the alter routes events are fired.
-    $this->dispatcher->dispatch($route_build_event, RoutingEvents::DYNAMIC)
-      ->shouldBeCalled();
-    $this->dispatcher->dispatch($route_build_event, RoutingEvents::ALTER)
-      ->shouldBeCalled();
+    $this->dispatcher->expects($this->atLeast(2))
+      ->method('dispatch')
+      ->withConsecutive(
+        [$route_build_event, RoutingEvents::DYNAMIC],
+        [$route_build_event, RoutingEvents::ALTER],
+      );
 
     // Ensure that access checks are set.
     $this->checkProvider->expects($this->once())
@@ -189,22 +187,22 @@ class RouteBuilderTest extends UnitTestCase {
    *
    * @see \Drupal\Core\Routing\RouteBuilder::rebuild()
    */
-  public function testRebuildWithProviderBasedRoutes(): void {
+  public function testRebuildWithProviderBasedRoutes() {
     $this->lock->expects($this->once())
       ->method('acquire')
       ->with('router_rebuild')
-      ->willReturn(TRUE);
+      ->will($this->returnValue(TRUE));
 
     $this->yamlDiscovery->expects($this->once())
       ->method('findAll')
-      ->willReturn([
+      ->will($this->returnValue([
         'test_module' => [
           'route_callbacks' => [
             '\Drupal\Tests\Core\Routing\TestRouteSubscriber::routesFromArray',
             'test_module.route_service:routesFromCollection',
           ],
         ],
-      ]);
+      ]));
 
     $container = new ContainerBuilder();
     $container->set('test_module.route_service', new TestRouteSubscriber());
@@ -231,10 +229,12 @@ class RouteBuilderTest extends UnitTestCase {
     $route_build_event = new RouteBuildEvent($route_collection_filled);
 
     // Ensure that the alter routes events are fired.
-    $this->dispatcher->dispatch($route_build_event, RoutingEvents::DYNAMIC)
-      ->shouldBeCalled();
-    $this->dispatcher->dispatch($route_build_event, RoutingEvents::ALTER)
-      ->shouldBeCalled();
+    $this->dispatcher->expects($this->atLeast(2))
+      ->method('dispatch')
+      ->withConsecutive(
+        [$route_build_event, RoutingEvents::DYNAMIC],
+        [$route_build_event, RoutingEvents::ALTER],
+      );
 
     // Ensure that access checks are set.
     $this->checkProvider->expects($this->once())
@@ -254,11 +254,11 @@ class RouteBuilderTest extends UnitTestCase {
   /**
    * Tests \Drupal\Core\Routing\RouteBuilder::rebuildIfNeeded() method.
    */
-  public function testRebuildIfNeeded(): void {
+  public function testRebuildIfNeeded() {
     $this->lock->expects($this->once())
       ->method('acquire')
       ->with('router_rebuild')
-      ->willReturn(TRUE);
+      ->will($this->returnValue(TRUE));
 
     $this->lock->expects($this->once())
       ->method('release')
@@ -266,7 +266,7 @@ class RouteBuilderTest extends UnitTestCase {
 
     $this->yamlDiscovery->expects($this->any())
       ->method('findAll')
-      ->willReturn([]);
+      ->will($this->returnValue([]));
 
     $this->routeBuilder->setRebuildNeeded();
 
@@ -282,14 +282,14 @@ class RouteBuilderTest extends UnitTestCase {
    *
    * @see \Drupal\Core\Routing\RouteBuilder::rebuild()
    */
-  public function testRebuildWithOverriddenRouteClass(): void {
+  public function testRebuildWithOverriddenRouteClass() {
     $this->lock->expects($this->once())
       ->method('acquire')
       ->with('router_rebuild')
-      ->willReturn(TRUE);
+      ->will($this->returnValue(TRUE));
     $this->yamlDiscovery->expects($this->once())
       ->method('findAll')
-      ->willReturn([
+      ->will($this->returnValue([
         'test_module' => [
           'test_route.override' => [
             'path' => '/test_route_override',
@@ -301,7 +301,7 @@ class RouteBuilderTest extends UnitTestCase {
             'path' => '/test_route',
           ],
         ],
-      ]);
+      ]));
 
     $container = new ContainerBuilder();
     $container->set('test_module.route_service', new TestRouteSubscriber());
@@ -311,10 +311,12 @@ class RouteBuilderTest extends UnitTestCase {
     $route_collection_filled->add('test_route.override', new Route('/test_route_override', [], [], ['compiler_class' => 'Class\Does\Not\Exist']));
     $route_collection_filled->add('test_route', new Route('/test_route', [], [], ['compiler_class' => RouteCompiler::class]));
     $route_build_event = new RouteBuildEvent($route_collection_filled);
-    $this->dispatcher->dispatch($route_build_event, RoutingEvents::DYNAMIC)
-      ->shouldBeCalled();
-    $this->dispatcher->dispatch($route_build_event, RoutingEvents::ALTER)
-      ->shouldBeCalled();
+    $this->dispatcher->expects($this->atLeast(2))
+      ->method('dispatch')
+      ->withConsecutive(
+        [$route_build_event, RoutingEvents::DYNAMIC],
+        [$route_build_event, RoutingEvents::ALTER],
+      );
 
     $this->assertTrue($this->routeBuilder->rebuild());
   }

@@ -3,13 +3,11 @@
 namespace Drupal\image\Plugin\Field\FieldFormatter;
 
 use Drupal\Core\Entity\EntityStorageInterface;
-use Drupal\Core\Field\Attribute\FieldFormatter;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\File\FileUrlGeneratorInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\image\Entity\ImageStyle;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -18,14 +16,18 @@ use Drupal\Core\Cache\Cache;
 
 /**
  * Plugin implementation of the 'image' formatter.
+ *
+ * @FieldFormatter(
+ *   id = "image",
+ *   label = @Translation("Image"),
+ *   field_types = {
+ *     "image"
+ *   },
+ *   quickedit = {
+ *     "editor" = "image"
+ *   }
+ * )
  */
-#[FieldFormatter(
-  id: 'image',
-  label: new TranslatableMarkup('Image'),
-  field_types: [
-    'image',
-  ],
-)]
 class ImageFormatter extends ImageFormatterBase {
 
   /**
@@ -53,7 +55,7 @@ class ImageFormatter extends ImageFormatterBase {
    * Constructs an ImageFormatter object.
    *
    * @param string $plugin_id
-   *   The plugin ID for the formatter.
+   *   The plugin_id for the formatter.
    * @param mixed $plugin_definition
    *   The plugin implementation definition.
    * @param \Drupal\Core\Field\FieldDefinitionInterface $field_definition
@@ -73,10 +75,14 @@ class ImageFormatter extends ImageFormatterBase {
    * @param \Drupal\Core\File\FileUrlGeneratorInterface $file_url_generator
    *   The file URL generator.
    */
-  public function __construct($plugin_id, $plugin_definition, FieldDefinitionInterface $field_definition, array $settings, $label, $view_mode, array $third_party_settings, AccountInterface $current_user, EntityStorageInterface $image_style_storage, FileUrlGeneratorInterface $file_url_generator) {
+  public function __construct($plugin_id, $plugin_definition, FieldDefinitionInterface $field_definition, array $settings, $label, $view_mode, array $third_party_settings, AccountInterface $current_user, EntityStorageInterface $image_style_storage, FileUrlGeneratorInterface $file_url_generator = NULL) {
     parent::__construct($plugin_id, $plugin_definition, $field_definition, $settings, $label, $view_mode, $third_party_settings);
     $this->currentUser = $current_user;
     $this->imageStyleStorage = $image_style_storage;
+    if (!$file_url_generator) {
+      @trigger_error('Calling ImageFormatter::__construct() without the $file_url_generator argument is deprecated in drupal:9.3.0 and the $file_url_generator argument will be required in drupal:10.0.0. See https://www.drupal.org/node/2940031', E_USER_DEPRECATED);
+      $file_url_generator = \Drupal::service('file_url_generator');
+    }
     $this->fileUrlGenerator = $file_url_generator;
   }
 
@@ -105,9 +111,6 @@ class ImageFormatter extends ImageFormatterBase {
     return [
       'image_style' => '',
       'image_link' => '',
-      'image_loading' => [
-        'attribute' => 'lazy',
-      ],
     ] + parent::defaultSettings();
   }
 
@@ -115,57 +118,32 @@ class ImageFormatter extends ImageFormatterBase {
    * {@inheritdoc}
    */
   public function settingsForm(array $form, FormStateInterface $form_state) {
-    $element = parent::settingsForm($form, $form_state);
-
     $image_styles = image_style_options(FALSE);
     $description_link = Link::fromTextAndUrl(
       $this->t('Configure Image Styles'),
       Url::fromRoute('entity.image_style.collection')
     );
     $element['image_style'] = [
-      '#title' => $this->t('Image style'),
+      '#title' => t('Image style'),
       '#type' => 'select',
       '#default_value' => $this->getSetting('image_style'),
-      '#empty_option' => $this->t('None (original image)'),
+      '#empty_option' => t('None (original image)'),
       '#options' => $image_styles,
       '#description' => $description_link->toRenderable() + [
         '#access' => $this->currentUser->hasPermission('administer image styles'),
       ],
     ];
     $link_types = [
-      'content' => $this->t('Content'),
-      'file' => $this->t('File'),
+      'content' => t('Content'),
+      'file' => t('File'),
     ];
     $element['image_link'] = [
-      '#title' => $this->t('Link image to'),
+      '#title' => t('Link image to'),
       '#type' => 'select',
       '#default_value' => $this->getSetting('image_link'),
-      '#empty_option' => $this->t('Nothing'),
+      '#empty_option' => t('Nothing'),
       '#options' => $link_types,
     ];
-
-    $image_loading = $this->getSetting('image_loading');
-    $element['image_loading'] = [
-      '#type' => 'details',
-      '#title' => $this->t('Image loading'),
-      '#weight' => 10,
-      '#description' => $this->t('Lazy render images with native image loading attribute (<em>loading="lazy"</em>). This improves performance by allowing browsers to lazily load images.'),
-    ];
-    $loading_attribute_options = [
-      'lazy' => $this->t('Lazy (<em>loading="lazy"</em>)'),
-      'eager' => $this->t('Eager (<em>loading="eager"</em>)'),
-    ];
-    $element['image_loading']['attribute'] = [
-      '#title' => $this->t('Image loading attribute'),
-      '#type' => 'radios',
-      '#default_value' => $image_loading['attribute'],
-      '#options' => $loading_attribute_options,
-      '#description' => $this->t('Select the loading attribute for images. <a href=":link">Learn more about the loading attribute for images.</a>', [
-        ':link' => 'https://html.spec.whatwg.org/multipage/urls-and-fetching.html#lazy-loading-attributes',
-      ]),
-    ];
-    $element['image_loading']['attribute']['lazy']['#description'] = $this->t('Delays loading the image until that section of the page is visible in the browser. When in doubt, lazy loading is recommended.');
-    $element['image_loading']['attribute']['eager']['#description'] = $this->t('Force browsers to download an image as soon as possible. This is the browser default for legacy reasons. Only use this option when the image is always expected to render.');
 
     return $element;
   }
@@ -183,15 +161,15 @@ class ImageFormatter extends ImageFormatterBase {
     // their styles in code.
     $image_style_setting = $this->getSetting('image_style');
     if (isset($image_styles[$image_style_setting])) {
-      $summary[] = $this->t('Image style: @style', ['@style' => $image_styles[$image_style_setting]]);
+      $summary[] = t('Image style: @style', ['@style' => $image_styles[$image_style_setting]]);
     }
     else {
-      $summary[] = $this->t('Original image');
+      $summary[] = t('Original image');
     }
 
     $link_types = [
-      'content' => $this->t('Linked to content'),
-      'file' => $this->t('Linked to file'),
+      'content' => t('Linked to content'),
+      'file' => t('Linked to file'),
     ];
     // Display this setting only if image is linked.
     $image_link_setting = $this->getSetting('image_link');
@@ -199,12 +177,7 @@ class ImageFormatter extends ImageFormatterBase {
       $summary[] = $link_types[$image_link_setting];
     }
 
-    $image_loading = $this->getSetting('image_loading');
-    $summary[] = $this->t('Image loading: @attribute', [
-      '@attribute' => $image_loading['attribute'],
-    ]);
-
-    return array_merge($summary, parent::settingsSummary());
+    return $summary;
   }
 
   /**
@@ -253,9 +226,6 @@ class ImageFormatter extends ImageFormatterBase {
       $item = $file->_referringItem;
       $item_attributes = $item->_attributes;
       unset($item->_attributes);
-
-      $image_loading_settings = $this->getSetting('image_loading');
-      $item_attributes['loading'] = $image_loading_settings['attribute'];
 
       $elements[$delta] = [
         '#theme' => 'image_formatter',

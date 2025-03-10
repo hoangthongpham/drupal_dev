@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\system\Functional\Theme;
 
 use Drupal\Tests\BrowserTestBase;
@@ -40,7 +38,7 @@ class ThemeTokenTest extends BrowserTestBase {
   /**
    * Tests if the 'theme_token' key of 'ajaxPageState' is computed.
    */
-  public function testThemeToken(): void {
+  public function testThemeToken() {
     // Visit the block administrative page with default theme. We use that page
     // because 'misc/ajax.js' is loaded there and we can test the token
     // generation.
@@ -48,12 +46,12 @@ class ThemeTokenTest extends BrowserTestBase {
     $settings = $this->getDrupalSettings();
     $this->assertNull($settings['ajaxPageState']['theme_token']);
 
-    // Install 'claro' and configure it as administrative theme.
-    $this->container->get('theme_installer')->install(['claro']);
-    $this->config('system.theme')->set('admin', 'claro')->save();
+    // Install 'seven' and configure it as administrative theme.
+    $this->container->get('theme_installer')->install(['seven']);
+    $this->config('system.theme')->set('admin', 'seven')->save();
 
-    // Revisit the page. This time the page is displayed using the 'claro' theme
-    // and that is different from the default theme ('stark').
+    // Revisit the page. This time the page is displayed using the 'seven' theme
+    // and that is different from the default theme ('classy').
     $this->drupalGet('admin/structure/block');
     $settings = $this->getDrupalSettings();
     $this->assertNotNull($settings['ajaxPageState']['theme_token']);

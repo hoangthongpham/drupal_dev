@@ -20,22 +20,22 @@ class Config {
    * @var array
    */
   protected static $defaultConfig = [
-    'behat/mink' => ['tests'],
-    'behat/mink-browserkit-driver' => ['tests'],
+    'behat/mink' => ['tests', 'driver-testsuite'],
+    'behat/mink-selenium2-driver' => ['tests'],
     'composer/composer' => ['bin'],
     'drupal/coder' => [
       'coder_sniffer/Drupal/Test',
       'coder_sniffer/DrupalPractice/Test',
     ],
     'doctrine/instantiator' => ['tests'],
+    'easyrdf/easyrdf' => ['scripts'],
     'egulias/email-validator' => ['documentation', 'tests'],
+    'friends-of-behat/mink-browserkit-driver' => ['tests'],
     'guzzlehttp/promises' => ['tests'],
     'guzzlehttp/psr7' => ['tests'],
+    'instaclick/php-webdriver' => ['doc', 'test'],
     'justinrainbow/json-schema' => ['demo'],
-    'lullabot/mink-selenium2-driver' => ['tests'],
-    'lullabot/php-webdriver' => ['doc', 'test'],
     'masterminds/html5' => ['bin', 'test'],
-    'mck89/peast' => ['doc'],
     'mikey179/vfsstream' => ['src/test'],
     'myclabs/deep-copy' => ['doc'],
     'pear/archive_tar' => ['docs', 'tests'],
@@ -48,6 +48,7 @@ class Config {
     'phpspec/prophecy' => ['fixtures', 'spec', 'tests'],
     'phpunit/php-code-coverage' => ['tests'],
     'phpunit/php-timer' => ['tests'],
+    'phpunit/php-token-stream' => ['tests'],
     'phpunit/phpunit' => ['tests'],
     'sebastian/code-unit-reverse-lookup' => ['tests'],
     'sebastian/comparator' => ['tests'],
@@ -60,9 +61,11 @@ class Config {
     'sebastian/recursion-context' => ['tests'],
     'seld/jsonlint' => ['tests'],
     'squizlabs/php_codesniffer' => ['tests'],
+    'stack/builder' => ['tests'],
     'symfony/browser-kit' => ['Tests'],
     'symfony/console' => ['Tests'],
     'symfony/css-selector' => ['Tests'],
+    'symfony/debug' => ['Tests'],
     'symfony/dependency-injection' => ['Tests'],
     'symfony/dom-crawler' => ['Tests'],
     'symfony/filesystem' => ['Tests'],
@@ -75,10 +78,11 @@ class Config {
     'symfony/psr-http-message-bridge' => ['Tests'],
     'symfony/routing' => ['Tests'],
     'symfony/serializer' => ['Tests'],
+    'symfony/translation' => ['Tests'],
     'symfony/var-dumper' => ['Tests'],
     'symfony/validator' => ['Tests', 'Resources'],
     'symfony/yaml' => ['Tests'],
-    'tbachert/spi' => ['tests'],
+    'symfony-cmf/routing' => ['Test', 'Tests'],
     'theseer/tokenizer' => ['tests'],
     'twig/twig' => ['doc', 'ext', 'test', 'tests'],
   ];
@@ -86,7 +90,7 @@ class Config {
   /**
    * The root package.
    *
-   * @var \Composer\Package\RootPackageInterface
+   * @var Composer\Package\RootPackageInterface
    */
   protected $rootPackage;
 

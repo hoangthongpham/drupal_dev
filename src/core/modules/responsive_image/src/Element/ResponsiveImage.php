@@ -2,14 +2,14 @@
 
 namespace Drupal\responsive_image\Element;
 
-use Drupal\Core\Render\Attribute\RenderElement;
-use Drupal\Core\Render\Element\RenderElementBase;
+use Drupal\Core\Render\Element\RenderElement;
 
 /**
  * Provides a responsive image element.
+ *
+ * @RenderElement("responsive_image")
  */
-#[RenderElement('responsive_image')]
-class ResponsiveImage extends RenderElementBase {
+class ResponsiveImage extends RenderElement {
 
   /**
    * {@inheritdoc}
@@ -17,6 +17,9 @@ class ResponsiveImage extends RenderElementBase {
   public function getInfo() {
     return [
       '#theme' => 'responsive_image',
+      '#attached' => [
+        'library' => ['core/picturefill'],
+      ],
     ];
   }
 

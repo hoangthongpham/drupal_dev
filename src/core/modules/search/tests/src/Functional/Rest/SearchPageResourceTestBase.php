@@ -1,18 +1,11 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\search\Functional\Rest;
 
 use Drupal\search\Entity\SearchPage;
-use Drupal\Tests\rest\Functional\EntityResource\ConfigEntityResourceTestBase;
+use Drupal\Tests\rest\Functional\EntityResource\EntityResourceTestBase;
 
-// cspell:ignore hinode
-
-/**
- * Base class for Search page tests.
- */
-abstract class SearchPageResourceTestBase extends ConfigEntityResourceTestBase {
+abstract class SearchPageResourceTestBase extends EntityResourceTestBase {
 
   /**
    * {@inheritdoc}
@@ -87,7 +80,6 @@ abstract class SearchPageResourceTestBase extends ConfigEntityResourceTestBase {
    */
   protected function getNormalizedPostEntity() {
     // @todo Update in https://www.drupal.org/node/2300677.
-    return [];
   }
 
   /**

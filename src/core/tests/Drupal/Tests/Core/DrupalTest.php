@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\Core;
 
 use Drupal\Core\DependencyInjection\ClassResolverInterface;
@@ -43,7 +41,7 @@ class DrupalTest extends UnitTestCase {
    *
    * @covers ::getContainer
    */
-  public function testSetContainer(): void {
+  public function testSetContainer() {
     \Drupal::setContainer($this->container);
     $this->assertSame($this->container, \Drupal::getContainer());
   }
@@ -51,7 +49,7 @@ class DrupalTest extends UnitTestCase {
   /**
    * @covers ::getContainer
    */
-  public function testGetContainerException(): void {
+  public function testGetContainerException() {
     $this->expectException(ContainerNotInitializedException::class);
     $this->expectExceptionMessage('\Drupal::$container is not initialized yet. \Drupal::setContainer() must be called with a real container.');
     \Drupal::getContainer();
@@ -62,7 +60,7 @@ class DrupalTest extends UnitTestCase {
    *
    * @covers ::service
    */
-  public function testService(): void {
+  public function testService() {
     $this->setMockContainerService('test_service');
     $this->assertNotNull(\Drupal::service('test_service'));
   }
@@ -72,7 +70,7 @@ class DrupalTest extends UnitTestCase {
    *
    * @covers ::currentUser
    */
-  public function testCurrentUser(): void {
+  public function testCurrentUser() {
     $this->setMockContainerService('current_user');
     $this->assertNotNull(\Drupal::currentUser());
   }
@@ -82,7 +80,7 @@ class DrupalTest extends UnitTestCase {
    *
    * @covers ::entityTypeManager
    */
-  public function testEntityTypeManager(): void {
+  public function testEntityTypeManager() {
     $this->setMockContainerService('entity_type.manager');
     $this->assertNotNull(\Drupal::entityTypeManager());
   }
@@ -92,7 +90,7 @@ class DrupalTest extends UnitTestCase {
    *
    * @covers ::database
    */
-  public function testDatabase(): void {
+  public function testDatabase() {
     $this->setMockContainerService('database');
     $this->assertNotNull(\Drupal::database());
   }
@@ -102,7 +100,7 @@ class DrupalTest extends UnitTestCase {
    *
    * @covers ::cache
    */
-  public function testCache(): void {
+  public function testCache() {
     $this->setMockContainerService('cache.test');
     $this->assertNotNull(\Drupal::cache('test'));
   }
@@ -112,7 +110,7 @@ class DrupalTest extends UnitTestCase {
    *
    * @covers ::classResolver
    */
-  public function testClassResolver(): void {
+  public function testClassResolver() {
     $class_resolver = $this->prophesize(ClassResolverInterface::class);
     $this->setMockContainerService('class_resolver', $class_resolver->reveal());
     $this->assertInstanceOf(ClassResolverInterface::class, \Drupal::classResolver());
@@ -123,7 +121,7 @@ class DrupalTest extends UnitTestCase {
    *
    * @covers ::classResolver
    */
-  public function testClassResolverWithClass(): void {
+  public function testClassResolverWithClass() {
     $class_resolver = $this->prophesize(ClassResolverInterface::class);
     $class_resolver->getInstanceFromDefinition(static::class)->willReturn($this);
     $this->setMockContainerService('class_resolver', $class_resolver->reveal());
@@ -135,14 +133,14 @@ class DrupalTest extends UnitTestCase {
    *
    * @covers ::keyValueExpirable
    */
-  public function testKeyValueExpirable(): void {
+  public function testKeyValueExpirable() {
     $keyvalue = $this->getMockBuilder('Drupal\Core\KeyValueStore\KeyValueExpirableFactory')
       ->disableOriginalConstructor()
       ->getMock();
     $keyvalue->expects($this->once())
       ->method('get')
       ->with('test_collection')
-      ->willReturn(TRUE);
+      ->will($this->returnValue(TRUE));
     $this->setMockContainerService('keyvalue.expirable', $keyvalue);
 
     $this->assertNotNull(\Drupal::keyValueExpirable('test_collection'));
@@ -153,7 +151,7 @@ class DrupalTest extends UnitTestCase {
    *
    * @covers ::lock
    */
-  public function testLock(): void {
+  public function testLock() {
     $this->setMockContainerService('lock');
     $this->assertNotNull(\Drupal::lock());
   }
@@ -163,12 +161,12 @@ class DrupalTest extends UnitTestCase {
    *
    * @covers ::config
    */
-  public function testConfig(): void {
+  public function testConfig() {
     $config = $this->createMock('Drupal\Core\Config\ConfigFactoryInterface');
     $config->expects($this->once())
       ->method('get')
       ->with('test_config')
-      ->willReturn(TRUE);
+      ->will($this->returnValue(TRUE));
     $this->setMockContainerService('config.factory', $config);
 
     // Test \Drupal::config(), not $this->config().
@@ -180,14 +178,14 @@ class DrupalTest extends UnitTestCase {
    *
    * @covers ::queue
    */
-  public function testQueue(): void {
+  public function testQueue() {
     $queue = $this->getMockBuilder('Drupal\Core\Queue\QueueFactory')
       ->disableOriginalConstructor()
       ->getMock();
     $queue->expects($this->once())
       ->method('get')
       ->with('test_queue', TRUE)
-      ->willReturn(TRUE);
+      ->will($this->returnValue(TRUE));
     $this->setMockContainerService('queue', $queue);
 
     $this->assertNotNull(\Drupal::queue('test_queue', TRUE));
@@ -198,7 +196,7 @@ class DrupalTest extends UnitTestCase {
    *
    * @covers ::requestStack
    */
-  public function testRequestStack(): void {
+  public function testRequestStack() {
     $request_stack = new RequestStack();
     $this->setMockContainerService('request_stack', $request_stack);
 
@@ -210,14 +208,14 @@ class DrupalTest extends UnitTestCase {
    *
    * @covers ::keyValue
    */
-  public function testKeyValue(): void {
+  public function testKeyValue() {
     $keyvalue = $this->getMockBuilder('Drupal\Core\KeyValueStore\KeyValueFactory')
       ->disableOriginalConstructor()
       ->getMock();
     $keyvalue->expects($this->once())
       ->method('get')
       ->with('test_collection')
-      ->willReturn(TRUE);
+      ->will($this->returnValue(TRUE));
     $this->setMockContainerService('keyvalue', $keyvalue);
 
     $this->assertNotNull(\Drupal::keyValue('test_collection'));
@@ -228,7 +226,7 @@ class DrupalTest extends UnitTestCase {
    *
    * @covers ::state
    */
-  public function testState(): void {
+  public function testState() {
     $this->setMockContainerService('state');
     $this->assertNotNull(\Drupal::state());
   }
@@ -238,7 +236,7 @@ class DrupalTest extends UnitTestCase {
    *
    * @covers ::httpClient
    */
-  public function testHttpClient(): void {
+  public function testHttpClient() {
     $this->setMockContainerService('http_client');
     $this->assertNotNull(\Drupal::httpClient());
   }
@@ -248,7 +246,7 @@ class DrupalTest extends UnitTestCase {
    *
    * @covers ::entityQuery
    */
-  public function testEntityQuery(): void {
+  public function testEntityQuery() {
     $query = $this->createMock(QueryInterface::class);
     $storage = $this->createMock(EntityStorageInterface::class);
     $storage
@@ -274,7 +272,7 @@ class DrupalTest extends UnitTestCase {
    *
    * @covers ::entityQueryAggregate
    */
-  public function testEntityQueryAggregate(): void {
+  public function testEntityQueryAggregate() {
     $query = $this->createMock(QueryAggregateInterface::class);
     $storage = $this->createMock(EntityStorageInterface::class);
     $storage
@@ -300,7 +298,7 @@ class DrupalTest extends UnitTestCase {
    *
    * @covers ::flood
    */
-  public function testFlood(): void {
+  public function testFlood() {
     $this->setMockContainerService('flood');
     $this->assertNotNull(\Drupal::flood());
   }
@@ -310,7 +308,7 @@ class DrupalTest extends UnitTestCase {
    *
    * @covers ::moduleHandler
    */
-  public function testModuleHandler(): void {
+  public function testModuleHandler() {
     $this->setMockContainerService('module_handler');
     $this->assertNotNull(\Drupal::moduleHandler());
   }
@@ -320,7 +318,7 @@ class DrupalTest extends UnitTestCase {
    *
    * @covers ::typedDataManager
    */
-  public function testTypedDataManager(): void {
+  public function testTypedDataManager() {
     $this->setMockContainerService('typed_data_manager');
     $this->assertNotNull(\Drupal::typedDataManager());
   }
@@ -330,7 +328,7 @@ class DrupalTest extends UnitTestCase {
    *
    * @covers ::token
    */
-  public function testToken(): void {
+  public function testToken() {
     $this->setMockContainerService('token');
     $this->assertNotNull(\Drupal::token());
   }
@@ -340,7 +338,7 @@ class DrupalTest extends UnitTestCase {
    *
    * @covers ::urlGenerator
    */
-  public function testUrlGenerator(): void {
+  public function testUrlGenerator() {
     $this->setMockContainerService('url_generator');
     $this->assertNotNull(\Drupal::urlGenerator());
   }
@@ -350,7 +348,7 @@ class DrupalTest extends UnitTestCase {
    *
    * @covers ::linkGenerator
    */
-  public function testLinkGenerator(): void {
+  public function testLinkGenerator() {
     $this->setMockContainerService('link_generator');
     $this->assertNotNull(\Drupal::linkGenerator());
   }
@@ -360,7 +358,7 @@ class DrupalTest extends UnitTestCase {
    *
    * @covers ::translation
    */
-  public function testTranslation(): void {
+  public function testTranslation() {
     $this->setMockContainerService('string_translation');
     $this->assertNotNull(\Drupal::translation());
   }
@@ -370,7 +368,7 @@ class DrupalTest extends UnitTestCase {
    *
    * @covers ::languageManager
    */
-  public function testLanguageManager(): void {
+  public function testLanguageManager() {
     $this->setMockContainerService('language_manager');
     $this->assertNotNull(\Drupal::languageManager());
   }
@@ -380,7 +378,7 @@ class DrupalTest extends UnitTestCase {
    *
    * @covers ::csrfToken
    */
-  public function testCsrfToken(): void {
+  public function testCsrfToken() {
     $this->setMockContainerService('csrf_token');
     $this->assertNotNull(\Drupal::csrfToken());
   }
@@ -390,7 +388,7 @@ class DrupalTest extends UnitTestCase {
    *
    * @covers ::transliteration
    */
-  public function testTransliteration(): void {
+  public function testTransliteration() {
     $this->setMockContainerService('transliteration');
     $this->assertNotNull(\Drupal::transliteration());
   }
@@ -400,7 +398,7 @@ class DrupalTest extends UnitTestCase {
    *
    * @covers ::formBuilder
    */
-  public function testFormBuilder(): void {
+  public function testFormBuilder() {
     $this->setMockContainerService('form_builder');
     $this->assertNotNull(\Drupal::formBuilder());
   }
@@ -410,7 +408,7 @@ class DrupalTest extends UnitTestCase {
    *
    * @covers ::menuTree
    */
-  public function testMenuTree(): void {
+  public function testMenuTree() {
     $this->setMockContainerService('menu.link_tree');
     $this->assertNotNull(\Drupal::menuTree());
   }
@@ -420,7 +418,7 @@ class DrupalTest extends UnitTestCase {
    *
    * @covers ::pathValidator
    */
-  public function testPathValidator(): void {
+  public function testPathValidator() {
     $this->setMockContainerService('path.validator');
     $this->assertNotNull(\Drupal::pathValidator());
   }
@@ -430,32 +428,9 @@ class DrupalTest extends UnitTestCase {
    *
    * @covers ::accessManager
    */
-  public function testAccessManager(): void {
+  public function testAccessManager() {
     $this->setMockContainerService('access_manager');
     $this->assertNotNull(\Drupal::accessManager());
-  }
-
-  /**
-   * Tests the PHP constants have consistent values.
-   */
-  public function testPhpConstants(): void {
-    // RECOMMENDED_PHP can be just MAJOR.MINOR so normalize it to allow using
-    // version_compare().
-    $normalizer = function (string $version): string {
-      // The regex below is from \Composer\Semver\VersionParser::normalize().
-      preg_match('{^(\d{1,5})(\.\d++)?(\.\d++)?$}i', $version, $matches);
-      return $matches[1]
-        . (!empty($matches[2]) ? $matches[2] : '.9999999')
-        . (!empty($matches[3]) ? $matches[3] : '.9999999');
-    };
-
-    $recommended_php = $normalizer(\Drupal::RECOMMENDED_PHP);
-    $this->assertTrue(version_compare($recommended_php, \Drupal::MINIMUM_PHP, '>='), "\Drupal::RECOMMENDED_PHP should be greater or equal to \Drupal::MINIMUM_PHP");
-
-    // As this test depends on the $normalizer function it is tested.
-    $this->assertSame('10.9999999.9999999', $normalizer('10'));
-    $this->assertSame('10.1.9999999', $normalizer('10.1'));
-    $this->assertSame('10.1.2', $normalizer('10.1.2'));
   }
 
   /**
@@ -469,8 +444,14 @@ class DrupalTest extends UnitTestCase {
   protected function setMockContainerService($service_name, $return = NULL) {
     $expects = $this->container->expects($this->once())
       ->method('get')
-      ->with($service_name)
-      ->willReturn($return ?? new \stdClass());
+      ->with($service_name);
+
+    if (isset($return)) {
+      $expects->will($this->returnValue($return));
+    }
+    else {
+      $expects->will($this->returnValue(TRUE));
+    }
 
     \Drupal::setContainer($this->container);
   }

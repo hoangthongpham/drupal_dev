@@ -1,9 +1,8 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\block_content\Functional;
 
+use Drupal\Component\Render\FormattableMarkup;
 use Drupal\block_content\Entity\BlockContent;
 use Drupal\user\UserInterface;
 
@@ -53,7 +52,7 @@ class BlockContentRevisionsTest extends BlockContentTestBase {
       $block->setNewRevision(TRUE);
       $block->setRevisionLogMessage($this->randomMachineName(32));
       $block->setRevisionUser($this->adminUser);
-      $block->setRevisionCreationTime(time());
+      $block->setRevisionCreationTime(REQUEST_TIME);
       $logs[] = $block->getRevisionLogMessage();
       $block->save();
       $blocks[] = $block->getRevisionId();
@@ -66,7 +65,7 @@ class BlockContentRevisionsTest extends BlockContentTestBase {
   /**
    * Checks block revision related operations.
    */
-  public function testRevisions(): void {
+  public function testRevisions() {
     $blocks = $this->blocks;
     $logs = $this->revisionLogs;
 
@@ -77,7 +76,7 @@ class BlockContentRevisionsTest extends BlockContentTestBase {
         ->getStorage('block_content')
         ->loadRevision($revision_id);
       // Verify revision log is the same.
-      $this->assertEquals($logs[$delta], $loaded->getRevisionLogMessage(), "Correct log message found for revision $revision_id");
+      $this->assertEquals($logs[$delta], $loaded->getRevisionLogMessage(), new FormattableMarkup('Correct log message found for revision @revision', ['@revision' => $loaded->getRevisionId()]));
       if ($delta > 0) {
         $this->assertInstanceOf(UserInterface::class, $loaded->getRevisionUser());
         $this->assertIsNumeric($loaded->getRevisionUserId());
@@ -98,7 +97,7 @@ class BlockContentRevisionsTest extends BlockContentTestBase {
 
     // Confirm that revision body text is not present on default version of
     // block.
-    $this->drupalGet('admin/content/block/' . $loaded->id());
+    $this->drupalGet('block/' . $loaded->id());
     $this->assertSession()->pageTextNotContains($loaded->body->value);
 
     // Verify that the non-default revision id is greater than the default

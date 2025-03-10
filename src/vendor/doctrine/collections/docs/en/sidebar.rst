@@ -1,5 +1,3 @@
-:orphan:
-
 .. toctree::
     :depth: 3
 
@@ -8,4 +6,3 @@
     expression-builder
     derived-collections
     lazy-collections
-    serialization

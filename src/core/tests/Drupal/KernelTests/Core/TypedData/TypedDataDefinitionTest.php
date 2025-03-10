@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\KernelTests\Core\TypedData;
 
 use Drupal\Core\TypedData\ComplexDataDefinitionInterface;
@@ -9,7 +7,6 @@ use Drupal\Core\TypedData\DataDefinition;
 use Drupal\Core\TypedData\DataDefinitionInterface;
 use Drupal\Core\TypedData\DataReferenceDefinition;
 use Drupal\Core\TypedData\DataReferenceDefinitionInterface;
-use Drupal\Core\TypedData\DataReferenceInterface;
 use Drupal\Core\TypedData\ListDataDefinition;
 use Drupal\Core\TypedData\ListDataDefinitionInterface;
 use Drupal\Core\TypedData\MapDataDefinition;
@@ -29,9 +26,6 @@ class TypedDataDefinitionTest extends KernelTestBase {
    */
   protected $typedDataManager;
 
-  /**
-   * {@inheritdoc}
-   */
   protected function setUp(): void {
     parent::setUp();
     $this->typedDataManager = $this->container->get('typed_data_manager');
@@ -40,7 +34,7 @@ class TypedDataDefinitionTest extends KernelTestBase {
   /**
    * Tests deriving metadata about list items.
    */
-  public function testLists(): void {
+  public function testLists() {
     $list_definition = ListDataDefinition::create('string');
     $this->assertInstanceOf(ListDataDefinitionInterface::class, $list_definition);
     $item_definition = $list_definition->getItemDefinition();
@@ -63,7 +57,7 @@ class TypedDataDefinitionTest extends KernelTestBase {
   /**
    * Tests deriving metadata about maps.
    */
-  public function testMaps(): void {
+  public function testMaps() {
     $map_definition = MapDataDefinition::create()
       ->setPropertyDefinition('one', DataDefinition::create('string'))
       ->setPropertyDefinition('two', DataDefinition::create('string'))
@@ -89,7 +83,7 @@ class TypedDataDefinitionTest extends KernelTestBase {
   /**
    * Tests deriving metadata from data references.
    */
-  public function testDataReferences(): void {
+  public function testDataReferences() {
     $language_reference_definition = DataReferenceDefinition::create('language');
     $this->assertInstanceOf(DataReferenceDefinitionInterface::class, $language_reference_definition);
 
@@ -100,18 +94,6 @@ class TypedDataDefinitionTest extends KernelTestBase {
     $language_reference_definition2 = $this->typedDataManager->createDataDefinition('language_reference');
     $this->assertInstanceOf(DataReferenceDefinitionInterface::class, $language_reference_definition2);
     $this->assertEquals(serialize($language_reference_definition2), serialize($language_reference_definition));
-  }
-
-  /**
-   * Tests getString() throws exception when getType() is not implemented.
-   */
-  public function testNotImplementedGetType(): void {
-    $language_reference_definition = DataReferenceDefinition::create('language');
-    $language_reference = $this->typedDataManager->create($language_reference_definition);
-    $this->assertInstanceOf(DataReferenceInterface::class, $language_reference);
-    $this->expectException(\BadMethodCallException::class);
-    $this->expectExceptionMessageMatches('/getType\(\) not implemented/');
-    $language_reference->getString();
   }
 
 }

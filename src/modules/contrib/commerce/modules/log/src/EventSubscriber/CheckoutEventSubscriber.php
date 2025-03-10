@@ -2,9 +2,9 @@
 
 namespace Drupal\commerce_log\EventSubscriber;
 
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\commerce_checkout\Event\CheckoutEvents;
 use Drupal\commerce_order\Event\OrderEvent;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class CheckoutEventSubscriber implements EventSubscriberInterface {
@@ -29,7 +29,7 @@ class CheckoutEventSubscriber implements EventSubscriberInterface {
   /**
    * {@inheritdoc}
    */
-  public static function getSubscribedEvents(): array {
+  public static function getSubscribedEvents() {
     return [
       CheckoutEvents::COMPLETION => ['onCheckoutCompletion', -100],
     ];
@@ -44,11 +44,6 @@ class CheckoutEventSubscriber implements EventSubscriberInterface {
   public function onCheckoutCompletion(OrderEvent $event) {
     $order = $event->getOrder();
     $this->logStorage->generate($order, 'checkout_complete')->save();
-    if ($comments = $order->getCustomerComments()) {
-      $this->logStorage->generate($order, 'commerce_order_from_customer_comment', [
-        'comment' => $comments,
-      ])->save();
-    }
   }
 
 }

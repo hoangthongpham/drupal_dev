@@ -2,13 +2,13 @@
 
 namespace Drupal\commerce_promotion;
 
-use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Language\LanguageInterface;
-use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\commerce_order\OrderPreprocessorInterface;
 use Drupal\commerce_order\OrderProcessorInterface;
 use Drupal\commerce_price\Calculator;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Language\LanguageInterface;
+use Drupal\Core\Language\LanguageManagerInterface;
 
 /**
  * Applies promotions to orders during the order refresh process.

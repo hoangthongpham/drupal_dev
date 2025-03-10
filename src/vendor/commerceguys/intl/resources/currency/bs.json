@@ -53,6 +53,9 @@
 	"BWP": {
 		"name": "Bocvanska pula"
 	},
+	"VED": {
+		"name": "Bolívar Soberano"
+	},
 	"BOB": {
 		"name": "Bolivijski boliviano"
 	},
@@ -297,7 +300,7 @@
 		"name": "Mauricijska rupija"
 	},
 	"MRU": {
-		"name": "mauritanijska ugvija"
+		"name": "Mauritanijska ugvija"
 	},
 	"MXN": {
 		"name": "Meksički pezos"
@@ -376,6 +379,9 @@
 		"name": "Sejšelska rupija"
 	},
 	"SLE": {
+		"name": "Sierra Leonean Leone"
+	},
+	"SLL": {
 		"name": "Sijeraleonski leone"
 	},
 	"SGD": {
@@ -448,6 +454,9 @@
 	},
 	"UAH": {
 		"name": "Ukrajinska hrivnja"
+	},
+	"UYW": {
+		"name": "Uruguayan Nominal Wage Index Unit"
 	},
 	"UYU": {
 		"name": "Urugvajski pezos"

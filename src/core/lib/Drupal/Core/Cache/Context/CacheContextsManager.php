@@ -14,7 +14,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * state by which should varied (the current URL, language, and so on).
  *
  * Note that this maps exactly to HTTP's Vary header semantics:
- * @link https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.44
+ * @link http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.44
  *
  * @see \Drupal\Core\Cache\Context\CacheContextInterface
  * @see \Drupal\Core\Cache\Context\CalculatedCacheContextInterface
@@ -35,11 +35,6 @@ class CacheContextsManager {
    * @var string[]
    */
   protected $contexts;
-
-  /**
-   * The set of valid context tokens.
-   */
-  protected array $validContextTokens;
 
   /**
    * Constructs a CacheContextsManager object.
@@ -168,7 +163,7 @@ class CacheContextsManager {
       // Extract the parameter if available.
       $parameter = NULL;
       $context_id = $context_token;
-      if (str_contains($context_token, ':')) {
+      if (strpos($context_token, ':') !== FALSE) {
         [$context_id, $parameter] = explode(':', $context_token);
       }
 
@@ -176,7 +171,7 @@ class CacheContextsManager {
       // - a period means they don't have a parent
       // - a colon means they're not a specific value of a cache context
       // hence no optimizations are possible.
-      if (!str_contains($context_token, '.') && !str_contains($context_token, ':')) {
+      if (strpos($context_token, '.') === FALSE && strpos($context_token, ':') === FALSE) {
         $optimized_content_tokens[] = $context_token;
       }
       // Check cacheability. If the context defines a max-age of 0, then it
@@ -199,7 +194,7 @@ class CacheContextsManager {
             $ancestor_found = TRUE;
           }
 
-        } while (!$ancestor_found && str_contains($ancestor, '.'));
+        } while (!$ancestor_found && strpos($ancestor, '.') !== FALSE);
         if (!$ancestor_found) {
           $optimized_content_tokens[] = $context_token;
         }
@@ -240,7 +235,7 @@ class CacheContextsManager {
     foreach ($context_tokens as $context) {
       $context_id = $context;
       $parameter = NULL;
-      if (str_contains($context, ':')) {
+      if (strpos($context, ':') !== FALSE) {
         [$context_id, $parameter] = explode(':', $context, 2);
       }
       $contexts_with_parameters[] = [$context_id, $parameter];

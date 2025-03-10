@@ -82,7 +82,7 @@ final class VerificationResult {
   }
 
   /**
-   * Constructs an unknown result.
+   * Constructs an unkown result.
    *
    * @param int $timestamp
    *   The timestamp.

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\file\Kernel;
 
 use Drupal\file\Entity\File;
@@ -14,9 +12,6 @@ use Drupal\file\FileInterface;
  */
 class SpaceUsedTest extends FileManagedUnitTestBase {
 
-  /**
-   * {@inheritdoc}
-   */
   protected function setUp(): void {
     parent::setUp();
 
@@ -60,7 +55,7 @@ class SpaceUsedTest extends FileManagedUnitTestBase {
   /**
    * Tests different users with the default status.
    */
-  public function testFileSpaceUsed(): void {
+  public function testFileSpaceUsed() {
     $file = $this->container->get('entity_type.manager')->getStorage('file');
     // Test different users with default status.
     $this->assertEquals(70, $file->spaceUsed(2));

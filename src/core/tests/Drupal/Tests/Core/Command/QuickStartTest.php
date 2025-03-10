@@ -1,10 +1,8 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\Core\Command;
 
-use Drupal\sqlite\Driver\Database\sqlite\Install\Tasks;
+use Drupal\Core\Database\Driver\sqlite\Install\Tasks;
 use Drupal\Core\Test\TestDatabase;
 use Drupal\Tests\BrowserTestBase;
 use GuzzleHttp\Client;
@@ -51,11 +49,12 @@ class QuickStartTest extends TestCase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp(): void {
+  public function setUp(): void {
     parent::setUp();
     $php_executable_finder = new PhpExecutableFinder();
     $this->php = $php_executable_finder->find();
     $this->root = dirname(substr(__DIR__, 0, -strlen(__NAMESPACE__)), 2);
+    chdir($this->root);
     if (!is_writable("{$this->root}/sites/simpletest")) {
       $this->markTestSkipped('This test requires a writable sites/simpletest directory');
     }
@@ -66,7 +65,7 @@ class QuickStartTest extends TestCase {
   /**
    * {@inheritdoc}
    */
-  protected function tearDown(): void {
+  public function tearDown(): void {
     if ($this->testDb) {
       $test_site_directory = $this->root . DIRECTORY_SEPARATOR . $this->testDb->getTestSitePath();
       if (file_exists($test_site_directory)) {
@@ -85,9 +84,11 @@ class QuickStartTest extends TestCase {
   /**
    * Tests the quick-start command.
    */
-  public function testQuickStartCommand(): void {
-    $sqlite = (new \PDO('sqlite::memory:'))->query('select sqlite_version()')->fetch()[0];
-    if (version_compare($sqlite, Tasks::SQLITE_MINIMUM_VERSION) < 0) {
+  public function testQuickStartCommand() {
+    if (version_compare(phpversion(), \Drupal::MINIMUM_SUPPORTED_PHP) < 0) {
+      $this->markTestSkipped();
+    }
+    if (version_compare(\SQLite3::version()['versionString'], Tasks::SQLITE_MINIMUM_VERSION) < 0) {
       $this->markTestSkipped();
     }
 
@@ -139,11 +140,41 @@ class QuickStartTest extends TestCase {
   }
 
   /**
+   * Tests that the installer throws a requirement error on older PHP versions.
+   */
+  public function testPhpRequirement() {
+    if (version_compare(phpversion(), \Drupal::MINIMUM_SUPPORTED_PHP) >= 0) {
+      $this->markTestSkipped();
+    }
+
+    $install_command = [
+      $this->php,
+      'core/scripts/drupal',
+      'quick-start',
+      'standard',
+      "--site-name='Test site {$this->testDb->getDatabasePrefix()}'",
+      '--suppress-login',
+    ];
+    $process = new Process($install_command, NULL, ['DRUPAL_DEV_SITE_PATH' => $this->testDb->getTestSitePath()]);
+    $process->setTimeout(500);
+    $process->run();
+    $error_output = $process->getErrorOutput();
+    $this->assertStringContainsString('Your PHP installation is too old.', $error_output);
+    $this->assertStringContainsString('Drupal requires at least PHP', $error_output);
+    $this->assertStringContainsString(\Drupal::MINIMUM_SUPPORTED_PHP, $error_output);
+
+    // Stop the web server.
+    $process->stop();
+  }
+
+  /**
    * Tests the quick-start commands.
    */
-  public function testQuickStartInstallAndServerCommands(): void {
-    $sqlite = (new \PDO('sqlite::memory:'))->query('select sqlite_version()')->fetch()[0];
-    if (version_compare($sqlite, Tasks::SQLITE_MINIMUM_VERSION) < 0) {
+  public function testQuickStartInstallAndServerCommands() {
+    if (version_compare(phpversion(), \Drupal::MINIMUM_SUPPORTED_PHP) < 0) {
+      $this->markTestSkipped();
+    }
+    if (version_compare(\SQLite3::version()['versionString'], Tasks::SQLITE_MINIMUM_VERSION) < 0) {
       $this->markTestSkipped();
     }
 
@@ -223,7 +254,7 @@ class QuickStartTest extends TestCase {
   /**
    * Tests the install command with an invalid profile.
    */
-  public function testQuickStartCommandProfileValidation(): void {
+  public function testQuickStartCommandProfileValidation() {
     // Install a site using the standard profile to ensure the one time login
     // link generation works.
     $install_command = [
@@ -235,13 +266,13 @@ class QuickStartTest extends TestCase {
     ];
     $process = new Process($install_command, NULL, ['DRUPAL_DEV_SITE_PATH' => $this->testDb->getTestSitePath()]);
     $process->run();
-    $this->assertMatchesRegularExpression("/'umami' is not a valid install profile or recipe\. Did you mean \W*'demo_umami'?/", $process->getErrorOutput());
+    $this->assertStringContainsString('\'umami\' is not a valid install profile. Did you mean \'demo_umami\'?', $process->getErrorOutput());
   }
 
   /**
    * Tests the server command when there is no installation.
    */
-  public function testServerWithNoInstall(): void {
+  public function testServerWithNoInstall() {
     $server_command = [
       $this->php,
       'core/scripts/drupal',

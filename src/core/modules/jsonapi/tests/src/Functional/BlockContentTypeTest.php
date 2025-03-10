@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\jsonapi\Functional;
 
 use Drupal\block_content\Entity\BlockContentType;
@@ -12,7 +10,7 @@ use Drupal\Core\Url;
  *
  * @group jsonapi
  */
-class BlockContentTypeTest extends ConfigEntityResourceTestBase {
+class BlockContentTypeTest extends ResourceTestBase {
 
   /**
    * {@inheritdoc}
@@ -45,7 +43,7 @@ class BlockContentTypeTest extends ConfigEntityResourceTestBase {
    * {@inheritdoc}
    */
   protected function setUpAuthorization($method) {
-    $this->grantPermissionsToTestedRole(['administer block types']);
+    $this->grantPermissionsToTestedRole(['administer blocks']);
   }
 
   /**
@@ -92,7 +90,7 @@ class BlockContentTypeTest extends ConfigEntityResourceTestBase {
           'description' => 'Provides a competitive alternative to the "basic" type',
           'label' => 'Pascal',
           'langcode' => 'en',
-          'revision' => FALSE,
+          'revision' => 0,
           'status' => TRUE,
           'drupal_internal__id' => 'pascal',
         ],
@@ -105,7 +103,6 @@ class BlockContentTypeTest extends ConfigEntityResourceTestBase {
    */
   protected function getPostDocument() {
     // @todo Update in https://www.drupal.org/node/2300677.
-    return [];
   }
 
 }

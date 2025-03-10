@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\migrate\Unit\process;
 
 use Drupal\Core\Entity\EntityStorageInterface;
@@ -47,7 +45,7 @@ class MakeUniqueEntityFieldTest extends MigrateProcessTestCase {
       ->getMock();
     $this->entityQuery->expects($this->any())
       ->method('accessCheck')
-      ->willReturnSelf();
+      ->will($this->returnSelf());
     $this->entityTypeManager = $this->createMock(EntityTypeManagerInterface::class);
 
     $storage = $this->createMock(EntityStorageInterface::class);
@@ -66,7 +64,7 @@ class MakeUniqueEntityFieldTest extends MigrateProcessTestCase {
    *
    * @dataProvider providerTestMakeUniqueEntityField
    */
-  public function testMakeUniqueEntityField($count, $postfix = '', $start = NULL, $length = NULL): void {
+  public function testMakeUniqueEntityField($count, $postfix = '', $start = NULL, $length = NULL) {
     $configuration = [
       'entity_type' => 'test_entity_type',
       'field' => 'test_field',
@@ -88,7 +86,7 @@ class MakeUniqueEntityFieldTest extends MigrateProcessTestCase {
   /**
    * Tests that invalid start position throws an exception.
    */
-  public function testMakeUniqueEntityFieldEntityInvalidStart(): void {
+  public function testMakeUniqueEntityFieldEntityInvalidStart() {
     $configuration = [
       'entity_type' => 'test_entity_type',
       'field' => 'test_field',
@@ -103,7 +101,7 @@ class MakeUniqueEntityFieldTest extends MigrateProcessTestCase {
   /**
    * Tests that invalid length option throws an exception.
    */
-  public function testMakeUniqueEntityFieldEntityInvalidLength(): void {
+  public function testMakeUniqueEntityFieldEntityInvalidLength() {
     $configuration = [
       'entity_type' => 'test_entity_type',
       'field' => 'test_field',
@@ -118,7 +116,7 @@ class MakeUniqueEntityFieldTest extends MigrateProcessTestCase {
   /**
    * Data provider for testMakeUniqueEntityField().
    */
-  public static function providerTestMakeUniqueEntityField() {
+  public function providerTestMakeUniqueEntityField() {
     return [
       // Tests no duplication.
       [0],
@@ -164,10 +162,10 @@ class MakeUniqueEntityFieldTest extends MigrateProcessTestCase {
   protected function entityQueryExpects($count) {
     $this->entityQuery->expects($this->exactly($count + 1))
       ->method('condition')
-      ->willReturn($this->entityQuery);
+      ->will($this->returnValue($this->entityQuery));
     $this->entityQuery->expects($this->exactly($count + 1))
       ->method('count')
-      ->willReturn($this->entityQuery);
+      ->will($this->returnValue($this->entityQuery));
     $this->entityQuery->expects($this->exactly($count + 1))
       ->method('execute')
       ->willReturnCallback(function () use (&$count) {
@@ -178,7 +176,7 @@ class MakeUniqueEntityFieldTest extends MigrateProcessTestCase {
   /**
    * Tests making an entity field value unique only for migrated entities.
    */
-  public function testMakeUniqueEntityFieldMigrated(): void {
+  public function testMakeUniqueEntityFieldMigrated() {
     $configuration = [
       'entity_type' => 'test_entity_type',
       'field' => 'test_field',

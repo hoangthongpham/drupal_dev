@@ -2,17 +2,15 @@
 
 namespace Drupal\user\Plugin\Action;
 
-use Drupal\Core\Action\Attribute\Action;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
-
 /**
  * Adds a role to a user.
+ *
+ * @Action(
+ *   id = "user_add_role_action",
+ *   label = @Translation("Add a role to the selected users"),
+ *   type = "user"
+ * )
  */
-#[Action(
-  id: 'user_add_role_action',
-  label: new TranslatableMarkup('Add a role to the selected users'),
-  type: 'user'
-)]
 class AddRoleUser extends ChangeUserRoleBase {
 
   /**
@@ -25,7 +23,8 @@ class AddRoleUser extends ChangeUserRoleBase {
       // For efficiency manually save the original account before applying
       // any changes.
       $account->original = clone $account;
-      $account->addRole($rid)->save();
+      $account->addRole($rid);
+      $account->save();
     }
   }
 

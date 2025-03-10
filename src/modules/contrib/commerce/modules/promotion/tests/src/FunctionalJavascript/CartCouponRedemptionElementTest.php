@@ -2,11 +2,11 @@
 
 namespace Drupal\Tests\commerce_promotion\FunctionalJavascript;
 
-use Drupal\Core\Url;
-use Drupal\Tests\commerce\FunctionalJavascript\CommerceWebDriverTestBase;
 use Drupal\commerce_order\Entity\OrderItem;
 use Drupal\commerce_order\Entity\OrderItemType;
 use Drupal\commerce_price\Price;
+use Drupal\Core\Url;
+use Drupal\Tests\commerce\FunctionalJavascript\CommerceWebDriverTestBase;
 use Drupal\views\Entity\View;
 
 /**
@@ -31,11 +31,11 @@ class CartCouponRedemptionElementTest extends CommerceWebDriverTestBase {
   protected $cartManager;
 
   /**
-   * The test promotions.
+   * The promotion.
    *
-   * @var \Drupal\commerce_promotion\Entity\PromotionInterface[]
+   * @var \Drupal\commerce_promotion\Entity\PromotionInterface
    */
-  protected array $promotions;
+  protected $promotion;
 
   /**
    * Modules to enable.
@@ -45,7 +45,6 @@ class CartCouponRedemptionElementTest extends CommerceWebDriverTestBase {
   protected static $modules = [
     'block',
     'commerce_cart',
-    'commerce_product',
     'commerce_promotion',
   ];
 
@@ -72,7 +71,7 @@ class CartCouponRedemptionElementTest extends CommerceWebDriverTestBase {
     $this->cartManager->addOrderItem($this->cart, $order_item);
 
     // Starts now, enabled. No end time.
-    $promotion = $this->createEntity('commerce_promotion', [
+    $this->promotion = $this->createEntity('commerce_promotion', [
       'name' => 'Promotion (with coupon)',
       'order_types' => ['default'],
       'stores' => [$this->store->id()],
@@ -92,17 +91,13 @@ class CartCouponRedemptionElementTest extends CommerceWebDriverTestBase {
       'status' => TRUE,
     ]);
     $first_coupon->save();
-    $another_promotion = $promotion->createDuplicate();
     $second_coupon = $this->createEntity('commerce_promotion_coupon', [
       'code' => $this->getRandomGenerator()->word(8),
       'status' => TRUE,
     ]);
     $second_coupon->save();
-    $promotion->setCoupons([$first_coupon]);
-    $promotion->save();
-    $another_promotion->setCoupons([$second_coupon]);
-    $another_promotion->save();
-    $this->promotions = [$promotion, $another_promotion];
+    $this->promotion->setCoupons([$first_coupon, $second_coupon]);
+    $this->promotion->save();
   }
 
   /**
@@ -127,7 +122,7 @@ class CartCouponRedemptionElementTest extends CommerceWebDriverTestBase {
     ];
     $view->save();
 
-    $coupons = $this->promotions[0]->getCoupons();
+    $coupons = $this->promotion->getCoupons();
     $coupon = reset($coupons);
 
     $this->drupalGet(Url::fromRoute('commerce_cart.page'));
@@ -181,8 +176,9 @@ class CartCouponRedemptionElementTest extends CommerceWebDriverTestBase {
     ];
     $view->save();
 
-    $first_coupon = $this->promotions[0]->getCoupons()[0];
-    $second_coupon = $this->promotions[1]->getCoupons()[0];
+    $coupons = $this->promotion->getCoupons();
+    $first_coupon = reset($coupons);
+    $second_coupon = end($coupons);
 
     $this->drupalGet(Url::fromRoute('commerce_cart.page', [], ['query' => ['coupon_cardinality' => 2]]));
     // First coupon.

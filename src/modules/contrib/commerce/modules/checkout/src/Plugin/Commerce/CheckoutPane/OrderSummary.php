@@ -3,18 +3,17 @@
 namespace Drupal\commerce_checkout\Plugin\Commerce\CheckoutPane;
 
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\commerce_checkout\Attribute\CommerceCheckoutPane;
 
 /**
  * Provides the Order summary pane.
+ *
+ * @CommerceCheckoutPane(
+ *   id = "order_summary",
+ *   label = @Translation("Order summary"),
+ *   default_step = "_sidebar",
+ *   wrapper_element = "container",
+ * )
  */
-#[CommerceCheckoutPane(
-  id: "order_summary",
-  label: new TranslatableMarkup("Order summary"),
-  default_step: "_sidebar",
-  wrapper_element: "container",
-)]
 class OrderSummary extends CheckoutPaneBase implements CheckoutPaneInterface {
 
   /**
@@ -30,20 +29,15 @@ class OrderSummary extends CheckoutPaneBase implements CheckoutPaneInterface {
    * {@inheritdoc}
    */
   public function buildConfigurationSummary() {
-    $parent_summary = parent::buildConfigurationSummary();
     if ($this->configuration['view']) {
       $view_storage = $this->entityTypeManager->getStorage('view');
       $view = $view_storage->load($this->configuration['view']);
       if ($view) {
-        $summary = $this->t('View: @view', ['@view' => $view->label()]);
-        return $parent_summary ? implode('<br>', [$parent_summary, $summary]) : $summary;
+        return $this->t('View: @view', ['@view' => $view->label()]);
       }
-
-      return $parent_summary;
     }
     else {
-      $summary = $this->t('View: Not used');
-      return $parent_summary ? implode('<br>', [$parent_summary, $summary]) : $summary;
+      return $this->t('View: Not used');
     }
   }
 

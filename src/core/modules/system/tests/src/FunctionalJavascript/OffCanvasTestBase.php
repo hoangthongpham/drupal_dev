@@ -1,25 +1,13 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\system\FunctionalJavascript;
 
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
-use Drupal\Tests\system\Traits\OffCanvasTestTrait;
 
 /**
  * Base class contains common test functionality for the Off-canvas dialog.
  */
 abstract class OffCanvasTestBase extends WebDriverTestBase {
-
-  use OffCanvasTestTrait;
-
-  /**
-   * {@inheritdoc}
-   */
-  protected static $modules = [
-    'off_canvas_test',
-  ];
 
   /**
    * {@inheritdoc}
@@ -38,6 +26,7 @@ abstract class OffCanvasTestBase extends WebDriverTestBase {
    * the page is received.
    */
   protected function assertPageLoadComplete() {
+    $this->assertSession()->assertWaitOnAjaxRequest();
     if ($this->loggedInUser && $this->loggedInUser->hasPermission('access contextual links')) {
       $this->assertAllContextualLinksLoaded();
     }
@@ -78,9 +67,14 @@ abstract class OffCanvasTestBase extends WebDriverTestBase {
    * @throws \Behat\Mink\Exception\ElementNotFoundException
    */
   protected function waitForOffCanvasToOpen($position = 'side') {
-    $this->waitForOffCanvasArea();
+    $web_assert = $this->assertSession();
+    // Wait just slightly longer than the off-canvas dialog CSS animation.
+    // @see core/misc/dialog/off-canvas.motion.css
+    $this->getSession()->wait(800);
+    $web_assert->assertWaitOnAjaxRequest();
+    $this->assertElementVisibleAfterWait('css', '#drupal-off-canvas');
     // Check that the canvas is positioned on the side.
-    $this->assertSession()->elementExists('css', '.ui-dialog-position-' . $position);
+    $web_assert->elementExists('css', '.ui-dialog-position-' . $position);
   }
 
   /**
@@ -107,8 +101,8 @@ abstract class OffCanvasTestBase extends WebDriverTestBase {
    * @return string[]
    *   Theme names to test.
    */
-  protected static function getTestThemes() {
-    return ['claro', 'olivero', 'stable9', 'stark'];
+  protected function getTestThemes() {
+    return ['bartik', 'stark', 'classy', 'stable', 'seven'];
   }
 
   /**
@@ -130,8 +124,8 @@ abstract class OffCanvasTestBase extends WebDriverTestBase {
   /**
    * Data provider that returns theme name as the sole argument.
    */
-  public static function themeDataProvider() {
-    $themes = static::getTestThemes();
+  public function themeDataProvider() {
+    $themes = $this->getTestThemes();
     $data = [];
     foreach ($themes as $theme) {
       $data[$theme] = [

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\tracker\Functional;
 
 use Drupal\comment\Plugin\Field\FieldType\CommentItemInterface;
@@ -13,7 +11,6 @@ use Drupal\Tests\BrowserTestBase;
  * Tests for private node access on /tracker.
  *
  * @group tracker
- * @group legacy
  */
 class TrackerNodeAccessTest extends BrowserTestBase {
 
@@ -36,9 +33,6 @@ class TrackerNodeAccessTest extends BrowserTestBase {
    */
   protected $defaultTheme = 'stark';
 
-  /**
-   * {@inheritdoc}
-   */
   protected function setUp(): void {
     parent::setUp();
     node_access_rebuild();
@@ -51,7 +45,7 @@ class TrackerNodeAccessTest extends BrowserTestBase {
   /**
    * Ensure that tracker_cron is not access sensitive.
    */
-  public function testTrackerNodeAccessIndexing(): void {
+  public function testTrackerNodeAccessIndexing() {
     // The node is private and not authored by the anonymous user, so any entity
     // queries run for the anonymous user will miss it.
     $author = $this->drupalCreateUser();
@@ -77,7 +71,7 @@ class TrackerNodeAccessTest extends BrowserTestBase {
   /**
    * Ensure private node on /tracker is only visible to users with permission.
    */
-  public function testTrackerNodeAccess(): void {
+  public function testTrackerNodeAccess() {
     // Create user with node test view permission.
     $access_user = $this->drupalCreateUser([
       'node test view',

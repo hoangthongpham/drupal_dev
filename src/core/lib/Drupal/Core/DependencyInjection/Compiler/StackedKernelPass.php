@@ -2,18 +2,15 @@
 
 namespace Drupal\Core\DependencyInjection\Compiler;
 
-use Drupal\Core\StackMiddleware\StackedHttpKernel;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
-use Symfony\Component\HttpKernel\HttpKernelInterface;
-use Symfony\Component\HttpKernel\TerminableInterface;
 
 /**
  * Provides a compiler pass for stacked HTTP kernels.
  *
  * Builds the HTTP kernel by collecting all services tagged 'http_middleware'
- * and assembling them into a StackedHttpKernel. The middleware with the highest
+ * and assembling them into a StackedKernel. The middleware with the highest
  * priority ends up as the outermost while the lowest priority middleware wraps
  * the actual HTTP kernel defined by the http_kernel.basic service.
  *
@@ -46,15 +43,12 @@ use Symfony\Component\HttpKernel\TerminableInterface;
  *     - { name: http_middleware, priority: 200, responder: true }
  * @endcode
  *
- * @see \Drupal\Core\StackMiddleware\StackedHttpKernel
+ * @see \Stack\Builder
  */
 class StackedKernelPass implements CompilerPassInterface {
 
   /**
    * {@inheritdoc}
-   *
-   * phpcs:ignore Drupal.Commenting.FunctionComment.VoidReturn
-   * @return void
    */
   public function process(ContainerBuilder $container) {
 
@@ -65,7 +59,7 @@ class StackedKernelPass implements CompilerPassInterface {
     $stacked_kernel = $container->getDefinition('http_kernel');
 
     // Return now if this is not a stacked kernel.
-    if ($stacked_kernel->getClass() !== StackedHttpKernel::class) {
+    if ($stacked_kernel->getClass() !== 'Stack\StackedHttpKernel') {
       return;
     }
 
@@ -102,14 +96,7 @@ class StackedKernelPass implements CompilerPassInterface {
         $first_responder = FALSE;
       }
       elseif ($first_responder) {
-        // Use interface proxying to allow middleware classes declared final
-        // to be set as lazy.
         $decorator->setLazy(TRUE);
-        foreach ([HttpKernelInterface::class, TerminableInterface::class] as $interface) {
-          if (is_a($decorator->getClass(), $interface, TRUE)) {
-            $decorator->addTag('proxy', ['interface' => $interface]);
-          }
-        }
       }
 
       $decorated_id = $id;

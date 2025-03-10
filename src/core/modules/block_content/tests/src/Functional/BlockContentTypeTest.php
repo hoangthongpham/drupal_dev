@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\block_content\Functional;
 
 use Drupal\block_content\Entity\BlockContentType;
@@ -10,7 +8,7 @@ use Drupal\Core\Url;
 use Drupal\Tests\system\Functional\Menu\AssertBreadcrumbTrait;
 
 /**
- * Ensures that block type functions work correctly.
+ * Ensures that custom block type functions work correctly.
  *
  * @group block_content
  */
@@ -18,7 +16,9 @@ class BlockContentTypeTest extends BlockContentTestBase {
 
   use AssertBreadcrumbTrait;
   /**
-   * {@inheritdoc}
+   * Modules to enable.
+   *
+   * @var array
    */
   protected static $modules = ['field_ui'];
 
@@ -33,12 +33,8 @@ class BlockContentTypeTest extends BlockContentTestBase {
    * @var array
    */
   protected $permissions = [
-    'administer block content',
     'administer blocks',
     'administer block_content fields',
-    'administer block types',
-    'administer block content',
-    'access block library',
   ];
 
   /**
@@ -48,9 +44,6 @@ class BlockContentTypeTest extends BlockContentTestBase {
    */
   protected $autoCreateBasicBlockType = FALSE;
 
-  /**
-   * {@inheritdoc}
-   */
   protected function setUp(): void {
     parent::setUp();
 
@@ -60,7 +53,7 @@ class BlockContentTypeTest extends BlockContentTestBase {
   /**
    * Tests the order of the block content types on the add page.
    */
-  public function testBlockContentAddPageOrder(): void {
+  public function testBlockContentAddPageOrder() {
     $this->createBlockContentType(['id' => 'bundle_1', 'label' => 'Bundle 1']);
     $this->createBlockContentType(['id' => 'bundle_2', 'label' => 'Aaa Bundle 2']);
     $this->drupalLogin($this->adminUser);
@@ -71,7 +64,7 @@ class BlockContentTypeTest extends BlockContentTestBase {
   /**
    * Tests creating a block type programmatically and via a form.
    */
-  public function testBlockContentTypeCreation(): void {
+  public function testBlockContentTypeCreation() {
     // Log in a test user.
     $this->drupalLogin($this->adminUser);
 
@@ -86,11 +79,7 @@ class BlockContentTypeTest extends BlockContentTestBase {
       'id' => 'foo',
       'label' => 'title for foo',
     ];
-    $this->submitForm($edit, 'Save and manage fields');
-
-    // Asserts that form submit redirects to the expected manage fields page.
-    $this->assertSession()->addressEquals('admin/structure/block-content/manage/' . $edit['id'] . '/fields');
-
+    $this->submitForm($edit, 'Save');
     $block_type = BlockContentType::load('foo');
     $this->assertInstanceOf(BlockContentType::class, $block_type);
 
@@ -120,7 +109,7 @@ class BlockContentTypeTest extends BlockContentTestBase {
   /**
    * Tests editing a block type using the UI.
    */
-  public function testBlockContentTypeEditing(): void {
+  public function testBlockContentTypeEditing() {
     $this->drupalPlaceBlock('system_breadcrumb_block');
     // Now create an initial block-type.
     $this->createBlockContentType('basic', TRUE);
@@ -141,14 +130,15 @@ class BlockContentTypeTest extends BlockContentTestBase {
     $edit = [
       'label' => 'Bar',
     ];
-    $this->drupalGet('admin/structure/block-content/manage/basic');
-    $this->assertSession()->titleEquals('Edit basic block type | Drupal');
+    $this->drupalGet('admin/structure/block/block-content/manage/basic');
+    $this->assertSession()->titleEquals('Edit basic custom block type | Drupal');
     $this->submitForm($edit, 'Save');
     $front_page_path = Url::fromRoute('<front>')->toString();
-    $this->assertBreadcrumb('admin/structure/block-content/manage/basic/fields', [
+    $this->assertBreadcrumb('admin/structure/block/block-content/manage/basic/fields', [
       $front_page_path => 'Home',
-      'admin/structure/block-content' => 'Block types',
-      'admin/structure/block-content/manage/basic' => 'Edit Bar',
+      'admin/structure/block' => 'Block layout',
+      'admin/structure/block/block-content' => 'Custom block library',
+      'admin/structure/block/block-content/manage/basic' => 'Edit Bar',
     ]);
     \Drupal::service('entity_field.manager')->clearCachedFieldDefinitions();
 
@@ -159,10 +149,10 @@ class BlockContentTypeTest extends BlockContentTestBase {
     $this->assertSession()->addressEquals(Url::fromRoute('block_content.add_form', ['block_content_type' => 'basic']));
 
     // Remove the body field.
-    $this->drupalGet('admin/structure/block-content/manage/basic/fields/block_content.basic.body/delete');
+    $this->drupalGet('admin/structure/block/block-content/manage/basic/fields/block_content.basic.body/delete');
     $this->submitForm([], 'Delete');
     // Resave the settings for this type.
-    $this->drupalGet('admin/structure/block-content/manage/basic');
+    $this->drupalGet('admin/structure/block/block-content/manage/basic');
     $this->submitForm([], 'Save');
     // Check that the body field doesn't exist.
     $this->drupalGet('block/add/basic');
@@ -172,7 +162,7 @@ class BlockContentTypeTest extends BlockContentTestBase {
   /**
    * Tests deleting a block type that still has content.
    */
-  public function testBlockContentTypeDeletion(): void {
+  public function testBlockContentTypeDeletion() {
     // Now create an initial block-type.
     $this->createBlockContentType('basic', TRUE);
 
@@ -184,22 +174,22 @@ class BlockContentTypeTest extends BlockContentTestBase {
     // Add a new block of this type.
     $block = $this->createBlockContent(FALSE, 'foo');
     // Attempt to delete the block type, which should not be allowed.
-    $this->drupalGet('admin/structure/block-content/manage/' . $type->id() . '/delete');
-    $this->assertSession()->pageTextContains($type->label() . ' is used by 1 content block on your site. You can not remove this block type until you have removed all of the ' . $type->label() . ' blocks.');
+    $this->drupalGet('admin/structure/block/block-content/manage/' . $type->id() . '/delete');
+    $this->assertSession()->pageTextContains($type->label() . ' is used by 1 custom block on your site. You can not remove this block type until you have removed all of the ' . $type->label() . ' blocks.');
     $this->assertSession()->pageTextNotContains('This action cannot be undone.');
 
     // Delete the block.
     $block->delete();
     // Attempt to delete the block type, which should now be allowed.
-    $this->drupalGet('admin/structure/block-content/manage/' . $type->id() . '/delete');
-    $this->assertSession()->pageTextContains('Are you sure you want to delete the block type ' . $type->id() . '?');
+    $this->drupalGet('admin/structure/block/block-content/manage/' . $type->id() . '/delete');
+    $this->assertSession()->pageTextContains('Are you sure you want to delete the custom block type ' . $type->id() . '?');
     $this->assertSession()->pageTextContains('This action cannot be undone.');
   }
 
   /**
    * Tests that redirects work as expected when multiple block types exist.
    */
-  public function testsBlockContentAddTypes(): void {
+  public function testsBlockContentAddTypes() {
     // Now create an initial block-type.
     $this->createBlockContentType('basic', TRUE);
 
@@ -208,38 +198,45 @@ class BlockContentTypeTest extends BlockContentTestBase {
     $this->createBlockContentType('foo');
     $this->createBlockContentType('bar');
 
-    // Get the content block storage.
+    // Get the custom block storage.
     $storage = $this->container
       ->get('entity_type.manager')
       ->getStorage('block_content');
 
     // Install all themes.
-    $themes = ['olivero', 'stark', 'claro'];
-    \Drupal::service('theme_installer')->install($themes);
+    \Drupal::service('theme_installer')->install(['bartik', 'seven', 'stark']);
     $theme_settings = $this->config('system.theme');
-    foreach ($themes as $default_theme) {
+    foreach (['bartik', 'seven', 'stark'] as $default_theme) {
       // Change the default theme.
       $theme_settings->set('default', $default_theme)->save();
       $this->drupalPlaceBlock('local_actions_block');
 
       // For each installed theme, go to its block page and test the redirects.
-      foreach ($themes as $theme) {
+      foreach (['bartik', 'seven', 'stark'] as $theme) {
         // Test that adding a block from the 'place blocks' form sends you to the
         // block configure form.
         $path = $theme == $default_theme ? 'admin/structure/block' : "admin/structure/block/list/$theme";
         $this->drupalGet($path);
         $this->clickLink('Place block');
-        $this->clickLink('Add content block');
-        $this->clickLink('foo');
+        $this->clickLink('Add custom block');
+        // The seven theme has markup inside the link, we cannot use clickLink().
+        if ($default_theme == 'seven') {
+          $options = $theme != $default_theme ? ['query' => ['theme' => $theme]] : [];
+          $this->assertSession()->linkByHrefExists(Url::fromRoute('block_content.add_form', ['block_content_type' => 'foo'], $options)->toString());
+          $this->drupalGet('block/add/foo', $options);
+        }
+        else {
+          $this->clickLink('foo');
+        }
         // Create a new block.
         $edit = ['info[0][value]' => $this->randomMachineName(8)];
-        $this->submitForm($edit, 'Save and configure');
+        $this->submitForm($edit, 'Save');
         $blocks = $storage->loadByProperties(['info' => $edit['info[0][value]']]);
         if (!empty($blocks)) {
           $block = reset($blocks);
           $this->assertSession()->addressEquals(Url::fromRoute('block.admin_add', ['plugin_id' => 'block_content:' . $block->uuid(), 'theme' => $theme]));
           $this->submitForm(['region' => 'content'], 'Save block');
-          $this->assertSession()->addressEquals(Url::fromRoute('block.admin_display_theme', ['theme' => $theme], ['query' => ['block-placement' => $theme . '-' . Html::getClass($edit['info[0][value]'])]]));
+          $this->assertSession()->addressEquals(Url::fromRoute('block.admin_display_theme', ['theme' => $theme], ['query' => ['block-placement' => Html::getClass($edit['info[0][value]'])]]));
         }
         else {
           $this->fail('Could not load created block.');
@@ -247,10 +244,10 @@ class BlockContentTypeTest extends BlockContentTestBase {
       }
     }
 
-    // Test that adding a block from the 'content blocks list' doesn't send you
+    // Test that adding a block from the 'custom blocks list' doesn't send you
     // to the block configure form.
-    $this->drupalGet('admin/content/block');
-    $this->clickLink('Add content block');
+    $this->drupalGet('admin/structure/block/block-content');
+    $this->clickLink('Add custom block');
     $this->clickLink('foo');
     $edit = ['info[0][value]' => $this->randomMachineName(8)];
     $this->submitForm($edit, 'Save');

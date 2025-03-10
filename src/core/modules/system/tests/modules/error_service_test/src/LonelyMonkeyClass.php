@@ -9,11 +9,6 @@ use Drupal\Core\Database\Connection;
  */
 class LonelyMonkeyClass {
 
-  /**
-   * The database connection.
-   */
-  protected Connection $connection;
-
   public function __construct(Connection $connection) {
     $this->connection = $connection;
   }

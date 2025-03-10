@@ -27,7 +27,7 @@ function template_preprocess_image_style_preview(&$variables) {
   $variables['style_name'] = $style->label();
 
   // Cache bypass token.
-  $variables['cache_bypass'] = \Drupal::time()->getRequestTime();
+  $variables['cache_bypass'] = REQUEST_TIME;
 
   // Sample image info.
   $sample_width = 160;
@@ -58,11 +58,6 @@ function template_preprocess_image_style_preview(&$variables) {
     $style->createDerivative($original_path, $preview_file);
   }
   $preview_image = $image_factory->get($preview_file);
-
-  // Generate an itok.
-  $defaultScheme = \Drupal::config('system.file')->get('default_scheme');
-  $variables['itok'] = $style->getPathToken($defaultScheme . '://' . $original_path);
-
   $variables['derivative'] = [
     'url' => $file_url_generator->generateString($preview_file),
     'width' => $preview_image->getWidth(),
@@ -81,10 +76,7 @@ function template_preprocess_image_style_preview(&$variables) {
   $variables['original']['rendered'] = [
     '#theme' => 'image',
     '#uri' => $original_path,
-    '#alt' => t('Source image: @width pixels wide, @height pixels high', [
-      '@width' => $variables['original']['width'],
-      '@height' => $variables['original']['height'],
-    ]),
+    '#alt' => t('Sample original image'),
     '#title' => '',
     '#attributes' => [
       'width' => $variables['original']['width'],
@@ -97,11 +89,8 @@ function template_preprocess_image_style_preview(&$variables) {
   // to prevent caching of images on the client side.
   $variables['derivative']['rendered'] = [
     '#theme' => 'image',
-    '#uri' => $variables['derivative']['url'] . '?cache_bypass=' . $variables['cache_bypass'] . '&itok=' . $variables['itok'],
-    '#alt' => t('Derivative image: @width pixels wide, @height pixels high', [
-      '@width' => $variables['derivative']['width'],
-      '@height' => $variables['derivative']['height'],
-    ]),
+    '#uri' => $variables['derivative']['url'] . '?cache_bypass=' . $variables['cache_bypass'],
+    '#alt' => t('Sample modified image'),
     '#title' => '',
     '#attributes' => [
       'width' => $variables['derivative']['width'],

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\system\Functional\Theme;
 
 use Drupal\Tests\BrowserTestBase;
@@ -15,7 +13,9 @@ use Twig\TemplateWrapper;
 class TwigRegistryLoaderTest extends BrowserTestBase {
 
   /**
-   * {@inheritdoc}
+   * Modules to enable.
+   *
+   * @var array
    */
   protected static $modules = ['twig_theme_test', 'block'];
 
@@ -29,9 +29,6 @@ class TwigRegistryLoaderTest extends BrowserTestBase {
    */
   protected $twig;
 
-  /**
-   * {@inheritdoc}
-   */
   protected function setUp(): void {
     parent::setUp();
     \Drupal::service('theme_installer')->install(['test_theme_twig_registry_loader', 'test_theme_twig_registry_loader_theme', 'test_theme_twig_registry_loader_subtheme']);
@@ -50,14 +47,14 @@ class TwigRegistryLoaderTest extends BrowserTestBase {
   /**
    * Tests template discovery using the Drupal theme registry.
    */
-  public function testTemplateDiscovery(): void {
+  public function testTemplateDiscovery() {
     $this->assertTwigTemplate($this->twig->load('block.html.twig'), 'Found block.html.twig in block module.');
   }
 
   /**
    * Tests template extension and includes using the Drupal theme registry.
    */
-  public function testTwigNamespaces(): void {
+  public function testTwigNamespaces() {
     // Test the module-provided extend and insert templates.
     $this->drupalGet('twig-theme-test/registry-loader');
     $this->assertSession()->pageTextContains('This line is from twig_theme_test/templates/twig-registry-loader-test-extend.html.twig');

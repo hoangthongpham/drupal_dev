@@ -3,7 +3,6 @@
 namespace Drupal\update;
 
 use Drupal\Core\Extension\ExtensionVersion;
-use Drupal\Core\Utility\Error;
 
 /**
  * Calculates a project's security coverage information.
@@ -40,13 +39,11 @@ final class ProjectSecurityData {
    *
    * @see \Drupal\update\ProjectSecurityRequirement::getDateEndRequirement()
    */
-  const SECURITY_COVERAGE_END_DATE_10_5 = '2026-06-17';
+  const SECURITY_COVERAGE_END_DATE_8_8 = '2020-12-02';
 
-  const SECURITY_COVERAGE_ENDING_WARN_DATE_10_5 = '2025-12-10';
+  const SECURITY_COVERAGE_ENDING_WARN_DATE_8_8 = '2020-06-02';
 
-  const SECURITY_COVERAGE_END_DATE_10_6 = '2026-12-09';
-
-  const SECURITY_COVERAGE_ENDING_WARN_DATE_10_6 = '2026-06-17';
+  const SECURITY_COVERAGE_END_DATE_8_9 = '2021-11';
 
   /**
    * The existing (currently installed) version of the project.
@@ -225,7 +222,12 @@ final class ProjectSecurityData {
         // Ignore releases that are in an invalid format. Although this is
         // highly unlikely we should still process releases in the correct
         // format.
-        Error::logException(\Drupal::logger('update'), $exception, 'Invalid project format: @release', ['@release' => print_r($release_info, TRUE)]);
+        watchdog_exception(
+          'update',
+          $exception,
+          'Invalid project format: @release',
+          ['@release' => print_r($release_info, TRUE)]
+        );
         continue;
       }
       $release_version = ExtensionVersion::createFromVersionString($release->getVersion());

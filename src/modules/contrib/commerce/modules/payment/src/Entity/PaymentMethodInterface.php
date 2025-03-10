@@ -2,10 +2,10 @@
 
 namespace Drupal\commerce_payment\Entity;
 
-use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityChangedInterface;
-use Drupal\profile\Entity\ProfileInterface;
+use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\user\EntityOwnerInterface;
+use Drupal\profile\Entity\ProfileInterface;
 
 /**
  * Defines the interface for payment methods.

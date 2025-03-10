@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\comment\Unit\Entity;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
@@ -19,7 +17,7 @@ class CommentLockTest extends UnitTestCase {
   /**
    * Tests the lock behavior.
    */
-  public function testLocks(): void {
+  public function testLocks() {
     $container = new ContainerBuilder();
     $container->set('module_handler', $this->createMock('Drupal\Core\Extension\ModuleHandlerInterface'));
     $container->set('current_user', $this->createMock('Drupal\Core\Session\AccountInterface'));
@@ -35,7 +33,7 @@ class CommentLockTest extends UnitTestCase {
     $lock->expects($this->once())
       ->method('acquire')
       ->with($lock_name, 30)
-      ->willReturn(TRUE);
+      ->will($this->returnValue(TRUE));
     $lock->expects($this->once())
       ->method('release')
       ->with($lock_name);
@@ -57,27 +55,27 @@ class CommentLockTest extends UnitTestCase {
       ->getMock();
     $comment->expects($this->once())
       ->method('isNew')
-      ->willReturn(TRUE);
+      ->will($this->returnValue(TRUE));
     $comment->expects($this->once())
       ->method('hasParentComment')
-      ->willReturn(TRUE);
+      ->will($this->returnValue(TRUE));
     $comment->expects($this->once())
       ->method('getParentComment')
-      ->willReturn($comment);
+      ->will($this->returnValue($comment));
     $comment->expects($this->once())
       ->method('getCommentedEntityId')
-      ->willReturn($cid);
+      ->will($this->returnValue($cid));
     $comment->expects($this->any())
       ->method('getThread')
-      ->willReturn('');
+      ->will($this->returnValue(''));
 
     $anon_user = $this->createMock('Drupal\Core\Session\AccountInterface');
     $anon_user->expects($this->any())
       ->method('isAnonymous')
-      ->willReturn(TRUE);
+      ->will($this->returnValue(TRUE));
     $comment->expects($this->any())
       ->method('getOwner')
-      ->willReturn($anon_user);
+      ->will($this->returnValue($anon_user));
 
     $parent_entity = $this->createMock('\Drupal\Core\Entity\ContentEntityInterface');
     $parent_entity->expects($this->atLeastOnce())
@@ -90,7 +88,7 @@ class CommentLockTest extends UnitTestCase {
     $entity_type = $this->createMock('\Drupal\Core\Entity\EntityTypeInterface');
     $comment->expects($this->any())
       ->method('getEntityType')
-      ->willReturn($entity_type);
+      ->will($this->returnValue($entity_type));
     $storage = $this->createMock('Drupal\comment\CommentStorageInterface');
 
     // preSave() should acquire the lock. (This is what's really being tested.)

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\ckeditor5\FunctionalJavascript;
 
 // cspell:ignore subtheming
@@ -41,10 +39,10 @@ class CKEditorStylesheetsWarningTest extends CKEditor5TestBase {
    *
    * @dataProvider providerTestWarningFilterUI
    */
-  public function testWarningFilterUi($theme, $expected_warning): void {
+  public function testWarningFilterUi($theme, $expected_warning) {
     $page = $this->getSession()->getPage();
     $assert_session = $this->assertSession();
-    $this->addNewTextFormat();
+    $this->addNewTextFormat($page, $assert_session);
     $this->drupalGet('admin/config/content/formats/manage/ckeditor5');
 
     $assert_session->pageTextNotContains($expected_warning);
@@ -56,7 +54,7 @@ class CKEditorStylesheetsWarningTest extends CKEditor5TestBase {
   /**
    * Data provider for testWarningFilterUI().
    *
-   * @return string[][]
+   * @return \string[][]
    *   An array with the theme to enable and the warning message to check.
    */
   public function providerTestWarningFilterUi() {

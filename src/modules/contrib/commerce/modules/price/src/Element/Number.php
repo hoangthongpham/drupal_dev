@@ -3,9 +3,8 @@
 namespace Drupal\commerce_price\Element;
 
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Render\Attribute\FormElement;
+use Drupal\Core\Render\Element\FormElement;
 use Drupal\Core\Render\Element;
-use Drupal\Core\Render\Element\FormElementBase;
 
 /**
  * Provides a number form element with support for language-specific input.
@@ -24,11 +23,10 @@ use Drupal\Core\Render\Element\FormElementBase;
  *   '#required' => TRUE,
  * ];
  * @endcode
+ *
+ * @FormElement("commerce_number")
  */
-#[FormElement(
-  id: "commerce_number",
-)]
-class Number extends FormElementBase {
+class Number extends FormElement {
 
   /**
    * {@inheritdoc}
@@ -44,7 +42,6 @@ class Number extends FormElementBase {
       '#size' => 10,
       '#maxlength' => 128,
       '#default_value' => NULL,
-      '#locale' => NULL,
       '#element_validate' => [
         [$class, 'validateNumber'],
       ],
@@ -78,16 +75,11 @@ class Number extends FormElementBase {
       // becomes "9,99" in many locales. This also strips any extra zeroes.
       $number_formatter = \Drupal::service('commerce_price.number_formatter');
       $number = (string) $element['#default_value'];
-      $options = [
+      $number = $number_formatter->format($number, [
         'use_grouping' => FALSE,
         'minimum_fraction_digits' => $element['#min_fraction_digits'],
         'maximum_fraction_digits' => $element['#max_fraction_digits'],
-      ];
-
-      if (isset($element['#locale'])) {
-        $options['locale'] = $element['#locale'];
-      }
-      $number = $number_formatter->format($number, $options);
+      ]);
 
       return $number;
     }
@@ -135,12 +127,7 @@ class Number extends FormElementBase {
     $title = empty($element['#title']) ? $element['#parents'][0] : $element['#title'];
     $number_formatter = \Drupal::service('commerce_price.number_formatter');
 
-    $options = [];
-    if (isset($element['#locale'])) {
-      $options['locale'] = $element['#locale'];
-    }
-
-    $value = $number_formatter->parse($value, $options);
+    $value = $number_formatter->parse($value);
     if ($value === FALSE) {
       $form_state->setError($element, t('%title must be a number.', [
         '%title' => $title,

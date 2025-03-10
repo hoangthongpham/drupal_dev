@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2023 Justin Hileman
+ * (c) 2012-2020 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -15,6 +15,7 @@ use Psy\Shell;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command as BaseCommand;
 use Symfony\Component\Console\Helper\Table;
+use Symfony\Component\Console\Helper\TableHelper;
 use Symfony\Component\Console\Helper\TableStyle;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -30,32 +31,19 @@ abstract class Command extends BaseCommand
      *
      * @api
      */
-    public function setApplication(?Application $application = null): void
+    public function setApplication(Application $application = null)
     {
         if ($application !== null && !$application instanceof Shell) {
             throw new \InvalidArgumentException('PsySH Commands require an instance of Psy\Shell');
         }
 
-        parent::setApplication($application);
-    }
-
-    /**
-     * getApplication, but is guaranteed to return a Shell instance.
-     */
-    protected function getShell(): Shell
-    {
-        $shell = $this->getApplication();
-        if (!$shell instanceof Shell) {
-            throw new \RuntimeException('PsySH Commands require an instance of Psy\Shell');
-        }
-
-        return $shell;
+        return parent::setApplication($application);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function asText(): string
+    public function asText()
     {
         $messages = [
             '<comment>Usage:</comment>',
@@ -86,7 +74,7 @@ abstract class Command extends BaseCommand
     /**
      * {@inheritdoc}
      */
-    private function getArguments(): array
+    private function getArguments()
     {
         $hidden = $this->getHiddenArguments();
 
@@ -98,9 +86,9 @@ abstract class Command extends BaseCommand
     /**
      * These arguments will be excluded from help output.
      *
-     * @return string[]
+     * @return array
      */
-    protected function getHiddenArguments(): array
+    protected function getHiddenArguments()
     {
         return ['command'];
     }
@@ -108,7 +96,7 @@ abstract class Command extends BaseCommand
     /**
      * {@inheritdoc}
      */
-    private function getOptions(): array
+    private function getOptions()
     {
         $hidden = $this->getHiddenOptions();
 
@@ -120,25 +108,29 @@ abstract class Command extends BaseCommand
     /**
      * These options will be excluded from help output.
      *
-     * @return string[]
+     * @return array
      */
-    protected function getHiddenOptions(): array
+    protected function getHiddenOptions()
     {
         return ['verbose'];
     }
 
     /**
      * Format command aliases as text..
+     *
+     * @return string
      */
-    private function aliasesAsText(): string
+    private function aliasesAsText()
     {
         return '<comment>Aliases:</comment> <info>'.\implode(', ', $this->getAliases()).'</info>'.\PHP_EOL;
     }
 
     /**
      * Format command arguments as text.
+     *
+     * @return string
      */
-    private function argumentsAsText(): string
+    private function argumentsAsText()
     {
         $max = $this->getMaxWidth();
         $messages = [];
@@ -153,11 +145,9 @@ abstract class Command extends BaseCommand
                     $default = '';
                 }
 
-                $name = $argument->getName();
-                $pad = \str_pad('', $max - \strlen($name));
                 $description = \str_replace("\n", "\n".\str_pad('', $max + 2, ' '), $argument->getDescription());
 
-                $messages[] = \sprintf(' <info>%s</info>%s %s%s', $name, $pad, $description, $default);
+                $messages[] = \sprintf(" <info>%-${max}s</info> %s%s", $argument->getName(), $description, $default);
             }
 
             $messages[] = '';
@@ -168,8 +158,10 @@ abstract class Command extends BaseCommand
 
     /**
      * Format options as text.
+     *
+     * @return string
      */
-    private function optionsAsText(): string
+    private function optionsAsText()
     {
         $max = $this->getMaxWidth();
         $messages = [];
@@ -190,7 +182,7 @@ abstract class Command extends BaseCommand
 
                 $optionMax = $max - \strlen($option->getName()) - 2;
                 $messages[] = \sprintf(
-                    " <info>%s</info> %-{$optionMax}s%s%s%s",
+                    " <info>%s</info> %-${optionMax}s%s%s%s",
                     '--'.$option->getName(),
                     $option->getShortcut() ? \sprintf('(-%s) ', $option->getShortcut()) : '',
                     $description,
@@ -207,8 +199,10 @@ abstract class Command extends BaseCommand
 
     /**
      * Calculate the maximum padding width for a set of lines.
+     *
+     * @return int
      */
-    private function getMaxWidth(): int
+    private function getMaxWidth()
     {
         $max = 0;
 
@@ -232,8 +226,10 @@ abstract class Command extends BaseCommand
      * Format an option default as text.
      *
      * @param mixed $default
+     *
+     * @return string
      */
-    private function formatDefaultValue($default): string
+    private function formatDefaultValue($default)
     {
         if (\is_array($default) && $default === \array_values($default)) {
             return \sprintf("['%s']", \implode("', '", $default));
@@ -245,10 +241,16 @@ abstract class Command extends BaseCommand
     /**
      * Get a Table instance.
      *
-     * @return Table
+     * Falls back to legacy TableHelper.
+     *
+     * @return Table|TableHelper
      */
     protected function getTable(OutputInterface $output)
     {
+        if (!\class_exists(Table::class)) {
+            return $this->getTableHelper();
+        }
+
         $style = new TableStyle();
 
         // Symfony 4.1 deprecated single-argument style setters.
@@ -267,5 +269,21 @@ abstract class Command extends BaseCommand
         return $table
             ->setRows([])
             ->setStyle($style);
+    }
+
+    /**
+     * Legacy fallback for getTable.
+     *
+     * @return TableHelper
+     */
+    protected function getTableHelper()
+    {
+        $table = $this->getApplication()->getHelperSet()->get('table');
+
+        return $table
+            ->setRows([])
+            ->setLayout(TableHelper::LAYOUT_BORDERLESS)
+            ->setHorizontalBorderChar('')
+            ->setCrossingChar('');
     }
 }

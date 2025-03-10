@@ -36,7 +36,7 @@ abstract class QueryPluginBase extends PluginBase implements CacheableDependency
   /**
    * A pager plugin that should be provided by the display.
    *
-   * @var \Drupal\views\Plugin\views\pager\PagerPluginBase|null
+   * @var views_plugin_pager
    */
   public $pager = NULL;
 
@@ -48,22 +48,11 @@ abstract class QueryPluginBase extends PluginBase implements CacheableDependency
   protected $limit;
 
   /**
-   * The OFFSET on the query.
-   */
-  public int $offset;
-
-  /**
-   * Controls how the WHERE and HAVING groups are put together.
-   *
-   * @var string
-   */
-  protected $groupOperator;
-
-  /**
-   * Generate a query and a countQuery from all of the information supplied.
+   * Generate a query and a countquery from all of the information supplied
+   * to the object.
    *
    * @param $get_count
-   *   Provide a countQuery if this is true, otherwise provide a normal query.
+   *   Provide a countquery if this is true, otherwise provide a normal query.
    */
   public function query($get_count = FALSE) {}
 
@@ -84,7 +73,8 @@ abstract class QueryPluginBase extends PluginBase implements CacheableDependency
   public function build(ViewExecutable $view) {}
 
   /**
-   * Executes query and fills associated view object with according values.
+   * Executes the query and fills the associated view object with according
+   * values.
    *
    * Values to set: $view->result, $view->total_rows, $view->execute_time,
    * $view->pager['current_page'].
@@ -129,7 +119,7 @@ abstract class QueryPluginBase extends PluginBase implements CacheableDependency
   public function calculateDependencies() {
     $dependencies = [];
 
-    foreach ($this->getEntityTableInfo() as $info) {
+    foreach ($this->getEntityTableInfo() as $entity_type => $info) {
       if (!empty($info['provider'])) {
         $dependencies['module'][] = $info['provider'];
       }
@@ -170,7 +160,7 @@ abstract class QueryPluginBase extends PluginBase implements CacheableDependency
    * @param $where
    *   'where' or 'having'.
    *
-   * @return int|string
+   * @return
    *   The group ID generated.
    */
   public function setWhereGroup($type = 'AND', $group = NULL, $where = 'where') {

@@ -461,7 +461,7 @@
 	"MDL": {
 		"name": "ليو مولدوفي"
 	},
-	"SLE": {
+	"SLL": {
 		"name": "ليون سيراليوني"
 	},
 	"BAM": {
@@ -506,5 +506,14 @@
 	"EUR": {
 		"name": "يورو",
 		"symbol": "€"
+	},
+	"VED": {
+		"name": "Bolívar Soberano"
+	},
+	"SLE": {
+		"name": "Sierra Leonean Leone"
+	},
+	"UYW": {
+		"name": "Uruguayan Nominal Wage Index Unit"
 	}
 }

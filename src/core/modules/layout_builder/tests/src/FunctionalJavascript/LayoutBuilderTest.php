@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\layout_builder\FunctionalJavascript;
 
 use Drupal\block_content\Entity\BlockContent;
@@ -37,7 +35,7 @@ class LayoutBuilderTest extends WebDriverTestBase {
   /**
    * {@inheritdoc}
    */
-  protected $defaultTheme = 'starterkit_theme';
+  protected $defaultTheme = 'classy';
 
   /**
    * The node to customize with Layout Builder.
@@ -70,7 +68,7 @@ class LayoutBuilderTest extends WebDriverTestBase {
     $bundle->save();
     block_content_add_body_field($bundle->id());
     BlockContent::create([
-      'info' => 'My content block',
+      'info' => 'My custom block',
       'type' => 'basic',
       'body' => [
         [
@@ -101,7 +99,8 @@ class LayoutBuilderTest extends WebDriverTestBase {
   /**
    * Tests the Layout Builder UI.
    */
-  public function testLayoutBuilderUi(): void {
+  public function testLayoutBuilderUi() {
+    $this->markTestSkipped();
     $layout_url = 'node/1/layout';
     $node_url = 'node/1';
 
@@ -230,7 +229,7 @@ class LayoutBuilderTest extends WebDriverTestBase {
     $this->drupalGet($layout_url);
     $this->markCurrentPage();
 
-    $this->openAddBlockForm('My content block');
+    $this->openAddBlockForm('My custom block');
     $page->pressButton('Add block');
     $assert_session->assertWaitOnAjaxRequest();
     $assert_session->pageTextContains('This is the block content');
@@ -265,7 +264,7 @@ class LayoutBuilderTest extends WebDriverTestBase {
   /**
    * Tests configurable layouts.
    */
-  public function testConfigurableLayoutSections(): void {
+  public function testConfigurableLayoutSections() {
     $layout_url = 'node/1/layout';
 
     \Drupal::entityTypeManager()
@@ -344,7 +343,7 @@ class LayoutBuilderTest extends WebDriverTestBase {
   /**
    * Tests bypassing the off-canvas dialog.
    */
-  public function testLayoutNoDialog(): void {
+  public function testLayoutNoDialog() {
     $layout_url = 'node/1/layout';
 
     \Drupal::entityTypeManager()

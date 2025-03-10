@@ -4,19 +4,18 @@ namespace Drupal\search_extra_type\Plugin\Search;
 
 use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
-use Drupal\search\Attribute\Search;
 use Drupal\search\Plugin\ConfigurableSearchPluginBase;
 
 /**
  * Executes a dummy keyword search.
+ *
+ * @SearchPlugin(
+ *   id = "search_extra_type_search",
+ *   title = @Translation("Dummy search type"),
+ *   use_admin_theme = TRUE,
+ * )
  */
-#[Search(
-  id: 'search_extra_type_search',
-  title: new TranslatableMarkup('Dummy search type'),
-  use_admin_theme: TRUE,
-)]
 class SearchExtraTypeSearch extends ConfigurableSearchPluginBase {
 
   /**
@@ -27,7 +26,6 @@ class SearchExtraTypeSearch extends ConfigurableSearchPluginBase {
       $parameters['search_conditions'] = '';
     }
     parent::setSearch($keywords, $parameters, $attributes);
-    return $this;
   }
 
   /**
@@ -93,16 +91,16 @@ class SearchExtraTypeSearch extends ConfigurableSearchPluginBase {
     // Output form for defining rank factor weights.
     $form['extra_type_settings'] = [
       '#type' => 'fieldset',
-      '#title' => $this->t('Extra type settings'),
+      '#title' => t('Extra type settings'),
       '#tree' => TRUE,
     ];
 
     $form['extra_type_settings']['boost'] = [
       '#type' => 'select',
-      '#title' => $this->t('Boost method'),
+      '#title' => t('Boost method'),
       '#options' => [
-        'bi' => $this->t('Bistro mathematics'),
-        'ii' => $this->t('Infinite Improbability'),
+        'bi' => t('Bistromathic'),
+        'ii' => t('Infinite Improbability'),
       ],
       '#default_value' => $this->configuration['boost'],
     ];

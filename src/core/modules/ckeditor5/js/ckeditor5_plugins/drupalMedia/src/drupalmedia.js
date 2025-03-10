@@ -1,5 +1,5 @@
 /* eslint-disable import/no-extraneous-dependencies */
-/* cspell:ignore drupalmediaediting drupalmediageneralhtmlsupport drupalmediaui drupalmediatoolbar mediaimagetextalternative */
+/* cspell:words drupalmediaediting drupalmediageneralhtmlsupport drupalmediaui drupalmediatoolbar mediaimagetextalternative */
 
 import { Plugin } from 'ckeditor5/src/core';
 import DrupalMediaEditing from './drupalmediaediting';
@@ -10,21 +10,9 @@ import MediaImageTextAlternative from './mediaimagetextalternative';
 import DrupalMediaGeneralHtmlSupport from './drupalmediageneralhtmlsupport';
 
 /**
- * Main entrypoint to the Drupal media widget.
- *
- * See individual capabilities for details:
- *  - {@link DrupalMediaEditing}
- *  - {@link DrupalMediaGeneralHtmlSupport}
- *  - {@link DrupalMediaUI}
- *  - {@link DrupalMediaToolbar}
- *  - {@link MediaImageTextAlternative}
- *
- * @private
+ * @internal
  */
 export default class DrupalMedia extends Plugin {
-  /**
-   * @inheritdoc
-   */
   static get requires() {
     return [
       DrupalMediaEditing,

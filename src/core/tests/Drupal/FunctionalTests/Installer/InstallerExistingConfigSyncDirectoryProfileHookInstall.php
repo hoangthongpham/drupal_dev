@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\FunctionalTests\Installer;
 
 /**
@@ -9,7 +7,7 @@ namespace Drupal\FunctionalTests\Installer;
  *
  * @group Installer
  */
-class InstallerExistingConfigSyncDirectoryProfileHookInstall extends InstallerConfigDirectoryTestBase {
+class InstallerExistingConfigSyncDirectoryProfileHookInstall extends InstallerExistingConfigTestBase {
 
   /**
    * {@inheritdoc}
@@ -74,14 +72,14 @@ EOF;
   /**
    * {@inheritdoc}
    */
-  protected function getConfigLocation(): string {
-    return __DIR__ . '/../../../fixtures/config_install/multilingual';
+  protected function getConfigTarball() {
+    return __DIR__ . '/../../../fixtures/config_install/multilingual.tar.gz';
   }
 
   /**
    * Tests installing from config is not available due to hook_INSTALL().
    */
-  public function testConfigSync(): void {
+  public function testConfigSync() {
     $this->assertSession()->titleEquals('Select an installation profile | Drupal');
     $this->assertSession()->responseNotContains('Use existing configuration');
 

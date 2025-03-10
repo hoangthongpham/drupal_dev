@@ -1,10 +1,7 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\path_alias\Unit;
 
-use Drupal\Component\Datetime\Time;
 use Drupal\Core\Language\Language;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\path_alias\AliasRepositoryInterface;
@@ -77,7 +74,7 @@ class AliasManagerTest extends UnitTestCase {
     $this->languageManager = $this->createMock('Drupal\Core\Language\LanguageManagerInterface');
     $this->cache = $this->createMock('Drupal\Core\Cache\CacheBackendInterface');
 
-    $this->aliasManager = new AliasManager($this->aliasRepository, $this->aliasWhitelist, $this->languageManager, $this->cache, new Time());
+    $this->aliasManager = new AliasManager($this->aliasRepository, $this->aliasWhitelist, $this->languageManager, $this->cache);
 
   }
 
@@ -86,7 +83,7 @@ class AliasManagerTest extends UnitTestCase {
    *
    * @covers ::getPathByAlias
    */
-  public function testGetPathByAliasNoMatch(): void {
+  public function testGetPathByAliasNoMatch() {
     $alias = '/' . $this->randomMachineName();
 
     $language = new Language(['id' => 'en']);
@@ -94,12 +91,12 @@ class AliasManagerTest extends UnitTestCase {
     $this->languageManager->expects($this->any())
       ->method('getCurrentLanguage')
       ->with(LanguageInterface::TYPE_URL)
-      ->willReturn($language);
+      ->will($this->returnValue($language));
 
     $this->aliasRepository->expects($this->once())
       ->method('lookupByAlias')
       ->with($alias, $language->getId())
-      ->willReturn(NULL);
+      ->will($this->returnValue(NULL));
 
     $this->assertEquals($alias, $this->aliasManager->getPathByAlias($alias));
     // Call it twice to test the static cache.
@@ -111,7 +108,7 @@ class AliasManagerTest extends UnitTestCase {
    *
    * @covers ::getPathByAlias
    */
-  public function testGetPathByAliasMatch(): void {
+  public function testGetPathByAliasMatch() {
     $alias = $this->randomMachineName();
     $path = $this->randomMachineName();
 
@@ -120,7 +117,7 @@ class AliasManagerTest extends UnitTestCase {
     $this->aliasRepository->expects($this->once())
       ->method('lookupByAlias')
       ->with($alias, $language->getId())
-      ->willReturn(['path' => $path]);
+      ->will($this->returnValue(['path' => $path]));
 
     $this->assertEquals($path, $this->aliasManager->getPathByAlias($alias));
     // Call it twice to test the static cache.
@@ -132,7 +129,7 @@ class AliasManagerTest extends UnitTestCase {
    *
    * @covers ::getPathByAlias
    */
-  public function testGetPathByAliasLangcode(): void {
+  public function testGetPathByAliasLangcode() {
     $alias = $this->randomMachineName();
     $path = $this->randomMachineName();
 
@@ -142,7 +139,7 @@ class AliasManagerTest extends UnitTestCase {
     $this->aliasRepository->expects($this->once())
       ->method('lookupByAlias')
       ->with($alias, 'de')
-      ->willReturn(['path' => $path]);
+      ->will($this->returnValue(['path' => $path]));
 
     $this->assertEquals($path, $this->aliasManager->getPathByAlias($alias, 'de'));
     // Call it twice to test the static cache.
@@ -154,7 +151,7 @@ class AliasManagerTest extends UnitTestCase {
    *
    * @covers ::getAliasByPath
    */
-  public function testGetAliasByPathWhitelist(): void {
+  public function testGetAliasByPathWhitelist() {
     $path_part1 = $this->randomMachineName();
     $path_part2 = $this->randomMachineName();
     $path = '/' . $path_part1 . '/' . $path_part2;
@@ -164,7 +161,7 @@ class AliasManagerTest extends UnitTestCase {
     $this->aliasWhitelist->expects($this->any())
       ->method('get')
       ->with($path_part1)
-      ->willReturn(FALSE);
+      ->will($this->returnValue(FALSE));
 
     // The whitelist returns FALSE for that path part, so the storage should
     // never be called.
@@ -179,7 +176,7 @@ class AliasManagerTest extends UnitTestCase {
    *
    * @covers ::getAliasByPath
    */
-  public function testGetAliasByPathNoMatch(): void {
+  public function testGetAliasByPathNoMatch() {
     $path_part1 = $this->randomMachineName();
     $path_part2 = $this->randomMachineName();
     $path = '/' . $path_part1 . '/' . $path_part2;
@@ -191,12 +188,12 @@ class AliasManagerTest extends UnitTestCase {
     $this->aliasWhitelist->expects($this->any())
       ->method('get')
       ->with($path_part1)
-      ->willReturn(TRUE);
+      ->will($this->returnValue(TRUE));
 
     $this->aliasRepository->expects($this->once())
       ->method('lookupBySystemPath')
       ->with($path, $language->getId())
-      ->willReturn(NULL);
+      ->will($this->returnValue(NULL));
 
     $this->assertEquals($path, $this->aliasManager->getAliasByPath($path));
     // Call it twice to test the static cache.
@@ -211,22 +208,12 @@ class AliasManagerTest extends UnitTestCase {
   }
 
   /**
-   * Tests the getAliasByPath method exception.
-   *
-   * @covers ::getAliasByPath
-   */
-  public function testGetAliasByPathException(): void {
-    $this->expectException(\InvalidArgumentException::class);
-    $this->aliasManager->getAliasByPath('no-leading-slash-here');
-  }
-
-  /**
    * Tests the getAliasByPath method for a path that has a matching alias.
    *
    * @covers ::getAliasByPath
    * @covers ::writeCache
    */
-  public function testGetAliasByPathMatch(): void {
+  public function testGetAliasByPathMatch() {
     $path_part1 = $this->randomMachineName();
     $path_part2 = $this->randomMachineName();
     $path = '/' . $path_part1 . '/' . $path_part2;
@@ -239,12 +226,12 @@ class AliasManagerTest extends UnitTestCase {
     $this->aliasWhitelist->expects($this->any())
       ->method('get')
       ->with($path_part1)
-      ->willReturn(TRUE);
+      ->will($this->returnValue(TRUE));
 
     $this->aliasRepository->expects($this->once())
       ->method('lookupBySystemPath')
       ->with($path, $language->getId())
-      ->willReturn(['alias' => $alias]);
+      ->will($this->returnValue(['alias' => $alias]));
 
     $this->assertEquals($alias, $this->aliasManager->getAliasByPath($path));
     // Call it twice to test the static cache.
@@ -264,7 +251,7 @@ class AliasManagerTest extends UnitTestCase {
    * @covers ::getAliasByPath
    * @covers ::writeCache
    */
-  public function testGetAliasByPathCachedMatch(): void {
+  public function testGetAliasByPathCachedMatch() {
     $path_part1 = $this->randomMachineName();
     $path_part2 = $this->randomMachineName();
     $path = '/' . $path_part1 . '/' . $path_part2;
@@ -272,18 +259,11 @@ class AliasManagerTest extends UnitTestCase {
 
     $language = $this->setUpCurrentLanguage();
 
-    // Use a set of cached paths where the tested path is in any position, not
-    // only in the first one.
-    $cached_paths = [
-      $language->getId() => [
-        '/another/path',
-        $path,
-      ],
-    ];
+    $cached_paths = [$language->getId() => [$path]];
     $this->cache->expects($this->once())
       ->method('get')
       ->with($this->cacheKey)
-      ->willReturn((object) ['data' => $cached_paths]);
+      ->will($this->returnValue((object) ['data' => $cached_paths]));
 
     // Simulate a request so that the preloaded paths are fetched.
     $this->aliasManager->setCacheKey($this->path);
@@ -291,12 +271,12 @@ class AliasManagerTest extends UnitTestCase {
     $this->aliasWhitelist->expects($this->any())
       ->method('get')
       ->with($path_part1)
-      ->willReturn(TRUE);
+      ->will($this->returnValue(TRUE));
 
     $this->aliasRepository->expects($this->once())
       ->method('preloadPathAlias')
       ->with($cached_paths[$language->getId()], $language->getId())
-      ->willReturn([$path => $alias]);
+      ->will($this->returnValue([$path => $alias]));
 
     // LookupPathAlias should not be called.
     $this->aliasRepository->expects($this->never())
@@ -318,7 +298,7 @@ class AliasManagerTest extends UnitTestCase {
    * @covers ::getAliasByPath
    * @covers ::writeCache
    */
-  public function testGetAliasByPathCachedMissLanguage(): void {
+  public function testGetAliasByPathCachedMissLanguage() {
     $path_part1 = $this->randomMachineName();
     $path_part2 = $this->randomMachineName();
     $path = '/' . $path_part1 . '/' . $path_part2;
@@ -331,7 +311,7 @@ class AliasManagerTest extends UnitTestCase {
     $this->cache->expects($this->once())
       ->method('get')
       ->with($this->cacheKey)
-      ->willReturn((object) ['data' => $cached_paths]);
+      ->will($this->returnValue((object) ['data' => $cached_paths]));
 
     // Simulate a request so that the preloaded paths are fetched.
     $this->aliasManager->setCacheKey($this->path);
@@ -339,7 +319,7 @@ class AliasManagerTest extends UnitTestCase {
     $this->aliasWhitelist->expects($this->any())
       ->method('get')
       ->with($path_part1)
-      ->willReturn(TRUE);
+      ->will($this->returnValue(TRUE));
 
     // The requested language is different than the cached, so this will
     // need to load.
@@ -348,7 +328,7 @@ class AliasManagerTest extends UnitTestCase {
     $this->aliasRepository->expects($this->once())
       ->method('lookupBySystemPath')
       ->with($path, $language->getId())
-      ->willReturn(['alias' => $alias]);
+      ->will($this->returnValue(['alias' => $alias]));
 
     $this->assertEquals($alias, $this->aliasManager->getAliasByPath($path));
     // Call it twice to test the static cache.
@@ -367,7 +347,7 @@ class AliasManagerTest extends UnitTestCase {
    * @covers ::getAliasByPath
    * @covers ::writeCache
    */
-  public function testGetAliasByPathCachedMissNoAlias(): void {
+  public function testGetAliasByPathCachedMissNoAlias() {
     $path_part1 = $this->randomMachineName();
     $path_part2 = $this->randomMachineName();
     $path = '/' . $path_part1 . '/' . $path_part2;
@@ -380,7 +360,7 @@ class AliasManagerTest extends UnitTestCase {
     $this->cache->expects($this->once())
       ->method('get')
       ->with($this->cacheKey)
-      ->willReturn((object) ['data' => $cached_paths]);
+      ->will($this->returnValue((object) ['data' => $cached_paths]));
 
     // Simulate a request so that the preloaded paths are fetched.
     $this->aliasManager->setCacheKey($this->path);
@@ -388,12 +368,12 @@ class AliasManagerTest extends UnitTestCase {
     $this->aliasWhitelist->expects($this->any())
       ->method('get')
       ->with($path_part1)
-      ->willReturn(TRUE);
+      ->will($this->returnValue(TRUE));
 
     $this->aliasRepository->expects($this->once())
       ->method('preloadPathAlias')
       ->with($cached_paths[$language->getId()], $language->getId())
-      ->willReturn([$cached_path => $cached_alias]);
+      ->will($this->returnValue([$cached_path => $cached_alias]));
 
     // LookupPathAlias() should not be called.
     $this->aliasRepository->expects($this->never())
@@ -410,12 +390,12 @@ class AliasManagerTest extends UnitTestCase {
   }
 
   /**
-   * Tests the getAliasByPath cache with an un-preloaded path without alias.
+   * Tests the getAliasByPath cache with an unpreloaded path without alias.
    *
    * @covers ::getAliasByPath
    * @covers ::writeCache
    */
-  public function testGetAliasByPathUncachedMissNoAlias(): void {
+  public function testGetAliasByPathUncachedMissNoAlias() {
     $path_part1 = $this->randomMachineName();
     $path_part2 = $this->randomMachineName();
     $path = '/' . $path_part1 . '/' . $path_part2;
@@ -428,7 +408,7 @@ class AliasManagerTest extends UnitTestCase {
     $this->cache->expects($this->once())
       ->method('get')
       ->with($this->cacheKey)
-      ->willReturn((object) ['data' => $cached_paths]);
+      ->will($this->returnValue((object) ['data' => $cached_paths]));
 
     // Simulate a request so that the preloaded paths are fetched.
     $this->aliasManager->setCacheKey($this->path);
@@ -436,17 +416,17 @@ class AliasManagerTest extends UnitTestCase {
     $this->aliasWhitelist->expects($this->any())
       ->method('get')
       ->with($path_part1)
-      ->willReturn(TRUE);
+      ->will($this->returnValue(TRUE));
 
     $this->aliasRepository->expects($this->once())
       ->method('preloadPathAlias')
       ->with($cached_paths[$language->getId()], $language->getId())
-      ->willReturn([$cached_path => $cached_alias]);
+      ->will($this->returnValue([$cached_path => $cached_alias]));
 
     $this->aliasRepository->expects($this->once())
       ->method('lookupBySystemPath')
       ->with($path, $language->getId())
-      ->willReturn(NULL);
+      ->will($this->returnValue(NULL));
 
     $this->assertEquals($path, $this->aliasManager->getAliasByPath($path));
     // Call it twice to test the static cache.
@@ -462,7 +442,7 @@ class AliasManagerTest extends UnitTestCase {
   /**
    * @covers ::cacheClear
    */
-  public function testCacheClear(): void {
+  public function testCacheClear() {
     $path = '/path';
     $alias = '/alias';
     $language = $this->setUpCurrentLanguage();
@@ -494,12 +474,12 @@ class AliasManagerTest extends UnitTestCase {
   }
 
   /**
-   * Tests the getAliasByPath cache with an un-preloaded path with alias.
+   * Tests the getAliasByPath cache with an unpreloaded path with alias.
    *
    * @covers ::getAliasByPath
    * @covers ::writeCache
    */
-  public function testGetAliasByPathUncachedMissWithAlias(): void {
+  public function testGetAliasByPathUncachedMissWithAlias() {
     $path_part1 = $this->randomMachineName();
     $path_part2 = $this->randomMachineName();
     $path = '/' . $path_part1 . '/' . $path_part2;
@@ -514,7 +494,7 @@ class AliasManagerTest extends UnitTestCase {
     $this->cache->expects($this->once())
       ->method('get')
       ->with($this->cacheKey)
-      ->willReturn((object) ['data' => $cached_paths]);
+      ->will($this->returnValue((object) ['data' => $cached_paths]));
 
     // Simulate a request so that the preloaded paths are fetched.
     $this->aliasManager->setCacheKey($this->path);
@@ -522,17 +502,17 @@ class AliasManagerTest extends UnitTestCase {
     $this->aliasWhitelist->expects($this->any())
       ->method('get')
       ->with($path_part1)
-      ->willReturn(TRUE);
+      ->will($this->returnValue(TRUE));
 
     $this->aliasRepository->expects($this->once())
       ->method('preloadPathAlias')
       ->with($cached_paths[$language->getId()], $language->getId())
-      ->willReturn([$cached_path => $cached_alias]);
+      ->will($this->returnValue([$cached_path => $cached_alias]));
 
     $this->aliasRepository->expects($this->once())
       ->method('lookupBySystemPath')
       ->with($path, $language->getId())
-      ->willReturn(['alias' => $new_alias]);
+      ->will($this->returnValue(['alias' => $new_alias]));
 
     $this->assertEquals($new_alias, $this->aliasManager->getAliasByPath($path));
     // Call it twice to test the static cache.
@@ -557,7 +537,7 @@ class AliasManagerTest extends UnitTestCase {
     $this->languageManager->expects($this->any())
       ->method('getCurrentLanguage')
       ->with(LanguageInterface::TYPE_URL)
-      ->willReturn($language);
+      ->will($this->returnValue($language));
 
     return $language;
   }

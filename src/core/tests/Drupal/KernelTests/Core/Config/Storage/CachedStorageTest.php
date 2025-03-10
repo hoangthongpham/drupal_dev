@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\KernelTests\Core\Config\Storage;
 
 use Drupal\Core\Config\FileStorage;
@@ -29,9 +27,6 @@ class CachedStorageTest extends ConfigStorageTestBase {
    */
   protected $fileStorage;
 
-  /**
-   * {@inheritdoc}
-   */
   protected function setUp(): void {
     parent::setUp();
     // Create a directory.
@@ -39,12 +34,14 @@ class CachedStorageTest extends ConfigStorageTestBase {
     $this->fileStorage = new FileStorage($dir);
     $this->storage = new CachedStorage($this->fileStorage, \Drupal::service('cache.config'));
     $this->cache = \Drupal::service('cache_factory')->get('config');
+    // ::listAll() verifications require other configuration data to exist.
+    $this->storage->write('system.performance', []);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function testInvalidStorage(): void {
+  public function testInvalidStorage() {
     $this->markTestSkipped('No-op as this test does not make sense');
   }
 

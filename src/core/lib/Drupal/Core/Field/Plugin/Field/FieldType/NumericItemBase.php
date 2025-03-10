@@ -31,30 +31,29 @@ abstract class NumericItemBase extends FieldItemBase {
 
     $element['min'] = [
       '#type' => 'number',
-      '#title' => $this->t('Minimum'),
+      '#title' => t('Minimum'),
       '#default_value' => $settings['min'],
-      '#element_validate' => [[static::class, 'validateMinAndMaxConfig']],
-      '#description' => $this->t('The minimum value that should be allowed in this field. Leave blank for no minimum.'),
+      '#description' => t('The minimum value that should be allowed in this field. Leave blank for no minimum.'),
     ];
     $element['max'] = [
       '#type' => 'number',
-      '#title' => $this->t('Maximum'),
+      '#title' => t('Maximum'),
       '#default_value' => $settings['max'],
-      '#description' => $this->t('The maximum value that should be allowed in this field. Leave blank for no maximum.'),
+      '#description' => t('The maximum value that should be allowed in this field. Leave blank for no maximum.'),
     ];
     $element['prefix'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Prefix'),
+      '#title' => t('Prefix'),
       '#default_value' => $settings['prefix'],
       '#size' => 60,
-      '#description' => $this->t("Define a string that should be prefixed to the value, like '$ ' or '&euro; '. Leave blank for none. Separate singular and plural values with a pipe ('pound|pounds')."),
+      '#description' => t("Define a string that should be prefixed to the value, like '$ ' or '&euro; '. Leave blank for none. Separate singular and plural values with a pipe ('pound|pounds')."),
     ];
     $element['suffix'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Suffix'),
+      '#title' => t('Suffix'),
       '#default_value' => $settings['suffix'],
       '#size' => 60,
-      '#description' => $this->t("Define a string that should be suffixed to the value, like ' m', ' kb/s'. Leave blank for none. Separate singular and plural values with a pipe ('pound|pounds')."),
+      '#description' => t("Define a string that should be suffixed to the value, like ' m', ' kb/s'. Leave blank for none. Separate singular and plural values with a pipe ('pound|pounds')."),
     ];
 
     return $element;
@@ -86,7 +85,7 @@ abstract class NumericItemBase extends FieldItemBase {
         'value' => [
           'Range' => [
             'min' => $min,
-            'minMessage' => $this->t('%name: the value may be no less than %min.', ['%name' => $label, '%min' => $min]),
+            'minMessage' => t('%name: the value may be no less than %min.', ['%name' => $label, '%min' => $min]),
           ],
         ],
       ]);
@@ -98,10 +97,7 @@ abstract class NumericItemBase extends FieldItemBase {
         'value' => [
           'Range' => [
             'max' => $max,
-            'maxMessage' => $this->t('%name: the value may be no greater than %max.', [
-              '%name' => $label,
-              '%max' => $max,
-            ]),
+            'maxMessage' => t('%name: the value may be no greater than %max.', ['%name' => $label, '%max' => $max]),
           ],
         ],
       ]);
@@ -123,34 +119,6 @@ abstract class NumericItemBase extends FieldItemBase {
    */
   protected static function truncateDecimal($decimal, $num) {
     return floor($decimal * pow(10, $num)) / pow(10, $num);
-  }
-
-  /**
-   * Validates that the minimum value is less than the maximum.
-   *
-   * @param array[] $element
-   *   The numeric element to be validated.
-   * @param \Drupal\Core\Form\FormStateInterface $form_state
-   *   The current state of the form.
-   * @param array[] $complete_form
-   *   The complete form structure.
-   */
-  public static function validateMinAndMaxConfig(array &$element, FormStateInterface &$form_state, array &$complete_form): void {
-    $settingsValue = $form_state->getValue('settings');
-
-    // Ensure that the minimum and maximum are numeric.
-    $minValue = is_numeric($settingsValue['min']) ? (float) $settingsValue['min'] : NULL;
-    $maxValue = is_numeric($settingsValue['max']) ? (float) $settingsValue['max'] : NULL;
-
-    // Only proceed with validation if both values are numeric.
-    if ($minValue === NULL || $maxValue === NULL) {
-      return;
-    }
-
-    if ($minValue > $maxValue) {
-      $form_state->setError($element, t('The minimum value must be less than or equal to %max.', ['%max' => $maxValue]));
-      return;
-    }
   }
 
 }

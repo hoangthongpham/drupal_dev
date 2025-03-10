@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\field\Kernel\EntityReference;
 
 use Drupal\comment\Entity\Comment;
@@ -25,7 +23,7 @@ use Drupal\node\Entity\Node;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\taxonomy\Entity\Vocabulary;
 use Drupal\user\Entity\User;
-use Drupal\Tests\field\Traits\EntityReferenceFieldCreationTrait;
+use Drupal\Tests\field\Traits\EntityReferenceTestTrait;
 
 /**
  * Tests the new entity API for the entity reference field type.
@@ -34,10 +32,12 @@ use Drupal\Tests\field\Traits\EntityReferenceFieldCreationTrait;
  */
 class EntityReferenceItemTest extends FieldKernelTestBase {
 
-  use EntityReferenceFieldCreationTrait;
+  use EntityReferenceTestTrait;
 
   /**
-   * {@inheritdoc}
+   * Modules to install.
+   *
+   * @var array
    */
   protected static $modules = [
     'node',
@@ -88,7 +88,7 @@ class EntityReferenceItemTest extends FieldKernelTestBase {
 
     $this->vocabulary = Vocabulary::create([
       'name' => $this->randomMachineName(),
-      'vid' => $this->randomMachineName(),
+      'vid' => mb_strtolower($this->randomMachineName()),
       'langcode' => LanguageInterface::LANGCODE_NOT_SPECIFIED,
     ]);
     $this->vocabulary->save();
@@ -102,11 +102,9 @@ class EntityReferenceItemTest extends FieldKernelTestBase {
 
     NodeType::create([
       'type' => $this->randomMachineName(),
-      'name' => $this->randomString(),
     ])->save();
     CommentType::create([
       'id' => $this->randomMachineName(),
-      'label' => $this->randomString(),
       'target_entity_type_id' => 'node',
     ])->save();
 
@@ -129,7 +127,7 @@ class EntityReferenceItemTest extends FieldKernelTestBase {
   /**
    * Tests the entity reference field type for referencing content entities.
    */
-  public function testContentEntityReferenceItem(): void {
+  public function testContentEntityReferenceItem() {
     $tid = $this->term->id();
 
     // Just being able to create the entity like this verifies a lot of code.
@@ -218,7 +216,7 @@ class EntityReferenceItemTest extends FieldKernelTestBase {
   /**
    * Tests the ::generateSampleValue() method.
    */
-  public function testGenerateSampleValue(): void {
+  public function testGenerateSampleValue() {
     $entity = EntityTest::create();
 
     // Test while a term exists.
@@ -236,7 +234,7 @@ class EntityReferenceItemTest extends FieldKernelTestBase {
   /**
    * Tests the ::generateSampleValue() method when it has a circular reference.
    */
-  public function testGenerateSampleValueCircularReference(): void {
+  public function testGenerateSampleValueCircularReference() {
     // Delete the existing entity.
     $this->entityStringId->delete();
 
@@ -249,7 +247,7 @@ class EntityReferenceItemTest extends FieldKernelTestBase {
   /**
    * Tests referencing content entities with string IDs.
    */
-  public function testContentEntityReferenceItemWithStringId(): void {
+  public function testContentEntityReferenceItemWithStringId() {
     $entity = EntityTest::create();
     $entity->field_test_entity_test_string_id->target_id = $this->entityStringId->id();
     $entity->save();
@@ -265,7 +263,7 @@ class EntityReferenceItemTest extends FieldKernelTestBase {
   /**
    * Tests the entity reference field type for referencing config entities.
    */
-  public function testConfigEntityReferenceItem(): void {
+  public function testConfigEntityReferenceItem() {
     $referenced_entity_id = $this->vocabulary->id();
 
     // Just being able to create the entity like this verifies a lot of code.
@@ -293,7 +291,7 @@ class EntityReferenceItemTest extends FieldKernelTestBase {
     // Make sure the computed term reflects updates to the term id.
     $vocabulary2 = $vocabulary = Vocabulary::create([
       'name' => $this->randomMachineName(),
-      'vid' => $this->randomMachineName(),
+      'vid' => mb_strtolower($this->randomMachineName()),
       'langcode' => LanguageInterface::LANGCODE_NOT_SPECIFIED,
     ]);
     $vocabulary2->save();
@@ -312,7 +310,7 @@ class EntityReferenceItemTest extends FieldKernelTestBase {
   /**
    * Tests entity auto create.
    */
-  public function testEntityAutoCreate(): void {
+  public function testEntityAutoCreate() {
     // The term entity is unsaved here.
     $term = Term::create([
       'name' => $this->randomMachineName(),
@@ -336,7 +334,7 @@ class EntityReferenceItemTest extends FieldKernelTestBase {
   /**
    * Tests saving order sequence doesn't matter.
    */
-  public function testEntitySaveOrder(): void {
+  public function testEntitySaveOrder() {
     // The term entity is unsaved here.
     $term = Term::create([
       'name' => $this->randomMachineName(),
@@ -363,8 +361,8 @@ class EntityReferenceItemTest extends FieldKernelTestBase {
   /**
    * Tests that the 'handler' field setting stores the proper plugin ID.
    */
-  public function testSelectionHandlerSettings(): void {
-    $field_name = $this->randomMachineName();
+  public function testSelectionHandlerSettings() {
+    $field_name = mb_strtolower($this->randomMachineName());
     $field_storage = FieldStorageConfig::create([
       'field_name' => $field_name,
       'entity_type' => 'entity_test',
@@ -404,23 +402,12 @@ class EntityReferenceItemTest extends FieldKernelTestBase {
     $field_storage->save();
     $field = FieldConfig::load($field->id());
     $this->assertEquals('views', $field->getSetting('handler'));
-
-    // Check that selection handlers aren't changed during sync.
-    $field = FieldConfig::create([
-      'field_storage' => $field_storage,
-      'bundle' => 'entity_test',
-      'settings' => [
-        'handler' => 'fake:thing',
-      ],
-      'isSyncing' => TRUE,
-    ]);
-    $this->assertEquals('fake:thing', $field->getSetting('handler'));
   }
 
   /**
    * Tests ValidReferenceConstraint with newly created and unsaved entities.
    */
-  public function testAutocreateValidation(): void {
+  public function testAutocreateValidation() {
     // The term entity is unsaved here.
     $term = Term::create([
       'name' => $this->randomMachineName(),

@@ -1,6 +1,9 @@
 <?php
 
-declare(strict_types=1);
+/**
+ * @file
+ * Contains \Drupal\Tests\system\Unit\Breadcrumbs\PathBasedBreadcrumbBuilderTest.
+ */
 
 namespace Drupal\Tests\system\Unit\Breadcrumbs;
 
@@ -16,7 +19,7 @@ use Drupal\system\PathBasedBreadcrumbBuilder;
 use Drupal\Tests\UnitTestCase;
 use Drupal\Core\Routing\RouteObjectInterface;
 use Symfony\Component\DependencyInjection\Container;
-use Symfony\Component\HttpFoundation\InputBag;
+use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Route;
 
@@ -141,7 +144,7 @@ class PathBasedBreadcrumbBuilderTest extends UnitTestCase {
    *
    * @covers ::build
    */
-  public function testBuildOnFrontpage(): void {
+  public function testBuildOnFrontpage() {
     $this->pathMatcher->expects($this->once())
       ->method('isFrontPage')
       ->willReturn(TRUE);
@@ -158,10 +161,10 @@ class PathBasedBreadcrumbBuilderTest extends UnitTestCase {
    *
    * @covers ::build
    */
-  public function testBuildWithOnePathElement(): void {
+  public function testBuildWithOnePathElement() {
     $this->context->expects($this->once())
       ->method('getPathInfo')
-      ->willReturn('/example');
+      ->will($this->returnValue('/example'));
 
     $breadcrumb = $this->builder->build($this->createMock('Drupal\Core\Routing\RouteMatchInterface'));
     $this->assertEquals([0 => new Link('Home', new Url('<front>'))], $breadcrumb->getLinks());
@@ -176,10 +179,10 @@ class PathBasedBreadcrumbBuilderTest extends UnitTestCase {
    * @covers ::build
    * @covers ::getRequestForPath
    */
-  public function testBuildWithTwoPathElements(): void {
+  public function testBuildWithTwoPathElements() {
     $this->context->expects($this->once())
       ->method('getPathInfo')
-      ->willReturn('/example/baz');
+      ->will($this->returnValue('/example/baz'));
     $this->setupStubPathProcessor();
 
     $route_1 = new Route('/example');
@@ -191,7 +194,7 @@ class PathBasedBreadcrumbBuilderTest extends UnitTestCase {
           return [
             RouteObjectInterface::ROUTE_NAME => 'example',
             RouteObjectInterface::ROUTE_OBJECT => $route_1,
-            '_raw_variables' => new InputBag([]),
+            '_raw_variables' => new ParameterBag([]),
           ];
         }
       });
@@ -215,10 +218,10 @@ class PathBasedBreadcrumbBuilderTest extends UnitTestCase {
    * @covers ::build
    * @covers ::getRequestForPath
    */
-  public function testBuildWithThreePathElements(): void {
+  public function testBuildWithThreePathElements() {
     $this->context->expects($this->once())
       ->method('getPathInfo')
-      ->willReturn('/example/bar/baz');
+      ->will($this->returnValue('/example/bar/baz'));
     $this->setupStubPathProcessor();
 
     $route_1 = new Route('/example/bar');
@@ -231,14 +234,14 @@ class PathBasedBreadcrumbBuilderTest extends UnitTestCase {
           return [
             RouteObjectInterface::ROUTE_NAME => 'example_bar',
             RouteObjectInterface::ROUTE_OBJECT => $route_1,
-            '_raw_variables' => new InputBag([]),
+            '_raw_variables' => new ParameterBag([]),
           ];
         }
         elseif ($request->getPathInfo() == '/example') {
           return [
             RouteObjectInterface::ROUTE_NAME => 'example',
             RouteObjectInterface::ROUTE_OBJECT => $route_2,
-            '_raw_variables' => new InputBag([]),
+            '_raw_variables' => new ParameterBag([]),
           ];
         }
       });
@@ -273,10 +276,10 @@ class PathBasedBreadcrumbBuilderTest extends UnitTestCase {
    *
    * @dataProvider providerTestBuildWithException
    */
-  public function testBuildWithException($exception_class, $exception_argument): void {
+  public function testBuildWithException($exception_class, $exception_argument) {
     $this->context->expects($this->once())
       ->method('getPathInfo')
-      ->willReturn('/example/bar');
+      ->will($this->returnValue('/example/bar'));
     $this->setupStubPathProcessor();
 
     $this->requestMatcher->expects($this->any())
@@ -300,7 +303,7 @@ class PathBasedBreadcrumbBuilderTest extends UnitTestCase {
    *
    * @see \Drupal\Tests\system\Unit\Breadcrumbs\PathBasedBreadcrumbBuilderTest::testBuildWithException()
    */
-  public static function providerTestBuildWithException() {
+  public function providerTestBuildWithException() {
     return [
       ['Drupal\Core\ParamConverter\ParamNotConvertedException', ''],
       ['Symfony\Component\Routing\Exception\MethodNotAllowedException', []],
@@ -314,40 +317,18 @@ class PathBasedBreadcrumbBuilderTest extends UnitTestCase {
    * @covers ::build
    * @covers ::getRequestForPath
    */
-  public function testBuildWithNonProcessedPath(): void {
+  public function testBuildWithNonProcessedPath() {
     $this->context->expects($this->once())
       ->method('getPathInfo')
-      ->willReturn('/example/bar');
+      ->will($this->returnValue('/example/bar'));
 
     $this->pathProcessor->expects($this->once())
       ->method('processInbound')
-      ->willReturn(FALSE);
+      ->will($this->returnValue(FALSE));
 
     $this->requestMatcher->expects($this->any())
       ->method('matchRequest')
-      ->willReturn([]);
-
-    $breadcrumb = $this->builder->build($this->createMock('Drupal\Core\Routing\RouteMatchInterface'));
-
-    // No path matched, though at least the frontpage is displayed.
-    $this->assertEquals([0 => new Link('Home', new Url('<front>'))], $breadcrumb->getLinks());
-    $this->assertEqualsCanonicalizing(['url.path.is_front', 'url.path.parent'], $breadcrumb->getCacheContexts());
-    $this->assertEqualsCanonicalizing([], $breadcrumb->getCacheTags());
-    $this->assertEquals(Cache::PERMANENT, $breadcrumb->getCacheMaxAge());
-  }
-
-  /**
-   * Tests the build method with an invalid path.
-   *
-   * @covers ::build
-   * @covers ::getRequestForPath
-   */
-  public function testBuildWithInvalidPath(): void {
-    // The parse_url() function returns FALSE for '/:123/foo' so the
-    // Request::create() method therefore considers it to be an invalid URI.
-    $this->context->expects($this->once())
-      ->method('getPathInfo')
-      ->willReturn('/:123/foo/bar');
+      ->will($this->returnValue([]));
 
     $breadcrumb = $this->builder->build($this->createMock('Drupal\Core\Routing\RouteMatchInterface'));
 
@@ -363,7 +344,7 @@ class PathBasedBreadcrumbBuilderTest extends UnitTestCase {
    *
    * @covers ::applies
    */
-  public function testApplies(): void {
+  public function testApplies() {
     $this->assertTrue($this->builder->applies($this->createMock('Drupal\Core\Routing\RouteMatchInterface')));
   }
 
@@ -373,10 +354,10 @@ class PathBasedBreadcrumbBuilderTest extends UnitTestCase {
    * @covers ::build
    * @covers ::getRequestForPath
    */
-  public function testBuildWithUserPath(): void {
+  public function testBuildWithUserPath() {
     $this->context->expects($this->once())
       ->method('getPathInfo')
-      ->willReturn('/user/1/edit');
+      ->will($this->returnValue('/user/1/edit'));
     $this->setupStubPathProcessor();
 
     $route_1 = new Route('/user/1');
@@ -388,7 +369,7 @@ class PathBasedBreadcrumbBuilderTest extends UnitTestCase {
           return [
             RouteObjectInterface::ROUTE_NAME => 'user_page',
             RouteObjectInterface::ROUTE_OBJECT => $route_1,
-            '_raw_variables' => new InputBag([]),
+            '_raw_variables' => new ParameterBag([]),
           ];
         }
       });
@@ -397,7 +378,7 @@ class PathBasedBreadcrumbBuilderTest extends UnitTestCase {
     $this->titleResolver->expects($this->once())
       ->method('getTitle')
       ->with($this->anything(), $route_1)
-      ->willReturn('Admin');
+      ->will($this->returnValue('Admin'));
 
     $breadcrumb = $this->builder->build($this->createMock('Drupal\Core\Routing\RouteMatchInterface'));
     $this->assertEquals([0 => new Link('Home', new Url('<front>')), 1 => new Link('Admin', new Url('user_page'))], $breadcrumb->getLinks());
@@ -422,7 +403,7 @@ class PathBasedBreadcrumbBuilderTest extends UnitTestCase {
   protected function setupStubPathProcessor() {
     $this->pathProcessor->expects($this->any())
       ->method('processInbound')
-      ->willReturnArgument(0);
+      ->will($this->returnArgument(0));
   }
 
 }
@@ -432,11 +413,8 @@ class PathBasedBreadcrumbBuilderTest extends UnitTestCase {
  */
 class TestPathBasedBreadcrumbBuilder extends PathBasedBreadcrumbBuilder {
 
-  protected LinkGeneratorInterface $linkGenerator;
-
   public function setStringTranslation(TranslationInterface $string_translation) {
     $this->stringTranslation = $string_translation;
-    return $this;
   }
 
   public function setLinkGenerator(LinkGeneratorInterface $link_generator) {

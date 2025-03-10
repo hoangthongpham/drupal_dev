@@ -2,9 +2,9 @@
 
 namespace Drupal\commerce_order;
 
+use Drupal\commerce_order\DependencyInjection\Compiler\PriceCalculatorPass;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\DependencyInjection\ServiceProviderBase;
-use Drupal\commerce_order\DependencyInjection\Compiler\PriceCalculatorPass;
 
 /**
  * Registers the PriceCalculator compiler pass.

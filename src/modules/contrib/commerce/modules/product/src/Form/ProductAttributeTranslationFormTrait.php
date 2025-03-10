@@ -2,10 +2,10 @@
 
 namespace Drupal\commerce_product\Form;
 
-use Drupal\Core\Field\BaseFieldDefinition;
-use Drupal\Core\Form\FormStateInterface;
 use Drupal\commerce_product\Entity\ProductAttributeInterface;
 use Drupal\commerce_product\Entity\ProductAttributeValueInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Provides common functionality for the product attribute translation forms.

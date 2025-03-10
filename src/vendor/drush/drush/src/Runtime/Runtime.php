@@ -1,11 +1,6 @@
 <?php
-
-declare(strict_types=1);
-
 namespace Drush\Runtime;
 
-use Symfony\Component\Console\Output\ConsoleOutput;
-use Drush\Application;
 use Drush\Commands\DrushCommands;
 use Drush\Drush;
 use Drush\Preflight\Preflight;
@@ -21,11 +16,24 @@ use Drush\Preflight\Preflight;
  */
 class Runtime
 {
+    /** @var Preflight */
+    protected $preflight;
+
+    /** @var DependencyInjection */
+    protected $di;
+
     const DRUSH_RUNTIME_COMPLETED_NAMESPACE = 'runtime.execution.completed';
     const DRUSH_RUNTIME_EXIT_CODE_NAMESPACE = 'runtime.exit_code';
 
-    public function __construct(protected Preflight $preflight, protected DependencyInjection $di)
+    /**
+     * Runtime constructor
+     *
+     * @param Preflight $preflight the preflight object
+     */
+    public function __construct(Preflight $preflight, DependencyInjection $di)
     {
+        $this->preflight = $preflight;
+        $this->di = $di;
     }
 
     /**
@@ -33,10 +41,10 @@ class Runtime
      * Typically, this will happen only for code that fails fast during
      * preflight. Later code should catch and handle its own exceptions.
      */
-    public function run($argv): int
+    public function run($argv)
     {
         try {
-            $output = new ConsoleOutput();
+            $output = new \Symfony\Component\Console\Output\ConsoleOutput();
             $status = $this->doRun($argv, $output);
         } catch (\Exception $e) {
             // Fallback to status 1 if the Exception has not indicated otherwise.
@@ -52,26 +60,26 @@ class Runtime
     /**
      * Start up Drush
      */
-    protected function doRun($argv, $output): int
+    protected function doRun($argv, $output)
     {
         // Do the preflight steps
-        [$preflightDidRedispatch, $exitStatus] = $this->preflight->preflight($argv);
+        $status = $this->preflight->preflight($argv);
 
         // If preflight signals that we are done, then exit early.
-        if ($preflightDidRedispatch) {
-            return $exitStatus;
+        if ($status !== false) {
+            return $status;
         }
 
         $commandfileSearchpath = $this->preflight->getCommandFilePaths();
         $this->preflight->logger()->log('Commandfile search paths: ' . implode(',', $commandfileSearchpath));
         $this->preflight->config()->set('runtime.commandfile.paths', $commandfileSearchpath);
 
-        // Load the Symfony compatability layer autoloader
-        $this->preflight->loadSymfonyCompatabilityAutoloader();
+        // Require the Composer autoloader for Drupal (if different)
+        $loader = $this->preflight->loadSiteAutoloader();
 
         // Create the Symfony Application et. al.
         $input = $this->preflight->createInput();
-        $application = new Application('Drush Commandline Tool', Drush::sanitizeVersionString(Drush::getVersion()));
+        $application = new \Drush\Application('Drush Commandline Tool', Drush::getVersion());
 
         // Set up the DI container.
         $container = $this->di->initContainer(
@@ -79,7 +87,7 @@ class Runtime
             $this->preflight->config(),
             $input,
             $output,
-            $this->preflight->environment()->loader(),
+            $loader,
             $this->preflight->drupalFinder(),
             $this->preflight->aliasManager()
         );
@@ -102,7 +110,7 @@ class Runtime
         // Configure the application object and register all of the commandfiles
         // from the search paths we found above.  After this point, the input
         // and output objects are ready & we can start using the logger, etc.
-        $application->configureAndRegisterCommands($input, $output, $commandfileSearchpath, $this->preflight->environment()->loader());
+        $application->configureAndRegisterCommands($input, $output, $commandfileSearchpath, $loader);
 
         // Run the Symfony Application
         // Predispatch: call a remote Drush command if applicable (via a 'pre-init' hook)
@@ -119,30 +127,31 @@ class Runtime
     /**
      * Mark the current request as having completed successfully.
      */
-    public static function setCompleted(): void
+    public static function setCompleted()
     {
         Drush::config()->set(self::DRUSH_RUNTIME_COMPLETED_NAMESPACE, true);
     }
 
     /**
-     * Mark the exit code for current request.
-     *
      * @deprecated
-     *   Was used by backend.inc
+     *   Used by backend.inc
+     *
+     * Mark the exit code for current request.
+     * @param int $code
      */
-    public static function setExitCode(int $code): void
+    public static function setExitCode($code)
     {
         Drush::config()->set(self::DRUSH_RUNTIME_EXIT_CODE_NAMESPACE, $code);
     }
 
     /**
-     * Get the exit code for current request.
-     *
      * @deprecated
-     *   Was used by backend.inc
+     *   Used by backend.inc
+     *
+     * Get the exit code for current request.
      */
     public static function exitCode()
     {
-        return Drush::config()->get(self::DRUSH_RUNTIME_EXIT_CODE_NAMESPACE, 0);
+        return Drush::config()->get(self::DRUSH_RUNTIME_EXIT_CODE_NAMESPACE, DRUSH_SUCCESS);
     }
 }

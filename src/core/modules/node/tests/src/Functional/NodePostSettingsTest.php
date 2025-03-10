@@ -1,11 +1,10 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\node\Functional;
 
 /**
- * Tests the node setting for displaying author and date information.
+ * Tests that the post information (submitted by Username on date) text displays
+ * appropriately.
  *
  * @group node
  */
@@ -14,11 +13,8 @@ class NodePostSettingsTest extends NodeTestBase {
   /**
    * {@inheritdoc}
    */
-  protected $defaultTheme = 'stark';
+  protected $defaultTheme = 'classy';
 
-  /**
-   * {@inheritdoc}
-   */
   protected function setUp(): void {
     parent::setUp();
 
@@ -33,13 +29,13 @@ class NodePostSettingsTest extends NodeTestBase {
   /**
    * Confirms "Basic page" content type and post information is on a new node.
    */
-  public function testPagePostInfo(): void {
+  public function testPagePostInfo() {
 
     // Set "Basic page" content type to display post information.
     $edit = [];
     $edit['display_submitted'] = TRUE;
     $this->drupalGet('admin/structure/types/manage/page');
-    $this->submitForm($edit, 'Save');
+    $this->submitForm($edit, 'Save content type');
 
     // Create a node.
     $edit = [];
@@ -50,14 +46,14 @@ class NodePostSettingsTest extends NodeTestBase {
 
     // Check that the post information is displayed.
     $node = $this->drupalGetNodeByTitle($edit['title[0][value]']);
-    $this->assertSession()->pageTextContainsOnce('Submitted by');
+    $this->assertSession()->elementsCount('xpath', '//div[contains(@class, "node__submitted")]', 1);
     $node->delete();
 
     // Set "Basic page" content type to display post information.
     $edit = [];
     $edit['display_submitted'] = FALSE;
     $this->drupalGet('admin/structure/types/manage/page');
-    $this->submitForm($edit, 'Save');
+    $this->submitForm($edit, 'Save content type');
 
     // Create a node.
     $edit = [];
@@ -67,7 +63,7 @@ class NodePostSettingsTest extends NodeTestBase {
     $this->submitForm($edit, 'Save');
 
     // Check that the post information is not displayed.
-    $this->assertSession()->pageTextNotContains('Submitted by');
+    $this->assertSession()->elementNotExists('xpath', '//div[contains(@class, "node__submitted")]');
   }
 
 }

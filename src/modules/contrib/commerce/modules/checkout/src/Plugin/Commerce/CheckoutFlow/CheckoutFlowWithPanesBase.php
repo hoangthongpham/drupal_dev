@@ -2,6 +2,8 @@
 
 namespace Drupal\commerce_checkout\Plugin\Commerce\CheckoutFlow;
 
+use Drupal\commerce_checkout\CheckoutPaneManager;
+use Drupal\commerce_checkout\Plugin\Commerce\CheckoutPane\CheckoutPaneInterface;
 use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Component\Utility\SortArray;
@@ -9,8 +11,6 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Routing\RouteMatchInterface;
-use Drupal\commerce_checkout\CheckoutPaneManager;
-use Drupal\commerce_checkout\Plugin\Commerce\CheckoutPane\CheckoutPaneInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -75,7 +75,7 @@ abstract class CheckoutFlowWithPanesBase extends CheckoutFlowBase implements Che
   /**
    * {@inheritdoc}
    */
-  public function __sleep(): array {
+  public function __sleep() {
     unset($this->panes);
     return parent::__sleep();
   }

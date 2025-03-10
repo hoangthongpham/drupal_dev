@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\Component\Utility;
 
 use Drupal\Component\Render\MarkupInterface;
@@ -9,9 +7,6 @@ use Drupal\Component\Render\MarkupTrait;
 use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\Random;
 use PHPUnit\Framework\TestCase;
-use Symfony\Bridge\PhpUnit\ExpectDeprecationTrait;
-
-// cspell:ignore répét répété
 
 /**
  * Tests \Drupal\Component\Utility\Html.
@@ -22,8 +17,6 @@ use Symfony\Bridge\PhpUnit\ExpectDeprecationTrait;
  */
 class HtmlTest extends TestCase {
 
-  use ExpectDeprecationTrait;
-
   /**
    * {@inheritdoc}
    */
@@ -31,7 +24,8 @@ class HtmlTest extends TestCase {
     parent::setUp();
 
     $property = new \ReflectionProperty('Drupal\Component\Utility\Html', 'seenIdsInit');
-    $property->setValue(NULL, NULL);
+    $property->setAccessible(TRUE);
+    $property->setValue(NULL);
   }
 
   /**
@@ -49,7 +43,7 @@ class HtmlTest extends TestCase {
    *
    * @covers ::cleanCssIdentifier
    */
-  public function testCleanCssIdentifier($expected, $source, $filter = NULL): void {
+  public function testCleanCssIdentifier($expected, $source, $filter = NULL) {
     if ($filter !== NULL) {
       $this->assertSame($expected, Html::cleanCssIdentifier($source, $filter));
     }
@@ -64,7 +58,7 @@ class HtmlTest extends TestCase {
    * @return array
    *   Test data.
    */
-  public static function providerTestCleanCssIdentifier() {
+  public function providerTestCleanCssIdentifier() {
     $id1 = 'abcdefghijklmnopqrstuvwxyz_ABCDEFGHIJKLMNOPQRSTUVWXYZ-0123456789';
     $id2 = '¡¢£¤¥';
     $id3 = 'css__identifier__with__double__underscores';
@@ -77,25 +71,25 @@ class HtmlTest extends TestCase {
       [$id3, $id3],
       // Verify that invalid characters (including non-breaking space) are
       // stripped from the identifier.
-      ['invalid_identifier', 'invalid_ !"#$%&\'()*+,./:;<=>?@[\\]^`{|}~ identifier', []],
+      ['invalididentifier', 'invalid !"#$%&\'()*+,./:;<=>?@[\\]^`{|}~ identifier', []],
       // Verify that an identifier starting with a digit is replaced.
-      ['_css_identifier', '1css_identifier', []],
+      ['_cssidentifier', '1cssidentifier', []],
       // Verify that an identifier starting with a hyphen followed by a digit is
       // replaced.
-      ['__css_identifier', '-1css_identifier', []],
+      ['__cssidentifier', '-1cssidentifier', []],
       // Verify that an identifier starting with two hyphens is replaced.
-      ['__css_identifier', '--css_identifier', []],
+      ['__cssidentifier', '--cssidentifier', []],
       // Verify that passing double underscores as a filter is processed.
-      ['_css_identifier', '__css_identifier', ['__' => '_']],
+      ['_cssidentifier', '__cssidentifier', ['__' => '_']],
     ];
   }
 
   /**
    * Tests that Html::getClass() cleans the class name properly.
    *
-   * @covers ::getClass
+   * @coversDefaultClass ::getClass
    */
-  public function testHtmlClass(): void {
+  public function testHtmlClass() {
     // Verify Drupal coding standards are enforced.
     $this->assertSame('class-name--ü', Html::getClass('CLASS NAME_[Ü]'), 'Enforce Drupal coding standards.');
 
@@ -119,7 +113,7 @@ class HtmlTest extends TestCase {
    *
    * @covers ::getUniqueId
    */
-  public function testHtmlGetUniqueId($expected, $source, $reset = FALSE): void {
+  public function testHtmlGetUniqueId($expected, $source, $reset = FALSE) {
     if ($reset) {
       Html::resetSeenIds();
     }
@@ -132,7 +126,7 @@ class HtmlTest extends TestCase {
    * @return array
    *   Test data.
    */
-  public static function providerTestHtmlGetUniqueId() {
+  public function providerTestHtmlGetUniqueId() {
     // cSpell:disable
     $id = 'abcdefghijklmnopqrstuvwxyz-0123456789';
     return [
@@ -162,13 +156,13 @@ class HtmlTest extends TestCase {
    *
    * @covers ::getUniqueId
    */
-  public function testHtmlGetUniqueIdWithAjaxIds($expected, $source): void {
+  public function testHtmlGetUniqueIdWithAjaxIds($expected, $source) {
     Html::setIsAjax(TRUE);
     $id = Html::getUniqueId($source);
 
     // Note, we truncate two hyphens at the end.
     // @see \Drupal\Component\Utility\Html::getId()
-    if (str_contains($source, '--')) {
+    if (strpos($source, '--') !== FALSE) {
       $random_suffix = substr($id, strlen($source) + 1);
     }
     else {
@@ -184,7 +178,7 @@ class HtmlTest extends TestCase {
    * @return array
    *   Test data.
    */
-  public static function providerTestHtmlGetUniqueIdWithAjaxIds() {
+  public function providerTestHtmlGetUniqueIdWithAjaxIds() {
     return [
       ['test-unique-id1--', 'test-unique-id1'],
       // Note, we truncate two hyphens at the end.
@@ -206,7 +200,7 @@ class HtmlTest extends TestCase {
    *
    * @covers ::getId
    */
-  public function testHtmlGetId($expected, $source): void {
+  public function testHtmlGetId($expected, $source) {
     Html::setIsAjax(FALSE);
     $this->assertSame($expected, Html::getId($source));
   }
@@ -217,7 +211,7 @@ class HtmlTest extends TestCase {
    * @return array
    *   Test data.
    */
-  public static function providerTestHtmlGetId() {
+  public function providerTestHtmlGetId() {
     // cSpell:disable
     $id = 'abcdefghijklmnopqrstuvwxyz-0123456789';
     return [
@@ -240,7 +234,7 @@ class HtmlTest extends TestCase {
    * @dataProvider providerDecodeEntities
    * @covers ::decodeEntities
    */
-  public function testDecodeEntities($text, $expected): void {
+  public function testDecodeEntities($text, $expected) {
     $this->assertEquals($expected, Html::decodeEntities($text));
   }
 
@@ -249,7 +243,7 @@ class HtmlTest extends TestCase {
    *
    * @see testDecodeEntities()
    */
-  public static function providerDecodeEntities() {
+  public function providerDecodeEntities() {
     return [
       ['Drupal', 'Drupal'],
       ['<script>', '<script>'],
@@ -281,7 +275,7 @@ class HtmlTest extends TestCase {
    * @dataProvider providerEscape
    * @covers ::escape
    */
-  public function testEscape($expected, $text): void {
+  public function testEscape($expected, $text) {
     $this->assertEquals($expected, Html::escape($text));
   }
 
@@ -290,7 +284,7 @@ class HtmlTest extends TestCase {
    *
    * @see testEscape()
    */
-  public static function providerEscape() {
+  public function providerEscape() {
     return [
       ['Drupal', 'Drupal'],
       ['&lt;script&gt;', '<script>'],
@@ -304,7 +298,6 @@ class HtmlTest extends TestCase {
       ['→', '→'],
       ['➼', '➼'],
       ['€', '€'],
-      // cspell:disable-next-line
       ['Drup�al', "Drup\x80al"],
     ];
   }
@@ -315,7 +308,7 @@ class HtmlTest extends TestCase {
    * @covers ::decodeEntities
    * @covers ::escape
    */
-  public function testDecodeEntitiesAndEscape(): void {
+  public function testDecodeEntitiesAndEscape() {
     $string = "<em>répét&eacute;</em>";
     $escaped = Html::escape($string);
     $this->assertSame('&lt;em&gt;répét&amp;eacute;&lt;/em&gt;', $escaped);
@@ -335,7 +328,7 @@ class HtmlTest extends TestCase {
    *
    * @covers ::serialize
    */
-  public function testSerialize(): void {
+  public function testSerialize() {
     $document = new \DOMDocument();
     $result = Html::serialize($document);
     $this->assertSame('', $result);
@@ -345,7 +338,7 @@ class HtmlTest extends TestCase {
    * @covers ::transformRootRelativeUrlsToAbsolute
    * @dataProvider providerTestTransformRootRelativeUrlsToAbsolute
    */
-  public function testTransformRootRelativeUrlsToAbsolute($html, $scheme_and_host, $expected_html): void {
+  public function testTransformRootRelativeUrlsToAbsolute($html, $scheme_and_host, $expected_html) {
     $this->assertSame($expected_html ?: $html, Html::transformRootRelativeUrlsToAbsolute($html, $scheme_and_host));
   }
 
@@ -353,7 +346,7 @@ class HtmlTest extends TestCase {
    * @covers ::transformRootRelativeUrlsToAbsolute
    * @dataProvider providerTestTransformRootRelativeUrlsToAbsoluteAssertion
    */
-  public function testTransformRootRelativeUrlsToAbsoluteAssertion($scheme_and_host): void {
+  public function testTransformRootRelativeUrlsToAbsoluteAssertion($scheme_and_host) {
     $this->expectException(\AssertionError::class);
     Html::transformRootRelativeUrlsToAbsolute('', $scheme_and_host);
   }
@@ -364,7 +357,7 @@ class HtmlTest extends TestCase {
    * @return array
    *   Test data.
    */
-  public static function providerTestTransformRootRelativeUrlsToAbsolute() {
+  public function providerTestTransformRootRelativeUrlsToAbsolute() {
     $data = [];
 
     // Random generator.
@@ -383,7 +376,6 @@ class HtmlTest extends TestCase {
         "$tag_name, srcset, $base_path: root-relative" => ["<$tag_name srcset=\"http://example.com{$base_path}already-absolute 200w, {$base_path}root-relative 300w\">root-relative test</$tag_name>", 'http://example.com', "<$tag_name srcset=\"http://example.com{$base_path}already-absolute 200w, http://example.com{$base_path}root-relative 300w\">root-relative test</$tag_name>"],
         "$tag_name, srcset, $base_path: protocol-relative" => ["<$tag_name srcset=\"http://example.com{$base_path}already-absolute 200w, //example.com{$base_path}protocol-relative 300w\">protocol-relative test</$tag_name>", 'http://example.com', FALSE],
         "$tag_name, srcset, $base_path: absolute" => ["<$tag_name srcset=\"http://example.com{$base_path}already-absolute 200w, http://example.com{$base_path}absolute 300w\">absolute test</$tag_name>", 'http://example.com', FALSE],
-        "$tag_name, empty srcset" => ["<$tag_name srcset>empty test</$tag_name>", 'http://example.com', FALSE],
       ];
 
       foreach (['href', 'poster', 'src', 'cite', 'data', 'action', 'formaction', 'about'] as $attribute) {
@@ -395,11 +387,6 @@ class HtmlTest extends TestCase {
       }
     }
 
-    // Double-character carriage return should be normalized.
-    $data['line break with double special character'] = ["Test without links but with\r\nsome special characters", 'http://example.com', "Test without links but with\nsome special characters"];
-    $data['line break with single special character'] = ["Test without links but with&#13;\nsome special characters", 'http://example.com', "Test without links but with\nsome special characters"];
-    $data['carriage return within html'] = ["<a\rhref='/node'>My link</a>", 'http://example.com', '<a href="http://example.com/node">My link</a>'];
-
     return $data;
   }
 
@@ -409,26 +396,13 @@ class HtmlTest extends TestCase {
    * @return array
    *   Test data.
    */
-  public static function providerTestTransformRootRelativeUrlsToAbsoluteAssertion() {
+  public function providerTestTransformRootRelativeUrlsToAbsoluteAssertion() {
     return [
       'only relative path' => ['llama'],
       'only root-relative path' => ['/llama'],
       'host and path' => ['example.com/llama'],
       'scheme, host and path' => ['http://example.com/llama'],
     ];
-  }
-
-  /**
-   * Test deprecations.
-   *
-   * @group legacy
-   */
-  public function testDeprecations(): void {
-    $this->expectDeprecation('Passing NULL to Drupal\Component\Utility\Html::decodeEntities is deprecated in drupal:9.5.0 and will trigger a PHP error from drupal:11.0.0. Pass a string instead. See https://www.drupal.org/node/3318826');
-    $this->assertSame('', Html::decodeEntities(NULL));
-
-    $this->expectDeprecation('Passing NULL to Drupal\Component\Utility\Html::escape is deprecated in drupal:9.5.0 and will trigger a PHP error from drupal:11.0.0. Pass a string instead. See https://www.drupal.org/node/3318826');
-    $this->assertSame('', Html::escape(NULL));
   }
 
 }

@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2023 Justin Hileman
+ * (c) 2012-2020 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -13,6 +13,7 @@ namespace Psy\Output;
 
 use Symfony\Component\Console\Formatter\OutputFormatter;
 use Symfony\Component\Console\Formatter\OutputFormatterInterface;
+use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Console\Output\ConsoleOutput;
 
 /**
@@ -22,9 +23,8 @@ class ShellOutput extends ConsoleOutput
 {
     const NUMBER_LINES = 128;
 
-    private int $paging = 0;
-    private OutputPager $pager;
-    private Theme $theme;
+    private $paging = 0;
+    private $pager;
 
     /**
      * Construct a ShellOutput instance.
@@ -34,11 +34,10 @@ class ShellOutput extends ConsoleOutput
      * @param OutputFormatterInterface|null $formatter (default: null)
      * @param string|OutputPager|null       $pager     (default: null)
      */
-    public function __construct($verbosity = self::VERBOSITY_NORMAL, $decorated = null, ?OutputFormatterInterface $formatter = null, $pager = null, $theme = null)
+    public function __construct($verbosity = self::VERBOSITY_NORMAL, $decorated = null, OutputFormatterInterface $formatter = null, $pager = null)
     {
         parent::__construct($verbosity, $decorated, $formatter);
 
-        $this->theme = $theme ?? new Theme('modern');
         $this->initFormatters();
 
         if ($pager === null) {
@@ -65,7 +64,7 @@ class ShellOutput extends ConsoleOutput
      * @param string|array|\Closure $messages A string, array of strings or a callback
      * @param int                   $type     (default: 0)
      */
-    public function page($messages, int $type = 0)
+    public function page($messages, $type = 0)
     {
         if (\is_string($messages)) {
             $messages = (array) $messages;
@@ -115,7 +114,7 @@ class ShellOutput extends ConsoleOutput
      * @param bool         $newline  Whether to add a newline or not
      * @param int          $type     The type of output
      */
-    public function write($messages, $newline = false, $type = 0): void
+    public function write($messages, $newline = false, $type = 0)
     {
         if ($this->getVerbosity() === self::VERBOSITY_QUIET) {
             return;
@@ -150,23 +149,13 @@ class ShellOutput extends ConsoleOutput
      * @param string $message A message to write to the output
      * @param bool   $newline Whether to add a newline or not
      */
-    public function doWrite($message, $newline): void
+    public function doWrite($message, $newline)
     {
-        // @todo Update OutputPager interface to require doWrite
-        if ($this->paging > 0 && $this->pager instanceof ProcOutputPager) {
+        if ($this->paging > 0) {
             $this->pager->doWrite($message, $newline);
         } else {
             parent::doWrite($message, $newline);
         }
-    }
-
-    /**
-     * Set the output Theme.
-     */
-    public function setTheme(Theme $theme)
-    {
-        $this->theme = $theme;
-        $this->initFormatters();
     }
 
     /**
@@ -184,22 +173,38 @@ class ShellOutput extends ConsoleOutput
      */
     private function initFormatters()
     {
-        $useGrayFallback = !$this->grayExists();
-        $this->theme->applyStyles($this->getFormatter(), $useGrayFallback);
-        $this->theme->applyErrorStyles($this->getErrorOutput()->getFormatter(), $useGrayFallback);
-    }
+        $formatter = $this->getFormatter();
 
-    /**
-     * Checks if the "gray" color exists on the output.
-     */
-    private function grayExists(): bool
-    {
-        try {
-            $this->write('<fg=gray></>');
-        } catch (\InvalidArgumentException $e) {
-            return false;
-        }
+        $formatter->setStyle('warning', new OutputFormatterStyle('black', 'yellow'));
+        $formatter->setStyle('error', new OutputFormatterStyle('white', 'red', ['bold']));
+        $formatter->setStyle('aside', new OutputFormatterStyle('blue'));
+        $formatter->setStyle('strong', new OutputFormatterStyle(null, null, ['bold']));
+        $formatter->setStyle('return', new OutputFormatterStyle('cyan'));
+        $formatter->setStyle('urgent', new OutputFormatterStyle('red'));
+        $formatter->setStyle('hidden', new OutputFormatterStyle('black'));
 
-        return true;
+        // Visibility
+        $formatter->setStyle('public', new OutputFormatterStyle(null, null, ['bold']));
+        $formatter->setStyle('protected', new OutputFormatterStyle('yellow'));
+        $formatter->setStyle('private', new OutputFormatterStyle('red'));
+        $formatter->setStyle('global', new OutputFormatterStyle('cyan', null, ['bold']));
+        $formatter->setStyle('const', new OutputFormatterStyle('cyan'));
+        $formatter->setStyle('class', new OutputFormatterStyle('blue', null, ['underscore']));
+        $formatter->setStyle('function', new OutputFormatterStyle(null));
+        $formatter->setStyle('default', new OutputFormatterStyle(null));
+
+        // Types
+        $formatter->setStyle('number', new OutputFormatterStyle('magenta'));
+        $formatter->setStyle('integer', new OutputFormatterStyle('magenta'));
+        $formatter->setStyle('float', new OutputFormatterStyle('yellow'));
+        $formatter->setStyle('string', new OutputFormatterStyle('green'));
+        $formatter->setStyle('bool', new OutputFormatterStyle('cyan'));
+        $formatter->setStyle('keyword', new OutputFormatterStyle('yellow'));
+        $formatter->setStyle('comment', new OutputFormatterStyle('blue'));
+        $formatter->setStyle('object', new OutputFormatterStyle('blue'));
+        $formatter->setStyle('resource', new OutputFormatterStyle('yellow'));
+
+        // Code-specific formatting
+        $formatter->setStyle('inline_html', new OutputFormatterStyle('cyan'));
     }
 }

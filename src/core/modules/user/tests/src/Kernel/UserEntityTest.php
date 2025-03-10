@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\user\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
@@ -17,7 +15,9 @@ use Drupal\user\RoleInterface;
 class UserEntityTest extends KernelTestBase {
 
   /**
-   * {@inheritdoc}
+   * Modules to enable.
+   *
+   * @var array
    */
   protected static $modules = ['system', 'user', 'field'];
 
@@ -36,7 +36,7 @@ class UserEntityTest extends KernelTestBase {
    * @see \Drupal\user\Entity\User::addRole()
    * @see \Drupal\user\Entity\User::removeRole()
    */
-  public function testUserMethods(): void {
+  public function testUserMethods() {
     $role_storage = $this->container->get('entity_type.manager')->getStorage('user_role');
     $role_storage->create(['id' => 'test_role_one', 'label' => 'Test role 1'])->save();
     $role_storage->create(['id' => 'test_role_two', 'label' => 'Test role 2'])->save();
@@ -52,8 +52,7 @@ class UserEntityTest extends KernelTestBase {
     $this->assertFalse($user->hasRole('test_role_two'));
     $this->assertEquals([RoleInterface::AUTHENTICATED_ID, 'test_role_one'], $user->getRoles());
 
-    $account = $user->addRole('test_role_one');
-    $this->assertSame($user, $account);
+    $user->addRole('test_role_one');
     $this->assertTrue($user->hasRole('test_role_one'));
     $this->assertFalse($user->hasRole('test_role_two'));
     $this->assertEquals([RoleInterface::AUTHENTICATED_ID, 'test_role_one'], $user->getRoles());
@@ -63,8 +62,7 @@ class UserEntityTest extends KernelTestBase {
     $this->assertTrue($user->hasRole('test_role_two'));
     $this->assertEquals([RoleInterface::AUTHENTICATED_ID, 'test_role_one', 'test_role_two'], $user->getRoles());
 
-    $account = $user->removeRole('test_role_three');
-    $this->assertSame($user, $account);
+    $user->removeRole('test_role_three');
     $this->assertTrue($user->hasRole('test_role_one'));
     $this->assertTrue($user->hasRole('test_role_two'));
     $this->assertEquals([RoleInterface::AUTHENTICATED_ID, 'test_role_one', 'test_role_two'], $user->getRoles());
@@ -82,7 +80,7 @@ class UserEntityTest extends KernelTestBase {
    * @see \Drupal\Core\Field\FieldItemInterface::generateSampleValue()
    * @see \Drupal\Core\Entity\FieldableEntityInterface::validate()
    */
-  public function testUserValidation(): void {
+  public function testUserValidation() {
     $user = User::create([]);
     foreach ($user as $field_name => $field) {
       if (!in_array($field_name, ['uid'])) {
@@ -91,18 +89,6 @@ class UserEntityTest extends KernelTestBase {
     }
     $violations = $user->validate();
     $this->assertFalse((bool) $violations->count());
-  }
-
-  /**
-   * Tests that ::existingPassword can be used for chaining.
-   */
-  public function testChainExistingPasswordMethod(): void {
-    /** @var \Drupal\user\Entity\User $user */
-    $user = User::create([
-      'name' => $this->randomMachineName(),
-    ]);
-    $user = $user->setExistingPassword('existing_pass');
-    $this->assertInstanceOf(User::class, $user);
   }
 
 }

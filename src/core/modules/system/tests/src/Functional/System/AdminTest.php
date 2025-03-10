@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\system\Functional\System;
 
 use Drupal\Core\Menu\MenuTreeParameters;
@@ -29,18 +27,17 @@ class AdminTest extends BrowserTestBase {
   protected $webUser;
 
   /**
-   * {@inheritdoc}
+   * Modules to enable.
+   *
+   * @var array
    */
-  protected static $modules = ['locale', 'menu_test'];
+  protected static $modules = ['locale'];
 
   /**
    * {@inheritdoc}
    */
   protected $defaultTheme = 'stark';
 
-  /**
-   * {@inheritdoc}
-   */
   protected function setUp(): void {
     // testAdminPages() requires Locale module.
     parent::setUp();
@@ -59,20 +56,13 @@ class AdminTest extends BrowserTestBase {
   /**
    * Tests output on administrative listing pages.
    */
-  public function testAdminPages(): void {
+  public function testAdminPages() {
     // Go to Administration.
     $this->drupalGet('admin');
 
     // Verify that all visible, top-level administration links are listed on
     // the main administration page.
-    foreach ($this->getTopLevelMenuLinks() as $element) {
-      $item = $element->link;
-      if (!$element->access->isAllowed()) {
-        // If the link is not accessible, it should not be rendered.
-        // @see \Drupal\Core\Menu\MenuLinkTree::buildItems().
-        $this->assertSession()->linkNotExists($item->getTitle());
-        continue;
-      }
+    foreach ($this->getTopLevelMenuLinks() as $item) {
       $this->assertSession()->linkExists($item->getTitle());
       $this->assertSession()->linkByHrefExists($item->getUrlObject()->toString());
       // The description should appear below the link.
@@ -131,7 +121,7 @@ class AdminTest extends BrowserTestBase {
   /**
    * Returns all top level menu links.
    *
-   * @return \Drupal\Core\Menu\MenuLinkTreeElement[]
+   * @return \Drupal\Core\Menu\MenuLinkInterface[]
    */
   protected function getTopLevelMenuLinks() {
     $menu_tree = \Drupal::menuTree();
@@ -144,18 +134,26 @@ class AdminTest extends BrowserTestBase {
       ['callable' => 'menu.default_tree_manipulators:checkAccess'],
       ['callable' => 'menu.default_tree_manipulators:flatten'],
     ];
-    return $menu_tree->transform($tree, $manipulators);
+    $tree = $menu_tree->transform($tree, $manipulators);
+
+    // Transform the tree to a list of menu links.
+    $menu_links = [];
+    foreach ($tree as $element) {
+      $menu_links[] = $element->link;
+    }
+
+    return $menu_links;
   }
 
   /**
    * Tests compact mode.
    */
-  public function testCompactMode(): void {
+  public function testCompactMode() {
     $session = $this->getSession();
 
     // The front page defaults to 'user/login', which redirects to 'user/{user}'
     // for authenticated users. We cannot use '<front>', since this does not
-    // match the redirected URL.
+    // match the redirected url.
     $frontpage_url = 'user/' . $this->adminUser->id();
 
     $this->drupalGet('admin/compact/on');
@@ -179,19 +177,6 @@ class AdminTest extends BrowserTestBase {
     $this->assertNull($session->getCookie('Drupal.visitor.admin_compact_mode'), 'Compact mode remains off after a repeat call.');
     $this->drupalGet('');
     $this->assertNull($session->getCookie('Drupal.visitor.admin_compact_mode'), 'Compact mode persists off new requests.');
-  }
-
-  /**
-   * Tests admin config page blocks without descriptions.
-   */
-  public function testConfigBlocksDescription(): void {
-    // Go to Config administration page.
-    $this->drupalGet('admin/config');
-    $this->assertSession()->statusCodeEquals(200);
-    // Validates the content block without description.
-    $this->assertSession()->pageTextContains('Test custom admin block without description');
-    // Validates an empty description block.
-    $this->assertSession()->elementNotExists('xpath', '//dd[@class="list-group__description"][not(text())]');
   }
 
 }

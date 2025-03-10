@@ -44,7 +44,7 @@ class EntityResourcePostRouteSubscriber implements EventSubscriberInterface {
       // We only care about REST resource config entities for the
       // \Drupal\rest\Plugin\rest\resource\EntityResource plugin.
       $plugin_id = $resource_config->toArray()['plugin_id'];
-      if (!str_starts_with($plugin_id, 'entity')) {
+      if (substr($plugin_id, 0, 6) !== 'entity') {
         continue;
       }
 
@@ -64,7 +64,7 @@ class EntityResourcePostRouteSubscriber implements EventSubscriberInterface {
   /**
    * {@inheritdoc}
    */
-  public static function getSubscribedEvents(): array {
+  public static function getSubscribedEvents() {
     // Priority -10, to run after \Drupal\rest\Routing\ResourceRoutes, which has
     // priority 0.
     $events[RoutingEvents::DYNAMIC][] = ['onDynamicRouteEvent', -10];

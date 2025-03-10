@@ -1,46 +1,33 @@
 <?php
-
-declare(strict_types=1);
-
 namespace Drush\Commands;
 
-use Consolidation\AnnotatedCommand\AnnotationData;
 use Consolidation\AnnotatedCommand\CommandData;
-use Consolidation\AnnotatedCommand\Hooks\HookManager;
-use Consolidation\SiteProcess\ProcessManagerAwareInterface;
-use Consolidation\SiteProcess\ProcessManagerAwareTrait;
-use Drush\Attributes as CLI;
-use Drush\Config\ConfigAwareTrait;
 use Drush\Drush;
-use Drush\Exec\ExecTrait;
-use Drush\Log\DrushLoggerManager;
-use Drush\SiteAlias\ProcessManager;
 use Drush\Style\DrushStyle;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\MessageFormatter;
 use GuzzleHttp\Middleware;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
-use Robo\Common\IO;
+use Psr\Log\LoggerInterface;
+use Drush\Config\ConfigAwareTrait;
+use Drush\Exec\ExecTrait;
 use Robo\Contract\ConfigAwareInterface;
 use Robo\Contract\IOAwareInterface;
+use Robo\Common\IO;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Filesystem\Path;
+use Consolidation\SiteProcess\ProcessManagerAwareTrait;
+use Consolidation\SiteProcess\ProcessManagerAwareInterface;
+use Webmozart\PathUtil\Path;
 
 abstract class DrushCommands implements IOAwareInterface, LoggerAwareInterface, ConfigAwareInterface, ProcessManagerAwareInterface
 {
     use ProcessManagerAwareTrait;
     use ExecTrait;
-    use ConfigAwareTrait;
-    use LoggerAwareTrait;
-    use IO {
-        io as roboIo;
-    }
-    use ConfiguresPrompts;
 
     // This is more readable.
-    const REQ = InputOption::VALUE_REQUIRED;
-    const OPT = InputOption::VALUE_OPTIONAL;
+    const REQ=InputOption::VALUE_REQUIRED;
+    const OPT=InputOption::VALUE_OPTIONAL;
 
     // Common exit codes.
     const EXIT_SUCCESS = 0;
@@ -48,7 +35,16 @@ abstract class DrushCommands implements IOAwareInterface, LoggerAwareInterface, 
     // Used to signal that the command completed successfully, but we still want to indicate a failure to the caller.
     const EXIT_FAILURE_WITH_CLARITY = 3;
 
-    protected ?CommandData $commandData = null;
+    use LoggerAwareTrait;
+    use ConfigAwareTrait;
+    use IO {
+        io as roboIo;
+    }
+
+    /**
+     * @var CommandData
+     */
+    protected $commandData;
 
     public function __construct()
     {
@@ -57,23 +53,22 @@ abstract class DrushCommands implements IOAwareInterface, LoggerAwareInterface, 
     /**
      * Override Robo's IO function with our custom style.
      */
-    protected function io(): DrushStyle
+    protected function io()
     {
-        // @phpstan-ignore booleanNot.alwaysFalse
         if (!$this->io) {
             // Specify our own Style class when needed.
             $this->io = new DrushStyle($this->input(), $this->output());
         }
-        assert($this->io instanceof DrushStyle);
         return $this->io;
     }
 
     /**
      * Returns a logger object.
+     *
+     * @return LoggerInterface
      */
-    public function logger(): ?DrushLoggerManager
+    protected function logger()
     {
-        assert(is_null($this->logger) || $this->logger instanceof DrushLoggerManager, 'Instead of using replacing Drush\'s logger, use $this->add() on DrushLoggerManager to add a custom logger. See https://github.com/drush-ops/drush/pull/5022');
         return $this->logger;
     }
 
@@ -83,9 +78,9 @@ abstract class DrushCommands implements IOAwareInterface, LoggerAwareInterface, 
      * @param string $file
      *   Full path to a file.
      */
-    protected function printFile(string $file): void
+    protected function printFile($file)
     {
-        if (str_ends_with($file, ".htm") || str_ends_with($file, ".html")) {
+        if ((substr($file, -4) == ".htm") || (substr($file, -5) == ".html")) {
             $tmp_file = drush_tempnam(basename($file));
             file_put_contents($tmp_file, drush_html_to_text(file_get_contents($file)));
             $file = $tmp_file;
@@ -104,21 +99,14 @@ abstract class DrushCommands implements IOAwareInterface, LoggerAwareInterface, 
 
     /**
      * Persist commandData for use in primary command callback. Used by 'topic' commands.
+     *
+     * @hook pre-command *
+     *
+     * @param \Consolidation\AnnotatedCommand\CommandData $commandData
      */
-    #[CLI\Hook(type: HookManager::PRE_COMMAND_HOOK, target: '*')]
     public function preHook(CommandData $commandData)
     {
         $this->commandData = $commandData;
-    }
-
-    /**
-     * Configure Laravel prompts package.
-     */
-    #[CLI\Hook(type: HookManager::INITIALIZE, target: '*')]
-    public function initHook($input, AnnotationData $annotationData)
-    {
-
-        $this->configurePrompts($input);
     }
 
     /**
@@ -138,18 +126,10 @@ abstract class DrushCommands implements IOAwareInterface, LoggerAwareInterface, 
      *
      * @see https://stackoverflow.com/questions/32681165/how-do-you-log-all-api-calls-using-guzzle-6.
      */
-    protected function getStack(): HandlerStack
+    protected function getStack(): \GuzzleHttp\HandlerStack
     {
         $stack = HandlerStack::create();
         $stack->push(Middleware::log($this->logger(), new MessageFormatter(Drush::debug() ? MessageFormatter::DEBUG : MessageFormatter::SHORT)));
         return $stack;
-    }
-
-    /**
-     * This method overrides the trait in order to provide a more specific return type.
-     */
-    public function processManager(): ProcessManager
-    {
-        return $this->processManager;
     }
 }

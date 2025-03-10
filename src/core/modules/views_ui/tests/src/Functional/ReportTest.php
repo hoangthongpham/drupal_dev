@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\views_ui\Functional;
 
 /**
@@ -12,7 +10,9 @@ namespace Drupal\Tests\views_ui\Functional;
 class ReportTest extends UITestBase {
 
   /**
-   * {@inheritdoc}
+   * Modules to enable.
+   *
+   * @var array
    */
   protected static $modules = ['views', 'views_ui'];
 
@@ -24,14 +24,14 @@ class ReportTest extends UITestBase {
   /**
    * Stores an admin user used by the different tests.
    *
-   * @var \Drupal\user\Entity\User
+   * @var \Drupal\user\User
    */
   protected $adminUser;
 
   /**
    * Tests the existence of the views plugin report.
    */
-  public function testReport(): void {
+  public function testReport() {
     $this->drupalLogin($this->adminUser);
 
     // Test the report page.

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\help\Functional;
 
 use Drupal\Tests\BrowserTestBase;
@@ -35,9 +33,6 @@ class HelpBlockTest extends BrowserTestBase {
    */
   protected $helpBlock;
 
-  /**
-   * {@inheritdoc}
-   */
   protected function setUp(): void {
     parent::setUp();
     $this->helpBlock = $this->placeBlock('help_block');
@@ -46,7 +41,7 @@ class HelpBlockTest extends BrowserTestBase {
   /**
    * Logs in users, tests help pages.
    */
-  public function testHelp(): void {
+  public function testHelp() {
     $this->drupalGet('help_page_test/has_help');
     $this->assertSession()->pageTextContains('I have help!');
     $this->assertSession()->pageTextContains($this->helpBlock->label());

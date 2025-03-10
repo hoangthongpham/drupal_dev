@@ -8,3 +8,8 @@ dependencies:
   - drupal:big_pipe
   - drupal:big_pipe_test
   - drupal:dynamic_page_cache
+
+# Information added by Drupal.org packaging script on 2023-01-23
+version: '8.x-2.33'
+project: 'commerce'
+datestamp: 1674478179

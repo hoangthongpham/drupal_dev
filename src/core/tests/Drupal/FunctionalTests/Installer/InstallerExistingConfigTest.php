@@ -1,17 +1,13 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\FunctionalTests\Installer;
-
-// cspell:ignore enregistrer
 
 /**
  * Verifies that installing from existing configuration works.
  *
  * @group Installer
  */
-class InstallerExistingConfigTest extends InstallerConfigDirectoryTestBase {
+class InstallerExistingConfigTest extends InstallerExistingConfigTestBase {
 
   /**
    * {@inheritdoc}
@@ -37,8 +33,8 @@ class InstallerExistingConfigTest extends InstallerConfigDirectoryTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function getConfigLocation(): string {
-    return __DIR__ . '/../../../fixtures/config_install/testing_config_install';
+  protected function getConfigTarball() {
+    return __DIR__ . '/../../../fixtures/config_install/testing_config_install.tar.gz';
   }
 
 }

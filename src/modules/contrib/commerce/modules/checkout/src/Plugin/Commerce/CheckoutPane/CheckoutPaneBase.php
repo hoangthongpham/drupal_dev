@@ -2,13 +2,13 @@
 
 namespace Drupal\commerce_checkout\Plugin\Commerce\CheckoutPane;
 
+use Drupal\commerce_checkout\Plugin\Commerce\CheckoutFlow\CheckoutFlowInterface;
+use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\PluginBase;
-use Drupal\commerce_checkout\Plugin\Commerce\CheckoutFlow\CheckoutFlowInterface;
-use Drupal\commerce_order\Entity\OrderInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -63,7 +63,7 @@ abstract class CheckoutPaneBase extends PluginBase implements CheckoutPaneInterf
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition, ?CheckoutFlowInterface $checkout_flow = NULL) {
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition, CheckoutFlowInterface $checkout_flow = NULL) {
     return new static(
       $configuration,
       $plugin_id,
@@ -110,8 +110,6 @@ abstract class CheckoutPaneBase extends PluginBase implements CheckoutPaneInterf
 
     return [
       'step' => $default_step,
-      'display_label' => NULL,
-      'wrapper_element' => $this->pluginDefinition['wrapper_element'],
       'weight' => 10,
     ];
   }
@@ -120,50 +118,13 @@ abstract class CheckoutPaneBase extends PluginBase implements CheckoutPaneInterf
    * {@inheritdoc}
    */
   public function buildConfigurationSummary() {
-    $summary = [];
-    $summary[] = $this->t('Display label: @display_label', [
-      '@display_label' => $this->getDisplayLabel(),
-    ]);
-    $wrapper_element = $this->getWrapperElement();
-    if (!empty($wrapper_element)) {
-      $wrapper_element_options = $this->getWrapperElementOptions();
-      $summary[] = $this->t('Wrapper element: @wrapper_element', [
-        '@wrapper_element' => $wrapper_element_options[$wrapper_element] ?? $wrapper_element,
-      ]);
-    }
-
-    return implode('<br>', $summary);
+    return '';
   }
 
   /**
    * {@inheritdoc}
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
-    $form['display_label_override'] = [
-      '#title' => $this->t('Override the display label'),
-      '#type' => 'checkbox',
-      '#default_value' => !empty($this->configuration['display_label']),
-    ];
-    $form['display_label'] = [
-      '#title' => $this->t('Display label'),
-      '#description' => $this->t('Specify the display label to use in checkout, overriding the default value set.'),
-      '#type' => 'textfield',
-      '#default_value' => $this->getDisplayLabel(),
-      '#states' => [
-        'visible' => [
-          ':input[name="configuration[panes][' . $this->pluginId . '][configuration][display_label_override]"]' => ['checked' => TRUE],
-        ],
-      ],
-    ];
-    if (isset($this->pluginDefinition['wrapper_element'])) {
-      $form['wrapper_element'] = [
-        '#title' => $this->t('Wrapper element'),
-        '#options' => $this->getWrapperElementOptions(),
-        '#type' => 'select',
-        '#default_value' => $this->getWrapperElement(),
-      ];
-    }
-
     return $form;
   }
 
@@ -175,20 +136,7 @@ abstract class CheckoutPaneBase extends PluginBase implements CheckoutPaneInterf
   /**
    * {@inheritdoc}
    */
-  public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {
-    if (!$form_state->getErrors()) {
-      $values = $form_state->getValue($form['#parents']);
-      if (!empty($values['wrapper_element'])) {
-        $this->configuration['wrapper_element'] = $values['wrapper_element'];
-      }
-      if (!empty($values['display_label_override']) && !empty($values['display_label'])) {
-        $this->configuration['display_label'] = $values['display_label'];
-      }
-      else {
-        unset($this->configuration['display_label']);
-      }
-    }
-  }
+  public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {}
 
   /**
    * {@inheritdoc}
@@ -216,14 +164,14 @@ abstract class CheckoutPaneBase extends PluginBase implements CheckoutPaneInterf
    * {@inheritdoc}
    */
   public function getDisplayLabel() {
-    return $this->configuration['display_label'] ?? $this->pluginDefinition['display_label'];
+    return $this->pluginDefinition['display_label'];
   }
 
   /**
    * {@inheritdoc}
    */
   public function getWrapperElement() {
-    return $this->configuration['wrapper_element'] ?? $this->pluginDefinition['wrapper_element'];
+    return $this->pluginDefinition['wrapper_element'];
   }
 
   /**
@@ -238,7 +186,6 @@ abstract class CheckoutPaneBase extends PluginBase implements CheckoutPaneInterf
    */
   public function setStepId($step_id) {
     $this->configuration['step'] = $step_id;
-    return $this;
   }
 
   /**
@@ -253,7 +200,6 @@ abstract class CheckoutPaneBase extends PluginBase implements CheckoutPaneInterf
    */
   public function setWeight($weight) {
     $this->configuration['weight'] = $weight;
-    return $this;
   }
 
   /**
@@ -279,19 +225,5 @@ abstract class CheckoutPaneBase extends PluginBase implements CheckoutPaneInterf
    * {@inheritdoc}
    */
   public function submitPaneForm(array &$pane_form, FormStateInterface $form_state, array &$complete_form) {}
-
-  /**
-   * Gets the "wrapper_element" allowed options.
-   *
-   * @return array
-   *   The "wrapper_element" options.
-   */
-  protected function getWrapperElementOptions(): array {
-    return [
-      'container' => $this->t('Container'),
-      'fieldset' => $this->t('Fieldset'),
-      'details' => $this->t('Details (Closed)'),
-    ];
-  }
 
 }

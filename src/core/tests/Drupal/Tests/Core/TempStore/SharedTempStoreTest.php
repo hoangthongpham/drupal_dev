@@ -1,17 +1,18 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\Core\TempStore;
 
+use Drupal\Core\DependencyInjection\ContainerBuilder;
+use Drupal\Core\Http\RequestStack;
+use Drupal\Core\KeyValueStore\KeyValueExpirableFactoryInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\TempStore\Lock;
-use Drupal\Core\Test\TestKernel;
+use Drupal\Core\TempStore\SharedTempStoreFactory;
 use Drupal\Tests\UnitTestCase;
 use Drupal\Core\TempStore\SharedTempStore;
 use Drupal\Core\TempStore\TempStoreException;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 /**
@@ -100,13 +101,13 @@ class SharedTempStoreTest extends UnitTestCase {
   /**
    * @covers ::get
    */
-  public function testGet(): void {
-    $calls = ['test_2', 'test'];
-    $this->keyValue->expects($this->exactly(count($calls)))
+  public function testGet() {
+    $this->keyValue->expects($this->exactly(2))
       ->method('get')
-      ->with($this->callback(function (string $key) use (&$calls): bool {
-        return array_shift($calls) == $key;
-      }))
+      ->withConsecutive(
+        ['test_2'],
+        ['test'],
+      )
       ->willReturnOnConsecutiveCalls(
         FALSE,
         $this->ownObject,
@@ -121,13 +122,14 @@ class SharedTempStoreTest extends UnitTestCase {
    *
    * @covers ::getIfOwner
    */
-  public function testGetIfOwner(): void {
-    $calls = ['test_2', 'test', 'test'];
-    $this->keyValue->expects($this->exactly(count($calls)))
+  public function testGetIfOwner() {
+    $this->keyValue->expects($this->exactly(3))
       ->method('get')
-      ->with($this->callback(function (string $key) use (&$calls): bool {
-        return array_shift($calls) == $key;
-      }))
+      ->withConsecutive(
+        ['test_2'],
+        ['test'],
+        ['test'],
+      )
       ->willReturnOnConsecutiveCalls(
         FALSE,
         $this->ownObject,
@@ -144,11 +146,11 @@ class SharedTempStoreTest extends UnitTestCase {
    *
    * @covers ::set
    */
-  public function testSetWithNoLockAvailable(): void {
+  public function testSetWithNoLockAvailable() {
     $this->lock->expects($this->exactly(2))
       ->method('acquire')
       ->with('test')
-      ->willReturn(FALSE);
+      ->will($this->returnValue(FALSE));
     $this->lock->expects($this->once())
       ->method('wait')
       ->with('test');
@@ -165,11 +167,11 @@ class SharedTempStoreTest extends UnitTestCase {
    *
    * @covers ::set
    */
-  public function testSet(): void {
+  public function testSet() {
     $this->lock->expects($this->once())
       ->method('acquire')
       ->with('test')
-      ->willReturn(TRUE);
+      ->will($this->returnValue(TRUE));
     $this->lock->expects($this->never())
       ->method('wait');
     $this->lock->expects($this->once())
@@ -188,11 +190,11 @@ class SharedTempStoreTest extends UnitTestCase {
    *
    * @covers ::setIfNotExists
    */
-  public function testSetIfNotExists(): void {
+  public function testSetIfNotExists() {
     $this->keyValue->expects($this->once())
       ->method('setWithExpireIfNotExists')
       ->with('test', $this->ownObject, 604800)
-      ->willReturn(TRUE);
+      ->will($this->returnValue(TRUE));
 
     $this->assertTrue($this->tempStore->setIfNotExists('test', 'test_data'));
   }
@@ -202,10 +204,10 @@ class SharedTempStoreTest extends UnitTestCase {
    *
    * @covers ::setIfOwner
    */
-  public function testSetIfOwnerWhenNotExists(): void {
+  public function testSetIfOwnerWhenNotExists() {
     $this->keyValue->expects($this->once())
       ->method('setWithExpireIfNotExists')
-      ->willReturn(TRUE);
+      ->will($this->returnValue(TRUE));
 
     $this->assertTrue($this->tempStore->setIfOwner('test', 'test_data'));
   }
@@ -215,15 +217,15 @@ class SharedTempStoreTest extends UnitTestCase {
    *
    * @covers ::setIfOwner
    */
-  public function testSetIfOwnerNoObject(): void {
+  public function testSetIfOwnerNoObject() {
     $this->keyValue->expects($this->once())
       ->method('setWithExpireIfNotExists')
-      ->willReturn(FALSE);
+      ->will($this->returnValue(FALSE));
 
     $this->keyValue->expects($this->once())
       ->method('get')
       ->with('test')
-      ->willReturn(FALSE);
+      ->will($this->returnValue(FALSE));
 
     $this->assertFalse($this->tempStore->setIfOwner('test', 'test_data'));
   }
@@ -233,20 +235,20 @@ class SharedTempStoreTest extends UnitTestCase {
    *
    * @covers ::setIfOwner
    */
-  public function testSetIfOwner(): void {
+  public function testSetIfOwner() {
     $this->lock->expects($this->once())
       ->method('acquire')
       ->with('test')
-      ->willReturn(TRUE);
+      ->will($this->returnValue(TRUE));
 
     $this->keyValue->expects($this->exactly(2))
       ->method('setWithExpireIfNotExists')
-      ->willReturn(FALSE);
+      ->will($this->returnValue(FALSE));
 
     $this->keyValue->expects($this->exactly(2))
       ->method('get')
       ->with('test')
-      ->willReturn($this->ownObject, $this->otherObject);
+      ->will($this->onConsecutiveCalls($this->ownObject, $this->otherObject));
 
     $this->assertTrue($this->tempStore->setIfOwner('test', 'test_data'));
     $this->assertFalse($this->tempStore->setIfOwner('test', 'test_data'));
@@ -257,7 +259,7 @@ class SharedTempStoreTest extends UnitTestCase {
    *
    * @covers ::getMetadata
    */
-  public function testGetMetadata(): void {
+  public function testGetMetadata() {
     $this->keyValue->expects($this->exactly(2))
       ->method('get')
       ->with('test')
@@ -265,9 +267,9 @@ class SharedTempStoreTest extends UnitTestCase {
 
     $metadata = $this->tempStore->getMetadata('test');
     $this->assertInstanceOf(Lock::class, $metadata);
-    $this->assertObjectHasProperty('updated', $metadata);
+    $this->assertObjectHasAttribute('updated', $metadata);
     // Data should get removed.
-    $this->assertObjectNotHasProperty('data', $metadata);
+    $this->assertObjectNotHasAttribute('data', $metadata);
 
     $this->assertNull($this->tempStore->getMetadata('test'));
   }
@@ -277,11 +279,11 @@ class SharedTempStoreTest extends UnitTestCase {
    *
    * @covers ::delete
    */
-  public function testDelete(): void {
+  public function testDelete() {
     $this->lock->expects($this->once())
       ->method('acquire')
       ->with('test')
-      ->willReturn(TRUE);
+      ->will($this->returnValue(TRUE));
     $this->lock->expects($this->never())
       ->method('wait');
     $this->lock->expects($this->once())
@@ -300,11 +302,11 @@ class SharedTempStoreTest extends UnitTestCase {
    *
    * @covers ::delete
    */
-  public function testDeleteWithNoLockAvailable(): void {
+  public function testDeleteWithNoLockAvailable() {
     $this->lock->expects($this->exactly(2))
       ->method('acquire')
       ->with('test')
-      ->willReturn(FALSE);
+      ->will($this->returnValue(FALSE));
     $this->lock->expects($this->once())
       ->method('wait')
       ->with('test');
@@ -321,18 +323,19 @@ class SharedTempStoreTest extends UnitTestCase {
    *
    * @covers ::deleteIfOwner
    */
-  public function testDeleteIfOwner(): void {
+  public function testDeleteIfOwner() {
     $this->lock->expects($this->once())
       ->method('acquire')
       ->with('test_2')
-      ->willReturn(TRUE);
+      ->will($this->returnValue(TRUE));
 
-    $calls = ['test_1', 'test_2', 'test_3'];
-    $this->keyValue->expects($this->exactly(count($calls)))
+    $this->keyValue->expects($this->exactly(3))
       ->method('get')
-      ->with($this->callback(function (string $key) use (&$calls): bool {
-        return array_shift($calls) == $key;
-      }))
+      ->withConsecutive(
+        ['test_1'],
+        ['test_2'],
+        ['test_3'],
+      )
       ->willReturnOnConsecutiveCalls(
         FALSE,
         $this->ownObject,
@@ -350,25 +353,74 @@ class SharedTempStoreTest extends UnitTestCase {
   /**
    * Tests the serialization of a shared temp store.
    */
-  public function testSerialization(): void {
+  public function testSerialization() {
     // Add an unserializable request to the request stack. If the tempstore
     // didn't use DependencySerializationTrait, an exception would be thrown
     // when we try to serialize the tempstore.
     $unserializable_request = new UnserializableRequest();
 
     $this->requestStack->push($unserializable_request);
+    $this->requestStack->_serviceId = 'request_stack';
 
-    $container = TestKernel::setContainerWithKernel();
-    $container->set('request_stack', $this->requestStack);
-    \Drupal::setContainer($container);
+    $container = $this->prophesize(ContainerInterface::class);
+    $container->get('request_stack')->willReturn($this->requestStack);
+    $container->has('request_stack')->willReturn(TRUE);
+    \Drupal::setContainer($container->reveal());
 
     $store = unserialize(serialize($this->tempStore));
     $this->assertInstanceOf(SharedTempStore::class, $store);
 
     $reflected_request_stack = (new \ReflectionObject($store))->getProperty('requestStack');
+    $reflected_request_stack->setAccessible(TRUE);
     $request_stack = $reflected_request_stack->getValue($store);
     $this->assertEquals($this->requestStack, $request_stack);
     $this->assertSame($unserializable_request, $request_stack->pop());
+  }
+
+  /**
+   * @group legacy
+   */
+  public function testLegacyConstructor() {
+    $this->expectDeprecation('Calling Drupal\Core\TempStore\SharedTempStore::__construct() without the $current_user argument is deprecated in drupal:9.2.0 and will be required in drupal:10.0.0. See https://www.drupal.org/node/3006268');
+
+    $container = new ContainerBuilder();
+    $current_user = $this->createMock(AccountProxyInterface::class);
+    $container->set('current_user', $current_user);
+    \Drupal::setContainer($container);
+    $store = new SharedTempStore($this->keyValue, $this->lock, 2, $this->requestStack, 1000);
+    $reflection_class = new \ReflectionClass(SharedTempStore::class);
+
+    $current_user_property = $reflection_class->getProperty('currentUser');
+    $current_user_property->setAccessible(TRUE);
+    $this->assertSame($current_user, $current_user_property->getValue($store));
+
+    $expire_property = $reflection_class->getProperty('expire');
+    $expire_property->setAccessible(TRUE);
+    $this->assertSame(1000, $expire_property->getValue($store));
+  }
+
+  /**
+   * @group legacy
+   * @covers \Drupal\Core\TempStore\SharedTempStoreFactory::__construct
+   */
+  public function testLegacyFactoryConstructor() {
+    $this->expectDeprecation('Calling Drupal\Core\TempStore\SharedTempStoreFactory::__construct() without the $current_user argument is deprecated in drupal:9.2.0 and will be required in drupal:10.0.0. See https://www.drupal.org/node/3006268');
+
+    $container = new ContainerBuilder();
+    $current_user = $this->createMock(AccountProxyInterface::class);
+    $container->set('current_user', $current_user);
+    \Drupal::setContainer($container);
+    $key_value_factory = $this->prophesize(KeyValueExpirableFactoryInterface::class);
+    $store = new SharedTempStoreFactory($key_value_factory->reveal(), $this->lock, $this->requestStack, 1000);
+    $reflection_class = new \ReflectionClass(SharedTempStoreFactory::class);
+
+    $current_user_property = $reflection_class->getProperty('currentUser');
+    $current_user_property->setAccessible(TRUE);
+    $this->assertSame($current_user, $current_user_property->getValue($store));
+
+    $expire_property = $reflection_class->getProperty('expire');
+    $expire_property->setAccessible(TRUE);
+    $this->assertSame(1000, $expire_property->getValue($store));
   }
 
 }
@@ -379,9 +431,9 @@ class SharedTempStoreTest extends UnitTestCase {
 class UnserializableRequest extends Request {
 
   /**
-   * Always throw an exception.
+   * @return array
    */
-  public function __serialize() {
+  public function __serialize(): array {
     throw new \LogicException('Oops!');
   }
 

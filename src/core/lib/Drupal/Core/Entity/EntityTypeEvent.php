@@ -2,12 +2,12 @@
 
 namespace Drupal\Core\Entity;
 
-use Drupal\Component\EventDispatcher\Event;
+use Symfony\Component\EventDispatcher\GenericEvent;
 
 /**
  * Defines a base class for all entity type events.
  */
-class EntityTypeEvent extends Event {
+class EntityTypeEvent extends GenericEvent {
 
   /**
    * The entity type.
@@ -32,7 +32,7 @@ class EntityTypeEvent extends Event {
    *   (optional) The original entity type. This should be passed only when
    *   updating the entity type.
    */
-  public function __construct(EntityTypeInterface $entity_type, ?EntityTypeInterface $original = NULL) {
+  public function __construct(EntityTypeInterface $entity_type, EntityTypeInterface $original = NULL) {
     $this->entityType = $entity_type;
     $this->original = $original;
   }

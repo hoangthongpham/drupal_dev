@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\views\Kernel\Handler;
 
 use Drupal\node\Entity\Node;
@@ -31,13 +29,10 @@ class ArgumentStringTest extends ViewsKernelTestBase {
   /**
    * Tests the glossary feature.
    */
-  public function testGlossary(): void {
+  public function testGlossary() {
     $this->installEntitySchema('user');
     $this->installEntitySchema('node');
-    NodeType::create([
-      'type' => 'page',
-      'name' => 'Page',
-    ])->save();
+    NodeType::create(['type' => 'page'])->save();
 
     // Setup some nodes, one with a, two with b and three with c.
     $counter = 1;
@@ -55,13 +50,13 @@ class ArgumentStringTest extends ViewsKernelTestBase {
 
     $count_field = 'nid';
     foreach ($view->result as &$row) {
-      if (str_starts_with($view->field['title']->getValue($row), 'a')) {
+      if (strpos($view->field['title']->getValue($row), 'a') === 0) {
         $this->assertEquals(1, $row->{$count_field});
       }
-      if (str_starts_with($view->field['title']->getValue($row), 'b')) {
+      if (strpos($view->field['title']->getValue($row), 'b') === 0) {
         $this->assertEquals(2, $row->{$count_field});
       }
-      if (str_starts_with($view->field['title']->getValue($row), 'c')) {
+      if (strpos($view->field['title']->getValue($row), 'c') === 0) {
         $this->assertEquals(3, $row->{$count_field});
       }
     }

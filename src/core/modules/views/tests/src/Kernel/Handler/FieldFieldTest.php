@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\views\Kernel\Handler;
 
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
@@ -9,7 +7,6 @@ use Drupal\entity_test\Entity\EntityTest;
 use Drupal\entity_test\Entity\EntityTestRev;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
-use Drupal\Tests\user\Traits\UserCreationTrait;
 use Drupal\user\Entity\User;
 use Drupal\views\Plugin\views\field\EntityField;
 use Drupal\Tests\views\Kernel\ViewsKernelTestBase;
@@ -21,11 +18,8 @@ use Drupal\views\Views;
  *
  * @see \Drupal\views\Plugin\views\field\EntityField
  * @group views
- * @group #slow
  */
 class FieldFieldTest extends ViewsKernelTestBase {
-
-  use UserCreationTrait;
 
   /**
    * {@inheritdoc}
@@ -85,7 +79,8 @@ class FieldFieldTest extends ViewsKernelTestBase {
     ViewTestData::createTestViews(static::class, ['views_test_config']);
 
     // Bypass any field access.
-    $this->adminUser = $this->createUser(['administer users'], $this->randomString());
+    $this->adminUser = User::create(['name' => $this->randomString()]);
+    $this->adminUser->save();
     $this->container->get('current_user')->setAccount($this->adminUser);
 
     $this->testUsers = [];
@@ -93,7 +88,7 @@ class FieldFieldTest extends ViewsKernelTestBase {
       $this->testUsers[$i] = User::create([
         'name' => 'test ' . $i,
         'timezone' => User::getAllowedTimezones()[$i],
-        'created' => \Drupal::time()->getRequestTime() - rand(0, 3600),
+        'created' => REQUEST_TIME - rand(0, 3600),
       ]);
       $this->testUsers[$i]->save();
     }
@@ -236,7 +231,7 @@ class FieldFieldTest extends ViewsKernelTestBase {
   /**
    * Tests the result of a view with base fields and configurable fields.
    */
-  public function testSimpleExecute(): void {
+  public function testSimpleExecute() {
     $executable = Views::getView('test_field_field_test');
     $executable->execute();
 
@@ -258,7 +253,7 @@ class FieldFieldTest extends ViewsKernelTestBase {
   /**
    * Tests the output of a view with base fields and configurable fields.
    */
-  public function testSimpleRender(): void {
+  public function testSimpleRender() {
     $executable = Views::getView('test_field_field_test');
     $executable->execute();
 
@@ -281,7 +276,7 @@ class FieldFieldTest extends ViewsKernelTestBase {
    *
    * @see \Drupal\views_test_formatter\Plugin\Field\FieldFormatter\AttachmentTestFormatter::viewElements()
    */
-  public function testAttachedRender(): void {
+  public function testAttachedRender() {
     $executable = Views::getView('test_field_field_attachment_test');
     $executable->execute();
 
@@ -306,7 +301,7 @@ class FieldFieldTest extends ViewsKernelTestBase {
    * A complex field configuration contains multiple times the same field, with
    * different delta limit / offset.
    */
-  public function testFieldAlias(): void {
+  public function testFieldAlias() {
     $executable = Views::getView('test_field_alias_test');
     $executable->execute();
 
@@ -332,10 +327,7 @@ class FieldFieldTest extends ViewsKernelTestBase {
    * A complex field configuration contains multiple times the same field, with
    * different delta limit / offset.
    */
-  public function testFieldAliasRender(): void {
-    $this->setUpCurrentUser(permissions: [
-      'view test entity',
-    ]);
+  public function testFieldAliasRender() {
     $executable = Views::getView('test_field_alias_test');
     $executable->execute();
 
@@ -350,7 +342,7 @@ class FieldFieldTest extends ViewsKernelTestBase {
   /**
    * Tests the result of a view field with field_api_classes enabled.
    */
-  public function testFieldApiClassesRender(): void {
+  public function testFieldApiClassesRender() {
     /** @var \Drupal\Core\Render\RendererInterface $renderer */
     $renderer = $this->container->get('renderer');
     $executable = Views::getView('test_field_field_test');
@@ -374,7 +366,7 @@ class FieldFieldTest extends ViewsKernelTestBase {
    * A complex field configuration contains multiple times the same field, with
    * different delta limit / offset.
    */
-  public function testComplexExecute(): void {
+  public function testComplexExecute() {
     $executable = Views::getView('test_field_field_complex_test');
     $executable->execute();
 
@@ -403,7 +395,7 @@ class FieldFieldTest extends ViewsKernelTestBase {
   /**
    * Tests the output of a view with complex field configuration.
    */
-  public function testComplexRender(): void {
+  public function testComplexRender() {
     $executable = Views::getView('test_field_field_complex_test');
     $executable->execute();
     $date_formatter = \Drupal::service('date.formatter');
@@ -412,47 +404,47 @@ class FieldFieldTest extends ViewsKernelTestBase {
     $this->assertEquals("1, 3", $executable->getStyle()->getField(0, 'field_test_multiple'));
     $this->assertEquals("1", $executable->getStyle()->getField(0, 'field_test_multiple_1'));
     $this->assertEquals("3", $executable->getStyle()->getField(0, 'field_test_multiple_2'));
-    $this->assertEquals($date_formatter->format($this->testUsers[0]->getCreatedTime(), 'custom', 'Y'), trim(strip_tags((string) $executable->getStyle()->getField(0, 'created'))));
-    $this->assertEquals($date_formatter->format($this->testUsers[0]->getCreatedTime(), 'custom', 'H:i:s'), trim(strip_tags((string) $executable->getStyle()->getField(0, 'created_1'))));
-    $this->assertEquals($date_formatter->format($this->testUsers[0]->getCreatedTime(), 'fallback'), trim(strip_tags((string) $executable->getStyle()->getField(0, 'created_2'))));
+    $this->assertEquals($date_formatter->format($this->testUsers[0]->getCreatedTime(), 'custom', 'Y'), $executable->getStyle()->getField(0, 'created'));
+    $this->assertEquals($date_formatter->format($this->testUsers[0]->getCreatedTime(), 'custom', 'H:i:s'), $executable->getStyle()->getField(0, 'created_1'));
+    $this->assertEquals($date_formatter->format($this->testUsers[0]->getCreatedTime(), 'fallback'), $executable->getStyle()->getField(0, 'created_2'));
 
     $this->assertEquals($this->testUsers[1]->getTimeZone(), $executable->getStyle()->getField(1, 'timezone'));
     $this->assertEquals("7, 0", $executable->getStyle()->getField(1, 'field_test_multiple'));
     $this->assertEquals("7", $executable->getStyle()->getField(1, 'field_test_multiple_1'));
     $this->assertEquals("0", $executable->getStyle()->getField(1, 'field_test_multiple_2'));
-    $this->assertEquals($date_formatter->format($this->testUsers[1]->getCreatedTime(), 'custom', 'Y'), trim(strip_tags((string) $executable->getStyle()->getField(1, 'created'))));
-    $this->assertEquals($date_formatter->format($this->testUsers[1]->getCreatedTime(), 'custom', 'H:i:s'), trim(strip_tags((string) $executable->getStyle()->getField(1, 'created_1'))));
-    $this->assertEquals($date_formatter->format($this->testUsers[1]->getCreatedTime(), 'fallback'), trim(strip_tags((string) $executable->getStyle()->getField(1, 'created_2'))));
+    $this->assertEquals($date_formatter->format($this->testUsers[1]->getCreatedTime(), 'custom', 'Y'), $executable->getStyle()->getField(1, 'created'));
+    $this->assertEquals($date_formatter->format($this->testUsers[1]->getCreatedTime(), 'custom', 'H:i:s'), $executable->getStyle()->getField(1, 'created_1'));
+    $this->assertEquals($date_formatter->format($this->testUsers[1]->getCreatedTime(), 'fallback'), $executable->getStyle()->getField(1, 'created_2'));
 
     $this->assertEquals($this->testUsers[2]->getTimeZone(), $executable->getStyle()->getField(2, 'timezone'));
     $this->assertEquals("3, 5", $executable->getStyle()->getField(2, 'field_test_multiple'));
     $this->assertEquals("3", $executable->getStyle()->getField(2, 'field_test_multiple_1'));
     $this->assertEquals("5", $executable->getStyle()->getField(2, 'field_test_multiple_2'));
-    $this->assertEquals($date_formatter->format($this->testUsers[2]->getCreatedTime(), 'custom', 'Y'), trim(strip_tags((string) $executable->getStyle()->getField(2, 'created'))));
-    $this->assertEquals($date_formatter->format($this->testUsers[2]->getCreatedTime(), 'custom', 'H:i:s'), trim(strip_tags((string) $executable->getStyle()->getField(2, 'created_1'))));
-    $this->assertEquals($date_formatter->format($this->testUsers[2]->getCreatedTime(), 'fallback'), trim(strip_tags((string) $executable->getStyle()->getField(2, 'created_2'))));
+    $this->assertEquals($date_formatter->format($this->testUsers[2]->getCreatedTime(), 'custom', 'Y'), $executable->getStyle()->getField(2, 'created'));
+    $this->assertEquals($date_formatter->format($this->testUsers[2]->getCreatedTime(), 'custom', 'H:i:s'), $executable->getStyle()->getField(2, 'created_1'));
+    $this->assertEquals($date_formatter->format($this->testUsers[2]->getCreatedTime(), 'fallback'), $executable->getStyle()->getField(2, 'created_2'));
 
     $this->assertEquals($this->testUsers[3]->getTimeZone(), $executable->getStyle()->getField(3, 'timezone'));
     $this->assertEquals("9, 9", $executable->getStyle()->getField(3, 'field_test_multiple'));
     $this->assertEquals("9", $executable->getStyle()->getField(3, 'field_test_multiple_1'));
     $this->assertEquals("9", $executable->getStyle()->getField(3, 'field_test_multiple_2'));
-    $this->assertEquals($date_formatter->format($this->testUsers[3]->getCreatedTime(), 'custom', 'Y'), trim(strip_tags((string) $executable->getStyle()->getField(3, 'created'))));
-    $this->assertEquals($date_formatter->format($this->testUsers[3]->getCreatedTime(), 'custom', 'H:i:s'), trim(strip_tags((string) $executable->getStyle()->getField(3, 'created_1'))));
-    $this->assertEquals($date_formatter->format($this->testUsers[3]->getCreatedTime(), 'fallback'), trim(strip_tags((string) $executable->getStyle()->getField(3, 'created_2'))));
+    $this->assertEquals($date_formatter->format($this->testUsers[3]->getCreatedTime(), 'custom', 'Y'), $executable->getStyle()->getField(3, 'created'));
+    $this->assertEquals($date_formatter->format($this->testUsers[3]->getCreatedTime(), 'custom', 'H:i:s'), $executable->getStyle()->getField(3, 'created_1'));
+    $this->assertEquals($date_formatter->format($this->testUsers[3]->getCreatedTime(), 'fallback'), $executable->getStyle()->getField(3, 'created_2'));
 
     $this->assertEquals($this->testUsers[4]->getTimeZone(), $executable->getStyle()->getField(4, 'timezone'));
     $this->assertEquals("9, 0", $executable->getStyle()->getField(4, 'field_test_multiple'));
     $this->assertEquals("9", $executable->getStyle()->getField(4, 'field_test_multiple_1'));
     $this->assertEquals("0", $executable->getStyle()->getField(4, 'field_test_multiple_2'));
-    $this->assertEquals($date_formatter->format($this->testUsers[4]->getCreatedTime(), 'custom', 'Y'), trim(strip_tags((string) $executable->getStyle()->getField(4, 'created'))));
-    $this->assertEquals($date_formatter->format($this->testUsers[4]->getCreatedTime(), 'custom', 'H:i:s'), trim(strip_tags((string) $executable->getStyle()->getField(4, 'created_1'))));
-    $this->assertEquals($date_formatter->format($this->testUsers[4]->getCreatedTime(), 'fallback'), trim(strip_tags((string) $executable->getStyle()->getField(4, 'created_2'))));
+    $this->assertEquals($date_formatter->format($this->testUsers[4]->getCreatedTime(), 'custom', 'Y'), $executable->getStyle()->getField(4, 'created'));
+    $this->assertEquals($date_formatter->format($this->testUsers[4]->getCreatedTime(), 'custom', 'H:i:s'), $executable->getStyle()->getField(4, 'created_1'));
+    $this->assertEquals($date_formatter->format($this->testUsers[4]->getCreatedTime(), 'fallback'), $executable->getStyle()->getField(4, 'created_2'));
   }
 
   /**
    * Tests the revision result.
    */
-  public function testRevisionExecute(): void {
+  public function testRevisionExecute() {
     $executable = Views::getView('test_field_field_revision_test');
     $executable->execute();
 
@@ -473,7 +465,7 @@ class FieldFieldTest extends ViewsKernelTestBase {
   /**
    * Tests the output of a revision view with base and configurable fields.
    */
-  public function testRevisionRender(): void {
+  public function testRevisionRender() {
     $executable = Views::getView('test_field_field_revision_test');
     $executable->execute();
 
@@ -499,22 +491,9 @@ class FieldFieldTest extends ViewsKernelTestBase {
   }
 
   /**
-   * Tests the token replacement for revision fields.
-   */
-  public function testRevisionTokenRender(): void {
-    $view = Views::getView('test_field_field_revision_test');
-    $this->executeView($view);
-
-    $this->assertEquals('Replace: 1', $view->getStyle()->getField(0, 'field_test__revision_id_1'));
-    $this->assertEquals('Replace: 2', $view->getStyle()->getField(1, 'field_test__revision_id_1'));
-    $this->assertEquals('Replace: 3', $view->getStyle()->getField(2, 'field_test__revision_id_1'));
-    $this->assertEquals('Replace: 4', $view->getStyle()->getField(3, 'field_test__revision_id_1'));
-  }
-
-  /**
    * Tests the result set of a complex revision view.
    */
-  public function testRevisionComplexExecute(): void {
+  public function testRevisionComplexExecute() {
     $executable = Views::getView('test_field_field_revision_complex_test');
     $executable->execute();
 
@@ -544,7 +523,7 @@ class FieldFieldTest extends ViewsKernelTestBase {
   /**
    * Tests the output of a revision view with base fields and configurable fields.
    */
-  public function testRevisionComplexRender(): void {
+  public function testRevisionComplexRender() {
     $executable = Views::getView('test_field_field_revision_complex_test');
     $executable->execute();
 
@@ -580,7 +559,7 @@ class FieldFieldTest extends ViewsKernelTestBase {
   /**
    * Tests that a field not available for every bundle is rendered as empty.
    */
-  public function testMissingBundleFieldRender(): void {
+  public function testMissingBundleFieldRender() {
     // Create a new bundle not having the test field attached.
     $bundle = $this->randomMachineName();
     entity_test_create_bundle($bundle);
@@ -601,7 +580,7 @@ class FieldFieldTest extends ViewsKernelTestBase {
   /**
    * Tests \Drupal\views\Plugin\views\field\EntityField::getValue.
    */
-  public function testGetValueMethod(): void {
+  public function testGetValueMethod() {
     $bundle = 'test_bundle';
     entity_test_create_bundle($bundle);
 

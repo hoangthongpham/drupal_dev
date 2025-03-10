@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\block\Functional;
 
 use Drupal\Tests\BrowserTestBase;
@@ -14,19 +12,21 @@ use Drupal\Tests\BrowserTestBase;
 class BlockDemoTest extends BrowserTestBase {
 
   /**
-   * {@inheritdoc}
+   * Modules to enable.
+   *
+   * @var array
    */
   protected static $modules = ['block'];
 
   /**
    * {@inheritdoc}
    */
-  protected $defaultTheme = 'stark';
+  protected $defaultTheme = 'classy';
 
   /**
    * Check for the accessibility of the admin block demo page.
    */
-  public function testBlockDemo(): void {
+  public function testBlockDemo() {
     // Create administrative user.
     $admin_user = $this->drupalCreateUser([
       'administer blocks',
@@ -44,8 +44,9 @@ class BlockDemoTest extends BrowserTestBase {
 
     // All available themes in core.
     $available_themes = [
-      'olivero',
-      'claro',
+      'bartik',
+      'classy',
+      'seven',
       'stark',
     ];
 

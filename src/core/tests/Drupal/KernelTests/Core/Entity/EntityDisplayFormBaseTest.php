@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\KernelTests\Core\Entity;
 
 use Drupal\Core\Entity\Display\EntityDisplayInterface;
@@ -24,7 +22,7 @@ class EntityDisplayFormBaseTest extends KernelTestBase {
   /**
    * @covers ::copyFormValuesToEntity
    */
-  public function testCopyFormValuesToEntity(): void {
+  public function testCopyFormValuesToEntity() {
     $field_values = [];
     $entity = $this->prophesize(EntityDisplayInterface::class);
     $entity->getPluginCollections()->willReturn([]);
@@ -39,9 +37,9 @@ class EntityDisplayFormBaseTest extends KernelTestBase {
       'region' => 'hidden',
     ];
     $entity->removeComponent('new_field_mismatch_type_visible')
-      ->will(function (array $args) use ($entity) {
+      ->will(function ($args) {
         // On subsequent calls, getComponent() will return an empty array.
-        $entity->getComponent($args[0])->willReturn([]);
+        $this->getComponent($args[0])->willReturn([]);
       })
       ->shouldBeCalled();
 
@@ -78,9 +76,9 @@ class EntityDisplayFormBaseTest extends KernelTestBase {
       'region' => 'hidden',
     ];
     $entity->removeComponent('field_start_visible_change_region')
-      ->will(function (array $args) use ($entity) {
+      ->will(function ($args) {
         // On subsequent calls, getComponent() will return an empty array.
-        $entity->getComponent($args[0])->willReturn([]);
+        $this->getComponent($args[0])->willReturn([]);
       })
       ->shouldBeCalled();
 
@@ -107,16 +105,16 @@ class EntityDisplayFormBaseTest extends KernelTestBase {
         'type' => 'textfield',
         'region' => 'content',
       ])
-      ->will(function (array $args) use ($entity) {
+      ->will(function ($args) {
         // On subsequent calls, getComponent() will return the newly set values.
-        $entity->getComponent($args[0])->willReturn($args[1]);
+        $this->getComponent($args[0])->willReturn($args[1]);
         $args[1] += [
           'settings' => [],
           'third_party_settings' => [
             'foo' => 'bar',
           ],
         ];
-        $entity->setComponent($args[0], $args[1])->shouldBeCalled();
+        $this->setComponent($args[0], $args[1])->shouldBeCalled();
       })
       ->shouldBeCalled();
 

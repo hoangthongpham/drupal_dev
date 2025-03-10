@@ -1,12 +1,9 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\workspaces\Functional;
 
+use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\Tests\BrowserTestBase;
-use Drupal\Tests\content_translation\Traits\ContentTranslationTestTrait;
-use Drupal\Tests\WaitTerminateTestTrait;
 use Drupal\workspaces\Entity\Workspace;
 
 /**
@@ -17,9 +14,7 @@ use Drupal\workspaces\Entity\Workspace;
  */
 class PathWorkspacesTest extends BrowserTestBase {
 
-  use ContentTranslationTestTrait;
   use WorkspaceTestUtilities;
-  use WaitTerminateTestTrait;
 
   /**
    * {@inheritdoc}
@@ -43,7 +38,7 @@ class PathWorkspacesTest extends BrowserTestBase {
   protected function setUp(): void {
     parent::setUp();
 
-    static::createLanguageFromLangcode('ro');
+    ConfigurableLanguage::createFromLangcode('ro')->save();
     $this->rebuildContainer();
 
     // Create a content type.
@@ -52,17 +47,7 @@ class PathWorkspacesTest extends BrowserTestBase {
       'type' => 'article',
     ]);
 
-    $permissions = [
-      'administer languages',
-      'administer nodes',
-      'administer url aliases',
-      'administer workspaces',
-      'create article content',
-      'create content translations',
-      'edit any article content',
-      'translate any entity',
-    ];
-    $this->drupalLogin($this->drupalCreateUser($permissions));
+    $this->drupalLogin($this->rootUser);
 
     // Enable URL language detection and selection.
     $edit = ['language_interface[enabled][language-url]' => 1];
@@ -70,20 +55,24 @@ class PathWorkspacesTest extends BrowserTestBase {
     $this->submitForm($edit, 'Save settings');
 
     // Enable translation for article node.
-    static::enableContentTranslation('node', 'article');
+    $edit = [
+      'entity_types[node]' => 1,
+      'settings[node][article][translatable]' => 1,
+      'settings[node][article][fields][path]' => 1,
+      'settings[node][article][fields][body]' => 1,
+      'settings[node][article][settings][language][language_alterable]' => 1,
+    ];
+    $this->drupalGet('admin/config/regional/content-language');
+    $this->submitForm($edit, 'Save configuration');
+    \Drupal::entityTypeManager()->clearCachedDefinitions();
 
     $this->setupWorkspaceSwitcherBlock();
-
-    // The \Drupal\path_alias\AliasWhitelist service performs cache clears after
-    // Drupal has flushed the response to the client. We use
-    // WaitTerminateTestTrait to wait for Drupal to do this before continuing.
-    $this->setWaitForTerminate();
   }
 
   /**
    * Tests path aliases with workspaces.
    */
-  public function testPathAliases(): void {
+  public function testPathAliases() {
     // Create a published node in Live, without an alias.
     $node = $this->drupalCreateNode([
       'type' => 'article',
@@ -123,7 +112,7 @@ class PathWorkspacesTest extends BrowserTestBase {
   /**
    * Tests path aliases with workspaces and user switching.
    */
-  public function testPathAliasesUserSwitch(): void {
+  public function testPathAliasesUserSwitch() {
     // Create a published node in Live, without an alias.
     $node = $this->drupalCreateNode([
       'type' => 'article',
@@ -158,7 +147,6 @@ class PathWorkspacesTest extends BrowserTestBase {
     // Publish the workspace and check that the alias can be accessed in Live.
     $this->drupalLogin($this->rootUser);
     $stage->publish();
-
     $this->drupalLogout();
     $this->assertAccessiblePaths([$path]);
     $this->assertNotEmpty(\Drupal::cache('data')->get('preload-paths:/node/1'));
@@ -167,7 +155,7 @@ class PathWorkspacesTest extends BrowserTestBase {
   /**
    * Tests path aliases with workspaces for translatable nodes.
    */
-  public function testPathAliasesWithTranslation(): void {
+  public function testPathAliasesWithTranslation() {
     $stage = Workspace::load('stage');
 
     // Create one node with a random alias.

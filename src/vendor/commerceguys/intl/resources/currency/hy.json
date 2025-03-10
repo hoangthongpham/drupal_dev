@@ -413,7 +413,7 @@
 	"RSD": {
 		"name": "սերբական դինար"
 	},
-	"SLE": {
+	"SLL": {
 		"name": "Սիեռա Լեոնեի լեոնե"
 	},
 	"SGD": {
@@ -482,5 +482,20 @@
 	},
 	"FKP": {
 		"name": "Ֆոլքլենդյան կղզիների ֆունտ"
+	},
+	"VED": {
+		"name": "Bolívar Soberano"
+	},
+	"SVC": {
+		"name": "Salvadoran Colón"
+	},
+	"SLE": {
+		"name": "Sierra Leonean Leone"
+	},
+	"UYW": {
+		"name": "Uruguayan Nominal Wage Index Unit"
+	},
+	"ZWL": {
+		"name": "Zimbabwean Dollar (2009)"
 	}
 }

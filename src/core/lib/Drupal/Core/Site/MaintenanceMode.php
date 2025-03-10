@@ -2,8 +2,6 @@
 
 namespace Drupal\Core\Site;
 
-use Drupal\Component\Render\FormattableMarkup;
-use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\State\StateInterface;
@@ -21,23 +19,13 @@ class MaintenanceMode implements MaintenanceModeInterface {
   protected $state;
 
   /**
-   * The configuration factory.
-   *
-   * @var \Drupal\Core\Config\ConfigFactoryInterface
-   */
-  protected $config;
-
-  /**
    * Constructs a new maintenance mode service.
    *
    * @param \Drupal\Core\State\StateInterface $state
    *   The state.
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
-   *   The config factory.
    */
-  public function __construct(StateInterface $state, ConfigFactoryInterface $config_factory) {
+  public function __construct(StateInterface $state) {
     $this->state = $state;
-    $this->config = $config_factory;
   }
 
   /**
@@ -62,15 +50,6 @@ class MaintenanceMode implements MaintenanceModeInterface {
    */
   public function exempt(AccountInterface $account) {
     return $account->hasPermission('access site in maintenance mode');
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getSiteMaintenanceMessage() {
-    return new FormattableMarkup($this->config->get('system.maintenance')->get('message'), [
-      '@site' => $this->config->get('system.site')->get('name'),
-    ]);
   }
 
 }

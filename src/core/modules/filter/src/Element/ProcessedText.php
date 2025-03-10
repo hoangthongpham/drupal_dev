@@ -5,17 +5,17 @@ namespace Drupal\filter\Element;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Render\BubbleableMetadata;
-use Drupal\Core\Render\Attribute\RenderElement;
-use Drupal\Core\Render\Element\RenderElementBase;
+use Drupal\Core\Render\Element\RenderElement;
 use Drupal\filter\Entity\FilterFormat;
 use Drupal\filter\Plugin\FilterInterface;
 use Drupal\filter\Render\FilteredMarkup;
 
 /**
  * Provides a processed text render element.
+ *
+ * @RenderElement("processed_text")
  */
-#[RenderElement('processed_text')]
-class ProcessedText extends RenderElementBase {
+class ProcessedText extends RenderElement {
 
   /**
    * {@inheritdoc}
@@ -72,7 +72,7 @@ class ProcessedText extends RenderElementBase {
     if (!isset($format_id)) {
       $filter_settings = static::configFactory()->get('filter.settings');
       $format_id = $filter_settings->get('fallback_format');
-      // Ensure 'filter.settings' cacheability is respected.
+      // Ensure 'filter.settings' config's cacheability is respected.
       CacheableMetadata::createFromRenderArray($element)
         ->addCacheableDependency($filter_settings)
         ->applyTo($element);
@@ -85,11 +85,6 @@ class ProcessedText extends RenderElementBase {
       $message = !$format ? 'Missing text format: %format.' : 'Disabled text format: %format.';
       static::logger('filter')->alert($message, ['%format' => $format_id]);
       $element['#markup'] = '';
-      // Associate the disabled text format's cache tag, to ensure re-enabling
-      // the text format invalidates the appropriate render cache items.
-      if ($format !== NULL) {
-        $element['#cache']['tags'] = Cache::mergeTags($element['#cache']['tags'] ?? [], $format->getCacheTags());
-      }
       return $element;
     }
 

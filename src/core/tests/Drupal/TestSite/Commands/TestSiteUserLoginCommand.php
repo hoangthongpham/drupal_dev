@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\TestSite\Commands;
 
 use Drupal\Core\DrupalKernel;
@@ -24,7 +22,7 @@ class TestSiteUserLoginCommand extends Command {
   /**
    * The class loader to use for installation and initialization of setup.
    *
-   * @var \Composer\Autoload\ClassLoader
+   * @var \Symfony\Component\Classloader\Classloader
    */
   protected $classLoader;
 
@@ -43,7 +41,7 @@ class TestSiteUserLoginCommand extends Command {
    *
    * @throws \Symfony\Component\Console\Exception\InvalidArgumentException
    */
-  protected function execute(InputInterface $input, OutputInterface $output): int {
+  protected function execute(InputInterface $input, OutputInterface $output) {
     $root = dirname(__DIR__, 5);
     chdir($root);
 

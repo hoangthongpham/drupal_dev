@@ -7,12 +7,11 @@ use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Routing\LocalRedirectResponse;
 use Drupal\Core\Routing\RequestContext;
 use Drupal\Core\Utility\UnroutedUrlAssemblerInterface;
-use Symfony\Component\DependencyInjection\Attribute\AutowireServiceClosure;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
+use Symfony\Component\HttpKernel\Event\ResponseEvent;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
  * Allows manipulation of the response object when performing a redirect.
@@ -20,28 +19,23 @@ use Symfony\Component\HttpKernel\KernelEvents;
 class RedirectResponseSubscriber implements EventSubscriberInterface {
 
   /**
-   * Whether to ignore the destination query parameter when redirecting.
+   * The unrouted URL assembler service.
    *
-   * @var bool
+   * @var \Drupal\Core\Utility\UnroutedUrlAssemblerInterface
    */
-  protected bool $ignoreDestination = FALSE;
+  protected $unroutedUrlAssembler;
 
   /**
    * Constructs a RedirectResponseSubscriber object.
    *
-   * @param \Drupal\Core\Utility\UnroutedUrlAssemblerInterface $unroutedUrlAssembler
+   * @param \Drupal\Core\Utility\UnroutedUrlAssemblerInterface $url_assembler
    *   The unrouted URL assembler service.
-   * @param \Drupal\Core\Routing\RequestContext $requestContext
+   * @param \Drupal\Core\Routing\RequestContext $request_context
    *   The request context.
-   * @param \Closure $loggerClosure
-   *   A closure that wraps the 'logger.channel.php' service.
    */
-  public function __construct(
-    protected UnroutedUrlAssemblerInterface $unroutedUrlAssembler,
-    protected RequestContext $requestContext,
-    #[AutowireServiceClosure('logger.channel.php')]
-    protected \Closure $loggerClosure,
-  ) {
+  public function __construct(UnroutedUrlAssemblerInterface $url_assembler, RequestContext $request_context) {
+    $this->unroutedUrlAssembler = $url_assembler;
+    $this->requestContext = $request_context;
   }
 
   /**
@@ -59,7 +53,7 @@ class RedirectResponseSubscriber implements EventSubscriberInterface {
       // If $response is already a SecuredRedirectResponse, it might reject the
       // new target as invalid, in which case proceed with the old target.
       $destination = $request->query->get('destination');
-      if ($destination && !$this->ignoreDestination) {
+      if ($destination) {
         // The 'Location' HTTP header must always be absolute.
         $destination = $this->getDestinationAsAbsoluteUrl($destination, $request->getSchemeAndHttpHost());
         try {
@@ -81,14 +75,13 @@ class RedirectResponseSubscriber implements EventSubscriberInterface {
         }
         catch (\InvalidArgumentException $e) {
           // If the above failed, it's because the redirect target wasn't
-          // local. Do not follow that redirect. Log an error message instead,
-          // then return a 400 response to the client with the error message.
-          // We don't throw an exception, because this is a client error rather
-          // than a server error.
+          // local. Do not follow that redirect. Display an error message
+          // instead. We're already catching one exception, so trigger_error()
+          // rather than throw another one.
+          // We don't throw an exception, because this is a client error rather than a
+          // server error.
           $message = 'Redirects to external URLs are not allowed by default, use \Drupal\Core\Routing\TrustedRedirectResponse for it.';
-          /** @var \Psr\Log\LoggerInterface $logger */
-          $logger = ($this->loggerClosure)();
-          $logger->error($message);
+          trigger_error($message, E_USER_ERROR);
           $safe_response = new Response($message, 400);
         }
         $event->setResponse($safe_response);
@@ -114,7 +107,7 @@ class RedirectResponseSubscriber implements EventSubscriberInterface {
       // not including the scheme and host, but its path is expected to be
       // absolute (start with a '/'). For such a case, prepend the scheme and
       // host, because the 'Location' header must be absolute.
-      if (str_starts_with($destination, '/')) {
+      if (strpos($destination, '/') === 0) {
         $destination = $scheme_and_host . $destination;
       }
       else {
@@ -136,23 +129,12 @@ class RedirectResponseSubscriber implements EventSubscriberInterface {
   }
 
   /**
-   * Set whether the redirect response will ignore the destination query param.
-   *
-   * @param bool $status
-   *   (optional) TRUE if the destination query parameter should be ignored.
-   *   FALSE if not. Defaults to TRUE.
-   */
-  public function setIgnoreDestination($status = TRUE) {
-    $this->ignoreDestination = $status;
-  }
-
-  /**
    * Registers the methods in this class that should be listeners.
    *
    * @return array
    *   An array of event listener definitions.
    */
-  public static function getSubscribedEvents(): array {
+  public static function getSubscribedEvents() {
     $events[KernelEvents::RESPONSE][] = ['checkRedirectUrl'];
     return $events;
   }

@@ -50,6 +50,9 @@
 	"BTN": {
 		"name": "bhutanske ngultrum"
 	},
+	"VED": {
+		"name": "Bolívar Soberano"
+	},
 	"BOB": {
 		"name": "bolivianske boliviano"
 	},
@@ -300,7 +303,7 @@
 		"symbol": "kr"
 	},
 	"BYN": {
-		"name": "nye belarusiske rubler"
+		"name": "nye hviterussiske rubler"
 	},
 	"ILS": {
 		"name": "nye israelske shekler"
@@ -369,6 +372,9 @@
 		"name": "seychelliske rupier"
 	},
 	"SLE": {
+		"name": "Sierra Leonean Leone"
+	},
+	"SLL": {
 		"name": "sierraleonske leone"
 	},
 	"SGD": {
@@ -442,6 +448,9 @@
 	},
 	"HUF": {
 		"name": "ungarske forinter"
+	},
+	"UYW": {
+		"name": "Uruguayan Nominal Wage Index Unit"
 	},
 	"UYU": {
 		"name": "uruguayanske pesos"

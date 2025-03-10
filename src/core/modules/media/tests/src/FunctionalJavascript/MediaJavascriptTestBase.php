@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\media\FunctionalJavascript;
 
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
@@ -17,7 +15,9 @@ abstract class MediaJavascriptTestBase extends WebDriverTestBase {
   use MediaTypeCreationTrait;
 
   /**
-   * {@inheritdoc}
+   * Modules to enable.
+   *
+   * @var array
    */
   protected static $modules = [
     'system',
@@ -51,7 +51,7 @@ abstract class MediaJavascriptTestBase extends WebDriverTestBase {
    */
   protected function assertLinkToCreatedMedia() {
     $assert_session = $this->assertSession();
-    $selector = 'div[aria-label="Status message"] a';
+    $selector = '.messages a';
 
     // Get the canonical media entity URL from the creation message.
     $link = $assert_session->elementExists('css', $selector);

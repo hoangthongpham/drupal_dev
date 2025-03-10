@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\rest\Functional;
 
 use Drupal\Core\Url;
@@ -110,6 +108,10 @@ trait CookieResourceTestTrait {
       // Therefore we must update our cacheability expectations accordingly.
       if (in_array('user.permissions', $expected_cookie_403_cacheability->getCacheContexts(), TRUE)) {
         $expected_cookie_403_cacheability->addCacheTags(['config:user.role.anonymous']);
+      }
+      // @todo Fix \Drupal\block\BlockAccessControlHandler::mergeCacheabilityFromConditions() in https://www.drupal.org/node/2867881
+      if (static::$entityTypeId === 'block') {
+        $expected_cookie_403_cacheability->setCacheTags(str_replace('user:2', 'user:0', $expected_cookie_403_cacheability->getCacheTags()));
       }
       $this->assertResourceErrorResponse(403, FALSE, $response, $expected_cookie_403_cacheability->getCacheTags(), $expected_cookie_403_cacheability->getCacheContexts(), 'MISS', FALSE);
     }

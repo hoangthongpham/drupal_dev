@@ -2,13 +2,14 @@
 
 namespace Drupal\Tests\commerce\Functional;
 
-use Drupal\Core\StringTranslation\StringTranslationTrait;
-use Drupal\Tests\BrowserTestBase;
-use Drupal\Tests\block\Traits\BlockCreationTrait;
-use Drupal\Tests\commerce\Traits\CommerceBrowserTestTrait;
 use Drupal\commerce_price\Comparator\NumberComparator;
 use Drupal\commerce_price\Comparator\PriceComparator;
 use Drupal\commerce_store\StoreCreationTrait;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\Tests\block\Traits\BlockCreationTrait;
+use Drupal\Tests\BrowserTestBase;
+use Drupal\Tests\commerce\Traits\CommerceBrowserTestTrait;
+use Drupal\Tests\commerce\Traits\DeprecationSuppressionTrait;
 use SebastianBergmann\Comparator\Factory as PhpUnitComparatorFactory;
 
 /**
@@ -19,6 +20,7 @@ abstract class CommerceBrowserTestBase extends BrowserTestBase {
   use BlockCreationTrait;
   use StoreCreationTrait;
   use CommerceBrowserTestTrait;
+  use DeprecationSuppressionTrait;
   use StringTranslationTrait;
 
   /**
@@ -61,6 +63,7 @@ abstract class CommerceBrowserTestBase extends BrowserTestBase {
    * {@inheritdoc}
    */
   protected function setUp(): void {
+    $this->setErrorHandler();
     parent::setUp();
 
     $factory = PhpUnitComparatorFactory::getInstance();
@@ -74,6 +77,14 @@ abstract class CommerceBrowserTestBase extends BrowserTestBase {
 
     $this->adminUser = $this->drupalCreateUser($this->getAdministratorPermissions());
     $this->drupalLogin($this->adminUser);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function tearDown(): void {
+    parent::tearDown();
+    $this->restoreErrorHandler();
   }
 
   /**

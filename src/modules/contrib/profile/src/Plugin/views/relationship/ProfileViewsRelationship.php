@@ -5,6 +5,7 @@ namespace Drupal\profile\Plugin\views\relationship;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\profile\Entity\ProfileType;
 use Drupal\views\Plugin\views\relationship\RelationshipPluginBase;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides a views relationship to select profile content by a profile_type.
@@ -12,6 +13,28 @@ use Drupal\views\Plugin\views\relationship\RelationshipPluginBase;
  * @ViewsRelationship("profile_relationship")
  */
 class ProfileViewsRelationship extends RelationshipPluginBase {
+
+  /**
+   * Constructs a ProfileViewsRelationship object.
+   *
+   * @param array $configuration
+   *   A configuration array containing information about the plugin instance.
+   * @param string $plugin_id
+   *   The plugin_id for the plugin instance.
+   * @param mixed $plugin_definition
+   *   The plugin implementation definition.
+   */
+  public function __construct(array $configuration, $plugin_id, $plugin_definition) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
+    $this->definition = $plugin_definition + $configuration;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    return new static($configuration, $plugin_id, $plugin_definition);
+  }
 
   /**
    * {@inheritdoc}

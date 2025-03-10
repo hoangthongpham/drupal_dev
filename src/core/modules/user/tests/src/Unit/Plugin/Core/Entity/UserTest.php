@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\user\Unit\Plugin\Core\Entity;
 
 use Drupal\Tests\Core\Session\UserSessionTest;
@@ -24,7 +22,7 @@ class UserTest extends UserSessionTest {
     $user->expects($this->any())
       ->method('id')
       // @todo Also test the uid = 1 handling.
-      ->willReturn($authenticated ? 2 : 0);
+      ->will($this->returnValue($authenticated ? 2 : 0));
     $roles = [];
     foreach ($rids as $rid) {
       $roles[] = (object) [
@@ -34,7 +32,7 @@ class UserTest extends UserSessionTest {
     $user->expects($this->any())
       ->method('get')
       ->with('roles')
-      ->willReturn($roles);
+      ->will($this->returnValue($roles));
     return $user;
   }
 
@@ -44,7 +42,7 @@ class UserTest extends UserSessionTest {
    * @see \Drupal\user\Entity\User::getRoles()
    * @covers ::getRoles
    */
-  public function testUserGetRoles(): void {
+  public function testUserGetRoles() {
     // Anonymous user.
     $user = $this->createUserSession([]);
     $this->assertEquals([RoleInterface::ANONYMOUS_ID], $user->getRoles());

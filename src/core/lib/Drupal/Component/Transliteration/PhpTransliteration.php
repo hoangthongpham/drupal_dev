@@ -2,8 +2,6 @@
 
 namespace Drupal\Component\Transliteration;
 
-// cspell:ignore Brion Vibber
-
 /**
  * Implements transliteration without using the PECL extensions.
  *
@@ -67,8 +65,6 @@ class PhpTransliteration implements TransliterationInterface {
    * transliterates to more than one ASCII character require special
    * treatment: we want to remove their accent and use the un-
    * transliterated base character.
-   *
-   * @var string[]
    */
   protected $fixTransliterateForRemoveDiacritics = [
     'AE' => 'Æ',
@@ -134,7 +130,7 @@ class PhpTransliteration implements TransliterationInterface {
     // Replace question marks with a unique hash if necessary. This because
     // mb_convert_encoding() replaces all invalid characters with a question
     // mark.
-    if ($unknown_character != '?' && str_contains($string, '?')) {
+    if ($unknown_character != '?' && strpos($string, '?') !== FALSE) {
       $hash = hash('sha256', $string);
       $string = str_replace('?', $hash, $string);
     }
@@ -287,9 +283,11 @@ class PhpTransliteration implements TransliterationInterface {
 
     // Read in this file, which should set up a variable called $overrides,
     // which will be local to this function.
-    $overrides[$langcode] = [];
     if (is_file($file)) {
       include $file;
+    }
+    if (!isset($overrides) || !is_array($overrides)) {
+      $overrides = [$langcode => []];
     }
     $this->languageOverrides[$langcode] = $overrides[$langcode];
   }
@@ -313,10 +311,14 @@ class PhpTransliteration implements TransliterationInterface {
 
     // Read in this file, which should set up a variable called $base, which
     // will be local to this function.
-    $base = [];
     if (is_file($file)) {
       include $file;
     }
+    if (!isset($base) || !is_array($base)) {
+      $base = [];
+    }
+
+    // Save this data.
     $this->genericMap[$bank] = $base;
   }
 

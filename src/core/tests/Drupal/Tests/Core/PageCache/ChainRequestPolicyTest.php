@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\Core\PageCache;
 
 use Drupal\Core\PageCache\RequestPolicyInterface;
@@ -29,12 +27,7 @@ class ChainRequestPolicyTest extends UnitTestCase {
    */
   protected $request;
 
-  /**
-   * {@inheritdoc}
-   */
   protected function setUp(): void {
-    parent::setUp();
-
     $this->policy = new ChainRequestPolicy();
     $this->request = new Request();
   }
@@ -44,9 +37,9 @@ class ChainRequestPolicyTest extends UnitTestCase {
    *
    * @covers ::check
    */
-  public function testEmptyChain(): void {
+  public function testEmptyChain() {
     $result = $this->policy->check($this->request);
-    $this->assertNull($result);
+    $this->assertSame(NULL, $result);
   }
 
   /**
@@ -54,17 +47,17 @@ class ChainRequestPolicyTest extends UnitTestCase {
    *
    * @covers ::check
    */
-  public function testNullRuleChain(): void {
+  public function testNullRuleChain() {
     $rule = $this->createMock('Drupal\Core\PageCache\RequestPolicyInterface');
     $rule->expects($this->once())
       ->method('check')
       ->with($this->request)
-      ->willReturn(NULL);
+      ->will($this->returnValue(NULL));
 
     $this->policy->addPolicy($rule);
 
     $result = $this->policy->check($this->request);
-    $this->assertNull($result);
+    $this->assertSame(NULL, $result);
   }
 
   /**
@@ -73,12 +66,12 @@ class ChainRequestPolicyTest extends UnitTestCase {
    * @dataProvider providerChainExceptionOnInvalidReturnValue
    * @covers ::check
    */
-  public function testChainExceptionOnInvalidReturnValue($return_value): void {
+  public function testChainExceptionOnInvalidReturnValue($return_value) {
     $rule = $this->createMock('Drupal\Core\PageCache\RequestPolicyInterface');
     $rule->expects($this->once())
       ->method('check')
       ->with($this->request)
-      ->willReturn($return_value);
+      ->will($this->returnValue($return_value));
 
     $this->policy->addPolicy($rule);
 
@@ -92,7 +85,7 @@ class ChainRequestPolicyTest extends UnitTestCase {
    * @return array
    *   Test input and expected result.
    */
-  public static function providerChainExceptionOnInvalidReturnValue() {
+  public function providerChainExceptionOnInvalidReturnValue() {
     return [
       [FALSE],
       [0],
@@ -109,13 +102,13 @@ class ChainRequestPolicyTest extends UnitTestCase {
    * @dataProvider providerAllowIfAnyRuleReturnedAllow
    * @covers ::check
    */
-  public function testAllowIfAnyRuleReturnedAllow($return_values): void {
+  public function testAllowIfAnyRuleReturnedAllow($return_values) {
     foreach ($return_values as $return_value) {
       $rule = $this->createMock('Drupal\Core\PageCache\RequestPolicyInterface');
       $rule->expects($this->once())
         ->method('check')
         ->with($this->request)
-        ->willReturn($return_value);
+        ->will($this->returnValue($return_value));
 
       $this->policy->addPolicy($rule);
     }
@@ -130,7 +123,7 @@ class ChainRequestPolicyTest extends UnitTestCase {
    * @return array
    *   Test input and expected result.
    */
-  public static function providerAllowIfAnyRuleReturnedAllow() {
+  public function providerAllowIfAnyRuleReturnedAllow() {
     return [
       [[RequestPolicyInterface::ALLOW]],
       [[NULL, RequestPolicyInterface::ALLOW]],
@@ -140,19 +133,19 @@ class ChainRequestPolicyTest extends UnitTestCase {
   /**
    * Asserts that check() returns immediately when a rule returned DENY.
    */
-  public function testStopChainOnFirstDeny(): void {
+  public function testStopChainOnFirstDeny() {
     $rule1 = $this->createMock('Drupal\Core\PageCache\RequestPolicyInterface');
     $rule1->expects($this->once())
       ->method('check')
       ->with($this->request)
-      ->willReturn(RequestPolicyInterface::ALLOW);
+      ->will($this->returnValue(RequestPolicyInterface::ALLOW));
     $this->policy->addPolicy($rule1);
 
     $deny_rule = $this->createMock('Drupal\Core\PageCache\RequestPolicyInterface');
     $deny_rule->expects($this->once())
       ->method('check')
       ->with($this->request)
-      ->willReturn(RequestPolicyInterface::DENY);
+      ->will($this->returnValue(RequestPolicyInterface::DENY));
     $this->policy->addPolicy($deny_rule);
 
     $ignored_rule = $this->createMock('Drupal\Core\PageCache\RequestPolicyInterface');

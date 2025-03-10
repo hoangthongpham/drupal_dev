@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2023 Justin Hileman
+ * (c) 2012-2020 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -18,17 +18,10 @@ namespace Psy\Reflection;
  */
 class ReflectionLanguageConstructParameter extends \ReflectionParameter
 {
-    /** @var string|array|object */
     private $function;
-    /** @var int|string */
     private $parameter;
-    private array $opts;
+    private $opts;
 
-    /**
-     * @param string|array|object $function
-     * @param int|string          $parameter
-     * @param array               $opts
-     */
     public function __construct($function, $parameter, array $opts)
     {
         $this->function = $function;
@@ -39,9 +32,9 @@ class ReflectionLanguageConstructParameter extends \ReflectionParameter
     /**
      * No class here.
      */
-    public function getClass(): ?\ReflectionClass
+    public function getClass()
     {
-        return null;
+        return;
     }
 
     /**
@@ -49,7 +42,7 @@ class ReflectionLanguageConstructParameter extends \ReflectionParameter
      *
      * @return bool
      */
-    public function isArray(): bool
+    public function isArray()
     {
         return \array_key_exists('isArray', $this->opts) && $this->opts['isArray'];
     }
@@ -57,18 +50,13 @@ class ReflectionLanguageConstructParameter extends \ReflectionParameter
     /**
      * Get param default value.
      *
-     * @todo remove \ReturnTypeWillChange attribute after dropping support for PHP 7.x (when we can use mixed type)
-     *
      * @return mixed
      */
-    #[\ReturnTypeWillChange]
     public function getDefaultValue()
     {
         if ($this->isDefaultValueAvailable()) {
             return $this->opts['defaultValue'];
         }
-
-        return null;
     }
 
     /**
@@ -76,7 +64,7 @@ class ReflectionLanguageConstructParameter extends \ReflectionParameter
      *
      * @return string
      */
-    public function getName(): string
+    public function getName()
     {
         return $this->parameter;
     }
@@ -86,7 +74,7 @@ class ReflectionLanguageConstructParameter extends \ReflectionParameter
      *
      * @return bool
      */
-    public function isOptional(): bool
+    public function isOptional()
     {
         return \array_key_exists('isOptional', $this->opts) && $this->opts['isOptional'];
     }
@@ -96,7 +84,7 @@ class ReflectionLanguageConstructParameter extends \ReflectionParameter
      *
      * @return bool
      */
-    public function isDefaultValueAvailable(): bool
+    public function isDefaultValueAvailable()
     {
         return \array_key_exists('defaultValue', $this->opts);
     }
@@ -108,7 +96,7 @@ class ReflectionLanguageConstructParameter extends \ReflectionParameter
      *
      * @return bool
      */
-    public function isPassedByReference(): bool
+    public function isPassedByReference()
     {
         return \array_key_exists('isPassedByReference', $this->opts) && $this->opts['isPassedByReference'];
     }

@@ -2,10 +2,10 @@
 
 namespace Drupal\Tests\commerce_order\Unit\Plugin\Commerce\Condition;
 
-use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Tests\UnitTestCase;
 use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\commerce_order\Plugin\Commerce\Condition\OrderType;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Tests\UnitTestCase;
 
 /**
  * @coversDefaultClass \Drupal\commerce_order\Plugin\Commerce\Condition\OrderType

@@ -10,50 +10,47 @@
  */
 
 html {
-  font-family: var(--font-family);
+  font-family: BlinkMacSystemFont, -apple-system, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
   font-size: 100%;
   font-weight: normal;
   font-style: normal;
-  line-height: var(--line-height);
+  line-height: 1.5;
 }
 
 body {
-  word-wrap: break-word;
-  hyphens: auto;
-  color: var(--color-fg);
-  background: var(--color-bg);
+  color: #232429;
+  background: #fff;
 }
 
 a,
 .link {
-  color: var(--color-link);
+  color: #003cc5;
 }
 
 a:hover,
 a:focus,
 .link:hover,
 .link:focus {
-  -webkit-text-decoration: none;
   text-decoration: none;
   outline: 0;
 }
 
 a:hover,
 .link:hover {
-  color: var(--color-link-hover);
+  color: #0036b1;
 }
 
 a:active,
 .link:active {
-  color: var(--color-link-active);
+  color: #00339a;
 }
 
 hr {
   height: 1px;
-  margin: var(--space-m) 0;
+  margin: 1rem 0;
   padding: 0;
   border: none;
-  background: var(--color-divider);
+  background: rgba(142, 146, 156, 0.5);
 }
 
 summary {
@@ -67,50 +64,50 @@ summary {
 
 h1,
 .heading-a {
-  margin: var(--space-m) 0 var(--space-s);
-  font-size: var(--font-size-h1);
+  margin: 1rem 0 0.75rem;
+  font-size: 2.027rem;
   font-weight: bold;
-  line-height: var(--line-height-heading);
+  line-height: 1.3;
 }
 
 h2,
 .heading-b {
-  margin: var(--space-m) 0 var(--space-s);
-  font-size: var(--font-size-h2);
+  margin: 1rem 0 0.75rem;
+  font-size: 1.802rem;
   font-weight: bold;
-  line-height: var(--line-height-heading);
+  line-height: 1.3;
 }
 
 h3,
 .heading-c {
-  margin: var(--space-m) 0 var(--space-s);
-  font-size: var(--font-size-h3);
+  margin: 1rem 0 0.75rem;
+  font-size: 1.602rem;
   font-weight: bold;
-  line-height: var(--line-height-heading);
+  line-height: 1.3;
 }
 
 h4,
 .heading-d {
-  margin: var(--space-m) 0 var(--space-s);
-  font-size: var(--font-size-h4);
+  margin: 1rem 0 0.75rem;
+  font-size: 1.424rem;
   font-weight: bold;
-  line-height: var(--line-height-heading);
+  line-height: 1.3;
 }
 
 h5,
 .heading-e {
-  margin: var(--space-m) 0 var(--space-s);
-  font-size: var(--font-size-h5);
+  margin: 1rem 0 0.75rem;
+  font-size: 1.266rem;
   font-weight: bold;
-  line-height: var(--line-height-heading);
+  line-height: 1.3;
 }
 
 h6,
 .heading-f {
-  margin: var(--space-m) 0 var(--space-s);
-  font-size: var(--font-size-h6);
+  margin: 1rem 0 0.75rem;
+  font-size: 1.125rem;
   font-weight: bold;
-  line-height: var(--line-height-heading);
+  line-height: 1.3;
 }
 
 p {
@@ -123,29 +120,17 @@ dl {
 
 dl dd,
 dl dl {
-  margin-block-end: 0.625rem;
-  margin-inline-start: 1.25rem;
+  margin-bottom: 0.625rem;
+  margin-left: 1.25rem; /* LTR */
+}
+
+[dir="rtl"] dl dd,
+[dir="rtl"] dl dl {
+  margin-right: 1.25rem;
 }
 
 blockquote {
-  position: relative;
-  margin-block: var(--space-l);
-  margin-inline: 2.5rem var(--space-l);
-  font-size: var(--font-size-h6);
-}
-
-blockquote::before {
-  position: absolute;
-  inset-inline-start: -2.5rem;
-  content: open-quote;
-  color: var(--color-absolutezero);
-  font-family: var(--font-family-serif);
-  font-size: var(--space-xl);
-  line-height: 1em;
-}
-
-blockquote::after {
-  content: no-close-quote;
+  margin: 1em 2.5rem;
 }
 
 address {
@@ -154,14 +139,12 @@ address {
 
 u,
 ins {
-  -webkit-text-decoration: underline;
   text-decoration: underline;
 }
 
 s,
 strike,
 del {
-  -webkit-text-decoration: line-through;
   text-decoration: line-through;
 }
 
@@ -191,17 +174,42 @@ acronym {
 }
 
 ul {
-  margin-block: 0.25em;
-  margin-inline: 1.5em 0;
-  padding-inline-start: 0;
+  margin: 0.25em 0 0.25em 1.5em; /* LTR */
+  padding-left: 0;
   list-style-type: disc;
   list-style-image: none;
 }
 
+[dir="rtl"] ul {
+  margin-right: 1.5em;
+  margin-left: 0;
+  padding-right: 0;
+}
+
+/* This is required to win over specificity of [dir="rtl"] ul */
+
+[dir="rtl"] .messages__list {
+  margin-right: 0;
+}
+
 ol {
-  margin-block: 0.25em;
-  margin-inline: 2em 0;
+  margin: 0.25em 0 0.25em 2em; /* LTR */
   padding: 0;
+  list-style-type: decimal;
+}
+
+[dir="rtl"] ol {
+  margin-right: 2em;
+  margin-left: 0;
+}
+
+/**
+ * Fix duplicate border caused by normalize.css adding border-bottom without
+ * removing the text-decoration.
+ */
+
+abbr[title] {
+  text-decoration: none;
 }
 
 code {
@@ -214,7 +222,7 @@ pre {
 }
 
 details {
-  line-height: var(--details-line-height);
+  line-height: 1.295rem;
 }
 
 details summary {
@@ -235,10 +243,13 @@ img {
  *
  * This is applied globally to all interactive elements except Toolbar and
  * Settings Tray since they have their own styles.
+ *
+ * @todo https://www.drupal.org/project/claro/issues/3048785 :focus selector is
+ *   active for non-interactive elements in Internet Explorer 11.
  */
 
 .page-wrapper *:focus,
 .ui-dialog *:focus {
-  outline: var(--focus-outline);
-  box-shadow: var(--focus-box-shadow);
+  outline: 2px dotted transparent;
+  box-shadow: 0 0 0 2px #fff, 0 0 0 5px #26a769;
 }

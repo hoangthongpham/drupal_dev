@@ -2,10 +2,10 @@
 
 namespace Drupal\commerce_promotion\EventSubscriber;
 
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\commerce_promotion\PromotionUsageInterface;
-use Drupal\state_machine\Event\WorkflowTransitionEvent;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Drupal\state_machine\Event\WorkflowTransitionEvent;
 
 class OrderEventSubscriber implements EventSubscriberInterface {
 
@@ -47,7 +47,7 @@ class OrderEventSubscriber implements EventSubscriberInterface {
   /**
    * {@inheritdoc}
    */
-  public static function getSubscribedEvents(): array {
+  public static function getSubscribedEvents() {
     $events = [
       'commerce_order.place.pre_transition' => 'registerUsage',
     ];
@@ -73,8 +73,7 @@ class OrderEventSubscriber implements EventSubscriberInterface {
     $promotion_ids = [];
     $adjustments = $order->collectAdjustments();
     foreach ($adjustments as $adjustment) {
-      if ($adjustment->getType() !== 'promotion' &&
-        $adjustment->getType() !== 'shipping_promotion') {
+      if ($adjustment->getType() != 'promotion') {
         continue;
       }
 

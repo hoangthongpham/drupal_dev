@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\dblog\Kernel\Views;
 
 use Drupal\Component\Render\FormattableMarkup;
@@ -50,7 +48,7 @@ class ViewsIntegrationTest extends ViewsKernelTestBase {
   /**
    * Tests the messages escaping functionality.
    */
-  public function testMessages(): void {
+  public function testMessages() {
 
     // Remove the watchdog entries added by the potential batch process.
     $this->container->get('database')->truncate('watchdog')->execute();
@@ -72,11 +70,10 @@ class ViewsIntegrationTest extends ViewsKernelTestBase {
       // The 3rd entry contains some unsafe markup that needs to get filtered.
       if ($index == 2) {
         // Make sure that unsafe link differs from the rendered link, so we know
-        // that some filtering actually happened. We use assertNotSame and cast
-        // values to strings since HTML tags are significant.
-        $this->assertNotSame((string) $entry['variables']['link'], (string) $link_field);
+        // that some filtering actually happened.
+        $this->assertNotEquals($entry['variables']['link'], $link_field);
       }
-      $this->assertSame(Xss::filterAdmin($entry['variables']['link']), (string) $link_field);
+      $this->assertEquals(Xss::filterAdmin($entry['variables']['link']), $link_field);
     }
 
     // Disable replacing variables and check that the tokens aren't replaced.
@@ -94,7 +91,7 @@ class ViewsIntegrationTest extends ViewsKernelTestBase {
   /**
    * Tests the relationship with the users_field_data table.
    */
-  public function testRelationship(): void {
+  public function testRelationship() {
     $view = Views::getView('dblog_integration_test');
     $view->setDisplay('page_1');
     // The uid relationship should now join to the {users_field_data} table.
@@ -107,7 +104,7 @@ class ViewsIntegrationTest extends ViewsKernelTestBase {
   /**
    * Tests views can be filtered by severity and log type.
    */
-  public function testFiltering(): void {
+  public function testFiltering() {
     // Remove the watchdog entries added by the potential batch process.
     $this->container->get('database')->truncate('watchdog')->execute();
     $this->createLogEntries();

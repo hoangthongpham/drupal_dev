@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\config\Kernel;
 
 use Drupal\Core\Config\ConfigImporter;
@@ -22,13 +20,12 @@ class ConfigUninstallViaCliImportTest extends KernelTestBase {
   protected $configImporter;
 
   /**
-   * {@inheritdoc}
+   * Modules to enable.
+   *
+   * @var array
    */
   protected static $modules = ['system', 'config'];
 
-  /**
-   * {@inheritdoc}
-   */
   protected function setUp(): void {
     parent::setUp();
     if (PHP_SAPI !== 'cli') {
@@ -53,8 +50,7 @@ class ConfigUninstallViaCliImportTest extends KernelTestBase {
       $this->container->get('module_installer'),
       $this->container->get('theme_handler'),
       $this->container->get('string_translation'),
-      $this->container->get('extension.list.module'),
-      $this->container->get('extension.list.theme')
+      $this->container->get('extension.list.module')
     );
   }
 
@@ -63,7 +59,7 @@ class ConfigUninstallViaCliImportTest extends KernelTestBase {
    *
    * @see \Drupal\config\ConfigSubscriber
    */
-  public function testConfigUninstallViaCli(): void {
+  public function testConfigUninstallViaCli() {
     $this->assertTrue($this->container->get('module_handler')->moduleExists('config'));
     $sync = $this->container->get('config.storage.sync');
     $extensions = $sync->read('core.extension');

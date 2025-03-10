@@ -2,8 +2,8 @@
 
 namespace Drupal\commerce_order\EventSubscriber;
 
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\commerce_order\Mail\OrderReceiptMailInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\state_machine\Event\WorkflowTransitionEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -42,7 +42,7 @@ class OrderReceiptSubscriber implements EventSubscriberInterface {
   /**
    * {@inheritdoc}
    */
-  public static function getSubscribedEvents(): array {
+  public static function getSubscribedEvents() {
     $events = ['commerce_order.place.post_transition' => ['sendOrderReceipt', -100]];
     return $events;
   }

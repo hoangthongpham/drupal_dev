@@ -1,9 +1,8 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\KernelTests\Core\Installer;
 
+use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Extension\ProfileExtensionList;
 use Drupal\Core\StringTranslation\Translator\FileTranslation;
 use Drupal\KernelTests\KernelTestBase;
@@ -18,7 +17,7 @@ class InstallerLanguageTest extends KernelTestBase {
   /**
    * Tests that the installer can find translation files.
    */
-  public function testInstallerTranslationFiles(): void {
+  public function testInstallerTranslationFiles() {
     // Different translation files would be found depending on which language
     // we are looking for.
     $expected_translation_files = [
@@ -34,9 +33,9 @@ class InstallerLanguageTest extends KernelTestBase {
     $file_translation = new FileTranslation('core/tests/fixtures/files/translations', $this->container->get('file_system'));
     foreach ($expected_translation_files as $langcode => $files_expected) {
       $files_found = $file_translation->findTranslationFiles($langcode);
-      $this->assertSameSize($files_expected, $files_found, count($files_expected) . ' installer languages found.');
+      $this->assertSameSize($files_expected, $files_found, new FormattableMarkup('@count installer languages found.', ['@count' => count($files_expected)]));
       foreach ($files_found as $file) {
-        $this->assertContains($file->filename, $files_expected, $file->filename . ' found.');
+        $this->assertContains($file->filename, $files_expected, new FormattableMarkup('@file found.', ['@file' => $file->filename]));
       }
     }
   }
@@ -44,7 +43,7 @@ class InstallerLanguageTest extends KernelTestBase {
   /**
    * Tests profile info caching in non-English languages.
    */
-  public function testInstallerTranslationCache(): void {
+  public function testInstallerTranslationCache() {
     require_once 'core/includes/install.inc';
 
     // Prime the \Drupal\Core\Extension\ExtensionList::getPathname() static

@@ -1,13 +1,11 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\user\Functional\Rest;
 
-use Drupal\Tests\rest\Functional\EntityResource\ConfigEntityResourceTestBase;
+use Drupal\Tests\rest\Functional\EntityResource\EntityResourceTestBase;
 use Drupal\user\Entity\Role;
 
-abstract class RoleResourceTestBase extends ConfigEntityResourceTestBase {
+abstract class RoleResourceTestBase extends EntityResourceTestBase {
 
   /**
    * {@inheritdoc}
@@ -66,7 +64,6 @@ abstract class RoleResourceTestBase extends ConfigEntityResourceTestBase {
    */
   protected function getNormalizedPostEntity() {
     // @todo Update in https://www.drupal.org/node/2300677.
-    return [];
   }
 
 }

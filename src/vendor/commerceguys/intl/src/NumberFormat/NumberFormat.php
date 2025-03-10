@@ -23,91 +23,91 @@ final class NumberFormat
      *
      * @var string
      */
-    protected string $locale;
+    protected $locale;
 
     /**
      * The number pattern used to format decimal numbers.
      *
      * @var string
      */
-    protected string $decimalPattern;
+    protected $decimalPattern;
 
     /**
      * The number pattern used to format percentages.
      *
      * @var string
      */
-    protected string $percentPattern;
+    protected $percentPattern;
 
     /**
      * The number pattern used to format currency amounts.
      *
      * @var string
      */
-    protected string $currencyPattern;
+    protected $currencyPattern;
 
     /**
      * The number pattern used to format accounting currency amounts.
      *
      * @var string
      */
-    protected string $accountingCurrencyPattern;
+    protected $accountingCurrencyPattern;
 
     /**
      * The numbering system.
      *
      * @var string
      */
-    protected string $numberingSystem = self::NUMBERING_SYSTEM_LATIN;
+    protected $numberingSystem = self::NUMBERING_SYSTEM_LATIN;
 
     /**
      * The decimal separator.
      *
      * @var string
      */
-    protected string $decimalSeparator = '.';
+    protected $decimalSeparator = '.';
 
     /**
      * The decimal separator for currency amounts.
      *
      * @var string
      */
-    protected string $decimalCurrencySeparator = '.';
+    protected $decimalCurrencySeparator = '.';
 
     /**
      * The grouping separator.
      *
      * @var string
      */
-    protected string $groupingSeparator = ',';
+    protected $groupingSeparator = ',';
 
     /**
      * The grouping separator for currency amounts.
      *
      * @var string
      */
-    protected string $groupingCurrencySeparator = ',';
+    protected $groupingCurrencySeparator = ',';
 
     /**
      * The plus sign.
      *
      * @var string
      */
-    protected string $plusSign = '+';
+    protected $plusSign = '+';
 
     /**
      * The number symbols.
      *
      * @var string
      */
-    protected string $minusSign = '-';
+    protected $minusSign = '-';
 
     /**
      * The percent sign.
      *
      * @var string
      */
-    protected string $percentSign = '%';
+    protected $percentSign = '%';
 
     /**
      * Creates a new NumberFormat instance.
@@ -173,7 +173,7 @@ final class NumberFormat
      *
      * @return string
      */
-    public function getLocale(): string
+    public function getLocale()
     {
         return $this->locale;
     }
@@ -185,7 +185,7 @@ final class NumberFormat
      *
      * @see http://cldr.unicode.org/translation/number-patterns
      */
-    public function getDecimalPattern(): string
+    public function getDecimalPattern()
     {
         return $this->decimalPattern;
     }
@@ -197,7 +197,7 @@ final class NumberFormat
      *
      * @see http://cldr.unicode.org/translation/number-patterns
      */
-    public function getPercentPattern(): string
+    public function getPercentPattern()
     {
         return $this->percentPattern;
     }
@@ -209,7 +209,7 @@ final class NumberFormat
      *
      * @see http://cldr.unicode.org/translation/number-patterns
      */
-    public function getCurrencyPattern(): string
+    public function getCurrencyPattern()
     {
         return $this->currencyPattern;
     }
@@ -223,7 +223,7 @@ final class NumberFormat
      *
      * @see http://cldr.unicode.org/translation/number-patterns
      */
-    public function getAccountingCurrencyPattern(): string
+    public function getAccountingCurrencyPattern()
     {
         return $this->accountingCurrencyPattern;
     }
@@ -235,7 +235,7 @@ final class NumberFormat
      *
      * @return string
      */
-    public function getNumberingSystem(): string
+    public function getNumberingSystem()
     {
         return $this->numberingSystem;
     }
@@ -245,7 +245,7 @@ final class NumberFormat
      *
      * @return string
      */
-    public function getDecimalSeparator(): string
+    public function getDecimalSeparator()
     {
         return $this->decimalSeparator;
     }
@@ -255,7 +255,7 @@ final class NumberFormat
      *
      * @return string
      */
-    public function getDecimalCurrencySeparator(): string
+    public function getDecimalCurrencySeparator()
     {
         return $this->decimalCurrencySeparator;
     }
@@ -265,7 +265,7 @@ final class NumberFormat
      *
      * @return string
      */
-    public function getGroupingSeparator(): string
+    public function getGroupingSeparator()
     {
         return $this->groupingSeparator;
     }
@@ -275,7 +275,7 @@ final class NumberFormat
      *
      * @return string
      */
-    public function getGroupingCurrencySeparator(): string
+    public function getGroupingCurrencySeparator()
     {
         return $this->groupingCurrencySeparator;
     }
@@ -285,7 +285,7 @@ final class NumberFormat
      *
      * @return string
      */
-    public function getPlusSign(): string
+    public function getPlusSign()
     {
         return $this->plusSign;
     }
@@ -295,7 +295,7 @@ final class NumberFormat
      *
      * @return string
      */
-    public function getMinusSign(): string
+    public function getMinusSign()
     {
         return $this->minusSign;
     }
@@ -305,7 +305,7 @@ final class NumberFormat
      *
      * @return string
      */
-    public function getPercentSign(): string
+    public function getPercentSign()
     {
         return $this->percentSign;
     }

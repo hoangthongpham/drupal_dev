@@ -14,6 +14,9 @@
 	"ETB": {
 		"name": "birr éthiopien"
 	},
+	"VED": {
+		"name": "Bolívar Soberano"
+	},
 	"VES": {
 		"name": "bolivar vénézuélien"
 	},
@@ -246,7 +249,7 @@
 	"HNL": {
 		"name": "lempira hondurien"
 	},
-	"SLE": {
+	"SLL": {
 		"name": "leone sierra-léonais"
 	},
 	"MDL": {
@@ -423,7 +426,7 @@
 		"name": "roupie srilankaise"
 	},
 	"MVR": {
-		"name": "rufiyaa maldivienne"
+		"name": "rufiyaa maldivien"
 	},
 	"KES": {
 		"name": "shilling kényan"
@@ -436,6 +439,9 @@
 	},
 	"TZS": {
 		"name": "shilling tanzanien"
+	},
+	"SLE": {
+		"name": "Sierra Leonean Leone"
 	},
 	"KGS": {
 		"name": "som kirghize"
@@ -457,6 +463,9 @@
 	},
 	"MNT": {
 		"name": "tugrik mongol"
+	},
+	"UYW": {
+		"name": "Uruguayan Nominal Wage Index Unit"
 	},
 	"VUV": {
 		"name": "vatu"

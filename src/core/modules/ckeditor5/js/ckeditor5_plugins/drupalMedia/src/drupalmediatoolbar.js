@@ -1,5 +1,5 @@
 /* eslint-disable import/no-extraneous-dependencies */
-/* cspell:ignore drupalmediatoolbar */
+/* cspell:words drupalmediatoolbar */
 import { Plugin } from 'ckeditor5/src/core';
 import { WidgetToolbarRepository } from 'ckeditor5/src/widget';
 
@@ -26,26 +26,17 @@ function normalizeDeclarativeConfig(config) {
 }
 
 /**
- * @private
+ * @internal
  */
 export default class DrupalMediaToolbar extends Plugin {
-  /**
-   * @inheritdoc
-   */
   static get requires() {
     return [WidgetToolbarRepository];
   }
 
-  /**
-   * @inheritdoc
-   */
   static get pluginName() {
     return 'DrupalMediaToolbar';
   }
 
-  /**
-   * @inheritdoc
-   */
   afterInit() {
     const { editor } = this;
     const widgetToolbarRepository = editor.plugins.get(WidgetToolbarRepository);

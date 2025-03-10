@@ -23,28 +23,28 @@ class DefaultFormatter implements FormatterInterface
      *
      * @var AddressFormatRepositoryInterface
      */
-    protected AddressFormatRepositoryInterface $addressFormatRepository;
+    protected $addressFormatRepository;
 
     /**
      * The country repository.
      *
      * @var CountryRepositoryInterface
      */
-    protected CountryRepositoryInterface $countryRepository;
+    protected $countryRepository;
 
     /**
      * The subdivision repository.
      *
      * @var SubdivisionRepositoryInterface
      */
-    protected SubdivisionRepositoryInterface $subdivisionRepository;
+    protected $subdivisionRepository;
 
     /**
      * The default options.
      *
      * @var array
      */
-    protected array $defaultOptions = [
+    protected $defaultOptions = [
         'locale' => 'en',
         'html' => true,
         'html_tag' => 'p',
@@ -70,7 +70,6 @@ class DefaultFormatter implements FormatterInterface
 
     /**
      * {@inheritdoc}
-     * @throws \ReflectionException
      */
     public function format(AddressInterface $address, array $options = []): string
     {
@@ -133,13 +132,11 @@ class DefaultFormatter implements FormatterInterface
     /**
      * Builds the view for the given address.
      *
-     * @param AddressInterface $address The address.
-     * @param AddressFormat $addressFormat The address format.
-     * @param array $options The formatting options.
+     * @param AddressInterface $address       The address.
+     * @param AddressFormat    $addressFormat The address format.
+     * @param array            $options       The formatting options.
      *
      * @return array The view.
-     * @throws \ReflectionException
-     * @throws \ReflectionException
      */
     protected function buildView(AddressInterface $address, AddressFormat $addressFormat, array $options): array
     {
@@ -152,7 +149,7 @@ class DefaultFormatter implements FormatterInterface
             'html' => $options['html'],
             'html_tag' => 'span',
             'html_attributes' => ['class' => 'country'],
-            'value' => $countries[$countryCode] ?? $countryCode,
+            'value' => isset($countries[$countryCode]) ? $countries[$countryCode] : $countryCode,
         ];
         foreach ($addressFormat->getUsedFields() as $field) {
             // The constant is more suitable as a class than the value since
@@ -202,7 +199,7 @@ class DefaultFormatter implements FormatterInterface
     {
         foreach ($attributes as $name => $value) {
             if (is_array($value)) {
-                $value = implode(' ', $value);
+                $value = implode(' ', (array) $value);
             }
             $attributes[$name] = $name . '="' . htmlspecialchars($value, ENT_QUOTES, 'UTF-8') . '"';
         }
@@ -211,13 +208,17 @@ class DefaultFormatter implements FormatterInterface
     }
 
     /**
-     * Removes empty lines, leading/trailing punctuation, excess whitespace.
+     * Removes empty lines, leading punctuation, excess whitespace.
+     *
+     * @param string $output The output that needs cleanup.
+     *
+     * @return string The cleaned up output.
      */
     protected function cleanupOutput(string $output): string
     {
         $lines = explode("\n", $output);
         foreach ($lines as $index => $line) {
-            $line = trim($line, ' -,');
+            $line = trim(preg_replace('/^[-,]+/', '', $line, 1));
             $line = preg_replace('/\s\s+/', ' ', $line);
             $lines[$index] = $line;
         }

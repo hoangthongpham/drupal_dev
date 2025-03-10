@@ -2,12 +2,10 @@
 
 namespace Drupal\Tests\commerce_product\Kernel;
 
-use Drupal\Tests\commerce\Kernel\CommerceKernelTestBase;
 use Drupal\commerce_product\Entity\Product;
 use Drupal\commerce_product\Entity\ProductVariation;
+use Drupal\Tests\commerce\Kernel\CommerceKernelTestBase;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Session\Session;
-use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 
 /**
  * Tests the product variation storage.
@@ -45,7 +43,7 @@ class ProductVariationStorageTest extends CommerceKernelTestBase {
 
     $this->variationStorage = $this->container->get('entity_type.manager')->getStorage('commerce_product_variation');
 
-    $user = $this->createUser(['administer commerce_product']);
+    $user = $this->createUser([], ['administer commerce_product']);
     $this->container->get('current_user')->setAccount($user);
   }
 
@@ -121,7 +119,6 @@ class ProductVariationStorageTest extends CommerceKernelTestBase {
     ]);
     $product->save();
     $request = Request::create('');
-    $request->setSession(new Session(new MockArraySessionStorage()));
     $request->query->add([
       'v' => end($variations)->id(),
     ]);
@@ -133,7 +130,6 @@ class ProductVariationStorageTest extends CommerceKernelTestBase {
 
     // Invalid variation ID returns default variation.
     $request = Request::create('');
-    $request->setSession(new Session(new MockArraySessionStorage()));
     $request->query->add([
       'v' => '1111111',
     ]);

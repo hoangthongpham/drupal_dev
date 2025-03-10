@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\system\Functional\System;
 
 use Drupal\Tests\BrowserTestBase;
@@ -18,9 +16,6 @@ class IndexPhpTest extends BrowserTestBase {
    */
   protected $defaultTheme = 'stark';
 
-  /**
-   * {@inheritdoc}
-   */
   protected function setUp(): void {
     parent::setUp();
   }
@@ -28,7 +23,7 @@ class IndexPhpTest extends BrowserTestBase {
   /**
    * Tests index.php handling.
    */
-  public function testIndexPhpHandling(): void {
+  public function testIndexPhpHandling() {
     $index_php = $GLOBALS['base_url'] . '/index.php';
 
     $this->drupalGet($index_php, ['external' => TRUE]);

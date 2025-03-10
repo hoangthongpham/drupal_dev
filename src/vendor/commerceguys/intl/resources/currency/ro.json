@@ -17,6 +17,9 @@
 	"VES": {
 		"name": "bolívar soberano"
 	},
+	"VED": {
+		"name": "Bolívar Soberano"
+	},
 	"BOB": {
 		"name": "boliviano"
 	},
@@ -245,7 +248,7 @@
 	"HNL": {
 		"name": "lempira honduriană"
 	},
-	"SLE": {
+	"SLL": {
 		"name": "leone din Sierra Leone"
 	},
 	"MDL": {
@@ -416,6 +419,9 @@
 	"ILS": {
 		"name": "shekel israelian nou"
 	},
+	"SLE": {
+		"name": "Sierra Leonean Leone"
+	},
 	"PEN": {
 		"name": "sol"
 	},
@@ -451,6 +457,9 @@
 	},
 	"MNT": {
 		"name": "tugrik mongol"
+	},
+	"UYW": {
+		"name": "Uruguayan Nominal Wage Index Unit"
 	},
 	"VUV": {
 		"name": "vatu din Vanuatu"

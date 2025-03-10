@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\views\Kernel\Handler;
 
 use Drupal\Core\Link;
@@ -16,9 +14,6 @@ use Drupal\views\Views;
  */
 class FieldUrlTest extends ViewsKernelTestBase {
 
-  /**
-   * {@inheritdoc}
-   */
   protected static $modules = ['system'];
 
   /**
@@ -34,7 +29,7 @@ class FieldUrlTest extends ViewsKernelTestBase {
     return $data;
   }
 
-  public function testFieldUrl(): void {
+  public function testFieldUrl() {
     $view = Views::getView('test_view');
     $view->setDisplay();
 
@@ -52,7 +47,7 @@ class FieldUrlTest extends ViewsKernelTestBase {
 
     $this->assertEquals('John', $view->field['name']->advancedRender($view->result[0]));
 
-    // Make the URL a link.
+    // Make the url a link.
     $view->destroy();
     $view->setDisplay();
 

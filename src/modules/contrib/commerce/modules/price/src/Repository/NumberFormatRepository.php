@@ -2,8 +2,8 @@
 
 namespace Drupal\commerce_price\Repository;
 
-use CommerceGuys\Intl\NumberFormat\NumberFormatRepository as ExternalNumberFormatRepository;
 use CommerceGuys\Intl\NumberFormat\NumberFormatRepositoryInterface;
+use CommerceGuys\Intl\NumberFormat\NumberFormatRepository as ExternalNumberFormatRepository;
 use Drupal\commerce_price\Event\NumberFormatDefinitionEvent;
 use Drupal\commerce_price\Event\PriceEvents;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -17,19 +17,28 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 class NumberFormatRepository extends ExternalNumberFormatRepository implements NumberFormatRepositoryInterface {
 
   /**
+   * The event dispatcher.
+   *
+   * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
+   */
+  protected $eventDispatcher;
+
+  /**
    * Creates a NumberFormatRepository instance.
    *
-   * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $eventDispatcher
+   * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $event_dispatcher
    *   The event dispatcher.
    */
-  public function __construct(protected EventDispatcherInterface $eventDispatcher) {
+  public function __construct(EventDispatcherInterface $event_dispatcher) {
     parent::__construct();
+
+    $this->eventDispatcher = $event_dispatcher;
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function processDefinition(string $locale, array $definition): array {
+  protected function processDefinition($locale, array $definition) {
     $definition = parent::processDefinition($locale, $definition);
     // Let the definition be altered.
     $event = new NumberFormatDefinitionEvent($definition);

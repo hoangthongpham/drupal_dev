@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\content_moderation\Unit;
 
 use Drupal\block_content\Entity\BlockContent;
@@ -59,7 +57,7 @@ class LatestRevisionCheckTest extends UnitTestCase {
    *
    * @dataProvider accessSituationProvider
    */
-  public function testLatestAccessPermissions($entity_class, $entity_type, $has_pending_revision, array $account_permissions, $is_owner, $result_class): void {
+  public function testLatestAccessPermissions($entity_class, $entity_type, $has_pending_revision, array $account_permissions, $is_owner, $result_class) {
 
     /** @var \Drupal\Core\Session\AccountInterface $account */
     $account = $this->prophesize(AccountInterface::class);
@@ -105,7 +103,7 @@ class LatestRevisionCheckTest extends UnitTestCase {
   /**
    * Data provider for testLastAccessPermissions().
    */
-  public static function accessSituationProvider() {
+  public function accessSituationProvider() {
     return [
       // Node with global permissions and latest version.
       [Node::class, 'node', TRUE, ['view latest version', 'view any unpublished content'], FALSE, AccessResultAllowed::class],

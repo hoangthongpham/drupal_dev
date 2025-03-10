@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\system\Functional\System;
 
 use Drupal\Component\Utility\Html;
@@ -17,14 +15,16 @@ use Drupal\Tests\BrowserTestBase;
 class PageTitleTest extends BrowserTestBase {
 
   /**
-   * {@inheritdoc}
+   * Modules to enable.
+   *
+   * @var array
    */
   protected static $modules = ['node', 'test_page_test', 'form_test', 'block'];
 
   /**
    * {@inheritdoc}
    */
-  protected $defaultTheme = 'starterkit_theme';
+  protected $defaultTheme = 'classy';
 
   protected $contentUser;
   protected $savedTitle;
@@ -52,12 +52,12 @@ class PageTitleTest extends BrowserTestBase {
   /**
    * Tests the handling of HTML in node titles.
    */
-  public function testTitleTags(): void {
+  public function testTitleTags() {
     $title = "string with <em>HTML</em>";
     // Generate node content.
     $edit = [
-      'title[0][value]' => '!Test! ' . $title . $this->randomMachineName(20),
-      'body[0][value]' => '!Test! test body' . $this->randomMachineName(200),
+      'title[0][value]' => '!SimpleTest! ' . $title . $this->randomMachineName(20),
+      'body[0][value]' => '!SimpleTest! test body' . $this->randomMachineName(200),
     ];
     // Create the node with HTML in the title.
     $this->drupalGet('node/add/page');
@@ -74,7 +74,7 @@ class PageTitleTest extends BrowserTestBase {
   /**
    * Tests if the title of the site is XSS proof.
    */
-  public function testTitleXSS(): void {
+  public function testTitleXSS() {
     // Set some title with JavaScript and HTML chars to escape.
     $title = '</title><script type="text/javascript">alert("Title XSS!");</script> & < > " \' ';
     $title_filtered = Html::escape($title);
@@ -115,18 +115,20 @@ class PageTitleTest extends BrowserTestBase {
    *
    * @see \Drupal\test_page_test\Controller\Test
    */
-  public function testRoutingTitle(): void {
+  public function testRoutingTitle() {
     // Test the '#title' render array attribute.
     $this->drupalGet('test-render-title');
 
     $this->assertSession()->titleEquals('Foo | Drupal');
-    $this->assertSession()->elementTextEquals('xpath', '//h1[@class="page-title"]', 'Foo');
+    $result = $this->xpath('//h1[@class="page-title"]');
+    $this->assertEquals('Foo', $result[0]->getText());
 
     // Test forms
     $this->drupalGet('form-test/object-builder');
 
     $this->assertSession()->titleEquals('Test dynamic title | Drupal');
-    $this->assertSession()->elementTextEquals('xpath', '//h1[@class="page-title"]', 'Test dynamic title');
+    $result = $this->xpath('//h1[@class="page-title"]');
+    $this->assertEquals('Test dynamic title', $result[0]->getText());
 
     // Set some custom translated strings.
     $settings_key = 'locale_custom_strings_en';
@@ -150,13 +152,15 @@ class PageTitleTest extends BrowserTestBase {
     $this->drupalGet('test-page-static-title');
 
     $this->assertSession()->titleEquals('Static title translated | Drupal');
-    $this->assertSession()->elementTextEquals('xpath', '//h1[@class="page-title"]', 'Static title translated');
+    $result = $this->xpath('//h1[@class="page-title"]');
+    $this->assertEquals('Static title translated', $result[0]->getText());
 
     // Test the dynamic '_title_callback' route option.
     $this->drupalGet('test-page-dynamic-title');
 
     $this->assertSession()->titleEquals('Dynamic title | Drupal');
-    $this->assertSession()->elementTextEquals('xpath', '//h1[@class="page-title"]', 'Dynamic title');
+    $result = $this->xpath('//h1[@class="page-title"]');
+    $this->assertEquals('Dynamic title', $result[0]->getText());
 
     // Ensure that titles are cacheable and are escaped normally if the
     // controller does not escape them.

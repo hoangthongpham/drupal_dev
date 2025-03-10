@@ -29,7 +29,7 @@ class EntityDuplicateSubscriber implements EventSubscriberInterface {
   /**
    * {@inheritdoc}
    */
-  public static function getSubscribedEvents(): array {
+  public static function getSubscribedEvents() {
     $events = [
       EntityEvents::ENTITY_DUPLICATE => ['onEntityDuplicate'],
     ];

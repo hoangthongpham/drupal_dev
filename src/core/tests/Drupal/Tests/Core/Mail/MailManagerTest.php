@@ -1,6 +1,9 @@
 <?php
 
-declare(strict_types=1);
+/**
+ * @file
+ * Contains \Drupal\Tests\Core\Mail\MailManagerTest.
+ */
 
 namespace Drupal\Tests\Core\Mail;
 
@@ -10,8 +13,6 @@ use Drupal\Core\Render\RendererInterface;
 use Drupal\Tests\UnitTestCase;
 use Drupal\Core\Mail\MailManager;
 use Drupal\Component\Plugin\Discovery\DiscoveryInterface;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * @coversDefaultClass \Drupal\Core\Mail\MailManager
@@ -62,20 +63,6 @@ class MailManagerTest extends UnitTestCase {
   protected $mailManager;
 
   /**
-   * The request stack.
-   *
-   * @var \Symfony\Component\HttpFoundation\RequestStack|\Prophecy\Prophecy\ProphecyInterface
-   */
-  protected $requestStack;
-
-  /**
-   * The current request.
-   *
-   * @var \Symfony\Component\HttpFoundation\Request
-   */
-  protected $request;
-
-  /**
    * A list of mail plugin definitions.
    *
    * @var array
@@ -105,7 +92,7 @@ class MailManagerTest extends UnitTestCase {
     $this->discovery = $this->createMock('Drupal\Component\Plugin\Discovery\DiscoveryInterface');
     $this->discovery->expects($this->any())
       ->method('getDefinitions')
-      ->willReturn($this->definitions);
+      ->will($this->returnValue($this->definitions));
   }
 
   /**
@@ -116,14 +103,6 @@ class MailManagerTest extends UnitTestCase {
     $this->configFactory = $this->getConfigFactoryStub([
       'system.mail' => [
         'interface' => $interface,
-        'mailer_dsn' => [
-          'scheme' => 'null',
-          'host' => 'null',
-          'user' => NULL,
-          'password' => NULL,
-          'port' => NULL,
-          'options' => [],
-        ],
       ],
       'system.site' => [
         'mail' => 'test@example.com',
@@ -136,16 +115,9 @@ class MailManagerTest extends UnitTestCase {
     $this->mailManager = new TestMailManager(new \ArrayObject(), $this->cache, $this->moduleHandler, $this->configFactory, $logger_factory, $string_translation, $this->renderer);
     $this->mailManager->setDiscovery($this->discovery);
 
-    $this->request = new Request();
-
-    $this->requestStack = $this->prophesize(RequestStack::class);
-    $this->requestStack->getCurrentRequest()
-      ->willReturn($this->request);
-
     // @see \Drupal\Core\Plugin\Factory\ContainerFactory::createInstance()
     $container = new ContainerBuilder();
     $container->set('config.factory', $this->configFactory);
-    $container->set('request_stack', $this->requestStack->reveal());
     \Drupal::setContainer($container);
   }
 
@@ -154,10 +126,10 @@ class MailManagerTest extends UnitTestCase {
    *
    * @covers ::getInstance
    */
-  public function testGetInstance(): void {
+  public function testGetInstance() {
     $interface = [
       'default' => 'php_mail',
-      'example_test_key' => 'test_mail_collector',
+      'default' => 'test_mail_collector',
     ];
     $this->setUpMailManager($interface);
 
@@ -167,7 +139,7 @@ class MailManagerTest extends UnitTestCase {
     $this->assertInstanceOf('Drupal\Core\Mail\Plugin\Mail\PhpMail', $instance);
 
     // Test that a matching message_id returns the specified plugin instance.
-    $options = ['module' => 'example', 'key' => 'test_key'];
+    $options = ['module' => 'example', 'key' => 'testkey'];
     $instance = $this->mailManager->getInstance($options);
     $this->assertInstanceOf('Drupal\Core\Mail\Plugin\Mail\TestMailCollector', $instance);
   }
@@ -177,10 +149,10 @@ class MailManagerTest extends UnitTestCase {
    *
    * @covers ::mail
    */
-  public function testMailInRenderContext(): void {
+  public function testMailInRenderContext() {
     $interface = [
       'default' => 'php_mail',
-      'example_test_key' => 'test_mail_collector',
+      'example_testkey' => 'test_mail_collector',
     ];
     $this->setUpMailManager($interface);
 

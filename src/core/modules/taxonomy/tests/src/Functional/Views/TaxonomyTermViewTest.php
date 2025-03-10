@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\taxonomy\Functional\Views;
 
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
@@ -19,7 +17,9 @@ use Drupal\views\Views;
 class TaxonomyTermViewTest extends TaxonomyTestBase {
 
   /**
-   * {@inheritdoc}
+   * Modules to enable.
+   *
+   * @var array
    */
   protected static $modules = ['taxonomy', 'views'];
 
@@ -45,8 +45,8 @@ class TaxonomyTermViewTest extends TaxonomyTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp($import_test_views = TRUE, $modules = []): void {
-    parent::setUp($import_test_views, $modules);
+  protected function setUp($import_test_views = TRUE): void {
+    parent::setUp($import_test_views);
 
     // Create an administrative user.
     $this->adminUser = $this->drupalCreateUser([
@@ -57,7 +57,7 @@ class TaxonomyTermViewTest extends TaxonomyTestBase {
 
     // Create a vocabulary and add two term reference fields to article nodes.
 
-    $this->fieldName1 = $this->randomMachineName();
+    $this->fieldName1 = mb_strtolower($this->randomMachineName());
 
     $handler_settings = [
       'target_bundles' => [
@@ -84,7 +84,7 @@ class TaxonomyTermViewTest extends TaxonomyTestBase {
   /**
    * Tests that the taxonomy term view is working properly.
    */
-  public function testTaxonomyTermView(): void {
+  public function testTaxonomyTermView() {
     // Create terms in the vocabulary.
     $term = $this->createTerm();
 

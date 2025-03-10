@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\media\Unit;
 
 use Drupal\Core\PrivateKey;
@@ -23,7 +21,7 @@ class IFrameUrlHelperTest extends UnitTestCase {
    *
    * @return array
    */
-  public static function providerIsSecure() {
+  public function providerIsSecure() {
     return [
       'no domain' => [
         '/path/to/media.php',
@@ -77,15 +75,12 @@ class IFrameUrlHelperTest extends UnitTestCase {
    *
    * @dataProvider providerIsSecure
    */
-  public function testIsSecure($url, $base_url, $secure): void {
-    $request_context = $this->createMock(RequestContext::class);
-    $request_context->expects($this->any())
-      ->method('getCompleteBaseUrl')
-      ->willReturn($base_url);
-
+  public function testIsSecure($url, $base_url, $secure) {
+    $request_context = $this->prophesize(RequestContext::class);
+    $request_context->getCompleteBaseUrl()->willReturn($base_url);
     $url_helper = new IFrameUrlHelper(
-      $request_context,
-      $this->createMock(PrivateKey::class)
+      $request_context->reveal(),
+      $this->prophesize(PrivateKey::class)->reveal()
     );
 
     $this->assertSame($secure, $url_helper->isSecure($url));

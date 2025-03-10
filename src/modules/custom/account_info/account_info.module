@@ -30,5 +30,11 @@ function account_info_theme()
         'content' => NULL,
       ],
     ],
+    'two_factor_setting' => [
+      'variables' => [
+        'left_sidebar' => NULL,
+        'content' => [],
+      ],
+    ],
   ];
 }

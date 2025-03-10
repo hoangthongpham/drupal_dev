@@ -2,8 +2,8 @@
 
 namespace Drupal\Tests\commerce_store\Unit\Resolver;
 
-use Drupal\Tests\UnitTestCase;
 use Drupal\commerce_store\Resolver\DefaultStoreResolver;
+use Drupal\Tests\UnitTestCase;
 
 /**
  * @coversDefaultClass \Drupal\commerce_store\Resolver\DefaultStoreResolver
@@ -22,7 +22,6 @@ class DefaultStoreResolverTest extends UnitTestCase {
    * {@inheritdoc}
    */
   protected function setUp(): void {
-    parent::setUp();
     $storage = $this->getMockBuilder('Drupal\commerce_store\StoreStorage')
       ->disableOriginalConstructor()
       ->getMock();

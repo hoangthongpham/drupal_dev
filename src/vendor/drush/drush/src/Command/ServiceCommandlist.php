@@ -1,7 +1,4 @@
 <?php
-
-declare(strict_types=1);
-
 namespace Drush\Command;
 
 /**
@@ -10,15 +7,15 @@ namespace Drush\Command;
  */
 class ServiceCommandlist
 {
-    protected array $commandList = [];
+    protected $commandList = [];
 
-    public function addCommandReference($command): void
+    public function addCommandReference($command)
     {
         $this->commandList[] = $command;
     }
 
-    public function getCommandList(): array
+    public function getCommandList()
     {
-        return array_filter($this->commandList);
+        return $this->commandList;
     }
 }

@@ -1,6 +1,0 @@
-administer debug bar:
-  title: Administer debug bar
-  restrict access: true
-view debug bar:
-  title: View debug dar
-  restrict access: true

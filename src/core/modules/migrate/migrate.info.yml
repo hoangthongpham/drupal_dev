@@ -1,5 +1,10 @@
 name: Migrate
 type: module
-description: 'Provides a framework for migrating data to Drupal.'
+description: 'Handles migrations'
 package: Migration
-version: VERSION
+# version: VERSION
+
+# Information added by Drupal.org packaging script on 2022-04-20
+version: '9.3.12'
+project: 'drupal'
+datestamp: 1650467597

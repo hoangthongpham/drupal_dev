@@ -1,17 +1,16 @@
 /* eslint-disable import/no-extraneous-dependencies */
-// cspell:ignore datafilter eventinfo downcastdispatcher generalhtmlsupport
+// cSpell:words conversionutils datafilter eventinfo downcastdispatcher generalhtmlsupport
 import { Plugin } from 'ckeditor5/src/core';
-import { setViewAttributes } from '@ckeditor/ckeditor5-html-support/src/utils';
+import { setViewAttributes } from '@ckeditor/ckeditor5-html-support/src/conversionutils';
 
 /**
- * View-to-model conversion helper for Drupal Media.
- * Used for preserving allowed attributes on the Drupal Media model.
+ * View-to-model conversion helper preserving allowed attributes on the Drupal Media model.
  *
  * @param {module:html-support/datafilter~DataFilter} dataFilter
  *   The General HTML support data filter.
  *
  * @return {function}
- *   Function that adds an event listener to upcastDispatcher.
+ *   function that adds an event listener to upcastDispatcher.
  */
 function viewToModelDrupalMediaAttributeConverter(dataFilter) {
   return (dispatcher) => {
@@ -19,7 +18,7 @@ function viewToModelDrupalMediaAttributeConverter(dataFilter) {
       'element:drupal-media',
       (evt, data, conversionApi) => {
         function preserveElementAttributes(viewElement, attributeName) {
-          const viewAttributes = dataFilter.processViewAttributes(
+          const viewAttributes = dataFilter._consumeAllowedAttributes(
             viewElement,
             conversionApi,
           );
@@ -135,7 +134,7 @@ function modelToEditingViewAttributeConverter() {
  * Model to data view attribute converter.
  *
  * @return {function}
- *   Function that adds an event listener to downcastDispatcher.
+ *   function that adds an event listener to downcastDispatcher.
  */
 function modelToDataViewAttributeConverter() {
   return (dispatcher) => {
@@ -173,7 +172,7 @@ function modelToDataViewAttributeConverter() {
 /**
  * Integrates Drupal Media with General HTML Support.
  *
- * @private
+ * @internal
  */
 export default class DrupalMediaGeneralHtmlSupport extends Plugin {
   /**

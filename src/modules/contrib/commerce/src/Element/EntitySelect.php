@@ -2,10 +2,9 @@
 
 namespace Drupal\commerce\Element;
 
-use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Render\Attribute\FormElement;
-use Drupal\Core\Render\Element\FormElementBase;
 use Drupal\commerce\EntityHelper;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\Element\FormElement;
 
 /**
  * Provides a form input element for selecting one or multiple entities.
@@ -36,11 +35,10 @@ use Drupal\commerce\EntityHelper;
  * ];
  *
  * @endcode
+ *
+ * @FormElement("commerce_entity_select")
  */
-#[FormElement(
-  id: "commerce_entity_select",
-)]
-class EntitySelect extends FormElementBase {
+class EntitySelect extends FormElement {
 
   /**
    * {@inheritdoc}

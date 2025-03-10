@@ -18,6 +18,9 @@
 	"VES": {
 		"name": "Boliva ya Venezuela"
 	},
+	"VED": {
+		"name": "Bolívar Soberano"
+	},
 	"BOB": {
 		"name": "Boliviano ya Bolivia"
 	},
@@ -242,7 +245,7 @@
 	"HNL": {
 		"name": "Lempira ya Hondurasi"
 	},
-	"SLE": {
+	"SLL": {
 		"name": "Leoni ya Siera Leoni"
 	},
 	"MDL": {
@@ -414,6 +417,9 @@
 	"SCR": {
 		"name": "Rupia ya Ushelisheli"
 	},
+	"SVC": {
+		"name": "Salvadoran Colón"
+	},
 	"ILS": {
 		"name": "Shekeli Mpya ya Israel",
 		"symbol": "₪"
@@ -434,6 +440,9 @@
 	},
 	"GHS": {
 		"name": "Sidi ya Ghana"
+	},
+	"SLE": {
+		"name": "Sierra Leonean Leone"
 	},
 	"PEN": {
 		"name": "Sol ya Peru"
@@ -459,6 +468,9 @@
 	"MNT": {
 		"name": "Tugrik ya Mongolia"
 	},
+	"UYW": {
+		"name": "Uruguayan Nominal Wage Index Unit"
+	},
 	"VUV": {
 		"name": "Vatu ya Vanuatu"
 	},
@@ -480,6 +492,9 @@
 	"EUR": {
 		"name": "Yuro",
 		"symbol": "€"
+	},
+	"ZWL": {
+		"name": "Zimbabwean Dollar (2009)"
 	},
 	"PLN": {
 		"name": "Zloti ya Polandi"

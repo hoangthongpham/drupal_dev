@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\KernelTests\Core\Entity;
 
 use Drupal\Core\TypedData\DataDefinition;
@@ -21,14 +19,8 @@ class BundleConstraintValidatorTest extends KernelTestBase {
    */
   protected $typedData;
 
-  /**
-   * {@inheritdoc}
-   */
   protected static $modules = ['node', 'field', 'text', 'user'];
 
-  /**
-   * {@inheritdoc}
-   */
   protected function setUp(): void {
     parent::setUp();
     $this->installEntitySchema('user');
@@ -38,7 +30,7 @@ class BundleConstraintValidatorTest extends KernelTestBase {
   /**
    * Tests bundle constraint validation.
    */
-  public function testValidation(): void {
+  public function testValidation() {
     // Test with multiple values.
     $this->assertValidation(['foo', 'bar']);
     // Test with a single string value as well.
@@ -74,7 +66,7 @@ class BundleConstraintValidatorTest extends KernelTestBase {
 
     // Make sure the information provided by a violation is correct.
     $violation = $violations[0];
-    $this->assertEquals(sprintf('The entity must be of bundle %s.', implode(', ', (array) $bundle)), $violation->getMessage(), 'The message for invalid value is correct.');
+    $this->assertEquals(t('The entity must be of bundle %bundle.', ['%bundle' => implode(', ', (array) $bundle)]), $violation->getMessage(), 'The message for invalid value is correct.');
     $this->assertEquals($typed_data, $violation->getRoot(), 'Violation root is correct.');
     $this->assertEquals($page_node, $violation->getInvalidValue(), 'The invalid value is set correctly in the violation.');
   }

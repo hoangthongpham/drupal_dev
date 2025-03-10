@@ -1,10 +1,7 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\views\Functional\Plugin;
 
-use Drupal\Component\Render\FormattableMarkup;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\Tests\views\Functional\ViewTestBase;
 use Drupal\views\Views;
@@ -25,37 +22,24 @@ class DisplayTest extends ViewTestBase {
   public static $testViews = ['test_filter_groups', 'test_get_attach_displays', 'test_view', 'test_display_more', 'test_display_invalid', 'test_display_empty', 'test_exposed_relationship_admin_ui', 'test_simple_argument'];
 
   /**
-   * {@inheritdoc}
+   * Modules to enable.
+   *
+   * @var array
    */
   protected static $modules = ['views_ui', 'node', 'block'];
 
   /**
    * {@inheritdoc}
    */
-  protected static $configSchemaCheckerExclusions = [
-    // The availability of Views display plugins is validated by the config
-    // system, but one of our test cases saves a view with an invalid display
-    // plugin ID, to see how Views handles that. Therefore, allow that one view
-    // to be saved with an invalid display plugin without angering the config
-    // schema checker.
-    // @see ::testInvalidDisplayPlugins()
-    'views.view.test_display_invalid',
-  ];
-
-  /**
-   * {@inheritdoc}
-   */
   protected $defaultTheme = 'stark';
 
-  /**
-   * {@inheritdoc}
-   */
-  protected function setUp($import_test_views = TRUE, $modules = ['views_test_config']): void {
-    parent::setUp($import_test_views, $modules);
+  protected function setUp($import_test_views = TRUE): void {
+    parent::setUp();
 
     $this->enableViewsTestModule();
 
-    $this->drupalLogin($this->drupalCreateUser(['administer views']));
+    $this->adminUser = $this->drupalCreateUser(['administer views']);
+    $this->drupalLogin($this->adminUser);
 
     // Create 10 nodes.
     for ($i = 0; $i <= 10; $i++) {
@@ -68,7 +52,7 @@ class DisplayTest extends ViewTestBase {
    *
    * @see \Drupal\views_test_data\Plugin\views\display\DisplayTest
    */
-  public function testDisplayPlugin(): void {
+  public function testDisplayPlugin() {
     /** @var \Drupal\Core\Render\RendererInterface $renderer */
     $renderer = $this->container->get('renderer');
     $view = Views::getView('test_view');
@@ -123,7 +107,7 @@ class DisplayTest extends ViewTestBase {
     $view->style_plugin->setUsesRowPlugin(FALSE);
 
     $output = $view->preview();
-    $output = (string) $renderer->renderRoot($output);
+    $output = $renderer->renderRoot($output);
 
     $this->assertStringContainsString('<h1></h1>', $output, 'An empty value for test_option found in output.');
 
@@ -132,7 +116,7 @@ class DisplayTest extends ViewTestBase {
     $view->save();
 
     $output = $view->preview();
-    $output = (string) $renderer->renderRoot($output);
+    $output = $renderer->renderRoot($output);
 
     // Test we have our custom <h1> tag in the output of the view.
     $this->assertStringContainsString('<h1>Test option title</h1>', $output, 'The test_option value found in display output title.');
@@ -164,11 +148,11 @@ class DisplayTest extends ViewTestBase {
   /**
    * Tests the overriding of filter_groups.
    */
-  public function testFilterGroupsOverriding(): void {
+  public function testFilterGroupsOverriding() {
     $view = Views::getView('test_filter_groups');
     $view->initDisplay();
 
-    // Mark is as overridden, yes FALSE, means overridden.
+    // mark is as overridden, yes FALSE, means overridden.
     $view->displayHandlers->get('page')->setOverride('filter_groups', FALSE);
     $this->assertFalse($view->displayHandlers->get('page')->isDefaulted('filter_groups'), "Make sure that 'filter_groups' is marked as overridden.");
     $this->assertFalse($view->displayHandlers->get('page')->isDefaulted('filters'), "Make sure that 'filters'' is marked as overridden.");
@@ -177,7 +161,7 @@ class DisplayTest extends ViewTestBase {
   /**
    * Tests the getAttachedDisplays method.
    */
-  public function testGetAttachedDisplays(): void {
+  public function testGetAttachedDisplays() {
     $view = Views::getView('test_get_attach_displays');
 
     // Both the feed_1 and the feed_2 display are attached to the page display.
@@ -191,7 +175,7 @@ class DisplayTest extends ViewTestBase {
   /**
    * Tests the readmore validation.
    */
-  public function testReadMoreNoDisplay(): void {
+  public function testReadMoreNoDisplay() {
     $view = Views::getView('test_display_more');
     // Confirm that the view validates when there is a page display.
     $errors = $view->validate();
@@ -217,7 +201,7 @@ class DisplayTest extends ViewTestBase {
   /**
    * Tests the readmore with custom URL.
    */
-  public function testReadMoreCustomURL(): void {
+  public function testReadMoreCustomURL() {
     /** @var \Drupal\Core\Render\RendererInterface $renderer */
     $renderer = $this->container->get('renderer');
 
@@ -231,7 +215,7 @@ class DisplayTest extends ViewTestBase {
     $view->display_handler->setOption('link_url', 'node');
     $this->executeView($view);
     $output = $view->preview();
-    $output = (string) $renderer->renderRoot($output);
+    $output = $renderer->renderRoot($output);
     $this->assertStringContainsString('/node', $output, 'The read more link with href "/node" was found.');
 
     // Test more link with leading slash.
@@ -239,31 +223,31 @@ class DisplayTest extends ViewTestBase {
     $view->display_handler->setOption('link_url', '/node');
     $this->executeView($view);
     $output = $view->preview();
-    $output = (string) $renderer->renderRoot($output);
+    $output = $renderer->renderRoot($output);
     $this->assertStringContainsString('/node', $output, 'The read more link with href "/node" was found.');
 
-    // Test more link with absolute URL.
+    // Test more link with absolute url.
     $view->display_handler->setOption('link_display', 'custom_url');
-    $view->display_handler->setOption('link_url', 'http://example.com');
+    $view->display_handler->setOption('link_url', 'http://drupal.org');
     $this->executeView($view);
     $output = $view->preview();
-    $output = (string) $renderer->renderRoot($output);
-    $this->assertStringContainsString('http://example.com', $output, 'The read more link with href "http://example.com" was found.');
+    $output = $renderer->renderRoot($output);
+    $this->assertStringContainsString('http://drupal.org', $output, 'The read more link with href "http://drupal.org" was found.');
 
-    // Test more link with query parameters in the URL.
+    // Test more link with query parameters in the url.
     $view->display_handler->setOption('link_display', 'custom_url');
     $view->display_handler->setOption('link_url', 'node?page=1&foo=bar');
     $this->executeView($view);
     $output = $view->preview();
-    $output = (string) $renderer->renderRoot($output);
+    $output = $renderer->renderRoot($output);
     $this->assertStringContainsString('/node?page=1&amp;foo=bar', $output, 'The read more link with href "/node?page=1&foo=bar" was found.');
 
-    // Test more link with fragment in the URL.
+    // Test more link with fragment in the url.
     $view->display_handler->setOption('link_display', 'custom_url');
     $view->display_handler->setOption('link_url', 'node#target');
     $this->executeView($view);
     $output = $view->preview();
-    $output = (string) $renderer->renderRoot($output);
+    $output = $renderer->renderRoot($output);
     $this->assertStringContainsString('/node#target', $output, 'The read more link with href "/node#target" was found.');
 
     // Test more link with arguments.
@@ -276,7 +260,7 @@ class DisplayTest extends ViewTestBase {
     $view->setArguments([22]);
     $this->executeView($view);
     $output = $view->preview();
-    $output = (string) $renderer->renderRoot($output);
+    $output = $renderer->renderRoot($output);
     $this->assertStringContainsString('/node?date=22&amp;foo=bar', $output, 'The read more link with href "/node?date=22&foo=bar" was found.');
 
     // Test more link with 1 dimension array query parameters with arguments.
@@ -289,7 +273,7 @@ class DisplayTest extends ViewTestBase {
     $view->setArguments([22]);
     $this->executeView($view);
     $output = $view->preview();
-    $output = (string) $renderer->renderRoot($output);
+    $output = $renderer->renderRoot($output);
     $this->assertStringContainsString('/node?f%5B0%5D=foo%3Abar&amp;f%5B1%5D=foo%3A22', $output, 'The read more link with href "/node?f[0]=foo:bar&f[1]=foo:22" was found.');
 
     // Test more link with arguments in path.
@@ -297,7 +281,7 @@ class DisplayTest extends ViewTestBase {
     $view->setArguments([22]);
     $this->executeView($view);
     $output = $view->preview();
-    $output = (string) $renderer->renderRoot($output);
+    $output = $renderer->renderRoot($output);
     $this->assertStringContainsString('/node/22?date=22&amp;foo=bar', $output, 'The read more link with href "/node/22?date=22&foo=bar" was found.');
 
     // Test more link with arguments in fragment.
@@ -305,14 +289,14 @@ class DisplayTest extends ViewTestBase {
     $view->setArguments([22]);
     $this->executeView($view);
     $output = $view->preview();
-    $output = (string) $renderer->renderRoot($output);
+    $output = $renderer->renderRoot($output);
     $this->assertStringContainsString('/node?date=22&amp;foo=bar#22', $output, 'The read more link with href "/node?date=22&foo=bar#22" was found.');
   }
 
   /**
    * Tests invalid display plugins.
    */
-  public function testInvalidDisplayPlugins(): void {
+  public function testInvalidDisplayPlugins() {
     $this->drupalGet('test_display_invalid');
     $this->assertSession()->statusCodeEquals(200);
 
@@ -361,7 +345,7 @@ class DisplayTest extends ViewTestBase {
   /**
    * Tests display validation when a required relationship is missing.
    */
-  public function testMissingRelationship(): void {
+  public function testMissingRelationship() {
     $view = Views::getView('test_exposed_relationship_admin_ui');
 
     // Remove the relationship that is not used by other handlers.
@@ -379,14 +363,14 @@ class DisplayTest extends ViewTestBase {
     $errors = $view->validate();
     // Check that the error messages are shown.
     $this->assertCount(2, $errors['default'], 'Error messages found for required relationship');
-    $this->assertEquals(new FormattableMarkup('The %relationship_name relationship used in %handler_type %handler is not present in the %display_name display.', ['%relationship_name' => 'uid', '%handler_type' => 'field', '%handler' => 'User: Last login', '%display_name' => 'Default']), $errors['default'][0]);
-    $this->assertEquals(new FormattableMarkup('The %relationship_name relationship used in %handler_type %handler is not present in the %display_name display.', ['%relationship_name' => 'uid', '%handler_type' => 'field', '%handler' => 'User: Created', '%display_name' => 'Default']), $errors['default'][1]);
+    $this->assertEquals(t('The %handler_type %handler uses a relationship that has been removed.', ['%handler_type' => 'field', '%handler' => 'User: Last login']), $errors['default'][0]);
+    $this->assertEquals(t('The %handler_type %handler uses a relationship that has been removed.', ['%handler_type' => 'field', '%handler' => 'User: Created']), $errors['default'][1]);
   }
 
   /**
    * Tests the outputIsEmpty method on the display.
    */
-  public function testOutputIsEmpty(): void {
+  public function testOutputIsEmpty() {
     $view = Views::getView('test_display_empty');
     $this->executeView($view);
     $this->assertNotEmpty($view->result);
@@ -429,7 +413,7 @@ class DisplayTest extends ViewTestBase {
   /**
    * Tests translation rendering settings based on entity translatability.
    */
-  public function testTranslationSetting(): void {
+  public function testTranslationSetting() {
     \Drupal::service('module_installer')->install(['file']);
 
     // By default there should be no language settings.

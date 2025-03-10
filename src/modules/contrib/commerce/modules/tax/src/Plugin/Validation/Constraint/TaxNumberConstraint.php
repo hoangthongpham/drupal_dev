@@ -2,19 +2,18 @@
 
 namespace Drupal\commerce_tax\Plugin\Validation\Constraint;
 
-use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\Core\Validation\Attribute\Constraint;
-use Symfony\Component\Validator\Constraint as SymfonyConstraint;
+use Symfony\Component\Validator\Constraint;
 
 /**
  * Tax number constraint.
+ *
+ * @Constraint(
+ *   id = "TaxNumber",
+ *   label = @Translation("Tax number", context = "Validation"),
+ *   type = { "commerce_tax_number" }
+ * )
  */
-#[Constraint(
-  id: "TaxNumber",
-  label: new TranslatableMarkup("Tax number", [], ["context" => "Validation"]),
-  type: "commerce_tax_number",
-)]
-class TaxNumberConstraint extends SymfonyConstraint {
+class TaxNumberConstraint extends Constraint {
 
   public $verify = TRUE;
   public $allowUnverified = FALSE;

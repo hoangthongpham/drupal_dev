@@ -1,4 +1,3 @@
-#cspell:ignore objectid
 id: d6_field_instance_label_description_translation
 label: Field label and description translation
 migration_tags:
@@ -37,8 +36,8 @@ process:
       plugin: migration_lookup
       migration: d6_field_instance
       source:
-        - '@field_name'
-        - '@bundle'
+         - '@field_name'
+         - '@bundle'
     -
       plugin: skip_on_empty
       method: row

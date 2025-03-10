@@ -2,11 +2,11 @@
 
 namespace Drupal\Tests\commerce_payment\Kernel\Entity;
 
-use Drupal\Tests\commerce_order\Kernel\OrderKernelTestBase;
 use Drupal\commerce_payment\Entity\PaymentGateway;
 use Drupal\commerce_payment\Entity\PaymentMethod;
 use Drupal\commerce_payment\Plugin\Commerce\PaymentMethodType\CreditCard;
 use Drupal\profile\Entity\Profile;
+use Drupal\Tests\commerce_order\Kernel\OrderKernelTestBase;
 use Drupal\user\UserInterface;
 
 /**

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\system\Functional\Form;
 
 use Drupal\Core\Form\FormState;
@@ -15,7 +13,9 @@ use Drupal\Tests\BrowserTestBase;
 class ElementsTableSelectTest extends BrowserTestBase {
 
   /**
-   * {@inheritdoc}
+   * Modules to enable.
+   *
+   * @var array
    */
   protected static $modules = ['form_test'];
 
@@ -27,25 +27,25 @@ class ElementsTableSelectTest extends BrowserTestBase {
   /**
    * Tests the display of checkboxes when #multiple is TRUE.
    */
-  public function testMultipleTrue(): void {
+  public function testMultipleTrue() {
 
     $this->drupalGet('form_test/tableselect/multiple-true');
 
     $this->assertSession()->responseNotContains('Empty text.');
 
     // Test for the presence of the Select all rows tableheader.
-    $this->assertSession()->elementExists('xpath', '//th[@class="select-all"]');
+    $this->assertNotEmpty($this->xpath('//th[@class="select-all"]'), 'Presence of the "Select all" checkbox.');
 
     $rows = ['row1', 'row2', 'row3'];
     foreach ($rows as $row) {
-      $this->assertSession()->elementExists('xpath', '//input[@type="checkbox"]');
+      $this->assertNotEmpty($this->xpath('//input[@type="checkbox"]', [$row]), "Checkbox for the value $row.");
     }
   }
 
   /**
    * Tests the display of radios when #multiple is FALSE.
    */
-  public function testMultipleFalse(): void {
+  public function testMultipleFalse() {
     $this->drupalGet('form_test/tableselect/multiple-false');
 
     $this->assertSession()->pageTextNotContains('Empty text.');
@@ -55,14 +55,14 @@ class ElementsTableSelectTest extends BrowserTestBase {
 
     $rows = ['row1', 'row2', 'row3'];
     foreach ($rows as $row) {
-      $this->assertSession()->elementExists('xpath', '//input[@type="radio"]');
+      $this->assertNotEmpty($this->xpath('//input[@type="radio"]', [$row], "Radio button value: $row"));
     }
   }
 
   /**
    * Tests the display when #colspan is set.
    */
-  public function testTableSelectColSpan(): void {
+  public function testTableSelectColSpan() {
     $this->drupalGet('form_test/tableselect/colspan');
 
     // Verify presence of column three and absence of column four.
@@ -70,23 +70,24 @@ class ElementsTableSelectTest extends BrowserTestBase {
     $this->assertSession()->pageTextNotContains('Four');
 
     // There should be three labeled column headers and 1 for the input.
-    $this->assertSession()->elementsCount('xpath', '//thead/tr/th', 4);
+    $table_head = $this->xpath('//thead/tr/th');
+    $this->assertCount(4, $table_head, 'There are four column headers');
 
     // The first two body rows should each have 5 table cells: One for the
     // radio, one cell in the first column, one cell in the second column,
     // and two cells in the third column which has colspan 2.
     for ($i = 0; $i <= 1; $i++) {
-      $this->assertSession()->elementsCount('xpath', '//tbody/tr[' . ($i + 1) . ']/td', 5);
+      $this->assertCount(5, $this->xpath('//tbody/tr[' . ($i + 1) . ']/td'), 'There are five cells in row ' . $i);
     }
     // The third row should have 3 cells, one for the radio, one spanning the
     // first and second column, and a third in column 3 (which has colspan 3).
-    $this->assertSession()->elementsCount('xpath', '//tbody/tr[3]/td', 3);
+    $this->assertCount(3, $this->xpath('//tbody/tr[3]/td'), 'There are three cells in row 3.');
   }
 
   /**
    * Tests the display of the #empty text when #options is an empty array.
    */
-  public function testEmptyText(): void {
+  public function testEmptyText() {
     $this->drupalGet('form_test/tableselect/empty-text');
     $this->assertSession()->pageTextContains('Empty text.');
   }
@@ -94,7 +95,7 @@ class ElementsTableSelectTest extends BrowserTestBase {
   /**
    * Tests the submission of single and multiple values when #multiple is TRUE.
    */
-  public function testMultipleTrueSubmit(): void {
+  public function testMultipleTrueSubmit() {
 
     // Test a submission with one checkbox checked.
     $edit = [];
@@ -122,7 +123,7 @@ class ElementsTableSelectTest extends BrowserTestBase {
   /**
    * Tests submission of values when #multiple is FALSE.
    */
-  public function testMultipleFalseSubmit(): void {
+  public function testMultipleFalseSubmit() {
     $edit['tableselect'] = 'row1';
     $this->drupalGet('form_test/tableselect/multiple-false');
     $this->submitForm($edit, 'Submit');
@@ -132,7 +133,7 @@ class ElementsTableSelectTest extends BrowserTestBase {
   /**
    * Tests the #js_select property.
    */
-  public function testAdvancedSelect(): void {
+  public function testAdvancedSelect() {
     // When #multiple = TRUE a Select all checkbox should be displayed by default.
     $this->drupalGet('form_test/tableselect/advanced-select/multiple-true-default');
     $this->assertSession()->elementExists('xpath', '//th[@class="select-all"]');
@@ -150,9 +151,10 @@ class ElementsTableSelectTest extends BrowserTestBase {
   }
 
   /**
-   * Tests error handling for invalid tableselect values with checkboxes.
+   * Tests the whether the option checker gives an error on invalid
+   * tableselect values for checkboxes.
    */
-  public function testMultipleTrueOptionChecker(): void {
+  public function testMultipleTrueOptionchecker() {
 
     [$header, $options] = _form_test_tableselect_get_data();
 
@@ -173,9 +175,10 @@ class ElementsTableSelectTest extends BrowserTestBase {
   }
 
   /**
-   * Tests error handling for invalid tableselect values with radio buttons.
+   * Tests the whether the option checker gives an error on invalid
+   * tableselect values for radios.
    */
-  public function testMultipleFalseOptionChecker(): void {
+  public function testMultipleFalseOptionchecker() {
 
     [$header, $options] = _form_test_tableselect_get_data();
 
@@ -238,7 +241,7 @@ class ElementsTableSelectTest extends BrowserTestBase {
     $form_state->clearErrors();
 
     // Return the processed form together with form_state and errors
-    // to allow the caller low-level access to the form.
+    // to allow the caller lowlevel access to the form.
     return [$form, $form_state, $errors];
   }
 

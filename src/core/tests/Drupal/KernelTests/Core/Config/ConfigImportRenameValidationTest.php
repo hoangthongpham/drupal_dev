@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\KernelTests\Core\Config;
 
 use Drupal\Component\Render\FormattableMarkup;
@@ -27,7 +25,9 @@ class ConfigImportRenameValidationTest extends KernelTestBase {
   protected $configImporter;
 
   /**
-   * {@inheritdoc}
+   * Modules to enable.
+   *
+   * @var array
    */
   protected static $modules = [
     'system',
@@ -63,15 +63,14 @@ class ConfigImportRenameValidationTest extends KernelTestBase {
       $this->container->get('module_installer'),
       $this->container->get('theme_handler'),
       $this->container->get('string_translation'),
-      $this->container->get('extension.list.module'),
-      $this->container->get('extension.list.theme')
+      $this->container->get('extension.list.module')
     );
   }
 
   /**
    * Tests configuration renaming validation.
    */
-  public function testRenameValidation(): void {
+  public function testRenameValidation() {
     // Create a test entity.
     $test_entity_id = $this->randomMachineName();
     $test_entity = \Drupal::entityTypeManager()->getStorage('config_test')->create([
@@ -89,7 +88,7 @@ class ConfigImportRenameValidationTest extends KernelTestBase {
 
     // Create a content type with a matching UUID in the active storage.
     $content_type = NodeType::create([
-      'type' => $this->randomMachineName(16),
+      'type' => mb_strtolower($this->randomMachineName(16)),
       'name' => $this->randomMachineName(),
       'uuid' => $uuid,
     ]);
@@ -121,7 +120,7 @@ class ConfigImportRenameValidationTest extends KernelTestBase {
   /**
    * Tests configuration renaming validation for simple configuration.
    */
-  public function testRenameSimpleConfigValidation(): void {
+  public function testRenameSimpleConfigValidation() {
     $uuid = new Php();
     // Create a simple configuration with a UUID.
     $config = $this->config('config_test.new');

@@ -3,7 +3,6 @@
 namespace Drupal\Core\Render\Element;
 
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Render\Attribute\FormElement;
 use Drupal\Core\Render\Element;
 
 /**
@@ -14,16 +13,17 @@ use Drupal\Core\Render\Element;
  *
  * Usage example:
  * @code
- * $form['copy'] = [
+ * $form['copy'] = array(
  *   '#type' => 'checkbox',
  *   '#title' => $this->t('Send me a copy'),
- * ];
+ * );
  * @endcode
  *
  * @see \Drupal\Core\Render\Element\Checkboxes
+ *
+ * @FormElement("checkbox")
  */
-#[FormElement('checkbox')]
-class Checkbox extends FormElementBase {
+class Checkbox extends FormElement {
 
   /**
    * {@inheritdoc}
@@ -61,7 +61,7 @@ class Checkbox extends FormElementBase {
     }
     else {
       // Checked checkboxes are submitted with a value (possibly '0' or ''):
-      // https://www.w3.org/TR/html401/interact/forms.html#successful-controls.
+      // http://www.w3.org/TR/html401/interact/forms.html#successful-controls.
       // For checked checkboxes, browsers submit the string version of
       // #return_value, but we return the original #return_value. For unchecked
       // checkboxes, browsers submit nothing at all, but

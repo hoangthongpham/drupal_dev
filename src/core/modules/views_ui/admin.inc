@@ -182,7 +182,7 @@ function views_ui_add_ajax_wrapper($element, FormStateInterface $form_state) {
 /**
  * Updates a part of the add view form via AJAX.
  *
- * @return array
+ * @return
  *   The part of the form that has changed.
  */
 function views_ui_ajax_update_form($form, FormStateInterface $form_state) {
@@ -200,7 +200,9 @@ function views_ui_nojs_submit($form, FormStateInterface $form_state) {
 }
 
 /**
- * Adds an element to select either the default display or the current display.
+ * Add a <select> dropdown for a given section, allowing the user to
+ * change whether this info is stored on the default display or on
+ * the current display.
  */
 function views_ui_standard_display_dropdown(&$form, FormStateInterface $form_state, $section) {
   $view = $form_state->get('view');
@@ -220,8 +222,8 @@ function views_ui_standard_display_dropdown(&$form, FormStateInterface $form_sta
 
   // Add the "2 of 3" progress indicator.
   if ($form_progress = $view->getFormProgress()) {
-    $arguments = $form['#title']->getArguments() + ['@current' => $form_progress['current'], '@total' => $form_progress['total']];
-    $form['#title'] = t('Configure @type @current of @total: @item', $arguments);
+    $form['progress']['#markup'] = '<div id="views-progress-indicator" class="views-progress-indicator">' . t('@current of @total', ['@current' => $form_progress['current'], '@total' => $form_progress['total']]) . '</div>';
+    $form['progress']['#weight'] = -1001;
   }
 
   // The dropdown should not be added when :
@@ -253,7 +255,7 @@ function views_ui_standard_display_dropdown(&$form, FormStateInterface $form_sta
 
   $form['override']['dropdown'] = [
     '#type' => 'select',
-    // @todo Translators may need more context than this.
+    // @TODO: Translators may need more context than this.
     '#title' => t('For'),
     '#options' => $display_dropdown,
   ];
@@ -267,7 +269,8 @@ function views_ui_standard_display_dropdown(&$form, FormStateInterface $form_sta
 }
 
 /**
- * Creates the menu path for a standard AJAX form given the form state.
+ * Create the menu path for one of our standard AJAX forms based upon known
+ * information about the form.
  *
  * @return \Drupal\Core\Url
  *   The URL object pointing to the form URL.

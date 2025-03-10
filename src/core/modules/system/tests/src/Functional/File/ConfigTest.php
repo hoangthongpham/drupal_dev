@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\system\Functional\File;
 
 use Drupal\Tests\BrowserTestBase;
@@ -18,9 +16,6 @@ class ConfigTest extends BrowserTestBase {
    */
   protected $defaultTheme = 'stark';
 
-  /**
-   * {@inheritdoc}
-   */
   protected function setUp(): void {
     parent::setUp();
     $this->drupalLogin($this->drupalCreateUser([
@@ -31,7 +26,7 @@ class ConfigTest extends BrowserTestBase {
   /**
    * Tests file configuration page.
    */
-  public function testFileConfigurationPage(): void {
+  public function testFileConfigurationPage() {
     $this->drupalGet('admin/config/media/file-system');
 
     // Set the file paths to non-default values.

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\config\Functional;
 
 use Drupal\config_test\Entity\ConfigTest;
@@ -12,16 +10,11 @@ use Drupal\Core\Site\Settings;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\Tests\BrowserTestBase;
 
-// cspell:ignore suis
-
 /**
- * Tests configuration objects before and after module install and uninstall.
- *
- * The installation and removal of configuration objects in install, disable
- * and uninstall functionality is tested.
+ * Tests installation and removal of configuration objects in install, disable
+ * and uninstall functionality.
  *
  * @group config
- * @group #slow
  */
 class ConfigInstallWebTest extends BrowserTestBase {
 
@@ -55,7 +48,7 @@ class ConfigInstallWebTest extends BrowserTestBase {
   /**
    * Tests module re-installation.
    */
-  public function testIntegrationModuleReinstallation(): void {
+  public function testIntegrationModuleReinstallation() {
     $default_config = 'config_integration_test.settings';
     $default_configuration_entity = 'config_test.dynamic.config_integration_test';
 
@@ -135,7 +128,7 @@ class ConfigInstallWebTest extends BrowserTestBase {
   /**
    * Tests pre-existing configuration detection.
    */
-  public function testPreExistingConfigInstall(): void {
+  public function testPreExistingConfigInstall() {
     $this->drupalLogin($this->adminUser);
 
     // Try to install config_install_fail_test and config_test. Doing this
@@ -201,7 +194,7 @@ class ConfigInstallWebTest extends BrowserTestBase {
   /**
    * Tests unmet dependencies detection.
    */
-  public function testUnmetDependenciesInstall(): void {
+  public function testUnmetDependenciesInstall() {
     $this->drupalLogin($this->adminUser);
     // We need to install separately since config_install_dependency_test does
     // not depend on config_test and order is important.
@@ -228,7 +221,7 @@ class ConfigInstallWebTest extends BrowserTestBase {
   /**
    * Tests config_requirements().
    */
-  public function testConfigModuleRequirements(): void {
+  public function testConfigModuleRequirements() {
     $this->drupalLogin($this->adminUser);
     $this->drupalGet('admin/modules');
     $this->submitForm(['modules[config][enable]' => TRUE], 'Install');

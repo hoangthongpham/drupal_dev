@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\ckeditor5\Kernel;
 
 use Drupal\ckeditor5\Plugin\Editor\CKEditor5;
@@ -11,7 +9,7 @@ use Drupal\KernelTests\KernelTestBase;
 use Symfony\Component\Validator\ConstraintViolation;
 
 /**
- * @covers \Drupal\ckeditor5\Plugin\CKEditor5PluginManager::getCKEditor5PluginConfig
+ * @covers \Drupal\ckeditor5\Plugin\CKEditor5PluginManager::getCKEditor5PluginConfig()
  * @group ckeditor5
  * @internal
  */
@@ -42,7 +40,8 @@ class WildcardHtmlSupportTest extends KernelTestBase {
   }
 
   /**
-   * @covers \Drupal\ckeditor5\Plugin\CKEditor5Plugin\SourceEditing::getDynamicPluginConfig
+   * @covers \Drupal\ckeditor5\Plugin\CKEditor5Plugin\SourceEditing::getDynamicPluginConfig()
+   * @covers \Drupal\ckeditor5\Plugin\CKEditor5PluginManager::getCKEditor5PluginConfig()
    * @dataProvider providerGhsConfiguration
    */
   public function testGhsConfiguration(string $filter_html_allowed, array $source_editing_tags, array $expected_ghs_configuration, ?array $additional_toolbar_items = []): void {
@@ -58,7 +57,7 @@ class WildcardHtmlSupportTest extends KernelTestBase {
         ],
       ],
     ])->save();
-    $editor_config = [
+    $editor = Editor::create([
       'editor' => 'ckeditor5',
       'format' => 'test_format',
       'settings' => [
@@ -74,14 +73,7 @@ class WildcardHtmlSupportTest extends KernelTestBase {
       'image_upload' => [
         'status' => FALSE,
       ],
-    ];
-    if (in_array('alignment', $additional_toolbar_items, TRUE)) {
-      $editor_config['settings']['plugins']['ckeditor5_alignment'] = [
-        'enabled_alignments' => ['left', 'center', 'right', 'justify'],
-      ];
-    }
-
-    $editor = Editor::create($editor_config);
+    ]);
     $editor->save();
     $this->assertSame([], array_map(
       function (ConstraintViolation $v) {
@@ -93,15 +85,10 @@ class WildcardHtmlSupportTest extends KernelTestBase {
       ))
     ));
     $config = $this->manager->getCKEditor5PluginConfig($editor);
-    $ghs_configuration = $config['config']['htmlSupport']['allow'];
-    // The first two entries in the GHS configuration are from the
-    // `ckeditor5_globalAttributeDir` and `ckeditor5_globalAttributeLang`
-    // plugins. They are out of scope for this test, so omit them.
-    $ghs_configuration = array_slice($ghs_configuration, 2);
-    $this->assertEquals($expected_ghs_configuration, $ghs_configuration);
+    $this->assertEquals($expected_ghs_configuration, $config['config']['htmlSupport']['allow']);
   }
 
-  public static function providerGhsConfiguration(): array {
+  public function providerGhsConfiguration(): array {
     return [
       'empty source editing' => [
         '<p> <br>',
@@ -161,7 +148,7 @@ class WildcardHtmlSupportTest extends KernelTestBase {
         ['alignment'],
       ],
       '<$text-container> with attribute from multiple plugins' => [
-        '<p data-llama class> <br>',
+        '<p data-llama class"> <br>',
         ['<$text-container data-llama>', '<p class>'],
         [
           [

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\Core\Cache;
 
 use Drupal\Core\Cache\Cache;
@@ -27,7 +25,7 @@ class CacheableMetadataTest extends UnitTestCase {
    * @see \Drupal\Tests\Core\Cache\CacheTest::testMergeMaxAges()
    * @see \Drupal\Tests\Core\Cache\CacheContextsTest
    */
-  public function testMerge(CacheableMetadata $a, CacheableMetadata $b, CacheableMetadata $expected): void {
+  public function testMerge(CacheableMetadata $a, CacheableMetadata $b, CacheableMetadata $expected) {
     $cache_contexts_manager = $this->getMockBuilder('Drupal\Core\Cache\Context\CacheContextsManager')
       ->disableOriginalConstructor()
       ->getMock();
@@ -51,7 +49,7 @@ class CacheableMetadataTest extends UnitTestCase {
    * @see \Drupal\Tests\Core\Cache\CacheTest::testMergeMaxAges()
    * @see \Drupal\Tests\Core\Cache\CacheContextsTest
    */
-  public function testAddCacheableDependency(CacheableMetadata $a, CacheableMetadata $b, CacheableMetadata $expected): void {
+  public function testAddCacheableDependency(CacheableMetadata $a, CacheableMetadata $b, CacheableMetadata $expected) {
     $cache_contexts_manager = $this->getMockBuilder('Drupal\Core\Cache\Context\CacheContextsManager')
       ->disableOriginalConstructor()
       ->getMock();
@@ -68,7 +66,7 @@ class CacheableMetadataTest extends UnitTestCase {
    *
    * @return array
    */
-  public static function providerTestMerge() {
+  public function providerTestMerge() {
     return [
       // All empty.
       [(new CacheableMetadata()), (new CacheableMetadata()), (new CacheableMetadata())],
@@ -86,7 +84,7 @@ class CacheableMetadataTest extends UnitTestCase {
    *
    * @covers ::addCacheTags
    */
-  public function testAddCacheTags(): void {
+  public function testAddCacheTags() {
     $metadata = new CacheableMetadata();
     $add_expected = [
       [[], []],
@@ -110,7 +108,7 @@ class CacheableMetadataTest extends UnitTestCase {
    * @covers ::setCacheMaxAge
    * @dataProvider providerSetCacheMaxAge
    */
-  public function testSetCacheMaxAge($data, $expect_exception): void {
+  public function testSetCacheMaxAge($data, $expect_exception) {
     $metadata = new CacheableMetadata();
     if ($expect_exception) {
       $this->expectException('\InvalidArgumentException');
@@ -122,7 +120,7 @@ class CacheableMetadataTest extends UnitTestCase {
   /**
    * Data provider for testSetCacheMaxAge.
    */
-  public static function providerSetCacheMaxAge() {
+  public function providerSetCacheMaxAge() {
     return [
       [0 , FALSE],
       ['http', TRUE],
@@ -131,14 +129,14 @@ class CacheableMetadataTest extends UnitTestCase {
       [300, FALSE],
       [[], TRUE],
       [8.0, TRUE],
-    ];
+   ];
   }
 
   /**
    * @covers ::createFromRenderArray
    * @dataProvider providerTestCreateFromRenderArray
    */
-  public function testCreateFromRenderArray(array $render_array, CacheableMetadata $expected): void {
+  public function testCreateFromRenderArray(array $render_array, CacheableMetadata $expected) {
     $this->assertEquals($expected, CacheableMetadata::createFromRenderArray($render_array));
   }
 
@@ -147,7 +145,7 @@ class CacheableMetadataTest extends UnitTestCase {
    *
    * @return array
    */
-  public static function providerTestCreateFromRenderArray() {
+  public function providerTestCreateFromRenderArray() {
     $data = [];
 
     $empty_metadata = new CacheableMetadata();
@@ -174,7 +172,7 @@ class CacheableMetadataTest extends UnitTestCase {
    * @covers ::createFromObject
    * @dataProvider providerTestCreateFromObject
    */
-  public function testCreateFromObject($object, CacheableMetadata $expected): void {
+  public function testCreateFromObject($object, CacheableMetadata $expected) {
     $this->assertEquals($expected, CacheableMetadata::createFromObject($object));
   }
 
@@ -183,7 +181,7 @@ class CacheableMetadataTest extends UnitTestCase {
    *
    * @return array
    */
-  public static function providerTestCreateFromObject() {
+  public function providerTestCreateFromObject() {
     $data = [];
 
     $empty_metadata = new CacheableMetadata();

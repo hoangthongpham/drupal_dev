@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\KernelTests\Core\Theme;
 
 use Drupal\Core\Language\LanguageInterface;
@@ -44,6 +42,7 @@ class TwigWhiteListTest extends KernelTestBase {
     'system',
     'text',
     'field',
+    'entity_reference',
   ];
 
   /**
@@ -52,6 +51,7 @@ class TwigWhiteListTest extends KernelTestBase {
   protected function setUp(): void {
     parent::setUp();
     \Drupal::service('theme_installer')->install(['test_theme']);
+    $this->installSchema('system', ['sequences']);
     $this->installEntitySchema('node');
     $this->installEntitySchema('user');
     $this->installEntitySchema('taxonomy_term');
@@ -121,7 +121,7 @@ class TwigWhiteListTest extends KernelTestBase {
   /**
    * Tests white-listing of methods doesn't interfere with chaining.
    */
-  public function testWhiteListChaining(): void {
+  public function testWhiteListChaining() {
     /** @var \Drupal\Core\Template\TwigEnvironment $environment */
     $environment = \Drupal::service('twig');
     $node = Node::create([
@@ -131,7 +131,7 @@ class TwigWhiteListTest extends KernelTestBase {
       'field_term' => $this->term->id(),
     ]);
     $node->save();
-    $template = $environment->load($this->getThemePath('test_theme') . '/templates/node.html.twig');
+    $template = $environment->loadTemplate($this->getThemePath('test_theme') . '/templates/node.html.twig');
     $markup = $template->render(['node' => $node]);
     $this->setRawContent($markup);
     $this->assertText('Sometimes people are just jerks');

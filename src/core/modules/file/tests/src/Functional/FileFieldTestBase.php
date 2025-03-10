@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\file\Functional;
 
 use Drupal\Component\Render\FormattableMarkup;
@@ -37,7 +35,7 @@ abstract class FileFieldTestBase extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp(): void {
+  protected function setUp() {
     parent::setUp();
     $this->adminUser = $this->drupalCreateUser([
       'access content',

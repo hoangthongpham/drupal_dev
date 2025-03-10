@@ -2,20 +2,19 @@
 
 namespace Drupal\commerce_promotion\Plugin\Validation\Constraint;
 
-use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\Core\Validation\Attribute\Constraint;
-use Symfony\Component\Validator\Constraint as SymfonyConstraint;
+use Symfony\Component\Validator\Constraint;
 
 /**
  * Coupon valid reference constraint.
  *
  * Verifies that coupon is available and applies to the order.
+ *
+ * @Constraint(
+ *   id = "CouponValid",
+ *   label = @Translation("Coupon valid reference", context = "Validation")
+ * )
  */
-#[Constraint(
-  id: "CouponValid",
-  label: new TranslatableMarkup("Coupon valid reference", [], ["context" => "Validation"]),
-)]
-class CouponValidConstraint extends SymfonyConstraint {
+class CouponValidConstraint extends Constraint {
 
   /**
    * The default violation message.

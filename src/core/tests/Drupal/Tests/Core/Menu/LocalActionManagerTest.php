@@ -1,6 +1,9 @@
 <?php
 
-declare(strict_types=1);
+/**
+ * @file
+ * Contains \Drupal\Tests\Core\Menu\LocalActionManagerTest.
+ */
 
 namespace Drupal\Tests\Core\Menu;
 
@@ -20,7 +23,6 @@ use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
 use Drupal\Tests\UnitTestCase;
 use Prophecy\Argument;
-use Prophecy\Prophet;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Controller\ArgumentResolverInterface;
@@ -105,8 +107,6 @@ class LocalActionManagerTest extends UnitTestCase {
    * {@inheritdoc}
    */
   protected function setUp(): void {
-    parent::setUp();
-
     $this->argumentResolver = $this->createMock('\Symfony\Component\HttpKernel\Controller\ArgumentResolverInterface');
     $this->request = $this->createMock('Symfony\Component\HttpFoundation\Request');
     $this->routeProvider = $this->createMock('Drupal\Core\Routing\RouteProviderInterface');
@@ -137,7 +137,7 @@ class LocalActionManagerTest extends UnitTestCase {
   /**
    * @covers ::getTitle
    */
-  public function testGetTitle(): void {
+  public function testGetTitle() {
     $local_action = $this->createMock('Drupal\Core\Menu\LocalActionInterface');
     $local_action->expects($this->once())
       ->method('getTitle')
@@ -146,7 +146,7 @@ class LocalActionManagerTest extends UnitTestCase {
     $this->argumentResolver->expects($this->once())
       ->method('getArguments')
       ->with($this->request, [$local_action, 'getTitle'])
-      ->willReturn(['test']);
+      ->will($this->returnValue(['test']));
 
     $this->localActionManager->getTitle($local_action);
   }
@@ -156,34 +156,34 @@ class LocalActionManagerTest extends UnitTestCase {
    *
    * @dataProvider getActionsForRouteProvider
    */
-  public function testGetActionsForRoute($route_appears, array $plugin_definitions, array $expected_actions): void {
+  public function testGetActionsForRoute($route_appears, array $plugin_definitions, array $expected_actions) {
     $this->discovery->expects($this->any())
       ->method('getDefinitions')
-      ->willReturn($plugin_definitions);
+      ->will($this->returnValue($plugin_definitions));
     $map = [];
     foreach ($plugin_definitions as $plugin_id => $plugin_definition) {
       $plugin = $this->createMock('Drupal\Core\Menu\LocalActionInterface');
       $plugin->expects($this->any())
         ->method('getRouteName')
-        ->willReturn($plugin_definition['route_name']);
+        ->will($this->returnValue($plugin_definition['route_name']));
       $plugin->expects($this->any())
         ->method('getRouteParameters')
-        ->willReturn($plugin_definition['route_parameters'] ?? []);
+        ->will($this->returnValue($plugin_definition['route_parameters'] ?? []));
       $plugin->expects($this->any())
         ->method('getTitle')
-        ->willReturn($plugin_definition['title']);
+        ->will($this->returnValue($plugin_definition['title']));
       $this->argumentResolver->expects($this->any())
         ->method('getArguments')
         ->with($this->request, [$plugin, 'getTitle'])
-        ->willReturn([]);
+        ->will($this->returnValue([]));
 
       $plugin->expects($this->any())
         ->method('getWeight')
-        ->willReturn($plugin_definition['weight']);
+        ->will($this->returnValue($plugin_definition['weight']));
       $this->argumentResolver->expects($this->any())
         ->method('getArguments')
         ->with($this->request, [$plugin, 'getTitle'])
-        ->willReturn([]);
+        ->will($this->returnValue([]));
       $map[] = [$plugin_id, [], $plugin];
     }
     $this->factory->expects($this->any())
@@ -193,8 +193,8 @@ class LocalActionManagerTest extends UnitTestCase {
     $this->assertEquals($expected_actions, $this->localActionManager->getActionsForRoute($route_appears));
   }
 
-  public static function getActionsForRouteProvider() {
-    $cache_contexts_manager = (new Prophet())->prophesize(CacheContextsManager::class);
+  public function getActionsForRouteProvider() {
+    $cache_contexts_manager = $this->prophesize(CacheContextsManager::class);
     $cache_contexts_manager->assertValidTokens(Argument::any())
       ->willReturn(TRUE);
 
@@ -394,7 +394,7 @@ class TestLocalActionManager extends LocalActionManager {
     $this->routeMatch = $route_match;
     $this->moduleHandler = $module_handler;
     $this->alterInfo('menu_local_actions');
-    $this->setCacheBackend($cache_backend, 'local_action_plugins');
+    $this->setCacheBackend($cache_backend, 'local_action_plugins', ['local_action']);
   }
 
 }

@@ -30,7 +30,6 @@ abstract class CartKernelTestBase extends OrderKernelTestBase {
    */
   protected static $modules = [
     'commerce_cart',
-    'commerce_product',
   ];
 
   /**

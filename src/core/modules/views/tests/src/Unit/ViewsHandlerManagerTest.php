@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\views\Unit;
 
 use Drupal\Tests\UnitTestCase;
@@ -61,6 +59,7 @@ class ViewsHandlerManagerTest extends UnitTestCase {
 
     $reflection = new \ReflectionClass($this->handlerManager);
     $property = $reflection->getProperty('factory');
+    $property->setAccessible(TRUE);
     $property->setValue($this->handlerManager, $this->factory);
   }
 
@@ -70,7 +69,7 @@ class ViewsHandlerManagerTest extends UnitTestCase {
    * @covers ::__construct
    * @covers ::getDefinitions
    */
-  public function testAlterHookInvocation(): void {
+  public function testAlterHookInvocation() {
     $this->moduleHandler->expects($this->once())
       ->method('alter')
       ->with('views_plugins_test', []);
@@ -81,7 +80,7 @@ class ViewsHandlerManagerTest extends UnitTestCase {
   /**
    * Tests getHandler() and its base information propagation.
    */
-  public function testGetHandlerBaseInformationPropagation(): void {
+  public function testGetHandlerBaseInformationPropagation() {
     $this->setupMockedFactory();
 
     $item = [];
@@ -124,7 +123,7 @@ class ViewsHandlerManagerTest extends UnitTestCase {
   /**
    * Tests getHandler() with an override.
    */
-  public function testGetHandlerOverride(): void {
+  public function testGetHandlerOverride() {
     $this->setupMockedFactory();
 
     $item = [];
@@ -152,7 +151,7 @@ class ViewsHandlerManagerTest extends UnitTestCase {
   /**
    * Tests getHandler() without an override.
    */
-  public function testGetHandlerNoOverride(): void {
+  public function testGetHandlerNoOverride() {
     $this->setupMockedFactory();
 
     $item = [];

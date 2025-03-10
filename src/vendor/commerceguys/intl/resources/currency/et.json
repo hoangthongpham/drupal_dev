@@ -54,6 +54,9 @@
 	"BOB": {
 		"name": "Boliivia boliviaano"
 	},
+	"VED": {
+		"name": "Bolívar Soberano"
+	},
 	"BAM": {
 		"name": "Bosnia ja Hertsegoviina konverteeritav mark"
 	},
@@ -377,8 +380,11 @@
 	"RSD": {
 		"name": "Serbia dinaar"
 	},
-	"SLE": {
+	"SLL": {
 		"name": "Sierra Leone leoone"
+	},
+	"SLE": {
+		"name": "Sierra Leonean Leone"
 	},
 	"SGD": {
 		"name": "Singapuri dollar"
@@ -456,6 +462,9 @@
 	},
 	"UYU": {
 		"name": "Uruguay peeso"
+	},
+	"UYW": {
+		"name": "Uruguayan Nominal Wage Index Unit"
 	},
 	"USD": {
 		"name": "USA dollar",

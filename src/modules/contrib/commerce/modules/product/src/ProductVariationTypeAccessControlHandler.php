@@ -2,10 +2,10 @@
 
 namespace Drupal\commerce_product;
 
+use Drupal\commerce\CommerceBundleAccessControlHandler;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\commerce\CommerceBundleAccessControlHandler;
 
 /**
  * Controls access to product variation type entities.

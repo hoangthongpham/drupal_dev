@@ -91,7 +91,7 @@ class LoggerChannel implements LoggerChannelInterface {
   /**
    * {@inheritdoc}
    */
-  public function log($level, string|\Stringable $message, array $context = []): void {
+  public function log($level, $message, array $context = []) {
     if ($this->callDepth == self::MAX_CALL_DEPTH) {
       return;
     }
@@ -133,14 +133,14 @@ class LoggerChannel implements LoggerChannelInterface {
   /**
    * {@inheritdoc}
    */
-  public function setRequestStack(?RequestStack $requestStack = NULL) {
+  public function setRequestStack(RequestStack $requestStack = NULL) {
     $this->requestStack = $requestStack;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function setCurrentUser(?AccountInterface $current_user = NULL) {
+  public function setCurrentUser(AccountInterface $current_user = NULL) {
     $this->currentUser = $current_user;
   }
 
@@ -165,8 +165,13 @@ class LoggerChannel implements LoggerChannelInterface {
    *   An array of sorted loggers by priority.
    */
   protected function sortLoggers() {
+    $sorted = [];
     krsort($this->loggers);
-    return array_merge(...$this->loggers);
+
+    foreach ($this->loggers as $loggers) {
+      $sorted = array_merge($sorted, $loggers);
+    }
+    return $sorted;
   }
 
 }

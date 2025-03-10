@@ -1,7 +1,4 @@
 <?php
-
-declare(strict_types=1);
-
 namespace Drush\Drupal;
 
 use Drupal\Core\Installer\InstallerKernel as DrupalInstallerKernel;
@@ -11,5 +8,5 @@ use Drupal\Core\Installer\InstallerKernel as DrupalInstallerKernel;
  */
 class InstallerKernel extends DrupalInstallerKernel
 {
-    // Nothing here anymore, but kept in case we need it later.
+    use DrupalKernelTrait;
 }

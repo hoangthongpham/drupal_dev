@@ -1,15 +1,15 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\migrate\Kernel\Plugin\id_map;
 
 use Drupal\Core\Database\Database;
-use Drupal\Core\Database\Exception\SchemaTableColumnSizeTooLargeException;
+use Drupal\Core\Database\DatabaseExceptionWrapper;
 use Drupal\Tests\migrate\Kernel\MigrateTestBase;
 use Drupal\Tests\migrate\Unit\TestSqlIdMap;
 use Drupal\migrate\MigrateException;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
+
+// cspell:ignore sourceid
 
 /**
  * Tests that the migrate map table is created.
@@ -49,7 +49,7 @@ class SqlTest extends MigrateTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp(): void {
+  public function setUp(): void {
     parent::setUp();
     $this->database = \Drupal::database();
     $this->eventDispatcher = $this->prophesize(EventDispatcherInterface::class)
@@ -83,11 +83,11 @@ class SqlTest extends MigrateTestBase {
    *
    * @dataProvider providerTestEnsureTables
    */
-  public function testEnsureTables($ids): void {
+  public function testEnsureTables($ids) {
     $this->migrationDefinition['source']['ids'] = $ids;
     $migration = $this->migrationPluginManager->createStubMigration($this->migrationDefinition);
 
-    $map = new TestSqlIdMap($this->database, [], 'test', [], $migration, $this->eventDispatcher, $this->migrationPluginManager);
+    $map = new TestSqlIdMap($this->database, [], 'test', [], $migration, $this->eventDispatcher);
     $map->ensureTables();
 
     // Checks that the map table was created.
@@ -98,7 +98,7 @@ class SqlTest extends MigrateTestBase {
   /**
    * Provides data for testEnsureTables.
    */
-  public static function providerTestEnsureTables() {
+  public function providerTestEnsureTables() {
     return [
       'no ids' => [
         [],
@@ -137,7 +137,7 @@ class SqlTest extends MigrateTestBase {
    *
    * @dataProvider providerTestFailEnsureTables
    */
-  public function testFailEnsureTables($ids): void {
+  public function testFailEnsureTables($ids) {
     // This just tests mysql, as other PDO integrations allow longer indexes.
     if (Database::getConnection()->databaseType() !== 'mysql') {
       $this->markTestSkipped("This test only runs for MySQL");
@@ -149,16 +149,17 @@ class SqlTest extends MigrateTestBase {
       ->createStubMigration($this->migrationDefinition);
 
     // Use local id map plugin to force an error.
-    $map = new SqlIdMapTest($this->database, [], 'test', [], $migration, $this->eventDispatcher, $this->migrationPluginManager);
+    $map = new SqlIdMapTest($this->database, [], 'test', [], $migration, $this->eventDispatcher);
 
-    $this->expectException(SchemaTableColumnSizeTooLargeException::class);
+    $this->expectException(DatabaseExceptionWrapper::class);
+    $this->expectExceptionMessage("Syntax error or access violation: 1074 Column length too big for column 'sourceid1' (max = 16383); use BLOB or TEXT instead:");
     $map->ensureTables();
   }
 
   /**
    * Provides data for testFailEnsureTables.
    */
-  public static function providerTestFailEnsureTables() {
+  public function providerTestFailEnsureTables() {
     return [
       'one id' => [
         [

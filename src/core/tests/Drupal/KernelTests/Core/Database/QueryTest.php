@@ -1,17 +1,10 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\KernelTests\Core\Database;
-
-use Drupal\Core\Database\Database;
-
-// cSpell:ignore aquery aprepare
 
 /**
  * Tests Drupal's extended prepared statement syntax..
  *
- * @coversDefaultClass \Drupal\Core\Database\Connection
  * @group Database
  */
 class QueryTest extends DatabaseTestBase {
@@ -19,7 +12,7 @@ class QueryTest extends DatabaseTestBase {
   /**
    * Tests that we can pass an array of values directly in the query.
    */
-  public function testArraySubstitution(): void {
+  public function testArraySubstitution() {
     $names = $this->connection->query('SELECT [name] FROM {test} WHERE [age] IN ( :ages[] ) ORDER BY [age]', [':ages[]' => [25, 26, 27]])->fetchAll();
     $this->assertCount(3, $names, 'Correct number of names returned');
 
@@ -30,7 +23,7 @@ class QueryTest extends DatabaseTestBase {
   /**
    * Tests that we can not pass a scalar value when an array is expected.
    */
-  public function testScalarSubstitution(): void {
+  public function testScalarSubstitution() {
     try {
       $names = $this->connection->query('SELECT [name] FROM {test} WHERE [age] IN ( :ages[] ) ORDER BY [age]', [':ages[]' => 25])->fetchAll();
       $this->fail('Array placeholder with scalar argument should result in an exception.');
@@ -44,7 +37,7 @@ class QueryTest extends DatabaseTestBase {
   /**
    * Tests SQL injection via database query array arguments.
    */
-  public function testArrayArgumentsSQLInjection(): void {
+  public function testArrayArgumentsSQLInjection() {
     // Attempt SQL injection and verify that it does not work.
     $condition = [
       "1 ;INSERT INTO {test} (name) VALUES ('test12345678'); -- " => '',
@@ -71,7 +64,7 @@ class QueryTest extends DatabaseTestBase {
   /**
    * Tests SQL injection via condition operator.
    */
-  public function testConditionOperatorArgumentsSQLInjection(): void {
+  public function testConditionOperatorArgumentsSQLInjection() {
     $injection = "IS NOT NULL) ;INSERT INTO {test} (name) VALUES ('test12345678'); -- ";
 
     $previous_error_handler = set_error_handler(function ($severity, $message, $filename, $lineno) use (&$previous_error_handler) {
@@ -145,10 +138,10 @@ class QueryTest extends DatabaseTestBase {
   /**
    * Tests numeric query parameter expansion in expressions.
    *
-   * @see \Drupal\sqlite\Driver\Database\sqlite\Statement::getStatement()
+   * @see \Drupal\Core\Database\Driver\sqlite\Statement::getStatement()
    * @see http://bugs.php.net/bug.php?id=45259
    */
-  public function testNumericExpressionSubstitution(): void {
+  public function testNumericExpressionSubstitution() {
     $count_expected = $this->connection->query('SELECT COUNT(*) + 3 FROM {test}')->fetchField();
 
     $count = $this->connection->query('SELECT COUNT(*) + :count FROM {test}', [
@@ -160,29 +153,11 @@ class QueryTest extends DatabaseTestBase {
   /**
    * Tests quoting identifiers in queries.
    */
-  public function testQuotingIdentifiers(): void {
+  public function testQuotingIdentifiers() {
     // Use the table named an ANSI SQL reserved word with a column that is as
     // well.
     $result = $this->connection->query('SELECT [update] FROM {select}')->fetchObject();
     $this->assertEquals('Update value 1', $result->update);
-  }
-
-  /**
-   * Tests deprecation of the 'return' query option.
-   *
-   * @covers ::query
-   * @covers ::prepareStatement
-   *
-   * @group legacy
-   */
-  public function testReturnOptionDeprecation(): void {
-    $this->expectDeprecation('Passing "return" option to %Aquery() is deprecated in drupal:9.4.0 and is removed in drupal:11.0.0. For data manipulation operations, use dynamic queries instead. See https://www.drupal.org/node/3185520');
-    $this->expectDeprecation('Passing "return" option to %AprepareStatement() is deprecated in drupal:9.4.0 and is removed in drupal:11.0.0. For data manipulation operations, use dynamic queries instead. See https://www.drupal.org/node/3185520');
-    $this->assertIsInt((int) $this->connection->query('INSERT INTO {test} ([name], [age], [job]) VALUES (:name, :age, :job)', [
-      ':name' => 'Magoo',
-      ':age' => 56,
-      ':job' => 'Driver',
-    ], ['return' => Database::RETURN_INSERT_ID]));
   }
 
 }

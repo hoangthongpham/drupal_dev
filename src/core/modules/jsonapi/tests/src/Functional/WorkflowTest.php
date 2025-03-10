@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\jsonapi\Functional;
 
 use Drupal\Core\Url;
@@ -12,7 +10,7 @@ use Drupal\workflows\Entity\Workflow;
  *
  * @group jsonapi
  */
-class WorkflowTest extends ConfigEntityResourceTestBase {
+class WorkflowTest extends ResourceTestBase {
 
   /**
    * {@inheritdoc}
@@ -128,7 +126,6 @@ class WorkflowTest extends ConfigEntityResourceTestBase {
    */
   protected function getPostDocument() {
     // @todo Update in https://www.drupal.org/node/2300677.
-    return [];
   }
 
 }

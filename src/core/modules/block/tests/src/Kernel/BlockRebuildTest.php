@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\block\Kernel;
 
 use Drupal\block\Entity\Block;
@@ -29,8 +27,8 @@ class BlockRebuildTest extends KernelTestBase {
   protected function setUp(): void {
     parent::setUp();
 
-    $this->container->get('theme_installer')->install(['stark']);
-    $this->container->get('config.factory')->getEditable('system.theme')->set('default', 'stark')->save();
+    $this->container->get('theme_installer')->install(['stable', 'classy']);
+    $this->container->get('config.factory')->getEditable('system.theme')->set('default', 'classy')->save();
   }
 
   /**
@@ -47,7 +45,7 @@ class BlockRebuildTest extends KernelTestBase {
   /**
    * @covers ::block_rebuild
    */
-  public function testRebuildNoBlocks(): void {
+  public function testRebuildNoBlocks() {
     block_rebuild();
     $messages = \Drupal::messenger()->all();
     \Drupal::messenger()->deleteAll();
@@ -57,7 +55,7 @@ class BlockRebuildTest extends KernelTestBase {
   /**
    * @covers ::block_rebuild
    */
-  public function testRebuildNoInvalidBlocks(): void {
+  public function testRebuildNoInvalidBlocks() {
     $this->placeBlock('system_powered_by_block', ['region' => 'content']);
 
     block_rebuild();
@@ -69,7 +67,7 @@ class BlockRebuildTest extends KernelTestBase {
   /**
    * @covers ::block_rebuild
    */
-  public function testRebuildInvalidBlocks(): void {
+  public function testRebuildInvalidBlocks() {
     $this->placeBlock('system_powered_by_block', ['region' => 'content']);
     $block1 = $this->placeBlock('system_powered_by_block');
     $block2 = $this->placeBlock('system_powered_by_block');
@@ -98,7 +96,7 @@ class BlockRebuildTest extends KernelTestBase {
     $expected = ['warning' => [new TranslatableMarkup('The block %info was assigned to the invalid region %region and has been disabled.', ['%info' => $block1->id(), '%region' => 'INVALID'])]];
     $this->assertEquals($expected, $messages);
 
-    $default_region = system_default_region('stark');
+    $default_region = system_default_region('classy');
     $this->assertSame($default_region, $block1->getRegion());
     $this->assertFalse($block1->status());
     $this->assertSame($default_region, $block2->getRegion());

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\taxonomy\Functional;
 
 /**
@@ -12,7 +10,9 @@ namespace Drupal\Tests\taxonomy\Functional;
 class TaxonomyTermIndentationTest extends TaxonomyTestBase {
 
   /**
-   * {@inheritdoc}
+   * Modules to enable.
+   *
+   * @var array
    */
   protected static $modules = ['taxonomy'];
 
@@ -28,9 +28,6 @@ class TaxonomyTermIndentationTest extends TaxonomyTestBase {
    */
   protected $vocabulary;
 
-  /**
-   * {@inheritdoc}
-   */
   protected function setUp(): void {
     parent::setUp();
     $this->drupalLogin($this->drupalCreateUser([
@@ -43,7 +40,7 @@ class TaxonomyTermIndentationTest extends TaxonomyTestBase {
   /**
    * Tests term indentation.
    */
-  public function testTermIndentation(): void {
+  public function testTermIndentation() {
     $assert = $this->assertSession();
     // Create three taxonomy terms.
     $term1 = $this->createTerm($this->vocabulary);

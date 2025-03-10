@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\standard\FunctionalJavascript;
 
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
@@ -22,7 +20,7 @@ class StandardJavascriptTest extends WebDriverTestBase {
   /**
    * Tests BigPipe accelerates particular Standard installation profile routes.
    */
-  public function testBigPipe(): void {
+  public function testBigPipe() {
     $this->drupalLogin($this->drupalCreateUser([
       'access content',
       'post comments',
@@ -56,8 +54,7 @@ class StandardJavascriptTest extends WebDriverTestBase {
     $web_assert = $this->assertSession();
     $web_assert->waitForElement('css', 'script[data-big-pipe-event="stop"]');
     $page = $this->getSession()->getPage();
-    // Settings are removed as soon as they are processed.
-    $this->assertCount(0, $this->getDrupalSettings()['bigPipePlaceholderIds']);
+    $this->assertCount($expected_count, $this->getDrupalSettings()['bigPipePlaceholderIds']);
     $this->assertCount($expected_count, $page->findAll('css', 'script[data-big-pipe-replacement-for-placeholder-with-id]'));
   }
 

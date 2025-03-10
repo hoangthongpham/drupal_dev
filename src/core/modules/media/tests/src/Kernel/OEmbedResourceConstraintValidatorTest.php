@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\media\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
@@ -41,7 +39,7 @@ class OEmbedResourceConstraintValidatorTest extends KernelTestBase {
   /**
    * @covers ::validate
    */
-  public function testValidateEmptySource(): void {
+  public function testValidateEmptySource() {
     $media = Media::create([
       'bundle' => $this->createMediaType('oembed:video')->id(),
     ]);
@@ -68,7 +66,7 @@ class OEmbedResourceConstraintValidatorTest extends KernelTestBase {
   /**
    * @covers ::validate
    */
-  public function testValidateUrlResolverInvoked(): void {
+  public function testValidateUrlResolverInvoked() {
     $media = Media::create([
       'bundle' => $this->createMediaType('oembed:video')->id(),
       'field_media_oembed_video' => 'source value',
@@ -105,8 +103,6 @@ class OEmbedResourceConstraintValidatorTest extends KernelTestBase {
    */
   protected function getValue(Media $media) {
     return new class ($media) {
-
-      private $entity;
 
       public function __construct($entity) {
         $this->entity = $entity;

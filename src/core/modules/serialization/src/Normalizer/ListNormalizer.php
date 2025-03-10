@@ -18,21 +18,17 @@ class ListNormalizer extends NormalizerBase {
   /**
    * {@inheritdoc}
    */
-  public function normalize($object, $format = NULL, array $context = []): array|string|int|float|bool|\ArrayObject|NULL {
+  protected $supportedInterfaceOrClass = ListInterface::class;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function normalize($object, $format = NULL, array $context = []) {
     $attributes = [];
     foreach ($object as $fieldItem) {
       $attributes[] = $this->serializer->normalize($fieldItem, $format, $context);
     }
     return $attributes;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getSupportedTypes(?string $format): array {
-    return [
-      ListInterface::class => TRUE,
-    ];
   }
 
 }

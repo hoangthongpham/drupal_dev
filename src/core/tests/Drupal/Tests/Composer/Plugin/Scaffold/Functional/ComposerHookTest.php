@@ -1,14 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\Composer\Plugin\Scaffold\Functional;
 
 use Composer\Util\Filesystem;
-use Drupal\BuildTests\Framework\BuildTestBase;
 use Drupal\Tests\Composer\Plugin\Scaffold\AssertUtilsTrait;
 use Drupal\Tests\Composer\Plugin\Scaffold\ExecTrait;
 use Drupal\Tests\Composer\Plugin\Scaffold\Fixtures;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Tests Composer Hooks that run scaffold operations.
@@ -24,8 +22,7 @@ use Drupal\Tests\Composer\Plugin\Scaffold\Fixtures;
  *
  * @group Scaffold
  */
-class ComposerHookTest extends BuildTestBase {
-
+class ComposerHookTest extends TestCase {
   use ExecTrait;
   use AssertUtilsTrait;
 
@@ -54,12 +51,10 @@ class ComposerHookTest extends BuildTestBase {
    * {@inheritdoc}
    */
   protected function setUp(): void {
-    parent::setUp();
-
     $this->fileSystem = new Filesystem();
     $this->fixtures = new Fixtures();
     $this->fixtures->createIsolatedComposerCacheDir();
-    $this->fixturesDir = $this->fixtures->tmpDir($this->name());
+    $this->fixturesDir = $this->fixtures->tmpDir($this->getName());
     $replacements = ['SYMLINK' => 'false', 'PROJECT_ROOT' => $this->fixtures->projectRoot()];
     $this->fixtures->cloneFixtureProjects($this->fixturesDir, $replacements);
   }
@@ -70,14 +65,12 @@ class ComposerHookTest extends BuildTestBase {
   protected function tearDown(): void {
     // Remove any temporary directories et. al. that were created.
     $this->fixtures->tearDown();
-
-    parent::tearDown();
   }
 
   /**
    * Tests to see if scaffold operation runs at the correct times.
    */
-  public function testComposerHooks(): void {
+  public function testComposerHooks() {
     $topLevelProjectDir = 'composer-hooks-fixture';
     $sut = $this->fixturesDir . '/' . $topLevelProjectDir;
     // First test: run composer install. This is the same as composer update
@@ -88,7 +81,7 @@ class ComposerHookTest extends BuildTestBase {
     // project is "allowed" in our main fixture project, but not required.
     // We expect that requiring this library should re-scaffold, resulting
     // in a changed default.settings.php file.
-    $stdout = $this->mustExec("composer require --no-ansi --no-interaction fixtures/drupal-assets-fixture:dev-main fixtures/scaffold-override-fixture:dev-main", $sut);
+    $stdout = $this->mustExec("composer require --no-ansi --no-interaction fixtures/drupal-assets-fixture:dev-master fixtures/scaffold-override-fixture:dev-master", $sut);
     $this->assertScaffoldedFile($sut . '/sites/default/default.settings.php', FALSE, 'scaffolded from the scaffold-override-fixture');
     // Make sure that the appropriate notice informing us that scaffolding
     // is allowed was printed.
@@ -121,12 +114,21 @@ class ComposerHookTest extends BuildTestBase {
     $this->assertDirectoryExists($sut);
     $this->assertStringContainsString('Scaffolding files for fixtures/drupal-drupal', $stdout);
     $this->assertScaffoldedFile($sut . '/index.php', FALSE, 'Test version of index.php from drupal/core');
+    $topLevelProjectDir = 'composer-hooks-nothing-allowed-fixture';
+    $sut = $this->fixturesDir . '/' . $topLevelProjectDir;
+    // Run composer install on an empty project.
+    $this->mustExec("composer install --no-ansi", $sut);
+    // Require a project that is not allowed to scaffold and confirm that we
+    // get a warning, and it does not scaffold.
+    $stdout = $this->mustExec("composer require --no-ansi --no-interaction fixtures/drupal-assets-fixture:dev-master fixtures/scaffold-override-fixture:dev-master", $sut);
+    $this->assertFileDoesNotExist($sut . '/sites/default/default.settings.php');
+    $this->assertStringContainsString("Not scaffolding files for fixtures/scaffold-override-fixture, because it is not listed in the element 'extra.drupal-scaffold.allowed-packages' in the root-level composer.json file.", $stdout);
   }
 
   /**
    * Tests to see if scaffold messages are omitted when running scaffold twice.
    */
-  public function testScaffoldMessagesDoNotPrintTwice(): void {
+  public function testScaffoldMessagesDoNotPrintTwice() {
     $topLevelProjectDir = 'drupal-drupal';
     $sut = $this->fixturesDir . '/' . $topLevelProjectDir;
     // First test: run composer install. This is the same as composer update
@@ -146,17 +148,6 @@ class ComposerHookTest extends BuildTestBase {
     $stdout = $this->mustExec("composer scaffold --no-ansi", $sut);
     $this->assertStringContainsString('- Copy [web-root]/index.php from assets/index.php', $stdout);
     $this->assertStringNotContainsString('- Copy [web-root]/update.php from assets/update.php', $stdout);
-  }
-
-  /**
-   * Tests to see if scaffold events are dispatched and picked up by the plugin.
-   */
-  public function testScaffoldEvents(): void {
-    $topLevelProjectDir = 'scaffold-events-fixture';
-    $sut = $this->fixturesDir . '/' . $topLevelProjectDir;
-    $output = $this->mustExec("composer install --no-ansi", $sut);
-    $this->assertStringContainsString('Hello preDrupalScaffoldCmd', $output);
-    $this->assertStringContainsString('Hello postDrupalScaffoldCmd', $output);
   }
 
 }

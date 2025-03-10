@@ -1,6 +1,9 @@
 <?php
 
-declare(strict_types=1);
+/**
+ * @file
+ * Contains \Drupal\Tests\Core\Extension\ThemeHandlerTest.
+ */
 
 namespace Drupal\Tests\Core\Extension;
 
@@ -46,7 +49,7 @@ class ThemeHandlerTest extends UnitTestCase {
     $this->configFactory = $this->getConfigFactoryStub([
       'core.extension' => [
         'module' => [],
-        'theme' => ['stark' => 'stark'],
+        'theme' => [],
         'disabled' => [
           'theme' => [],
         ],
@@ -61,7 +64,7 @@ class ThemeHandlerTest extends UnitTestCase {
     $container->expects($this->any())
       ->method('get')
       ->with('class_loader')
-      ->willReturn($this->createMock(ClassLoader::class));
+      ->will($this->returnValue($this->createMock(ClassLoader::class)));
     \Drupal::setContainer($container);
   }
 
@@ -69,35 +72,33 @@ class ThemeHandlerTest extends UnitTestCase {
    * Tests rebuilding the theme data.
    *
    * @see \Drupal\Core\Extension\ThemeHandler::rebuildThemeData()
-   * @group legacy
    */
-  public function testRebuildThemeData(): void {
-    $this->expectDeprecation("\Drupal\Core\Extension\ThemeHandlerInterface::rebuildThemeData() is deprecated in drupal:10.3.0 and is removed from drupal:12.0.0. Use \Drupal::service('extension.list.theme')->reset()->getList() instead. See https://www.drupal.org/node/3413196");
+  public function testRebuildThemeData() {
     $this->themeList->expects($this->once())
       ->method('reset')
       ->willReturnSelf();
     $this->themeList->expects($this->once())
       ->method('getList')
-      ->willReturn([
-        'stark' => new Extension($this->root, 'theme', 'core/themes/stark/stark.info.yml', 'stark.theme'),
-      ]);
+      ->will($this->returnValue([
+        'seven' => new Extension($this->root, 'theme', 'core/themes/seven/seven.info.yml', 'seven.theme'),
+      ]));
 
     $theme_data = $this->themeHandler->rebuildThemeData();
     $this->assertCount(1, $theme_data);
-    $info = $theme_data['stark'];
+    $info = $theme_data['seven'];
 
     // Ensure some basic properties.
     $this->assertInstanceOf('Drupal\Core\Extension\Extension', $info);
-    $this->assertEquals('stark', $info->getName());
-    $this->assertEquals('core/themes/stark/stark.info.yml', $info->getPathname());
-    $this->assertEquals('core/themes/stark/stark.theme', $info->getExtensionPathname());
+    $this->assertEquals('seven', $info->getName());
+    $this->assertEquals('core/themes/seven/seven.info.yml', $info->getPathname());
+    $this->assertEquals('core/themes/seven/seven.theme', $info->getExtensionPathname());
 
   }
 
   /**
    * Tests empty libraries in theme.info.yml file.
    */
-  public function testThemeLibrariesEmpty(): void {
+  public function testThemeLibrariesEmpty() {
     $theme = new Extension($this->root, 'theme', 'core/modules/system/tests/themes/test_theme_libraries_empty', 'test_theme_libraries_empty.info.yml');
     try {
       $this->themeHandler->addTheme($theme);
@@ -106,16 +107,6 @@ class ThemeHandlerTest extends UnitTestCase {
     catch (\Exception $e) {
       $this->fail('Empty libraries key in theme.info.yml causes PHP warning.');
     }
-  }
-
-  /**
-   * Test that a missing theme doesn't break ThemeHandler::listInfo().
-   *
-   * @covers ::listInfo
-   */
-  public function testMissingTheme(): void {
-    $themes = $this->themeHandler->listInfo();
-    $this->assertSame([], $themes);
   }
 
 }

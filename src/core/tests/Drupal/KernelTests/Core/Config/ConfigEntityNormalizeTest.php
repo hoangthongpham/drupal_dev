@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\KernelTests\Core\Config;
 
 use Drupal\KernelTests\KernelTestBase;
@@ -14,19 +12,18 @@ use Drupal\KernelTests\KernelTestBase;
 class ConfigEntityNormalizeTest extends KernelTestBase {
 
   /**
-   * {@inheritdoc}
+   * Modules to install.
+   *
+   * @var array
    */
   protected static $modules = ['config_test'];
 
-  /**
-   * {@inheritdoc}
-   */
   protected function setUp(): void {
     parent::setUp();
     $this->installConfig(static::$modules);
   }
 
-  public function testNormalize(): void {
+  public function testNormalize() {
     $config_entity = \Drupal::entityTypeManager()->getStorage('config_test')->create(['id' => 'system', 'label' => 'foobar', 'weight' => 1]);
     $config_entity->save();
 

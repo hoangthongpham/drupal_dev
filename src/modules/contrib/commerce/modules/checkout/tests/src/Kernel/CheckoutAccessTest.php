@@ -2,18 +2,16 @@
 
 namespace Drupal\Tests\commerce_checkout\Kernel;
 
-use Drupal\Core\Routing\RouteObjectInterface;
-use Drupal\Core\Url;
-use Drupal\Tests\commerce_cart\Kernel\CartKernelTestBase;
 use Drupal\commerce_order\Entity\Order;
 use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\commerce_product\Entity\Product;
 use Drupal\commerce_product\Entity\ProductVariation;
 use Drupal\commerce_store\StoreCreationTrait;
+use Drupal\Core\Routing\RouteObjectInterface;
+use Drupal\Core\Url;
+use Drupal\Tests\commerce_cart\Kernel\CartKernelTestBase;
 use Drupal\user\UserInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Session\Session;
-use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 
 /**
  * Tests the checkout access for orders.
@@ -97,8 +95,8 @@ class CheckoutAccessTest extends CartKernelTestBase {
    * Tests that users need the `access checkout` permission.
    */
   public function testAccessCheckoutPermission() {
-    $user_with_access = $this->createUser(['access checkout']);
-    $user_without_access = $this->createUser();
+    $user_with_access = $this->createUser([], ['access checkout']);
+    $user_without_access = $this->createUser([], []);
 
     $order = $this->createOrder($user_with_access);
     $request = $this->createRequest($order);
@@ -113,8 +111,8 @@ class CheckoutAccessTest extends CartKernelTestBase {
    * Tests that only the order's owner can view its checkout.
    */
   public function testOwnerCheckoutAccess() {
-    $user1 = $this->createUser(['access checkout']);
-    $user2 = $this->createUser(['access checkout']);
+    $user1 = $this->createUser([], ['access checkout']);
+    $user2 = $this->createUser([], ['access checkout']);
     /** @var \Drupal\commerce_order\Entity\Order $order */
     $order = $this->createOrder($user1);
     $request = $this->createRequest($order);
@@ -126,7 +124,7 @@ class CheckoutAccessTest extends CartKernelTestBase {
    * Tests that canceled orders cannot enter checkout.
    */
   public function testCanceledOrderCheckout() {
-    $user1 = $this->createUser(['access checkout']);
+    $user1 = $this->createUser([], ['access checkout']);
     $order = $this->createOrder($user1);
     $order->getState()->applyTransitionById('cancel');
     $request = $this->createRequest($order);
@@ -137,7 +135,7 @@ class CheckoutAccessTest extends CartKernelTestBase {
    * Tests that an order must have items to enter checkout.
    */
   public function testOrderMustHaveItems() {
-    $user1 = $this->createUser(['access checkout']);
+    $user1 = $this->createUser([], ['access checkout']);
     $order = $this->createOrder($user1);
     $order->setItems([]);
     $request = $this->createRequest($order);
@@ -164,7 +162,6 @@ class CheckoutAccessTest extends CartKernelTestBase {
     $route = $route_provider->getRouteByName($url->getRouteName());
 
     $request = Request::create($url->toString());
-    $request->setSession(new Session(new MockArraySessionStorage()));
     $request->attributes->add([
       RouteObjectInterface::ROUTE_OBJECT => $route,
       'commerce_order' => $order,

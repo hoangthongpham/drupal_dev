@@ -77,7 +77,7 @@ class FormTestMachineNameValidationForm extends FormBase {
       '#ajax' => [
         'callback' => '::buildAjaxSnackConfigureForm',
         'wrapper' => 'snack-config-form',
-        'method' => 'replaceWith',
+        'method' => 'replace',
         'effect' => 'fade',
       ],
     ];
@@ -126,7 +126,7 @@ class FormTestMachineNameValidationForm extends FormBase {
    * @return bool
    */
   public function load($machine_name) {
-    if (str_contains($machine_name, 'duplicate')) {
+    if (strpos($machine_name, 'duplicate') !== FALSE) {
       return TRUE;
     }
 

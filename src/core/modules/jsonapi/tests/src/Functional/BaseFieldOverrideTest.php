@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\jsonapi\Functional;
 
 use Drupal\Core\Field\Entity\BaseFieldOverride;
@@ -13,7 +11,7 @@ use Drupal\node\Entity\NodeType;
  *
  * @group jsonapi
  */
-class BaseFieldOverrideTest extends ConfigEntityResourceTestBase {
+class BaseFieldOverrideTest extends ResourceTestBase {
 
   /**
    * {@inheritdoc}
@@ -63,7 +61,6 @@ class BaseFieldOverrideTest extends ConfigEntityResourceTestBase {
       'field_name' => 'promote',
       'entity_type' => 'node',
       'bundle' => 'camelids',
-      'label' => 'Promote to front page',
     ]);
     $entity->save();
 
@@ -106,7 +103,7 @@ class BaseFieldOverrideTest extends ConfigEntityResourceTestBase {
           'entity_type' => 'node',
           'field_name' => 'promote',
           'field_type' => 'boolean',
-          'label' => 'Promote to front page',
+          'label' => NULL,
           'langcode' => 'en',
           'required' => FALSE,
           'settings' => [
@@ -126,13 +123,12 @@ class BaseFieldOverrideTest extends ConfigEntityResourceTestBase {
    */
   protected function getPostDocument() {
     // @todo Update in https://www.drupal.org/node/2300677.
-    return [];
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function getExpectedUnauthorizedAccessMessage($method): string {
+  protected function getExpectedUnauthorizedAccessMessage($method) {
     return "The 'administer node fields' permission is required.";
   }
 
@@ -144,7 +140,6 @@ class BaseFieldOverrideTest extends ConfigEntityResourceTestBase {
       'field_name' => 'status',
       'entity_type' => 'node',
       'bundle' => 'camelids',
-      'label' => 'Published',
     ]);
     $entity->save();
     return $entity;

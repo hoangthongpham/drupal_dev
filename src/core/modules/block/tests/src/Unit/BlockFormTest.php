@@ -1,11 +1,8 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\block\Unit;
 
 use Drupal\block\BlockForm;
-use Drupal\block\BlockRepository;
 use Drupal\block\Entity\Block;
 use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Plugin\PluginFormFactoryInterface;
@@ -38,6 +35,7 @@ class BlockFormTest extends UnitTestCase {
    */
   protected $language;
 
+
   /**
    * The theme handler.
    *
@@ -46,25 +44,11 @@ class BlockFormTest extends UnitTestCase {
   protected $themeHandler;
 
   /**
-   * The theme manager service.
-   *
-   * @var \Drupal\Core\Theme\ThemeManagerInterface|\PHPUnit\Framework\MockObject\MockObject
-   */
-  protected $themeManager;
-
-  /**
    * The entity type manager.
    *
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface|\PHPUnit\Framework\MockObject\MockObject
    */
   protected $entityTypeManager;
-
-  /**
-   * The mocked context handler.
-   *
-   * @var \Drupal\Core\Plugin\Context\ContextHandlerInterface|\PHPUnit\Framework\MockObject\MockObject
-   */
-  protected $contextHandler;
 
   /**
    * The mocked context repository.
@@ -81,13 +65,6 @@ class BlockFormTest extends UnitTestCase {
   protected $pluginFormFactory;
 
   /**
-   * The block repository.
-   *
-   * @var \Drupal\block\BlockRepositoryInterface
-   */
-  protected $blockRepository;
-
-  /**
    * {@inheritdoc}
    */
   protected function setUp(): void {
@@ -102,13 +79,9 @@ class BlockFormTest extends UnitTestCase {
     $this->themeHandler = $this->createMock('Drupal\Core\Extension\ThemeHandlerInterface');
     $this->entityTypeManager->expects($this->any())
       ->method('getStorage')
-      ->willReturn($this->storage);
+      ->will($this->returnValue($this->storage));
 
     $this->pluginFormFactory = $this->prophesize(PluginFormFactoryInterface::class);
-
-    $this->themeManager = $this->createMock('\Drupal\Core\Theme\ThemeManagerInterface');
-    $this->contextHandler = $this->createMock('Drupal\Core\Plugin\Context\ContextHandlerInterface');
-    $this->blockRepository = new BlockRepository($this->entityTypeManager, $this->themeManager, $this->contextHandler);
   }
 
   /**
@@ -126,14 +99,14 @@ class BlockFormTest extends UnitTestCase {
       ->getMock();
     $plugin->expects($this->any())
       ->method('getMachineNameSuggestion')
-      ->willReturn($machine_name);
+      ->will($this->returnValue($machine_name));
 
     $block = $this->getMockBuilder(Block::class)
       ->disableOriginalConstructor()
       ->getMock();
     $block->expects($this->any())
       ->method('getPlugin')
-      ->willReturn($plugin);
+      ->will($this->returnValue($plugin));
     return $block;
   }
 
@@ -142,7 +115,7 @@ class BlockFormTest extends UnitTestCase {
    *
    * @see \Drupal\block\BlockForm::getUniqueMachineName()
    */
-  public function testGetUniqueMachineName(): void {
+  public function testGetUniqueMachineName() {
     $blocks = [];
 
     $blocks['test'] = $this->getBlockMockWithMachineName('test');
@@ -153,20 +126,20 @@ class BlockFormTest extends UnitTestCase {
     $query = $this->createMock('Drupal\Core\Entity\Query\QueryInterface');
     $query->expects($this->exactly(5))
       ->method('condition')
-      ->willReturn($query);
+      ->will($this->returnValue($query));
 
     $query->expects($this->exactly(5))
       ->method('execute')
-      ->willReturn(['test', 'other_test', 'other_test_1', 'other_test_2']);
+      ->will($this->returnValue(['test', 'other_test', 'other_test_1', 'other_test_2']));
 
     $this->storage->expects($this->exactly(5))
       ->method('getQuery')
-      ->willReturn($query);
+      ->will($this->returnValue($query));
 
-    $block_form_controller = new BlockForm($this->entityTypeManager, $this->conditionManager, $this->contextRepository, $this->language, $this->themeHandler, $this->pluginFormFactory->reveal(), $this->blockRepository);
+    $block_form_controller = new BlockForm($this->entityTypeManager, $this->conditionManager, $this->contextRepository, $this->language, $this->themeHandler, $this->pluginFormFactory->reveal());
 
-    // Ensure that the block with just one other instance gets
-    // the next available name suggestion.
+    // Ensure that the block with just one other instance gets the next available
+    // name suggestion.
     $this->assertEquals('test_2', $block_form_controller->getUniqueMachineName($blocks['test']));
 
     // Ensure that the block with already three instances (_0, _1, _2) gets the

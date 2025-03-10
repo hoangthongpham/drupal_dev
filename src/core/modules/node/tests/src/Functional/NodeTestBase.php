@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\node\Functional;
 
 use Drupal\Component\Render\FormattableMarkup;
@@ -15,7 +13,9 @@ use Drupal\Tests\BrowserTestBase;
 abstract class NodeTestBase extends BrowserTestBase {
 
   /**
-   * {@inheritdoc}
+   * Modules to enable.
+   *
+   * @var array
    */
   protected static $modules = ['node', 'datetime'];
 
@@ -29,7 +29,7 @@ abstract class NodeTestBase extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp(): void {
+  protected function setUp() {
     parent::setUp();
 
     // Create Basic page and Article node types.

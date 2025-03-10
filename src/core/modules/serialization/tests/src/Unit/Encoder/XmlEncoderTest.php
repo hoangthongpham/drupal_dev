@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\serialization\Unit\Encoder;
 
 use Drupal\serialization\Encoder\XmlEncoder;
@@ -35,12 +33,7 @@ class XmlEncoderTest extends UnitTestCase {
    */
   protected $testArray = ['test' => 'test'];
 
-  /**
-   * {@inheritdoc}
-   */
   protected function setUp(): void {
-    parent::setUp();
-
     $this->baseEncoder = $this->createMock(BaseXmlEncoder::class);
     $this->encoder = new XmlEncoder();
     $this->encoder->setBaseEncoder($this->baseEncoder);
@@ -49,7 +42,7 @@ class XmlEncoderTest extends UnitTestCase {
   /**
    * Tests the supportsEncoding() method.
    */
-  public function testSupportsEncoding(): void {
+  public function testSupportsEncoding() {
     $this->assertTrue($this->encoder->supportsEncoding('xml'));
     $this->assertFalse($this->encoder->supportsEncoding('json'));
   }
@@ -57,7 +50,7 @@ class XmlEncoderTest extends UnitTestCase {
   /**
    * Tests the supportsDecoding() method.
    */
-  public function testSupportsDecoding(): void {
+  public function testSupportsDecoding() {
     $this->assertTrue($this->encoder->supportsDecoding('xml'));
     $this->assertFalse($this->encoder->supportsDecoding('json'));
   }
@@ -65,11 +58,11 @@ class XmlEncoderTest extends UnitTestCase {
   /**
    * Tests the encode() method.
    */
-  public function testEncode(): void {
+  public function testEncode() {
     $this->baseEncoder->expects($this->once())
       ->method('encode')
       ->with($this->testArray, 'test', [])
-      ->willReturn('test');
+      ->will($this->returnValue('test'));
 
     $this->assertEquals('test', $this->encoder->encode($this->testArray, 'test'));
   }
@@ -77,11 +70,11 @@ class XmlEncoderTest extends UnitTestCase {
   /**
    * Tests the decode() method.
    */
-  public function testDecode(): void {
+  public function testDecode() {
     $this->baseEncoder->expects($this->once())
       ->method('decode')
       ->with('test', 'test', [])
-      ->willReturn($this->testArray);
+      ->will($this->returnValue($this->testArray));
 
     $this->assertEquals($this->testArray, $this->encoder->decode('test', 'test'));
   }
@@ -89,7 +82,7 @@ class XmlEncoderTest extends UnitTestCase {
   /**
    * @covers ::getBaseEncoder
    */
-  public function testDefaultEncoderHasSerializer(): void {
+  public function testDefaultEncoderHasSerializer() {
     // The serializer should be set on the Drupal encoder, which should then
     // set it on our default encoder.
     $encoder = new XmlEncoder();

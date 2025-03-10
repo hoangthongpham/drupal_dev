@@ -32,7 +32,7 @@ interface EntityStorageInterface {
    *   (optional) If specified, the cache is reset for the entities with the
    *   given ids only.
    */
-  public function resetCache(?array $ids = NULL);
+  public function resetCache(array $ids = NULL);
 
   /**
    * Loads one or more entities.
@@ -41,10 +41,10 @@ interface EntityStorageInterface {
    *   An array of entity IDs, or NULL to load all entities.
    *
    * @return \Drupal\Core\Entity\EntityInterface[]
-   *   An array of successfully loaded objects indexed by their IDs.
-   *   Returns an empty array if no matching entities are found.
+   *   An array of entity objects indexed by their IDs. Returns an empty array
+   *   if no matching entities are found.
    */
-  public function loadMultiple(?array $ids = NULL);
+  public function loadMultiple(array $ids = NULL);
 
   /**
    * Loads one entity.
@@ -80,12 +80,11 @@ interface EntityStorageInterface {
    * @return \Drupal\Core\Entity\EntityInterface|null
    *   The specified entity revision or NULL if not found.
    *
-   * @deprecated in drupal:10.1.0 and is removed from drupal:11.0.0. Use
-   * \Drupal\Core\Entity\RevisionableStorageInterface::loadRevision instead.
+   * @todo Deprecated in Drupal 8.5.0 and will be removed before Drupal 9.0.0.
+   *   Use \Drupal\Core\Entity\RevisionableStorageInterface instead.
    *
    * @see https://www.drupal.org/node/2926958
    * @see https://www.drupal.org/node/2927226
-   * @see https://www.drupal.org/node/3294237
    */
   public function loadRevision($revision_id);
 
@@ -97,22 +96,20 @@ interface EntityStorageInterface {
    * @param int $revision_id
    *   The revision id.
    *
-   * @deprecated in drupal:10.1.0 and is removed from drupal:11.0.0. Use
-   * \Drupal\Core\Entity\RevisionableStorageInterface::deleteRevision instead.
+   * @todo Deprecated in Drupal 8.5.0 and will be removed before Drupal 9.0.0.
+   *   Use \Drupal\Core\Entity\RevisionableStorageInterface instead.
    *
    * @see https://www.drupal.org/node/2926958
    * @see https://www.drupal.org/node/2927226
-   * @see https://www.drupal.org/node/3294237
    */
   public function deleteRevision($revision_id);
 
   /**
-   * Load entities by their property values without any access checks.
+   * Load entities by their property values.
    *
    * @param array $values
    *   An associative array where the keys are the property names and the
-   *   values are the values those properties must have. If a property takes
-   *   multiple values, passing an array of values will produce an IN condition.
+   *   values are the values those properties must have.
    *
    * @return \Drupal\Core\Entity\EntityInterface[]
    *   An array of entity objects indexed by their ids.
@@ -148,7 +145,7 @@ interface EntityStorageInterface {
    * @param \Drupal\Core\Entity\EntityInterface $entity
    *   The entity to save.
    *
-   * @return int|null
+   * @return
    *   SAVED_NEW or SAVED_UPDATED is returned depending on the operation
    *   performed.
    *

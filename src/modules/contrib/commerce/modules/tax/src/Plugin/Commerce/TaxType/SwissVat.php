@@ -2,20 +2,17 @@
 
 namespace Drupal\commerce_tax\Plugin\Commerce\TaxType;
 
-use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\commerce_tax\Attribute\CommerceTaxType;
 use Drupal\commerce_tax\TaxZone;
-
-// cspell:ignore Büsingen Lugano
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Provides the Swiss VAT tax type.
+ *
+ * @CommerceTaxType(
+ *   id = "swiss_vat",
+ *   label = "Swiss VAT",
+ * )
  */
-#[CommerceTaxType(
-  id: "swiss_vat",
-  label: new TranslatableMarkup("Swiss VAT"),
-)]
 class SwissVat extends LocalTaxTypeBase {
 
   /**
@@ -53,8 +50,7 @@ class SwissVat extends LocalTaxTypeBase {
           'label' => $this->t('Standard'),
           'percentages' => [
             ['number' => '0.08', 'start_date' => '2011-01-01', 'end_date' => '2017-12-31'],
-            ['number' => '0.077', 'start_date' => '2018-01-01', 'end_date' => '2023-12-31'],
-            ['number' => '0.081', 'start_date' => '2024-01-01'],
+            ['number' => '0.077', 'start_date' => '2018-01-01'],
           ],
           'default' => TRUE,
         ],
@@ -63,16 +59,14 @@ class SwissVat extends LocalTaxTypeBase {
           'label' => $this->t('Hotel'),
           'percentages' => [
             ['number' => '0.038', 'start_date' => '2011-01-01', 'end_date' => '2017-12-31'],
-            ['number' => '0.037', 'start_date' => '2018-01-01', 'end_date' => '2023-12-31'],
-            ['number' => '0.038', 'start_date' => '2024-01-01'],
+            ['number' => '0.037', 'start_date' => '2018-01-01'],
           ],
         ],
         [
           'id' => 'reduced',
           'label' => $this->t('Reduced'),
           'percentages' => [
-            ['number' => '0.025', 'start_date' => '2011-01-01', 'end_date' => '2023-12-31'],
-            ['number' => '0.026', 'start_date' => '2024-01-01'],
+            ['number' => '0.025', 'start_date' => '2011-01-01'],
           ],
         ],
       ],

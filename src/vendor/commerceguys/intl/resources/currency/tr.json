@@ -1,490 +1,499 @@
 {
 	"USD": {
-		"name": "ABD doları",
+		"name": "ABD Doları",
 		"symbol": "$"
 	},
 	"AFN": {
-		"name": "Afganistan afganisi"
+		"name": "Afganistan Afganisi"
 	},
 	"AOA": {
-		"name": "Angola kvanzası"
+		"name": "Angola Kvanzası"
 	},
 	"ARS": {
-		"name": "Arjantin pesosu"
+		"name": "Arjantin Pesosu"
 	},
 	"ALL": {
-		"name": "Arnavutluk leki"
+		"name": "Arnavutluk Leki"
 	},
 	"AWG": {
-		"name": "Aruba florini"
+		"name": "Aruba Florini"
 	},
 	"AUD": {
-		"name": "Avustralya doları",
+		"name": "Avustralya Doları",
 		"symbol": "AU$"
 	},
 	"AZN": {
-		"name": "Azerbaycan manatı"
+		"name": "Azerbaycan Manatı"
 	},
 	"BSD": {
-		"name": "Bahama doları"
+		"name": "Bahama Doları"
 	},
 	"BHD": {
-		"name": "Bahreyn dinarı"
+		"name": "Bahreyn Dinarı"
 	},
 	"BDT": {
-		"name": "Bangladeş takası"
+		"name": "Bangladeş Takası"
 	},
 	"BBD": {
-		"name": "Barbados doları"
+		"name": "Barbados Doları"
 	},
 	"XOF": {
-		"name": "Batı Afrika CFA frangı",
+		"name": "Batı Afrika CFA Frangı",
 		"symbol": "F CFA"
 	},
 	"BYN": {
-		"name": "Belarus rublesi"
+		"name": "Belarus Rublesi"
 	},
 	"BZD": {
-		"name": "Belize doları"
+		"name": "Belize Doları"
 	},
 	"BMD": {
-		"name": "Bermuda doları"
+		"name": "Bermuda Doları"
 	},
 	"AED": {
-		"name": "Birleşik Arap Emirlikleri dirhemi"
+		"name": "Birleşik Arap Emirlikleri Dirhemi"
+	},
+	"VED": {
+		"name": "Bolívar Soberano"
 	},
 	"BOB": {
-		"name": "Bolivya bolivyanosu"
+		"name": "Bolivya Bolivyanosu"
 	},
 	"BWP": {
-		"name": "Botsvana pulası"
+		"name": "Botsvana Pulası"
 	},
 	"BRL": {
-		"name": "Brezilya reali",
+		"name": "Brezilya Reali",
 		"symbol": "R$"
 	},
 	"BND": {
-		"name": "Brunei doları"
+		"name": "Brunei Doları"
 	},
 	"BGN": {
-		"name": "Bulgar levası"
+		"name": "Bulgar Levası"
 	},
 	"BIF": {
-		"name": "Burundi frangı"
+		"name": "Burundi Frangı"
 	},
 	"BTN": {
-		"name": "Butan ngultrumu"
+		"name": "Butan Ngultrumu"
 	},
 	"CVE": {
-		"name": "Cape Verde esküdosu"
+		"name": "Cape Verde Esküdosu"
 	},
 	"KYD": {
-		"name": "Cayman Adaları doları"
+		"name": "Cayman Adaları Doları"
 	},
 	"GIP": {
-		"name": "Cebelitarık lirası"
+		"name": "Cebelitarık Lirası"
 	},
 	"DZD": {
-		"name": "Cezayir dinarı"
+		"name": "Cezayir Dinarı"
 	},
 	"XPF": {
-		"name": "CFP frangı",
+		"name": "CFP Frangı",
 		"symbol": "CFPF"
 	},
 	"DJF": {
-		"name": "Cibuti frangı"
+		"name": "Cibuti Frangı"
 	},
 	"CZK": {
-		"name": "Çek korunası"
+		"name": "Çek Korunası"
 	},
 	"CNY": {
-		"name": "Çin yuanı",
+		"name": "Çin Yuanı",
 		"symbol": "CN¥"
 	},
 	"DKK": {
-		"name": "Danimarka kronu"
+		"name": "Danimarka Kronu"
 	},
 	"XCD": {
-		"name": "Doğu Karayip doları",
+		"name": "Doğu Karayip Doları",
 		"symbol": "EC$"
 	},
 	"DOP": {
-		"name": "Dominik pesosu"
+		"name": "Dominik Pesosu"
 	},
 	"SVC": {
 		"name": "El Salvador Kolonu"
 	},
 	"IDR": {
-		"name": "Endonezya rupisi"
+		"name": "Endonezya Rupisi"
 	},
 	"ERN": {
-		"name": "Eritre nakfası"
+		"name": "Eritre Nakfası"
 	},
 	"AMD": {
-		"name": "Ermenistan dramı"
+		"name": "Ermenistan Dramı"
 	},
 	"ETB": {
-		"name": "Etiyopya birri"
+		"name": "Etiyopya Birri"
 	},
 	"EUR": {
 		"name": "Euro",
 		"symbol": "€"
 	},
 	"FKP": {
-		"name": "Falkland Adaları lirası"
+		"name": "Falkland Adaları Lirası"
 	},
 	"MAD": {
-		"name": "Fas dirhemi"
+		"name": "Fas Dirhemi"
 	},
 	"FJD": {
-		"name": "Fiji doları"
+		"name": "Fiji Doları"
 	},
 	"PHP": {
-		"name": "Filipinler pesosu"
+		"name": "Filipinler Pesosu"
 	},
 	"GMD": {
-		"name": "Gambiya dalasisi"
+		"name": "Gambiya Dalasisi"
 	},
 	"GHS": {
-		"name": "Gana sedisi"
+		"name": "Gana Sedisi"
 	},
 	"GNF": {
-		"name": "Gine frangı"
+		"name": "Gine Frangı"
 	},
 	"GTQ": {
-		"name": "Guatemala quetzalı"
+		"name": "Guatemala Quetzalı"
 	},
 	"GYD": {
-		"name": "Guyana doları"
+		"name": "Guyana Doları"
 	},
 	"ZAR": {
-		"name": "Güney Afrika randı"
+		"name": "Güney Afrika Randı"
 	},
 	"KRW": {
-		"name": "Güney Kore wonu",
+		"name": "Güney Kore Wonu",
 		"symbol": "₩"
 	},
 	"SSP": {
-		"name": "Güney Sudan lirası"
+		"name": "Güney Sudan Lirası"
 	},
 	"GEL": {
-		"name": "Gürcistan larisi"
+		"name": "Gürcistan Larisi"
 	},
 	"HTG": {
-		"name": "Haiti gurdu"
+		"name": "Haiti Gurdu"
 	},
 	"INR": {
-		"name": "Hindistan rupisi",
+		"name": "Hindistan Rupisi",
 		"symbol": "₹"
 	},
 	"ANG": {
-		"name": "Hollanda Antilleri guldeni"
+		"name": "Hollanda Antilleri Guldeni"
 	},
 	"HNL": {
-		"name": "Honduras lempirası"
+		"name": "Honduras Lempirası"
 	},
 	"HKD": {
-		"name": "Hong Kong doları",
+		"name": "Hong Kong Doları",
 		"symbol": "HK$"
 	},
 	"IQD": {
-		"name": "Irak dinarı"
+		"name": "Irak Dinarı"
 	},
 	"GBP": {
-		"name": "İngiliz sterlini",
+		"name": "İngiliz Sterlini",
 		"symbol": "£"
 	},
 	"IRR": {
-		"name": "İran riyali"
+		"name": "İran Riyali"
 	},
 	"SEK": {
-		"name": "İsveç kronu"
+		"name": "İsveç Kronu"
 	},
 	"CHF": {
-		"name": "İsviçre frangı"
+		"name": "İsviçre Frangı"
 	},
 	"ISK": {
-		"name": "İzlanda kronu"
+		"name": "İzlanda Kronu"
 	},
 	"JMD": {
-		"name": "Jamaika doları"
+		"name": "Jamaika Doları"
 	},
 	"JPY": {
-		"name": "Japon yeni",
+		"name": "Japon Yeni",
 		"symbol": "¥"
 	},
 	"KHR": {
-		"name": "Kamboçya rieli"
+		"name": "Kamboçya Rieli"
 	},
 	"CAD": {
-		"name": "Kanada doları",
+		"name": "Kanada Doları",
 		"symbol": "CA$"
 	},
 	"QAR": {
-		"name": "Katar riyali"
+		"name": "Katar Riyali"
 	},
 	"KZT": {
-		"name": "Kazakistan tengesi"
+		"name": "Kazakistan Tengesi"
 	},
 	"KES": {
-		"name": "Kenya şilini"
+		"name": "Kenya Şilini"
 	},
 	"KGS": {
-		"name": "Kırgızistan somu"
+		"name": "Kırgızistan Somu"
 	},
 	"COP": {
-		"name": "Kolombiya pesosu"
+		"name": "Kolombiya Pesosu"
 	},
 	"KMF": {
-		"name": "Komorlar frangı"
+		"name": "Komorlar Frangı"
 	},
 	"CDF": {
-		"name": "Kongo frangı"
+		"name": "Kongo Frangı"
 	},
 	"BAM": {
-		"name": "Konvertibl Bosna Hersek markı"
+		"name": "Konvertibl Bosna Hersek Markı"
 	},
 	"CUC": {
-		"name": "Konvertibl Küba pesosu"
+		"name": "Konvertibl Küba Pesosu"
 	},
 	"CRC": {
-		"name": "Kosta Rika kolonu"
+		"name": "Kosta Rika Kolonu"
 	},
 	"KWD": {
-		"name": "Kuveyt dinarı"
+		"name": "Kuveyt Dinarı"
 	},
 	"KPW": {
-		"name": "Kuzey Kore wonu"
+		"name": "Kuzey Kore Wonu"
 	},
 	"CUP": {
-		"name": "Küba pesosu"
+		"name": "Küba Pesosu"
 	},
 	"LAK": {
-		"name": "Laos kipi"
+		"name": "Laos Kipi"
 	},
 	"LSL": {
-		"name": "Lesotho lotisi"
+		"name": "Lesotho Lotisi"
 	},
 	"LRD": {
-		"name": "Liberya doları"
+		"name": "Liberya Doları"
 	},
 	"LYD": {
-		"name": "Libya dinarı"
+		"name": "Libya Dinarı"
 	},
 	"LBP": {
-		"name": "Lübnan lirası"
+		"name": "Lübnan Lirası"
 	},
 	"HUF": {
-		"name": "Macar forinti"
+		"name": "Macar Forinti"
 	},
 	"MGA": {
-		"name": "Madagaskar ariarisi"
+		"name": "Madagaskar Ariarisi"
 	},
 	"MOP": {
-		"name": "Makao patakası"
+		"name": "Makao Patakası"
 	},
 	"MKD": {
-		"name": "Makedonya dinarı"
+		"name": "Makedonya Dinarı"
 	},
 	"MWK": {
-		"name": "Malavi kvaçası"
+		"name": "Malavi Kvaçası"
 	},
 	"MVR": {
-		"name": "Maldiv rufiyaası"
+		"name": "Maldiv Rufiyaası"
 	},
 	"MYR": {
-		"name": "Malezya ringgiti"
+		"name": "Malezya Ringgiti"
 	},
 	"MUR": {
-		"name": "Mauritius rupisi"
+		"name": "Mauritius Rupisi"
 	},
 	"MXN": {
-		"name": "Meksika pesosu",
+		"name": "Meksika Pesosu",
 		"symbol": "MX$"
 	},
 	"EGP": {
-		"name": "Mısır lirası"
+		"name": "Mısır Lirası"
 	},
 	"MNT": {
-		"name": "Moğolistan tugriki"
+		"name": "Moğolistan Tugriki"
 	},
 	"MDL": {
-		"name": "Moldova leyi"
+		"name": "Moldova Leyi"
 	},
 	"MRU": {
-		"name": "Moritanya ugiyası"
+		"name": "Moritanya Ugiyası"
 	},
 	"MZN": {
-		"name": "Mozambik metikali"
+		"name": "Mozambik Metikali"
 	},
 	"MMK": {
-		"name": "Myanmar kyatı"
+		"name": "Myanmar Kyatı"
 	},
 	"NAD": {
-		"name": "Namibya doları"
+		"name": "Namibya Doları"
 	},
 	"NPR": {
-		"name": "Nepal rupisi"
+		"name": "Nepal Rupisi"
 	},
 	"NGN": {
-		"name": "Nijerya nairası"
+		"name": "Nijerya Nairası"
 	},
 	"NIO": {
-		"name": "Nikaragua kordobası"
+		"name": "Nikaragua Kordobası"
 	},
 	"NOK": {
-		"name": "Norveç kronu"
+		"name": "Norveç Kronu"
 	},
 	"XAF": {
-		"name": "Orta Afrika CFA frangı",
+		"name": "Orta Afrika CFA Frangı",
 		"symbol": "FCFA"
 	},
 	"UZS": {
-		"name": "Özbekistan somu"
+		"name": "Özbekistan Somu"
 	},
 	"PKR": {
-		"name": "Pakistan rupisi"
+		"name": "Pakistan Rupisi"
 	},
 	"PAB": {
-		"name": "Panama balboası"
+		"name": "Panama Balboası"
 	},
 	"PGK": {
-		"name": "Papua Yeni Gine kinası"
+		"name": "Papua Yeni Gine Kinası"
 	},
 	"PYG": {
-		"name": "Paraguay guaranisi"
+		"name": "Paraguay Guaranisi"
 	},
 	"PEN": {
-		"name": "Peru solü"
+		"name": "Peru Solü"
 	},
 	"PLN": {
-		"name": "Polonya zlotisi"
+		"name": "Polonya Zlotisi"
 	},
 	"RON": {
-		"name": "Romen leyi"
+		"name": "Romen Leyi"
 	},
 	"RWF": {
-		"name": "Ruanda frangı"
+		"name": "Ruanda Frangı"
 	},
 	"RUB": {
-		"name": "Rus rublesi"
+		"name": "Rus Rublesi"
 	},
 	"SHP": {
-		"name": "Saint Helena lirası"
+		"name": "Saint Helena Lirası"
 	},
 	"WST": {
-		"name": "Samoa talası"
+		"name": "Samoa Talası"
 	},
 	"STN": {
-		"name": "Sao Tome ve Principe dobrası"
+		"name": "Sao Tome ve Principe Dobrası"
 	},
 	"SCR": {
-		"name": "Seyşeller rupisi"
+		"name": "Seyşeller Rupisi"
 	},
 	"RSD": {
-		"name": "Sırp dinarı"
+		"name": "Sırp Dinarı"
+	},
+	"SLL": {
+		"name": "Sierra Leone Leonesi"
 	},
 	"SLE": {
-		"name": "Sierra Leone leonesi"
+		"name": "Sierra Leonean Leone"
 	},
 	"SGD": {
-		"name": "Singapur doları"
+		"name": "Singapur Doları"
 	},
 	"SBD": {
-		"name": "Solomon Adaları doları"
+		"name": "Solomon Adaları Doları"
 	},
 	"SOS": {
-		"name": "Somali şilini"
+		"name": "Somali Şilini"
 	},
 	"LKR": {
-		"name": "Sri Lanka rupisi"
+		"name": "Sri Lanka Rupisi"
 	},
 	"SDG": {
-		"name": "Sudan lirası"
+		"name": "Sudan Lirası"
 	},
 	"SRD": {
-		"name": "Surinam doları"
+		"name": "Surinam Doları"
 	},
 	"SYP": {
-		"name": "Suriye lirası"
+		"name": "Suriye Lirası"
 	},
 	"SAR": {
-		"name": "Suudi Arabistan riyali"
+		"name": "Suudi Arabistan Riyali"
 	},
 	"SZL": {
-		"name": "Svaziland lilangenisi"
+		"name": "Svaziland Lilangenisi"
 	},
 	"CLP": {
-		"name": "Şili pesosu"
+		"name": "Şili Pesosu"
 	},
 	"TJS": {
-		"name": "Tacikistan somonisi"
+		"name": "Tacikistan Somonisi"
 	},
 	"TZS": {
-		"name": "Tanzanya şilini"
+		"name": "Tanzanya Şilini"
 	},
 	"THB": {
-		"name": "Tayland bahtı",
+		"name": "Tayland Bahtı",
 		"symbol": "฿"
 	},
 	"TOP": {
-		"name": "Tonga paʻangası"
+		"name": "Tonga Paʻangası"
 	},
 	"TTD": {
-		"name": "Trinidad ve Tobago doları"
+		"name": "Trinidad ve Tobago Doları"
 	},
 	"TND": {
-		"name": "Tunus dinarı"
+		"name": "Tunus Dinarı"
 	},
 	"TRY": {
-		"name": "Türk lirası",
+		"name": "Türk Lirası",
 		"symbol": "₺"
 	},
 	"TMT": {
-		"name": "Türkmenistan manatı"
+		"name": "Türkmenistan Manatı"
 	},
 	"UGX": {
-		"name": "Uganda şilini"
+		"name": "Uganda Şilini"
 	},
 	"UAH": {
-		"name": "Ukrayna grivnası"
+		"name": "Ukrayna Grivnası"
 	},
 	"OMR": {
-		"name": "Umman riyali"
+		"name": "Umman Riyali"
 	},
 	"UYU": {
-		"name": "Uruguay pesosu"
+		"name": "Uruguay Pesosu"
+	},
+	"UYW": {
+		"name": "Uruguayan Nominal Wage Index Unit"
 	},
 	"JOD": {
-		"name": "Ürdün dinarı"
+		"name": "Ürdün Dinarı"
 	},
 	"VUV": {
-		"name": "Vanuatu vatusu"
+		"name": "Vanuatu Vatusu"
 	},
 	"VES": {
-		"name": "Venezuela bolivarı"
+		"name": "Venezuela Bolivarı"
 	},
 	"VND": {
-		"name": "Vietnam dongu",
+		"name": "Vietnam Dongu",
 		"symbol": "₫"
 	},
 	"YER": {
-		"name": "Yemen riyali"
+		"name": "Yemen Riyali"
 	},
 	"ILS": {
-		"name": "Yeni İsrail şekeli",
+		"name": "Yeni İsrail Şekeli",
 		"symbol": "₪"
 	},
 	"TWD": {
-		"name": "Yeni Tayvan doları",
+		"name": "Yeni Tayvan Doları",
 		"symbol": "NT$"
 	},
 	"NZD": {
-		"name": "Yeni Zelanda doları",
+		"name": "Yeni Zelanda Doları",
 		"symbol": "NZ$"
 	},
 	"ZMW": {
-		"name": "Zambiya kvaçası"
+		"name": "Zambiya Kvaçası"
 	},
 	"ZWL": {
 		"name": "Zimbabve Doları (2009)"

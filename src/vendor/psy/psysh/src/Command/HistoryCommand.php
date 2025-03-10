@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2023 Justin Hileman
+ * (c) 2012-2020 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -26,8 +26,8 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class HistoryCommand extends Command
 {
-    private FilterOptions $filter;
-    private Readline $readline;
+    private $filter;
+    private $readline;
 
     /**
      * {@inheritdoc}
@@ -90,10 +90,8 @@ HELP
 
     /**
      * {@inheritdoc}
-     *
-     * @return int 0 if everything went fine, or an exit code
      */
-    protected function execute(InputInterface $input, OutputInterface $output): int
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
         $this->validateOnlyOne($input, ['show', 'head', 'tail']);
         $this->validateOnlyOne($input, ['save', 'replay', 'clear']);
@@ -135,8 +133,7 @@ HELP
 
             $count = \count($history);
             $output->writeln(\sprintf('Replaying %d line%s of history', $count, ($count !== 1) ? 's' : ''));
-
-            $this->getShell()->addInput($history);
+            $this->getApplication()->addInput($history);
         } elseif ($input->getOption('clear')) {
             $this->clearHistory();
             $output->writeln('<info>History cleared.</info>');
@@ -157,12 +154,12 @@ HELP
      *
      * @param string $range
      *
-     * @return int[] [ start, end ]
+     * @return array [ start, end ]
      */
-    private function extractRange(string $range): array
+    private function extractRange($range)
     {
         if (\preg_match('/^\d+$/', $range)) {
-            return [(int) $range, (int) $range + 1];
+            return [$range, $range + 1];
         }
 
         $matches = [];
@@ -179,13 +176,13 @@ HELP
     /**
      * Retrieve a slice of the readline history.
      *
-     * @param string|null $show
-     * @param string|null $head
-     * @param string|null $tail
+     * @param string $show
+     * @param string $head
+     * @param string $tail
      *
-     * @return array A slice of history
+     * @return array A slilce of history
      */
-    private function getHistorySlice($show, $head, $tail): array
+    private function getHistorySlice($show, $head, $tail)
     {
         $history = $this->readline->listHistory();
 
@@ -207,7 +204,7 @@ HELP
                 throw new \InvalidArgumentException('Please specify an integer argument for --tail');
             }
 
-            $start = \count($history) - (int) $tail;
+            $start = \count($history) - $tail;
             $length = (int) $tail + 1;
         } else {
             return $history;
@@ -244,7 +241,7 @@ HELP
         $this->readline->clearHistory();
     }
 
-    public static function escape(string $string): string
+    public static function escape($string)
     {
         return OutputFormatter::escape($string);
     }

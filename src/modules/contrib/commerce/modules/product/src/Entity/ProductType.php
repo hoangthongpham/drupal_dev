@@ -45,6 +45,7 @@ use Drupal\commerce\Entity\CommerceBundleEntityBase;
  *     "id",
  *     "label",
  *     "description",
+ *     "variationType",
  *     "variationTypes",
  *     "multipleVariations",
  *     "injectVariationFields",
@@ -68,6 +69,13 @@ class ProductType extends CommerceBundleEntityBase implements ProductTypeInterfa
    * @var string
    */
   protected $description = '';
+
+  /**
+   * The variation type ID.
+   *
+   * @var string
+   */
+  protected $variationType;
 
   /**
    * The variation type IDs.
@@ -108,8 +116,31 @@ class ProductType extends CommerceBundleEntityBase implements ProductTypeInterfa
   /**
    * {@inheritdoc}
    */
+  public function getVariationTypeId() : ?string {
+    if (count($this->getVariationTypeIds()) > 1) {
+      throw new \RuntimeException(sprintf('"%s" supports multiple variation types.', $this->label()));
+    }
+    return $this->variationType ?? reset($this->variationTypes);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setVariationTypeId(string $variation_type_id) : ProductTypeInterface {
+    $this->variationType = $variation_type_id;
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getVariationTypeIds() : array {
-    return array_filter($this->variationTypes ?? []);
+    if (!empty($this->variationTypes)) {
+      return array_filter($this->variationTypes);
+    }
+    else {
+      return [$this->variationType];
+    }
   }
 
   /**

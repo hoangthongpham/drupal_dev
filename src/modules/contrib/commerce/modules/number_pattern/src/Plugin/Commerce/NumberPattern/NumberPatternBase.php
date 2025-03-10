@@ -7,7 +7,6 @@ use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\PluginBase;
-use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\Core\Utility\Token;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -143,7 +142,7 @@ abstract class NumberPatternBase extends PluginBase implements NumberPatternInte
     $number = $this->token->replace($this->configuration['pattern'], [
       'pattern' => [],
       $entity->getEntityTypeId() => $entity,
-    ], ['clear' => TRUE], new BubbleableMetadata());
+    ]);
 
     return $number;
   }

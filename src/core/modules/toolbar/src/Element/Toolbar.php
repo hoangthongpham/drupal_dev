@@ -3,15 +3,15 @@
 namespace Drupal\toolbar\Element;
 
 use Drupal\Component\Utility\Html;
-use Drupal\Core\Render\Attribute\RenderElement;
-use Drupal\Core\Render\Element\RenderElementBase;
+use Drupal\Core\Render\Element\RenderElement;
 use Drupal\Core\Render\Element;
 
 /**
  * Provides a render element for the default Drupal toolbar.
+ *
+ * @RenderElement("toolbar")
  */
-#[RenderElement('toolbar')]
-class Toolbar extends RenderElementBase {
+class Toolbar extends RenderElement {
 
   /**
    * {@inheritdoc}
@@ -30,6 +30,9 @@ class Toolbar extends RenderElementBase {
       ],
       // Metadata for the toolbar wrapping element.
       '#attributes' => [
+        // The id cannot be simply "toolbar" or it will clash with the
+        // simpletest tests listing which produces a checkbox with attribute
+        // id="toolbar".
         'id' => 'toolbar-administration',
         'role' => 'group',
         'aria-label' => $this->t('Site administration toolbar'),

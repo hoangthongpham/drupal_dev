@@ -1,11 +1,10 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\contact\Functional\Views;
 
 use Drupal\Core\Cache\Cache;
 use Drupal\Tests\views\Functional\ViewTestBase;
+use Drupal\views\Tests\ViewTestData;
 use Drupal\user\Entity\User;
 
 /**
@@ -24,14 +23,16 @@ class ContactLinkTest extends ViewTestBase {
   public $userData;
 
   /**
-   * {@inheritdoc}
+   * Modules to enable.
+   *
+   * @var array
    */
   protected static $modules = ['contact_test_views'];
 
   /**
    * {@inheritdoc}
    */
-  protected $defaultTheme = 'stark';
+  protected $defaultTheme = 'classy';
 
   /**
    * Views used by this test.
@@ -43,8 +44,10 @@ class ContactLinkTest extends ViewTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp($import_test_views = TRUE, $modules = ['contact_test_views']): void {
-    parent::setUp($import_test_views, $modules);
+  protected function setUp($import_test_views = TRUE): void {
+    parent::setUp($import_test_views);
+
+    ViewTestData::createTestViews(static::class, ['contact_test_views']);
 
     $this->userData = $this->container->get('user.data');
   }
@@ -52,7 +55,7 @@ class ContactLinkTest extends ViewTestBase {
   /**
    * Tests contact link.
    */
-  public function testContactLink(): void {
+  public function testContactLink() {
     $accounts = [];
     $accounts['root'] = User::load(1);
     // Create an account with access to all contact pages.

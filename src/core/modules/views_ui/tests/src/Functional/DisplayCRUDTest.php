@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\views_ui\Functional;
 
 use Drupal\views\Views;
@@ -21,7 +19,9 @@ class DisplayCRUDTest extends UITestBase {
   public static $testViews = ['test_display'];
 
   /**
-   * {@inheritdoc}
+   * Modules to enable.
+   *
+   * @var array
    */
   protected static $modules = ['contextual'];
 
@@ -33,7 +33,7 @@ class DisplayCRUDTest extends UITestBase {
   /**
    * Tests adding a display.
    */
-  public function testAddDisplay(): void {
+  public function testAddDisplay() {
     // Show the default display.
     $this->config('views.settings')->set('ui.show.default_display', TRUE)->save();
 
@@ -58,7 +58,7 @@ class DisplayCRUDTest extends UITestBase {
   /**
    * Tests removing a display.
    */
-  public function testRemoveDisplay(): void {
+  public function testRemoveDisplay() {
     $view = $this->randomView();
     $path_prefix = 'admin/structure/views/view/' . $view['id'] . '/edit';
 
@@ -104,15 +104,16 @@ class DisplayCRUDTest extends UITestBase {
   /**
    * Tests that the correct display is loaded by default.
    */
-  public function testDefaultDisplay(): void {
+  public function testDefaultDisplay() {
     $this->drupalGet('admin/structure/views/view/test_display');
-    $this->assertSession()->elementsCount('xpath', '//*[@id="views-page-1-display-title"]', 1);
+    $elements = $this->xpath('//*[@id="views-page-1-display-title"]');
+    $this->assertCount(1, $elements, 'The page display is loaded as the default display.');
   }
 
   /**
    * Tests the duplicating of a display.
    */
-  public function testDuplicateDisplay(): void {
+  public function testDuplicateDisplay() {
     $view = $this->randomView();
     $path_prefix = 'admin/structure/views/view/' . $view['id'] . '/edit';
     $path = $view['page[path]'];

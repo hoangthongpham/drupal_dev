@@ -1,10 +1,7 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\taxonomy\Functional;
 
-use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Url;
 use Drupal\taxonomy\Entity\Vocabulary;
 
@@ -27,9 +24,6 @@ class VocabularyUiTest extends TaxonomyTestBase {
    */
   protected $defaultTheme = 'stark';
 
-  /**
-   * {@inheritdoc}
-   */
   protected function setUp(): void {
     parent::setUp();
     $this->drupalLogin($this->drupalCreateUser(['administer taxonomy']));
@@ -41,14 +35,14 @@ class VocabularyUiTest extends TaxonomyTestBase {
   /**
    * Create, edit and delete a vocabulary via the user interface.
    */
-  public function testVocabularyInterface(): void {
+  public function testVocabularyInterface() {
     // Visit the main taxonomy administration page.
     $this->drupalGet('admin/structure/taxonomy');
 
     // Create a new vocabulary.
     $this->clickLink('Add vocabulary');
     $edit = [];
-    $vid = $this->randomMachineName();
+    $vid = mb_strtolower($this->randomMachineName());
     $edit['name'] = $this->randomMachineName();
     $edit['description'] = $this->randomMachineName();
     $edit['vid'] = $vid;
@@ -91,27 +85,12 @@ class VocabularyUiTest extends TaxonomyTestBase {
 
     $site_name = $this->config('system.site')->get('name');
     $this->assertSession()->titleEquals("Don't Panic | $site_name");
-
-    // Delete the vocabulary.
-    $this->drupalGet('admin/structure/taxonomy');
-    $href = Url::fromRoute('entity.taxonomy_vocabulary.delete_form', ['taxonomy_vocabulary' => $edit['vid']])->toString();
-    $xpath = $this->assertSession()->buildXPathQuery('//a[contains(@href, :href)]', [':href' => $href]);
-    $link = $this->assertSession()->elementExists('xpath', $xpath);
-    $this->assertEquals('Delete vocabulary', $link->getText());
-    $link->click();
-
-    // Confirm deletion.
-    $this->assertSession()->responseContains(new FormattableMarkup('Are you sure you want to delete the vocabulary %name?', ['%name' => $edit['name']]));
-    $this->submitForm([], 'Delete');
-    $this->assertSession()->responseContains(new FormattableMarkup('Deleted vocabulary %name.', ['%name' => $edit['name']]));
-    $this->container->get('entity_type.manager')->getStorage('taxonomy_vocabulary')->resetCache();
-    $this->assertNull(Vocabulary::load($edit['vid']), 'Vocabulary not found.');
   }
 
   /**
    * Changing weights on the vocabulary overview with two or more vocabularies.
    */
-  public function testTaxonomyAdminChangingWeights(): void {
+  public function testTaxonomyAdminChangingWeights() {
     // Create some vocabularies.
     for ($i = 0; $i < 10; $i++) {
       $this->createVocabulary();
@@ -141,7 +120,7 @@ class VocabularyUiTest extends TaxonomyTestBase {
   /**
    * Tests the vocabulary overview with no vocabularies.
    */
-  public function testTaxonomyAdminNoVocabularies(): void {
+  public function testTaxonomyAdminNoVocabularies() {
     // Delete all vocabularies.
     $vocabularies = Vocabulary::loadMultiple();
     foreach ($vocabularies as $key => $vocabulary) {
@@ -157,9 +136,9 @@ class VocabularyUiTest extends TaxonomyTestBase {
   /**
    * Deleting a vocabulary.
    */
-  public function testTaxonomyAdminDeletingVocabulary(): void {
+  public function testTaxonomyAdminDeletingVocabulary() {
     // Create a vocabulary.
-    $vid = $this->randomMachineName();
+    $vid = mb_strtolower($this->randomMachineName());
     $edit = [
       'name' => $this->randomMachineName(),
       'vid' => $vid,

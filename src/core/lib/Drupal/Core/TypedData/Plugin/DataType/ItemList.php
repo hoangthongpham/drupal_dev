@@ -2,11 +2,7 @@
 
 namespace Drupal\Core\TypedData\Plugin\DataType;
 
-use Drupal\Component\Utility\FilterArray;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\Core\TypedData\Attribute\DataType;
 use Drupal\Core\TypedData\ComplexDataInterface;
-use Drupal\Core\TypedData\ListDataDefinition;
 use Drupal\Core\TypedData\ListInterface;
 use Drupal\Core\TypedData\TypedData;
 use Drupal\Core\TypedData\TypedDataInterface;
@@ -20,12 +16,13 @@ use Drupal\Core\TypedData\TypedDataInterface;
  * Note: The class cannot be called "List" as list is a reserved PHP keyword.
  *
  * @ingroup typed_data
+ *
+ * @DataType(
+ *   id = "list",
+ *   label = @Translation("List of items"),
+ *   definition_class = "\Drupal\Core\TypedData\ListDataDefinition"
+ * )
  */
-#[DataType(
-  id: "list",
-  label: new TranslatableMarkup("List of items"),
-  definition_class: ListDataDefinition::class,
-)]
 class ItemList extends TypedData implements \IteratorAggregate, ListInterface {
 
   /**
@@ -93,7 +90,7 @@ class ItemList extends TypedData implements \IteratorAggregate, ListInterface {
       $strings[] = $item->getString();
     }
     // Remove any empty strings resulting from empty items.
-    return implode(', ', FilterArray::removeEmptyStrings($strings));
+    return implode(', ', array_filter($strings, 'mb_strlen'));
   }
 
   /**

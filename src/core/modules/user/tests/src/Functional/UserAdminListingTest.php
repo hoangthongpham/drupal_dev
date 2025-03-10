@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\user\Functional;
 
 use Drupal\Tests\BrowserTestBase;
@@ -18,12 +16,12 @@ class UserAdminListingTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected $defaultTheme = 'stark';
+  protected $defaultTheme = 'classy';
 
   /**
    * Tests the listing.
    */
-  public function testUserListing(): void {
+  public function testUserListing() {
     // Ensure the anonymous user cannot access the admin listing.
     $this->drupalGet('admin/people');
     $this->assertSession()->statusCodeEquals(403);
@@ -51,7 +49,9 @@ class UserAdminListingTest extends BrowserTestBase {
     $rid_2 = $this->drupalCreateRole([], 'custom_role_2', 'custom_role_2');
 
     $account = $this->drupalCreateUser();
-    $account->addRole($rid_1)->addRole($rid_2)->save();
+    $account->addRole($rid_1);
+    $account->addRole($rid_2);
+    $account->save();
     $accounts[$account->label()] = $account;
     $role_account_name = $account->label();
 
@@ -73,7 +73,7 @@ class UserAdminListingTest extends BrowserTestBase {
       $account_columns = $account->findAll('css', 'td');
       $name = $account_columns[0]->find('css', 'a')->getText();
       $roles = [];
-      $account_roles = $account_columns[2]->findAll('css', 'td ul li');
+      $account_roles = $account_columns[2]->findAll('css', 'td div ul li');
       if (!empty($account_roles)) {
         foreach ($account_roles as $element) {
           $roles[] = $element->getText();

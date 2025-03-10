@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\layout_builder\Functional;
 
 use Drupal\layout_builder\Entity\LayoutBuilderEntityViewDisplay;
@@ -18,7 +16,6 @@ class LayoutBuilderPrepareLayoutTest extends BrowserTestBase {
    * {@inheritdoc}
    */
   protected static $modules = [
-    'field_ui',
     'layout_builder',
     'node',
     'layout_builder_element_test',
@@ -75,7 +72,7 @@ class LayoutBuilderPrepareLayoutTest extends BrowserTestBase {
    *
    * @see \Drupal\layout_builder_element_test\EventSubscriber\TestPrepareLayout;
    */
-  public function testAlterPrepareLayout(): void {
+  public function testAlterPrepareLayout() {
     $assert_session = $this->assertSession();
     $page = $this->getSession()->getPage();
 

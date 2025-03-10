@@ -4,11 +4,9 @@ namespace Drupal\Core\Utility;
 
 use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Component\Utility\Xss;
-use Drupal\Core\Database\Connection;
 use Drupal\Core\Database\Database;
 use Drupal\Core\Database\DatabaseExceptionWrapper;
-use Psr\Log\LoggerInterface;
-use Psr\Log\LogLevel;
+use Drupal\Core\Database\Log;
 
 /**
  * Drupal error utility class.
@@ -23,11 +21,6 @@ class Error {
   const ERROR = 3;
 
   /**
-   * The default message for logging errors.
-   */
-  const DEFAULT_ERROR_MESSAGE = '%type: @message in %function (line %line of %file).';
-
-  /**
    * An array of ignored functions.
    *
    * @var array
@@ -37,13 +30,13 @@ class Error {
   /**
    * Decodes an exception and retrieves the correct caller.
    *
-   * @param \Throwable $exception
+   * @param \Exception|\Throwable $exception
    *   The exception object that was thrown.
    *
    * @return array
    *   An error in the format expected by _drupal_log_error().
    */
-  public static function decodeException(\Throwable $exception): array {
+  public static function decodeException($exception) {
     $message = $exception->getMessage();
 
     $backtrace = $exception->getTrace();
@@ -54,7 +47,7 @@ class Error {
     // skipping internal functions of the database layer.
     if ($exception instanceof \PDOException || $exception instanceof DatabaseExceptionWrapper) {
       $driver_namespace = Database::getConnectionInfo()['default']['namespace'];
-      $backtrace = Connection::removeDatabaseEntriesFromDebugBacktrace($backtrace, $driver_namespace);
+      $backtrace = Log::removeDatabaseEntries($backtrace, $driver_namespace);
       if (isset($exception->query_string, $exception->args)) {
         $message .= ": " . $exception->query_string . "; " . print_r($exception->args, TRUE);
       }
@@ -75,24 +68,6 @@ class Error {
       '@backtrace_string' => $exception->getTraceAsString(),
       'exception' => $exception,
     ];
-  }
-
-  /**
-   * Log a formatted exception message to the provided logger.
-   *
-   * @param \Psr\Log\LoggerInterface $logger
-   *   The logger.
-   * @param \Throwable $exception
-   *   The exception.
-   * @param string $message
-   *   (optional) The message.
-   * @param array $additional_variables
-   *   (optional) Any additional variables.
-   * @param string $level
-   *   The PSR log level. Must be valid constant in \Psr\Log\LogLevel.
-   */
-  public static function logException(LoggerInterface $logger, \Throwable $exception, string $message = Error::DEFAULT_ERROR_MESSAGE, array $additional_variables = [], string $level = LogLevel::ERROR): void {
-    $logger->log($level, $message, static::decodeException($exception) + $additional_variables);
   }
 
   /**
@@ -117,7 +92,7 @@ class Error {
     // no longer function correctly (as opposed to a user-triggered error), so
     // we assume that it is safe to include a verbose backtrace.
     $decode['@backtrace'] = Error::formatBacktrace($backtrace);
-    return new FormattableMarkup(Error::DEFAULT_ERROR_MESSAGE . ' <pre class="backtrace">@backtrace</pre>', $decode);
+    return new FormattableMarkup('%type: @message in %function (line %line of %file). <pre class="backtrace">@backtrace</pre>', $decode);
   }
 
   /**

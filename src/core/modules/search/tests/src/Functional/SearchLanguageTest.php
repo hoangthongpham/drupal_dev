@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\search\Functional;
 
 use Drupal\Core\Url;
@@ -33,9 +31,6 @@ class SearchLanguageTest extends BrowserTestBase {
    */
   protected $searchableNodes;
 
-  /**
-   * {@inheritdoc}
-   */
   protected function setUp(): void {
     parent::setUp();
 
@@ -105,7 +100,7 @@ class SearchLanguageTest extends BrowserTestBase {
     $plugin->updateIndex();
   }
 
-  public function testLanguages(): void {
+  public function testLanguages() {
     // Add predefined language.
     $edit = ['predefined_langcode' => 'fr'];
     $this->drupalGet('admin/config/regional/language/add');
@@ -162,7 +157,7 @@ class SearchLanguageTest extends BrowserTestBase {
   /**
    * Test language attribute "lang" for the search results.
    */
-  public function testLanguageAttributes(): void {
+  public function testLanguageAttributes() {
     $this->drupalGet('search/node');
     $this->submitForm(['keys' => 'the Spanish title'], 'Search');
 

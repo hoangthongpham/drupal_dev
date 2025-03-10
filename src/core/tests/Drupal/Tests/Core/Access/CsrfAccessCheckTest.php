@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\Core\Access;
 
 use Drupal\Core\Access\AccessResult;
@@ -33,16 +31,11 @@ class CsrfAccessCheckTest extends UnitTestCase {
   /**
    * The mock route match.
    *
-   * @var \Drupal\Core\Routing\RouteMatchInterface|\PHPUnit\Framework\MockObject\MockObject
+   * @var \Drupal\Core\RouteMatch\RouteMatchInterface|\PHPUnit\Framework\MockObject\MockObject
    */
   protected $routeMatch;
 
-  /**
-   * {@inheritdoc}
-   */
   protected function setUp(): void {
-    parent::setUp();
-
     $this->csrfToken = $this->getMockBuilder('Drupal\Core\Access\CsrfTokenGenerator')
       ->disableOriginalConstructor()
       ->getMock();
@@ -55,15 +48,15 @@ class CsrfAccessCheckTest extends UnitTestCase {
   /**
    * Tests the access() method with a valid token.
    */
-  public function testAccessTokenPass(): void {
+  public function testAccessTokenPass() {
     $this->csrfToken->expects($this->once())
       ->method('validate')
       ->with('test_query', 'test-path/42')
-      ->willReturn(TRUE);
+      ->will($this->returnValue(TRUE));
 
     $this->routeMatch->expects($this->once())
       ->method('getRawParameters')
-      ->willReturn(['node' => 42]);
+      ->will($this->returnValue(['node' => 42]));
 
     $route = new Route('/test-path/{node}', [], ['_csrf_token' => 'TRUE']);
     $request = Request::create('/test-path/42?token=test_query');
@@ -74,15 +67,15 @@ class CsrfAccessCheckTest extends UnitTestCase {
   /**
    * @covers ::access
    */
-  public function testCsrfTokenInvalid(): void {
+  public function testCsrfTokenInvalid() {
     $this->csrfToken->expects($this->once())
       ->method('validate')
       ->with('test_query', 'test-path')
-      ->willReturn(FALSE);
+      ->will($this->returnValue(FALSE));
 
     $this->routeMatch->expects($this->once())
       ->method('getRawParameters')
-      ->willReturn([]);
+      ->will($this->returnValue([]));
 
     $route = new Route('/test-path', [], ['_csrf_token' => 'TRUE']);
     $request = Request::create('/test-path?token=test_query');
@@ -93,15 +86,15 @@ class CsrfAccessCheckTest extends UnitTestCase {
   /**
    * @covers ::access
    */
-  public function testCsrfTokenMissing(): void {
+  public function testCsrfTokenMissing() {
     $this->csrfToken->expects($this->once())
       ->method('validate')
       ->with('', 'test-path')
-      ->willReturn(FALSE);
+      ->will($this->returnValue(FALSE));
 
     $this->routeMatch->expects($this->once())
       ->method('getRawParameters')
-      ->willReturn([]);
+      ->will($this->returnValue([]));
 
     $route = new Route('/test-path', [], ['_csrf_token' => 'TRUE']);
     $request = Request::create('/test-path');

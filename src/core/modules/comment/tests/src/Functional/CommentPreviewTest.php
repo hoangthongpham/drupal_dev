@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\comment\Functional;
 
 use Drupal\comment\CommentManagerInterface;
@@ -22,23 +20,25 @@ class CommentPreviewTest extends CommentTestBase {
   }
 
   /**
-   * {@inheritdoc}
+   * The profile to install as a basis for testing.
+   *
+   * Using the standard profile to test user picture display in comments.
+   *
+   * @var string
    */
-  protected static $modules = ['olivero_test', 'test_user_config'];
-
-  /**
-   * {@inheritdoc}
-   */
-  protected $defaultTheme = 'olivero';
+  protected $profile = 'standard';
 
   /**
    * Tests comment preview.
    */
-  public function testCommentPreview(): void {
+  public function testCommentPreview() {
+    // As admin user, configure comment settings.
+    $this->drupalLogin($this->adminUser);
     $this->setCommentPreview(DRUPAL_OPTIONAL);
     $this->setCommentForm(TRUE);
     $this->setCommentSubject(TRUE);
     $this->setCommentSettings('default_mode', CommentManagerInterface::COMMENT_MODE_THREADED, 'Comment paging changed.');
+    $this->drupalLogout();
 
     // Log in as web user.
     $this->drupalLogin($this->webUser);
@@ -90,11 +90,14 @@ class CommentPreviewTest extends CommentTestBase {
   /**
    * Tests comment preview.
    */
-  public function testCommentPreviewDuplicateSubmission(): void {
+  public function testCommentPreviewDuplicateSubmission() {
+    // As admin user, configure comment settings.
+    $this->drupalLogin($this->adminUser);
     $this->setCommentPreview(DRUPAL_OPTIONAL);
     $this->setCommentForm(TRUE);
     $this->setCommentSubject(TRUE);
     $this->setCommentSettings('default_mode', CommentManagerInterface::COMMENT_MODE_THREADED, 'Comment paging changed.');
+    $this->drupalLogout();
 
     // Log in as web user.
     $this->drupalLogin($this->webUser);
@@ -118,20 +121,21 @@ class CommentPreviewTest extends CommentTestBase {
     // Store the content of this page.
     $this->submitForm([], 'Save');
     $this->assertSession()->pageTextContains('Your comment has been posted.');
-    $this->assertSession()->elementsCount('xpath', '//section[contains(@class, "comments")]/article', 1);
+    $elements = $this->xpath('//section[contains(@class, "comment-wrapper")]/article');
+    $this->assertCount(1, $elements);
 
     // Go back and re-submit the form.
     $this->getSession()->getDriver()->back();
     $submit_button = $this->assertSession()->buttonExists('Save');
     $submit_button->click();
     $this->assertSession()->pageTextContains('Your comment has been posted.');
-    $this->assertSession()->elementsCount('xpath', '//section[contains(@class, "comments")]/article', 2);
+    $this->assertSession()->elementsCount('xpath', '//section[contains(@class, "comment-wrapper")]/article', 2);
   }
 
   /**
    * Tests comment edit, preview, and save.
    */
-  public function testCommentEditPreviewSave(): void {
+  public function testCommentEditPreviewSave() {
     $web_user = $this->drupalCreateUser([
       'access comments',
       'post comments',
@@ -152,7 +156,7 @@ class CommentPreviewTest extends CommentTestBase {
     $edit['date[date]'] = $date->format('Y-m-d');
     $edit['date[time]'] = $date->format('H:i:s');
     $raw_date = $date->getTimestamp();
-    $expected_text_date = $this->container->get('date.formatter')->formatInterval(\Drupal::time()->getRequestTime() - $raw_date);
+    $expected_text_date = $this->container->get('date.formatter')->format($raw_date);
     $expected_form_date = $date->format('Y-m-d');
     $expected_form_time = $date->format('H:i:s');
     $comment = $this->postComment($this->node, $edit['subject[0][value]'], $edit['comment_body[0][value]'], TRUE);
@@ -176,7 +180,7 @@ class CommentPreviewTest extends CommentTestBase {
     // Check that saving a comment produces a success message.
     $this->drupalGet('comment/' . $comment->id() . '/edit');
     $this->submitForm($edit, 'Save');
-    $this->assertSession()->pageTextContains('Your comment has been updated.');
+    $this->assertSession()->pageTextContains('Your comment has been posted.');
 
     // Check that the comment fields are correct after loading the saved comment.
     $this->drupalGet('comment/' . $comment->id() . '/edit');

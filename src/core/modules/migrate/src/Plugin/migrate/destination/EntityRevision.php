@@ -8,9 +8,7 @@ use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Field\FieldTypePluginManagerInterface;
 use Drupal\Core\Session\AccountSwitcherInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\migrate\Attribute\MigrateDestination;
 use Drupal\migrate\MigrateException;
-use Drupal\migrate\Plugin\Derivative\MigrateEntityRevision;
 use Drupal\migrate\Plugin\MigrationInterface;
 use Drupal\migrate\Row;
 
@@ -106,11 +104,12 @@ use Drupal\migrate\Row;
  *   required:
  *     - custom_article_migration
  * @endcode
+ *
+ * @MigrateDestination(
+ *   id = "entity_revision",
+ *   deriver = "Drupal\migrate\Plugin\Derivative\MigrateEntityRevision"
+ * )
  */
-#[MigrateDestination(
-  id: 'entity_revision',
-  deriver: MigrateEntityRevision::class
-)]
 class EntityRevision extends EntityContentBase {
 
   /**
@@ -138,15 +137,10 @@ class EntityRevision extends EntityContentBase {
     $revision_id = $old_destination_id_values ?
       reset($old_destination_id_values) :
       $row->getDestinationProperty($this->getKey('revision'));
-    $entity = NULL;
-    if (!empty($revision_id)) {
-      /** @var \Drupal\Core\Entity\RevisionableStorageInterface $storage */
-      $storage = $this->storage;
-      if ($entity = $storage->loadRevision($revision_id)) {
-        $entity->setNewRevision(FALSE);
-      }
+    if (!empty($revision_id) && ($entity = $this->storage->loadRevision($revision_id))) {
+      $entity->setNewRevision(FALSE);
     }
-    if ($entity === NULL) {
+    else {
       $entity_id = $row->getDestinationProperty($this->getKey('id'));
       $entity = $this->storage->load($entity_id);
 
@@ -170,7 +164,6 @@ class EntityRevision extends EntityContentBase {
    * {@inheritdoc}
    */
   protected function save(ContentEntityInterface $entity, array $old_destination_id_values = []) {
-    $entity->setSyncing(TRUE);
     $entity->save();
     return [$entity->getRevisionId()];
   }

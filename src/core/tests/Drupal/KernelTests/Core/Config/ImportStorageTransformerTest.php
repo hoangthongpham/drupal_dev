@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\KernelTests\Core\Config;
 
 use Drupal\Core\Config\ConfigImporter;
@@ -10,8 +8,6 @@ use Drupal\Core\Config\MemoryStorage;
 use Drupal\Core\Config\StorageTransformerException;
 use Drupal\Core\Lock\NullLockBackend;
 use Drupal\KernelTests\KernelTestBase;
-
-// cspell:ignore arrr
 
 /**
  * Tests the import storage transformer.
@@ -39,7 +35,7 @@ class ImportStorageTransformerTest extends KernelTestBase {
   /**
    * Tests the import transformation.
    */
-  public function testTransform(): void {
+  public function testTransform() {
     // Get the raw system.site config and set it in the sync storage.
     $rawConfig = $this->config('system.site')->getRawData();
 
@@ -67,13 +63,13 @@ class ImportStorageTransformerTest extends KernelTestBase {
   /**
    * Tests that the import transformer throws an exception.
    */
-  public function testTransformLocked(): void {
+  public function testTransformLocked() {
     // Mock the request lock not being available.
     $lock = $this->createMock('Drupal\Core\Lock\LockBackendInterface');
     $lock->expects($this->exactly(2))
       ->method('acquire')
       ->with(ImportStorageTransformer::LOCK_NAME)
-      ->willReturn(FALSE);
+      ->will($this->returnValue(FALSE));
     $lock->expects($this->once())
       ->method('wait')
       ->with(ImportStorageTransformer::LOCK_NAME);
@@ -94,7 +90,7 @@ class ImportStorageTransformerTest extends KernelTestBase {
   /**
    * Tests the import transformer during a running config import.
    */
-  public function testTransformWhileImporting(): void {
+  public function testTransformWhileImporting() {
     // Set up the database table with the current active config.
     // This simulates the config importer having its transformation done.
     $storage = $this->container->get('config.import_transformer')->transform($this->container->get('config.storage'));
@@ -104,7 +100,7 @@ class ImportStorageTransformerTest extends KernelTestBase {
     $lock->expects($this->once())
       ->method('lockMayBeAvailable')
       ->with(ConfigImporter::LOCK_NAME)
-      ->willReturn(FALSE);
+      ->will($this->returnValue(FALSE));
 
     // The import transformer under test.
     $transformer = new ImportStorageTransformer(

@@ -2,27 +2,22 @@
 
 namespace Drupal\Core\Field\Plugin\Field\FieldType;
 
-use Drupal\Core\Field\Attribute\FieldType;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\TypedData\DataDefinition;
 
 /**
  * Defines the 'integer' field type.
+ *
+ * @FieldType(
+ *   id = "integer",
+ *   label = @Translation("Number (integer)"),
+ *   description = @Translation("This field stores a number in the database as an integer."),
+ *   category = @Translation("Number"),
+ *   default_widget = "number",
+ *   default_formatter = "number_integer"
+ * )
  */
-#[FieldType(
-  id: "integer",
-  label: new TranslatableMarkup("Number (integer)"),
-  description: [
-    new TranslatableMarkup("Number without decimals"),
-    new TranslatableMarkup("For example, 123"),
-  ],
-  category: "number",
-  weight: -50,
-  default_widget: "number",
-  default_formatter: "number_integer"
-)]
 class IntegerItem extends NumericItemBase {
 
   /**
@@ -54,7 +49,7 @@ class IntegerItem extends NumericItemBase {
    */
   public static function propertyDefinitions(FieldStorageDefinitionInterface $field_definition) {
     $properties['value'] = DataDefinition::create('integer')
-      ->setLabel(new TranslatableMarkup('Integer value'))
+      ->setLabel(t('Integer value'))
       ->setRequired(TRUE);
 
     return $properties;
@@ -74,7 +69,7 @@ class IntegerItem extends NumericItemBase {
         'value' => [
           'Range' => [
             'min' => 0,
-            'minMessage' => $this->t('%name: The integer must be larger or equal to %min.', [
+            'minMessage' => t('%name: The integer must be larger or equal to %min.', [
               '%name' => $this->getFieldDefinition()->getLabel(),
               '%min' => 0,
             ]),

@@ -1,5 +1,5 @@
 /* eslint-disable import/no-extraneous-dependencies */
-/* cspell:ignore imagealternativetext imagetextalternativeediting drupalimagealternativetextediting drupalimagealternativetextui */
+/* cspell:words imagealternativetext imagetextalternativeediting drupalimagealternativetextediting drupalimagealternativetextui */
 
 /**
  * @module drupalImage/imagealternativetext
@@ -25,14 +25,14 @@ import DrupalImageAlternativeTextUi from './imagealternativetext/drupalimagealte
  */
 export default class DrupalImageAlternativeText extends Plugin {
   /**
-   * @inheritdoc
+   * @inheritDoc
    */
   static get requires() {
     return [DrupalImageAlternativeTextEditing, DrupalImageAlternativeTextUi];
   }
 
   /**
-   * @inheritdoc
+   * @inheritDoc
    */
   static get pluginName() {
     return 'DrupalImageAlternativeText';

@@ -1,10 +1,7 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\layout_builder\Functional;
 
-use Drupal\layout_builder\Entity\LayoutBuilderEntityViewDisplay;
 use Drupal\Tests\BrowserTestBase;
 
 /**
@@ -26,7 +23,7 @@ class LayoutBuilderThemeSuggestionsTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected $defaultTheme = 'starterkit_theme';
+  protected $defaultTheme = 'classy';
 
   /**
    * {@inheritdoc}
@@ -38,10 +35,6 @@ class LayoutBuilderThemeSuggestionsTest extends BrowserTestBase {
       'type' => 'bundle_with_section_field',
       'name' => 'Bundle with section field',
     ]);
-    LayoutBuilderEntityViewDisplay::load('node.bundle_with_section_field.default')
-      ->enableLayoutBuilder()
-      ->setOverridable()
-      ->save();
     $this->createNode([
       'type' => 'bundle_with_section_field',
       'title' => 'A node title',
@@ -54,17 +47,21 @@ class LayoutBuilderThemeSuggestionsTest extends BrowserTestBase {
 
     $this->drupalLogin($this->drupalCreateUser([
       'configure any layout',
+      'administer node display',
     ]));
+
+    $this->drupalGet('admin/structure/types/manage/bundle_with_section_field/display/default');
+    $this->submitForm(['layout[enabled]' => TRUE], 'Save');
   }
 
   /**
    * Tests alterations of the layout list via preprocess functions.
    */
-  public function testLayoutListSuggestion(): void {
+  public function testLayoutListSuggestion() {
     $page = $this->getSession()->getPage();
     $assert_session = $this->assertSession();
 
-    $this->drupalGet('node/1/layout');
+    $this->drupalGet('admin/structure/types/manage/bundle_with_section_field/display/default/layout');
     $page->clickLink('Add section');
     $assert_session->pageTextContains('layout_builder_theme_suggestions_test_preprocess_item_list__layouts');
   }
@@ -72,7 +69,7 @@ class LayoutBuilderThemeSuggestionsTest extends BrowserTestBase {
   /**
    * Tests that of view mode specific field templates are suggested.
    */
-  public function testFieldBlockViewModeTemplates(): void {
+  public function testFieldBlockViewModeTemplates() {
     $assert_session = $this->assertSession();
 
     $this->drupalGet('node/1');

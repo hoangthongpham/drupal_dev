@@ -1,27 +1,25 @@
 <?php
-
-declare(strict_types=1);
-
 namespace Drush\Drupal;
-
-use Drupal\Core\Mail\MailFormatHelper;
-use Drupal\Core\Render\Markup;
 
 class DrupalUtil
 {
+
     /**
      * Output a Drupal render array, object or string as plain text.
      *
-     * @param string|array|Markup $data
+     * @param string|array $data
      *   Data to render.
      *
+     * @return string
      *   The plain-text representation of the input.
      */
-    public static function drushRender($data): string
+    public static function drushRender($data)
     {
         if (is_array($data)) {
             $data = \Drupal::service('renderer')->renderRoot($data);
         }
-        return MailFormatHelper::htmlToText((string) $data);
+
+        $data = \Drupal\Core\Mail\MailFormatHelper::htmlToText($data);
+        return $data;
     }
 }

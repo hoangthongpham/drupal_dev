@@ -2,21 +2,22 @@
 
 namespace Drupal\Core\Field\Plugin\Field\FieldWidget;
 
-use Drupal\Core\Field\Attribute\FieldWidget;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\WidgetBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element\Email;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * Plugin implementation of the 'email_default' widget.
+ *
+ * @FieldWidget(
+ *   id = "email_default",
+ *   label = @Translation("Email"),
+ *   field_types = {
+ *     "email"
+ *   }
+ * )
  */
-#[FieldWidget(
-  id: 'email_default',
-  label: new TranslatableMarkup('Email'),
-  field_types: ['email'],
-)]
 class EmailDefaultWidget extends WidgetBase {
 
   /**
@@ -42,9 +43,9 @@ class EmailDefaultWidget extends WidgetBase {
     ];
     $element['placeholder'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Placeholder'),
+      '#title' => t('Placeholder'),
       '#default_value' => $this->getSetting('placeholder'),
-      '#description' => $this->t('Text that will be shown inside the field until a value is entered. This hint is usually a sample value or a brief description of the expected format.'),
+      '#description' => t('Text that will be shown inside the field until a value is entered. This hint is usually a sample value or a brief description of the expected format.'),
     ];
     return $element;
   }
@@ -57,12 +58,12 @@ class EmailDefaultWidget extends WidgetBase {
 
     $placeholder = $this->getSetting('placeholder');
     if (!empty($placeholder)) {
-      $summary[] = $this->t('Placeholder: @placeholder', ['@placeholder' => $placeholder]);
+      $summary[] = t('Placeholder: @placeholder', ['@placeholder' => $placeholder]);
     }
     else {
-      $summary[] = $this->t('No placeholder');
+      $summary[] = t('No placeholder');
     }
-    $summary[] = $this->t('Textfield size: @size', ['@size' => $this->getSetting('size')]);
+    $summary[] = t('Textfield size: @size', ['@size' => $this->getSetting('size')]);
 
     return $summary;
   }

@@ -2,23 +2,22 @@
 
 namespace Drupal\commerce_order\Plugin\Commerce\Condition;
 
+use Drupal\commerce\Plugin\Commerce\Condition\ConditionBase;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\commerce\Attribute\CommerceCondition;
-use Drupal\commerce\Plugin\Commerce\Condition\ConditionBase;
 use Drupal\commerce_price\Price;
 
 /**
  * Provides the total price condition for orders.
+ *
+ * @CommerceCondition(
+ *   id = "order_total_price",
+ *   label = @Translation("Total price"),
+ *   display_label = @Translation("Current order total"),
+ *   category = @Translation("Order", context = "Commerce"),
+ *   entity_type = "commerce_order",
+ * )
  */
-#[CommerceCondition(
-  id: "order_total_price",
-  label: new TranslatableMarkup("Total price"),
-  entity_type: "commerce_order",
-  display_label: new TranslatableMarkup("Current order total"),
-  category: new TranslatableMarkup("Order", [], ["context" => "Commerce"]),
-)]
 class OrderTotalPrice extends ConditionBase {
 
   /**
@@ -28,7 +27,6 @@ class OrderTotalPrice extends ConditionBase {
     return [
       'operator' => '>',
       'amount' => NULL,
-      'type' => 'total',
     ] + parent::defaultConfiguration();
   }
 
@@ -57,16 +55,6 @@ class OrderTotalPrice extends ConditionBase {
       '#default_value' => $amount,
       '#required' => TRUE,
     ];
-    $form['type'] = [
-      '#type' => 'radios',
-      '#title' => $this->t('Total to compare against'),
-      '#options' => [
-        'total' => $this->t('Order total'),
-        'subtotal' => $this->t('Sum of order item totals'),
-      ],
-      '#description' => $this->t('Totals used may include prior price adjustments.'),
-      '#default_value' => $this->configuration['type'] ?? 'total',
-    ];
 
     return $form;
   }
@@ -80,7 +68,6 @@ class OrderTotalPrice extends ConditionBase {
     $values = $form_state->getValue($form['#parents']);
     $this->configuration['operator'] = $values['operator'];
     $this->configuration['amount'] = $values['amount'];
-    $this->configuration['type'] = $values['type'];
   }
 
   /**
@@ -90,13 +77,7 @@ class OrderTotalPrice extends ConditionBase {
     $this->assertEntity($entity);
     /** @var \Drupal\commerce_order\Entity\OrderInterface $order */
     $order = $entity;
-    // Use the order's total or subtotal depending on configuration.
-    if (empty($this->configuration['type']) || $this->configuration['type'] === 'total') {
-      $total_price = $order->getTotalPrice();
-    }
-    else {
-      $total_price = $order->getSubtotalPrice();
-    }
+    $total_price = $order->getTotalPrice();
     if (!$total_price) {
       return FALSE;
     }

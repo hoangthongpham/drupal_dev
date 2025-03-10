@@ -1,12 +1,8 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\config\Functional;
 
 use Drupal\Tests\BrowserTestBase;
-
-// cspell:ignore arrr
 
 /**
  * Tests the user interface for importing/exporting transformed configuration.
@@ -39,7 +35,8 @@ class TransformedConfigExportImportUITest extends BrowserTestBase {
       'import configuration',
       'synchronize configuration',
     ];
-    $this->drupalLogin($this->drupalCreateUser($permissions));
+    $this->webUser = $this->drupalCreateUser($permissions);
+    $this->drupalLogin($this->webUser);
 
     // Start off with the sync storage being the same as the active storage.
     $this->copyConfig($this->container->get('config.storage'), $this->container->get('config.storage.sync'));
@@ -48,7 +45,7 @@ class TransformedConfigExportImportUITest extends BrowserTestBase {
   /**
    * Tests a simple site export import case.
    */
-  public function testTransformedExportImport(): void {
+  public function testTransformedExportImport() {
     // After installation there is no snapshot but a new site name.
     $this->drupalGet('admin/config/development/configuration');
     $this->assertSession()->pageTextNotContains('Warning message');

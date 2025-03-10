@@ -305,7 +305,8 @@ class MultipleCartMultipleVariationTypesTest extends CartWebDriverTestBase {
     $product_type = ProductType::create([
       'id' => $id,
       'label' => $label,
-      'variationTypes' => [$variation_type->id()],
+      'variationType' => $variation_type->id(),
+      'variationTypes' => [],
     ]);
     $product_type->save();
   }

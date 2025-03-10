@@ -2,12 +2,12 @@
 
 namespace Drupal\commerce_order\Form;
 
+use Drupal\commerce_order\Mail\OrderReceiptMailInterface;
 use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Entity\ContentEntityConfirmFormBase;
 use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\commerce_order\Mail\OrderReceiptMailInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -72,7 +72,7 @@ class OrderReceiptResendForm extends ContentEntityConfirmFormBase {
    * {@inheritdoc}
    */
   public function getCancelUrl() {
-    return $this->entity->toUrl();
+    return $this->entity->toUrl('collection');
   }
 
   /**
@@ -81,13 +81,11 @@ class OrderReceiptResendForm extends ContentEntityConfirmFormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     /** @var \Drupal\commerce_order\Entity\OrderInterface $order */
     $order = $this->entity;
-    $result = $this->orderReceiptMail->send($order, NULL, NULL, TRUE);
+    $result = $this->orderReceiptMail->send($order);
     // Drupal's MailManager sets an error message itself, if the sending failed.
     if ($result) {
       $this->messenger()->addMessage($this->t('Order receipt resent.'));
     }
-
-    $form_state->setRedirectUrl($this->entity->toUrl());
   }
 
 }

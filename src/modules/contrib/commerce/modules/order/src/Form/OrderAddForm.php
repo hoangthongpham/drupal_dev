@@ -7,7 +7,6 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Link;
-use Drupal\Core\Password\PasswordGeneratorInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -43,24 +42,18 @@ class OrderAddForm extends FormBase {
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
-   * @param \Drupal\Core\Password\PasswordGeneratorInterface $password_generator
-   *   The password generator.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, PasswordGeneratorInterface $password_generator) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager) {
     $this->orderStorage = $entity_type_manager->getStorage('commerce_order');
     $this->storeStorage = $entity_type_manager->getStorage('commerce_store');
     $this->userStorage = $entity_type_manager->getStorage('user');
-    $this->passwordGenerator = $password_generator;
   }
 
   /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    return new static(
-      $container->get('entity_type.manager'),
-      $container->get('password_generator')
-    );
+    return new static($container->get('entity_type.manager'));
   }
 
   /**

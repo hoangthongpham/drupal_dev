@@ -5,17 +5,16 @@ namespace Drupal\image\Plugin\ImageEffect;
 use Drupal\Component\Utility\Image;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Image\ImageInterface;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\image\Attribute\ImageEffect;
 
 /**
  * Scales an image resource.
+ *
+ * @ImageEffect(
+ *   id = "image_scale",
+ *   label = @Translation("Scale"),
+ *   description = @Translation("Scaling will maintain the aspect-ratio of the original image. If only a single dimension is specified, the other dimension will be calculated.")
+ * )
  */
-#[ImageEffect(
-  id: "image_scale",
-  label: new TranslatableMarkup("Scale"),
-  description: new TranslatableMarkup("Scaling will maintain the aspect-ratio of the original image. If only a single dimension is specified, the other dimension will be calculated.")
-)]
 class ScaleImageEffect extends ResizeImageEffect {
 
   /**
@@ -70,8 +69,8 @@ class ScaleImageEffect extends ResizeImageEffect {
     $form['upscale'] = [
       '#type' => 'checkbox',
       '#default_value' => $this->configuration['upscale'],
-      '#title' => $this->t('Allow Upscaling'),
-      '#description' => $this->t('Let scale make images larger than their original size.'),
+      '#title' => t('Allow Upscaling'),
+      '#description' => t('Let scale make images larger than their original size.'),
     ];
     return $form;
   }

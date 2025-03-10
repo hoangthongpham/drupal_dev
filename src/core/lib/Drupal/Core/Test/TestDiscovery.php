@@ -7,12 +7,11 @@ use Drupal\Component\Annotation\Reflection\MockFileFinder;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Extension\ExtensionDiscovery;
 use Drupal\Core\Test\Exception\MissingGroupException;
-use Drupal\TestTools\PhpUnitCompatibility\ClassWriter;
+use Drupal\TestTools\PhpUnitCompatibility\PhpUnit8\ClassWriter;
+use PHPUnit\Util\Test;
 
 /**
  * Discovers available tests.
- *
- * @internal
  */
 class TestDiscovery {
 
@@ -58,7 +57,8 @@ class TestDiscovery {
    *   The app root.
    * @param $class_loader
    *   The class loader. Normally Composer's ClassLoader, as included by the
-   *   front controller, but may also be decorated.
+   *   front controller, but may also be decorated; e.g.,
+   *   \Symfony\Component\ClassLoader\ApcClassLoader.
    */
   public function __construct($root, $class_loader) {
     $this->root = $root;
@@ -80,15 +80,12 @@ class TestDiscovery {
 
     $existing = $this->classLoader->getPrefixesPsr4();
 
-    // Add PHPUnit test namespaces of Drupal core. Order the namespaces by the
-    // test types that tend to be slowest first, to optimize overall test times
-    // when multiple different test types are run concurrently by the same test
-    // runner.
-    $this->testNamespaces['Drupal\\FunctionalJavascriptTests\\'] = [$this->root . '/core/tests/Drupal/FunctionalJavascriptTests'];
-    $this->testNamespaces['Drupal\\FunctionalTests\\'] = [$this->root . '/core/tests/Drupal/FunctionalTests'];
-    $this->testNamespaces['Drupal\\BuildTests\\'] = [$this->root . '/core/tests/Drupal/BuildTests'];
+    // Add PHPUnit test namespaces of Drupal core.
     $this->testNamespaces['Drupal\\Tests\\'] = [$this->root . '/core/tests/Drupal/Tests'];
+    $this->testNamespaces['Drupal\\BuildTests\\'] = [$this->root . '/core/tests/Drupal/BuildTests'];
     $this->testNamespaces['Drupal\\KernelTests\\'] = [$this->root . '/core/tests/Drupal/KernelTests'];
+    $this->testNamespaces['Drupal\\FunctionalTests\\'] = [$this->root . '/core/tests/Drupal/FunctionalTests'];
+    $this->testNamespaces['Drupal\\FunctionalJavascriptTests\\'] = [$this->root . '/core/tests/Drupal/FunctionalJavascriptTests'];
     $this->testNamespaces['Drupal\\TestTools\\'] = [$this->root . '/core/tests/Drupal/TestTools'];
 
     $this->availableExtensions = [];
@@ -101,9 +98,19 @@ class TestDiscovery {
       if (!isset($existing["Drupal\\$name\\"])) {
         $this->classLoader->addPsr4("Drupal\\$name\\", "$base_path/src");
       }
+      // Add Simpletest test namespace.
+      $this->testNamespaces["Drupal\\$name\\Tests\\"][] = "$base_path/src/Tests";
 
       // Add PHPUnit test namespaces.
-      $this->testNamespaces["Drupal\\Tests\\$name\\"][] = "$base_path/tests/src";
+      $this->testNamespaces["Drupal\\Tests\\$name\\Unit\\"][] = "$base_path/tests/src/Unit";
+      $this->testNamespaces["Drupal\\Tests\\$name\\Kernel\\"][] = "$base_path/tests/src/Kernel";
+      $this->testNamespaces["Drupal\\Tests\\$name\\Functional\\"][] = "$base_path/tests/src/Functional";
+      $this->testNamespaces["Drupal\\Tests\\$name\\Build\\"][] = "$base_path/tests/src/Build";
+      $this->testNamespaces["Drupal\\Tests\\$name\\FunctionalJavascript\\"][] = "$base_path/tests/src/FunctionalJavascript";
+
+      // Add discovery for traits which are shared between different test
+      // suites.
+      $this->testNamespaces["Drupal\\Tests\\$name\\Traits\\"][] = "$base_path/tests/src/Traits";
     }
 
     foreach ($this->testNamespaces as $prefix => $paths) {
@@ -123,9 +130,7 @@ class TestDiscovery {
    * @param string $extension
    *   (optional) The name of an extension to limit discovery to; e.g., 'node'.
    * @param string[] $types
-   *   (optional) An array of included test types.
-   * @param string|null $directory
-   *   (optional) Limit discovered tests to a specific directory.
+   *   An array of included test types.
    *
    * @return array
    *   An array of tests keyed by the group name. If a test is annotated to
@@ -133,20 +138,20 @@ class TestDiscovery {
    *   to.
    *
    * @code
-   *     $groups['block'] => [
-   *       'Drupal\Tests\block\Functional\BlockTest' => [
+   *     $groups['block'] => array(
+   *       'Drupal\Tests\block\Functional\BlockTest' => array(
    *         'name' => 'Drupal\Tests\block\Functional\BlockTest',
    *         'description' => 'Tests block UI CRUD functionality.',
    *         'group' => 'block',
    *         'groups' => ['block', 'group2', 'group3'],
-   *       ],
-   *     ];
+   *       ),
+   *     );
    * @endcode
    *
    * @todo Remove singular grouping; retain list of groups in 'group' key.
    * @see https://www.drupal.org/node/2296615
    */
-  public function getTestClasses($extension = NULL, array $types = [], ?string $directory = NULL) {
+  public function getTestClasses($extension = NULL, array $types = []) {
     if (!isset($extension) && empty($types)) {
       if (!empty($this->testClasses)) {
         return $this->testClasses;
@@ -154,12 +159,12 @@ class TestDiscovery {
     }
     $list = [];
 
-    $classmap = $this->findAllClassFiles($extension, $directory);
+    $classmap = $this->findAllClassFiles($extension);
 
     // Prevent expensive class loader lookups for each reflected test class by
     // registering the complete classmap of test classes to the class loader.
     // This also ensures that test classes are loaded from the discovered
-    // path names; a namespace/classname mismatch will throw an exception.
+    // pathnames; a namespace/classname mismatch will throw an exception.
     $this->classLoader->addClassMap($classmap);
 
     foreach ($classmap as $classname => $pathname) {
@@ -170,13 +175,27 @@ class TestDiscovery {
       }
       catch (MissingGroupException $e) {
         // If the class name ends in Test and is not a migrate table dump.
-        if (str_ends_with($classname, 'Test') && !str_contains($classname, 'migrate_drupal\Tests\Table')) {
+        if (preg_match('/Test$/', $classname) && strpos($classname, 'migrate_drupal\Tests\Table') === FALSE) {
           throw $e;
         }
         // If the class is @group annotation just skip it. Most likely it is an
         // abstract class, trait or test fixture.
         continue;
       }
+      // Skip this test class if it is a Simpletest-based test and requires
+      // unavailable modules. TestDiscovery should not filter out module
+      // requirements for PHPUnit-based test classes.
+      // @todo Move this behavior to \Drupal\simpletest\TestBase so tests can be
+      //   marked as skipped, instead.
+      // @see https://www.drupal.org/node/1273478
+      if ($info['type'] == 'Simpletest') {
+        if (!empty($info['requires']['module'])) {
+          if (array_diff($info['requires']['module'], $this->availableExtensions['module'])) {
+            continue;
+          }
+        }
+      }
+
       foreach ($info['groups'] as $group) {
         $list[$group][$classname] = $info;
       }
@@ -206,14 +225,12 @@ class TestDiscovery {
    *
    * @param string $extension
    *   (optional) The name of an extension to limit discovery to; e.g., 'node'.
-   * @param string|null $directory
-   *   (optional) Limit discovered tests to a specific directory.
    *
    * @return array
    *   A classmap containing all discovered class files; i.e., a map of
-   *   fully-qualified classnames to path names.
+   *   fully-qualified classnames to pathnames.
    */
-  public function findAllClassFiles($extension = NULL, ?string $directory = NULL) {
+  public function findAllClassFiles($extension = NULL) {
     $classmap = [];
     $namespaces = $this->registerTestNamespaces();
     if (isset($extension)) {
@@ -223,7 +240,7 @@ class TestDiscovery {
     }
     foreach ($namespaces as $namespace => $paths) {
       foreach ($paths as $path) {
-        if (!is_dir($path) || (!is_null($directory) && !str_contains($path, $directory))) {
+        if (!is_dir($path)) {
           continue;
         }
         $classmap += static::scanDirectory($namespace, $path);
@@ -245,7 +262,7 @@ class TestDiscovery {
    *
    * @return array
    *   An associative array whose keys are fully-qualified class names and whose
-   *   values are corresponding filesystem path names.
+   *   values are corresponding filesystem pathnames.
    *
    * @throws \InvalidArgumentException
    *   If $namespace_prefix does not end in a namespace separator (backslash).
@@ -254,7 +271,7 @@ class TestDiscovery {
    * @see https://www.drupal.org/node/2296635
    */
   public static function scanDirectory($namespace_prefix, $path) {
-    if (!str_ends_with($namespace_prefix, '\\')) {
+    if (substr($namespace_prefix, -1) !== '\\') {
       throw new \InvalidArgumentException("Namespace prefix for $path must contain a trailing namespace separator.");
     }
     $flags = \FilesystemIterator::UNIX_PATHS;
@@ -271,10 +288,10 @@ class TestDiscovery {
       // We don't want to discover abstract TestBase classes, traits or
       // interfaces. They can be deprecated and will call @trigger_error()
       // during discovery.
-      return str_ends_with($file_name, '.php') &&
-        !str_ends_with($file_name, 'TestBase.php') &&
-        !str_ends_with($file_name, 'Trait.php') &&
-        !str_ends_with($file_name, 'Interface.php');
+      return substr($file_name, -4) === '.php' &&
+        substr($file_name, -12) !== 'TestBase.php' &&
+        substr($file_name, -9) !== 'Trait.php' &&
+        substr($file_name, -13) !== 'Interface.php';
     });
     $files = new \RecursiveIteratorIterator($filter);
     $classes = [];
@@ -305,8 +322,11 @@ class TestDiscovery {
    *   - group: The test's first @group (parsed from PHPDoc annotations).
    *   - groups: All of the test's @group annotations, as an array (parsed from
    *     PHPDoc annotations).
+   *   - requires: An associative array containing test requirements parsed from
+   *     PHPDoc annotations:
+   *     - module: List of Drupal module extension names the test depends on.
    *
-   * @throws \Drupal\Core\Test\Exception\MissingGroupException
+   * @throws \Drupal\simpletest\Exception\MissingGroupException
    *   If the class does not have a @group annotation.
    */
   public static function getTestInfo($classname, $doc_comment = NULL) {
@@ -343,13 +363,23 @@ class TestDiscovery {
     }
     $info['group'] = $annotations['group'];
     $info['groups'] = $annotations['groups'];
-    $info['type'] = 'PHPUnit-' . static::getPhpunitTestSuite($classname);
+
+    // Sort out PHPUnit-runnable tests by type.
+    if ($testsuite = static::getPhpunitTestSuite($classname)) {
+      $info['type'] = 'PHPUnit-' . $testsuite;
+    }
+    else {
+      $info['type'] = 'Simpletest';
+    }
 
     if (!empty($annotations['coversDefaultClass'])) {
       $info['description'] = 'Tests ' . $annotations['coversDefaultClass'] . '.';
     }
     else {
       $info['description'] = static::parseTestClassSummary($doc_comment);
+    }
+    if (isset($annotations['dependencies'])) {
+      $info['requires']['module'] = array_map('trim', explode(',', $annotations['dependencies']));
     }
 
     return $info;
@@ -382,6 +412,42 @@ class TestDiscovery {
       $summary[] = trim($line, ' *');
     }
     return implode(' ', $summary);
+  }
+
+  /**
+   * Parses annotations in the phpDoc of a test class.
+   *
+   * @param \ReflectionClass $class
+   *   The reflected test class.
+   *
+   * @return array
+   *   An associative array that contains all annotations on the test class;
+   *   typically including:
+   *   - group: A list of @group values.
+   *   - requires: An associative array of @requires values; e.g.:
+   *     - module: A list of Drupal module dependencies that are required to
+   *       exist.
+   *
+   * @see \PHPUnit\Util\Test::parseTestMethodAnnotations()
+   * @see http://phpunit.de/manual/current/en/incomplete-and-skipped-tests.html#incomplete-and-skipped-tests.skipping-tests-using-requires
+   */
+  public static function parseTestClassAnnotations(\ReflectionClass $class) {
+    $annotations = Test::parseTestMethodAnnotations($class->getName())['class'];
+
+    // @todo Enhance PHPUnit upstream to allow for custom @requires identifiers.
+    // @see \PHPUnit\Util\Test::getRequirements()
+    // @todo Add support for 'PHP', 'OS', 'function', 'extension'.
+    // @see https://www.drupal.org/node/1273478
+    if (isset($annotations['requires'])) {
+      foreach ($annotations['requires'] as $i => $value) {
+        [$type, $value] = explode(' ', $value, 2);
+        if ($type === 'module') {
+          $annotations['requires']['module'][$value] = $value;
+          unset($annotations['requires'][$i]);
+        }
+      }
+    }
+    return $annotations;
   }
 
   /**

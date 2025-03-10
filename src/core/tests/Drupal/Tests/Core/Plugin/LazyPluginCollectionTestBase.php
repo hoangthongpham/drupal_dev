@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\Core\Plugin;
 
 use Drupal\Core\Plugin\DefaultLazyPluginCollection;
@@ -45,16 +43,11 @@ abstract class LazyPluginCollectionTestBase extends UnitTestCase {
     'apple' => ['id' => 'apple', 'key' => 'value'],
   ];
 
-  /**
-   * {@inheritdoc}
-   */
-  protected function setUp(): void {
-    parent::setUp();
-
+  protected function setUp() {
     $this->pluginManager = $this->createMock('Drupal\Component\Plugin\PluginManagerInterface');
     $this->pluginManager->expects($this->any())
       ->method('getDefinitions')
-      ->willReturn($this->getPluginDefinitions());
+      ->will($this->returnValue($this->getPluginDefinitions()));
 
   }
 
@@ -66,7 +59,7 @@ abstract class LazyPluginCollectionTestBase extends UnitTestCase {
    *   called. For example, $this->any(), $this->once(), $this->exactly(6).
    *   Defaults to $this->never().
    */
-  protected function setupPluginCollection(?InvocationOrder $create_count = NULL) {
+  protected function setupPluginCollection(InvocationOrder $create_count = NULL) {
     $this->pluginInstances = [];
     $map = [];
     foreach ($this->getPluginDefinitions() as $plugin_id => $definition) {
@@ -93,7 +86,9 @@ abstract class LazyPluginCollectionTestBase extends UnitTestCase {
    *   The mock plugin object.
    */
   public function returnPluginMap($plugin_id) {
-    return $this->pluginInstances[$plugin_id];
+    if (isset($this->pluginInstances[$plugin_id])) {
+      return $this->pluginInstances[$plugin_id];
+    }
   }
 
   /**
@@ -111,7 +106,7 @@ abstract class LazyPluginCollectionTestBase extends UnitTestCase {
     $mock = $this->createMock('Drupal\Component\Plugin\PluginInspectionInterface');
     $mock->expects($this->any())
       ->method('getPluginId')
-      ->willReturn($plugin_id);
+      ->will($this->returnValue($plugin_id));
     return $mock;
   }
 

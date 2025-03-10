@@ -11,25 +11,27 @@
  */
 
 .block-page-title-block {
-  margin-block-end: var(--space-s);
+  margin-bottom: 0.75rem;
 }
 
 .block-page-title-block:last-child {
-  margin-block-end: var(--space-l);
+  margin-bottom: 1.5rem;
+}
+
+/**
+ * There are use cases where page title is not rendered as a block ¯\_(ツ)_/¯.
+ *
+ * @see Drupal\system\Controller\BatchController::batchPage()
+ */
+
+.region-header > .page-title {
+  margin-top: 1.25rem;
+  margin-bottom: 1.5rem;
 }
 
 .page-title {
   display: inline-block;
   margin: 0;
-  font-size: var(--font-size-h1);
+  font-size: 2.027rem;
   -webkit-font-smoothing: antialiased;
-}
-
-.region-header > .page-title {
-  /**
-     * In this case page title is not rendered as a block ¯\_(ツ)_/¯.
-     *
-     * @see Drupal\system\Controller\BatchController::batchPage()
-     */
-  margin-block: var(--breadcrumb-height) var(--space-l);
 }

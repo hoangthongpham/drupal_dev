@@ -2,14 +2,13 @@
 
 namespace Drupal\Tests\commerce_checkout\Functional;
 
-use Drupal\Core\Test\AssertMailTrait;
-use Drupal\Core\Url;
-use Drupal\Tests\commerce\Functional\CommerceBrowserTestBase;
 use Drupal\commerce_order\Entity\Order;
+use Drupal\Core\Url;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\filter\Entity\FilterFormat;
 use Drupal\language\Entity\ConfigurableLanguage;
+use Drupal\Tests\commerce\Functional\CommerceBrowserTestBase;
 
 /**
  * Tests the checkout of an order.
@@ -17,8 +16,6 @@ use Drupal\language\Entity\ConfigurableLanguage;
  * @group commerce
  */
 class CheckoutOrderTest extends CommerceBrowserTestBase {
-
-  use AssertMailTrait;
 
   /**
    * The current user.
@@ -45,7 +42,6 @@ class CheckoutOrderTest extends CommerceBrowserTestBase {
     'commerce_cart',
     'commerce_checkout',
     'commerce_checkout_test',
-    'commerce_product',
     'views_ui',
   ];
 
@@ -103,23 +99,26 @@ class CheckoutOrderTest extends CommerceBrowserTestBase {
     $cart_link->click();
     $this->submitForm([], 'Checkout');
     $this->assertSession()->pageTextNotContains('Order summary');
-    $this->assertCheckoutProgressStep('Log in');
+    $this->assertCheckoutProgressStep('Login');
 
     /** @var \Drupal\commerce_order\Entity\OrderInterface $order */
     $order = $this->container->get('entity_type.manager')->getStorage('commerce_order')->load(1);
     /** @var \Drupal\commerce_checkout\Entity\CheckoutFlowInterface $checkout_flow */
     $checkout_flow = $this->container->get('entity_type.manager')->getStorage('commerce_checkout_flow')->load('default');
+
+    // We're on a form, so no Page Cache.
+    $this->assertSession()->responseHeaderEquals('X-Drupal-Cache', NULL);
     // Dynamic page cache should be present, and a MISS.
     $this->assertSession()->responseHeaderEquals('X-Drupal-Dynamic-Cache', 'MISS');
 
     // Assert cache tags bubbled.
     $cache_tags_header = $this->getSession()->getResponseHeader('X-Drupal-Cache-Tags');
-    $this->assertTrue(str_contains($cache_tags_header, 'commerce_order:' . $order->id()));
+    $this->assertTrue(strpos($cache_tags_header, 'commerce_order:' . $order->id()) !== FALSE);
     foreach ($order->getItems() as $item) {
-      $this->assertTrue(str_contains($cache_tags_header, 'commerce_order_item:' . $item->id()));
+      $this->assertTrue(strpos($cache_tags_header, 'commerce_order_item:' . $item->id()) !== FALSE);
     }
     foreach ($checkout_flow->getCacheTags() as $cache_tag) {
-      $this->assertTrue(str_contains($cache_tags_header, $cache_tag));
+      $this->assertTrue(strpos($cache_tags_header, $cache_tag) !== FALSE);
     }
 
     $this->getSession()->reload();
@@ -165,9 +164,9 @@ class CheckoutOrderTest extends CommerceBrowserTestBase {
     $this->submitForm([], 'Continue as Guest');
     // Check breadcrumb link functionality.
     $this->assertSession()->elementsCount('css', '.block-commerce-checkout-progress li.checkout-progress--step > a', 1);
-    $this->getSession()->getPage()->findLink('Log in')->click();
+    $this->getSession()->getPage()->findLink('Login')->click();
     $this->assertSession()->pageTextNotContains('Order summary');
-    $this->assertCheckoutProgressStep('Log in');
+    $this->assertCheckoutProgressStep('Login');
 
     $this->submitForm([], 'Continue as Guest');
     $this->assertCheckoutProgressStep('Order information');
@@ -280,73 +279,20 @@ class CheckoutOrderTest extends CommerceBrowserTestBase {
 
     $this->drupalLogout();
     $this->drupalGet('/fr/product/' . $this->product->id());
-    $this->submitForm([], (string) $this->t('Add to cart'));
+    $this->submitForm([], 'Add to cart');
     $cart_link = $this->getSession()->getPage()->findLink('your cart');
     $cart_link->click();
-    $this->submitForm([], (string) $this->t('Checkout'));
+    $this->submitForm([], 'Checkout');
     $this->assertSession()->pageTextContains('New Customer');
     $this->submitForm([
       'login[register][name]' => 'User name',
       'login[register][mail]' => 'guest@example.com',
       'login[register][password][pass1]' => 'pass',
       'login[register][password][pass2]' => 'pass',
-    ], 'Create new account and continue');
+    ], 'Create account and continue');
     $this->assertSession()->pageTextContains('Billing information');
     // Check breadcrumbs are not links. (the default setting)
     $this->assertSession()->elementNotExists('css', '.block-commerce-checkout-progress li.checkout-progress--step > a');
-
-    // Assert created user account values.
-    $users = \Drupal::entityTypeManager()->getStorage('user')->loadByProperties(['mail' => 'guest@example.com']);
-    /** @var \Drupal\user\UserInterface $user */
-    $user = reset($users);
-
-    $this->assertEquals('User name', $user->label());
-    $this->assertEquals('fr', $user->language()->getId());
-    $this->assertEquals('fr', $user->getPreferredLangcode());
-    $this->assertEquals('fr', $user->getPreferredAdminLangcode());
-  }
-
-  /**
-   * Tests the user gets created in the current language on checkout complete.
-   */
-  public function testMultilingualCompletionRegister() {
-    \Drupal::service('module_installer')->install(['language']);
-    ConfigurableLanguage::createFromLangcode('fr')->save();
-    $this->drupalLogout();
-    $this->drupalGet('/fr/product/' . $this->product->id());
-    $this->submitForm([], 'Add to cart');
-    $cart_link = $this->getSession()->getPage()->findLink('your cart');
-    $cart_link->click();
-    $this->submitForm([], 'Checkout');
-
-    // Checkout as guest.
-    $this->assertCheckoutProgressStep('Log in');
-    $this->submitForm([], 'Continue as Guest');
-    $this->assertCheckoutProgressStep('Order information');
-    $this->submitForm([
-      'contact_information[email]' => 'guest@example.com',
-      'contact_information[email_confirm]' => 'guest@example.com',
-      'billing_information[profile][address][0][address][given_name]' => $this->randomString(),
-      'billing_information[profile][address][0][address][family_name]' => $this->randomString(),
-      'billing_information[profile][address][0][address][organization]' => $this->randomString(),
-      'billing_information[profile][address][0][address][address_line1]' => $this->randomString(),
-      'billing_information[profile][address][0][address][postal_code]' => '94043',
-      'billing_information[profile][address][0][address][locality]' => 'Mountain View',
-      'billing_information[profile][address][0][address][administrative_area]' => 'CA',
-    ], 'Continue to review');
-    $this->assertCheckoutProgressStep('Review');
-    $this->assertSession()->pageTextContains('Contact information');
-    $this->assertSession()->pageTextContains('Billing information');
-    $this->assertSession()->pageTextContains('Order summary');
-    $this->submitForm([], 'Complete checkout');
-    $this->assertSession()->pageTextContains('Your order number is 1. You can view your order on your account page when logged in.');
-
-    $this->assertSession()->pageTextContains('Create your account');
-    $this->submitForm([
-      'completion_register[name]' => 'User name',
-      'completion_register[pass][pass1]' => 'pass',
-      'completion_register[pass][pass2]' => 'pass',
-    ], 'Create account');
 
     // Assert created user account values.
     $users = \Drupal::entityTypeManager()->getStorage('user')->loadByProperties(['mail' => 'guest@example.com']);
@@ -380,7 +326,7 @@ class CheckoutOrderTest extends CommerceBrowserTestBase {
       'login[register][mail]' => 'guest@example.com',
       'login[register][password][pass1]' => 'pass',
       'login[register][password][pass2]' => 'pass',
-    ], 'Create new account and continue');
+    ], 'Create account and continue');
     $this->assertSession()->pageTextContains('Billing information');
     // Check breadcrumbs are not links. (the default setting)
     $this->assertSession()->elementNotExists('css', '.block-commerce-checkout-progress li.checkout-progress--step > a');
@@ -399,7 +345,7 @@ class CheckoutOrderTest extends CommerceBrowserTestBase {
       'login[register][mail]' => '',
       'login[register][password][pass1]' => 'pass',
       'login[register][password][pass2]' => 'pass',
-    ], 'Create new account and continue');
+    ], 'Create account and continue');
     $this->assertSession()->pageTextContains('Email field is required.');
 
     $this->submitForm([
@@ -407,7 +353,7 @@ class CheckoutOrderTest extends CommerceBrowserTestBase {
       'login[register][mail]' => 'guest@example.com',
       'login[register][password][pass1]' => 'pass',
       'login[register][password][pass2]' => 'pass',
-    ], 'Create new account and continue');
+    ], 'Create account and continue');
     $this->assertSession()->pageTextContains('Username field is required.');
 
     $this->submitForm([
@@ -415,7 +361,7 @@ class CheckoutOrderTest extends CommerceBrowserTestBase {
       'login[register][mail]' => 'guest@example.com',
       'login[register][password][pass1]' => '',
       'login[register][password][pass2]' => '',
-    ], 'Create new account and continue');
+    ], 'Create account and continue');
     $this->assertSession()->pageTextContains('Password field is required.');
 
     $this->submitForm([
@@ -423,7 +369,7 @@ class CheckoutOrderTest extends CommerceBrowserTestBase {
       'login[register][mail]' => 'guest@example.com',
       'login[register][password][pass1]' => 'pass',
       'login[register][password][pass2]' => 'pass',
-    ], 'Create new account and continue');
+    ], 'Create account and continue');
     $this->assertSession()->pageTextContains('The email address guest@example.com is already taken.');
 
     $this->submitForm([
@@ -431,7 +377,7 @@ class CheckoutOrderTest extends CommerceBrowserTestBase {
       'login[register][mail]' => 'guest2@example.com',
       'login[register][password][pass1]' => 'pass',
       'login[register][password][pass2]' => 'pass',
-    ], 'Create new account and continue');
+    ], 'Create account and continue');
     $this->assertSession()->pageTextContains('The username contains an illegal character.');
 
     $this->submitForm([
@@ -439,7 +385,7 @@ class CheckoutOrderTest extends CommerceBrowserTestBase {
       'login[register][mail]' => 'guest2@example.com',
       'login[register][password][pass1]' => 'pass',
       'login[register][password][pass2]' => 'pass',
-    ], 'Create new account and continue');
+    ], 'Create account and continue');
     $this->assertSession()->pageTextContains('The username User name is already taken.');
   }
 
@@ -482,7 +428,7 @@ class CheckoutOrderTest extends CommerceBrowserTestBase {
       'login[register][mail]' => 'guest@example.com',
       'login[register][password][pass1]' => 'pass',
       'login[register][password][pass2]' => 'pass',
-    ], 'Create new account and continue');
+    ], 'Create account and continue');
     $this->assertSession()->pageTextContains('Custom user field field is required.');
 
     $this->submitForm([
@@ -491,7 +437,7 @@ class CheckoutOrderTest extends CommerceBrowserTestBase {
       'login[register][password][pass1]' => 'pass',
       'login[register][password][pass2]' => 'pass',
       'login[register][test_user_field][0][value]' => 'test_user_field_value',
-    ], 'Create new account and continue');
+    ], 'Create account and continue');
     $this->assertSession()->pageTextContains('Billing information');
 
     $accounts = $this->container->get('entity_type.manager')
@@ -515,7 +461,7 @@ class CheckoutOrderTest extends CommerceBrowserTestBase {
     $this->submitForm([], 'Checkout');
 
     // Checkout as guest.
-    $this->assertCheckoutProgressStep('Log in');
+    $this->assertCheckoutProgressStep('Login');
     $this->submitForm([], 'Continue as Guest');
     $this->assertCheckoutProgressStep('Order information');
     $this->submitForm([
@@ -560,7 +506,7 @@ class CheckoutOrderTest extends CommerceBrowserTestBase {
     $cart_link = $this->getSession()->getPage()->findLink('your cart');
     $cart_link->click();
     $this->submitForm([], 'Checkout');
-    $this->assertCheckoutProgressStep('Log in');
+    $this->assertCheckoutProgressStep('Login');
     $this->submitForm([], 'Continue as Guest');
     $this->assertCheckoutProgressStep('Order information');
     $this->submitForm([
@@ -641,7 +587,7 @@ class CheckoutOrderTest extends CommerceBrowserTestBase {
     $this->submitForm([], 'Checkout');
 
     // Checkout as guest.
-    $this->assertCheckoutProgressStep('Log in');
+    $this->assertCheckoutProgressStep('Login');
     $this->submitForm([], 'Continue as Guest');
     $this->assertCheckoutProgressStep('Order information');
     $this->submitForm([
@@ -700,7 +646,7 @@ class CheckoutOrderTest extends CommerceBrowserTestBase {
     $this->submitForm([], 'Checkout');
 
     // Checkout as guest.
-    $this->assertCheckoutProgressStep('Log in');
+    $this->assertCheckoutProgressStep('Login');
     $this->submitForm([], 'Continue as Guest');
     $this->assertCheckoutProgressStep('Order information');
     $this->submitForm([
@@ -735,7 +681,7 @@ class CheckoutOrderTest extends CommerceBrowserTestBase {
   }
 
   /**
-   * Tests checkout behavior after a cart update.
+   * Tests checkout behaviour after a cart update.
    */
   public function testCheckoutFlowOnCartUpdate() {
     $this->drupalGet($this->product->toUrl());
@@ -881,7 +827,7 @@ class CheckoutOrderTest extends CommerceBrowserTestBase {
       'commerce_order' => 1,
       'user' => 0,
     ], ['absolute' => TRUE]);
-    // We have text separated by <h1> and <p> tags, so they appear individually.
+    // We have text seperated by <h1> and <p> tags, so they appear individually.
     $this->assertSession()->pageTextNotContains("Your order number is 1. Click here you view your order: {$expected_order_url->toString()}.");
     $this->assertSession()->pageTextContains('Your order number is 1.');
     $this->assertSession()->pageTextContains("Click here you view your order: {$expected_order_url->toString()}.");
@@ -923,129 +869,12 @@ class CheckoutOrderTest extends CommerceBrowserTestBase {
   }
 
   /**
-   * Tests guest_new_account.
-   */
-  public function testGuestNewAccountNoNotify() {
-    \Drupal::configFactory()
-      ->getEditable('commerce_checkout.commerce_checkout_flow.default')
-      ->set('configuration.guest_new_account', TRUE)
-      ->set('configuration.guest_new_account_notify', FALSE)
-      ->save();
-
-    $this->drupalLogout();
-    $this->drupalGet($this->product->toUrl());
-    $this->submitForm([], 'Add to cart');
-    $cart_link = $this->getSession()->getPage()->findLink('your cart');
-    $cart_link->click();
-    $this->submitForm([], 'Checkout');
-
-    $this->submitForm([], 'Continue as Guest');
-    $this->submitForm([
-      'contact_information[email]' => 'guest@example.com',
-      'contact_information[email_confirm]' => 'guest@example.com',
-      'billing_information[profile][address][0][address][given_name]' => 'John',
-      'billing_information[profile][address][0][address][family_name]' => 'Smith',
-      'billing_information[profile][address][0][address][organization]' => 'Centarro',
-      'billing_information[profile][address][0][address][address_line1]' => '9 Drupal Ave',
-      'billing_information[profile][address][0][address][postal_code]' => '94043',
-      'billing_information[profile][address][0][address][locality]' => 'Mountain View',
-      'billing_information[profile][address][0][address][administrative_area]' => 'CA',
-    ], 'Continue to review');
-    $this->submitForm([], 'Complete checkout');
-
-    $order = Order::load(1);
-    $customer = $order->getCustomer();
-    $this->assertNotNull($customer);
-    $this->assertEquals('guest@example.com', $customer->getEmail());
-  }
-
-  /**
-   * Tests guest_new_account_notify.
-   */
-  public function testGuestNewAccountWithNotify() {
-    \Drupal::configFactory()->getEditable('commerce_checkout.commerce_checkout_flow.default')
-      ->set('configuration.guest_new_account', TRUE)
-      ->set('configuration.guest_new_account_notify', TRUE)
-      ->save();
-
-    $this->drupalLogout();
-    $this->drupalGet($this->product->toUrl());
-    $this->submitForm([], 'Add to cart');
-    $cart_link = $this->getSession()->getPage()->findLink('your cart');
-    $cart_link->click();
-    $this->submitForm([], 'Checkout');
-
-    $this->submitForm([], 'Continue as Guest');
-    $this->submitForm([
-      'contact_information[email]' => 'guest@example.com',
-      'contact_information[email_confirm]' => 'guest@example.com',
-      'billing_information[profile][address][0][address][given_name]' => 'John',
-      'billing_information[profile][address][0][address][family_name]' => 'Smith',
-      'billing_information[profile][address][0][address][organization]' => 'Centarro',
-      'billing_information[profile][address][0][address][address_line1]' => '9 Drupal Ave',
-      'billing_information[profile][address][0][address][postal_code]' => '94043',
-      'billing_information[profile][address][0][address][locality]' => 'Mountain View',
-      'billing_information[profile][address][0][address][administrative_area]' => 'CA',
-    ], 'Continue to review');
-    $this->submitForm([], 'Complete checkout');
-
-    $order = Order::load(1);
-    $customer = $order->getCustomer();
-    $this->assertNotNull($customer);
-    $this->assertEquals('guest@example.com', $customer->getEmail());
-
-    // Assert that the register_admin_created email was sent for the user.
-    $filter = ['key' => 'register_admin_created'];
-    $mail = $this->getMails($filter);
-    $this->assertCount(1, $mail);
-    $this->assertEquals('guest@example.com', $mail[0]['to']);
-  }
-
-  /**
-   * Tests guest_order_assign.
-   */
-  public function testGuestOrderConvert() {
-    $test_user = $this->createUser();
-
-    \Drupal::configFactory()->getEditable('commerce_checkout.commerce_checkout_flow.default')
-      ->set('configuration.guest_order_assign', TRUE)
-      ->save();
-
-    $this->drupalLogout();
-    $this->drupalGet($this->product->toUrl());
-    $this->submitForm([], 'Add to cart');
-    $cart_link = $this->getSession()->getPage()->findLink('your cart');
-    $cart_link->click();
-    $this->submitForm([], 'Checkout');
-
-    $this->submitForm([], 'Continue as Guest');
-    $this->submitForm([
-      'contact_information[email]' => $test_user->getEmail(),
-      'contact_information[email_confirm]' => $test_user->getEmail(),
-      'billing_information[profile][address][0][address][given_name]' => 'John',
-      'billing_information[profile][address][0][address][family_name]' => 'Smith',
-      'billing_information[profile][address][0][address][organization]' => 'Centarro',
-      'billing_information[profile][address][0][address][address_line1]' => '9 Drupal Ave',
-      'billing_information[profile][address][0][address][postal_code]' => '94043',
-      'billing_information[profile][address][0][address][locality]' => 'Mountain View',
-      'billing_information[profile][address][0][address][administrative_area]' => 'CA',
-    ], 'Continue to review');
-    $this->submitForm([], 'Complete checkout');
-
-    $order = Order::load(1);
-    $customer = $order->getCustomer();
-    $this->assertNotNull($customer);
-    $this->assertEquals($test_user->getEmail(), $customer->getEmail());
-    $this->assertEquals($test_user->id(), $customer->id());
-  }
-
-  /**
    * Asserts the current step in the checkout progress block.
    *
    * @param string $expected
    *   The expected value.
    */
-  protected function assertCheckoutProgressStep(string $expected) {
+  protected function assertCheckoutProgressStep($expected) {
     $current_step = $this->getSession()->getPage()->find('css', '.checkout-progress--step__current')->getText();
     $this->assertEquals($expected, $current_step);
   }

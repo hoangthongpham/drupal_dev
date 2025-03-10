@@ -15,6 +15,9 @@
 	"ETB": {
 		"name": "Birr Etiopia"
 	},
+	"VED": {
+		"name": "Bolívar Soberano"
+	},
 	"VES": {
 		"name": "Bolivar Venezuela"
 	},
@@ -255,7 +258,7 @@
 	"HNL": {
 		"name": "Lempira Honduras"
 	},
-	"SLE": {
+	"SLL": {
 		"name": "Leone Sierra Leone"
 	},
 	"MDL": {
@@ -444,6 +447,9 @@
 	"UGX": {
 		"name": "Shilling Uganda"
 	},
+	"SLE": {
+		"name": "Sierra Leonean Leone"
+	},
 	"PEN": {
 		"name": "Sol Peru"
 	},
@@ -467,6 +473,9 @@
 	},
 	"MNT": {
 		"name": "Tugrik Mongolia"
+	},
+	"UYW": {
+		"name": "Uruguayan Nominal Wage Index Unit"
 	},
 	"VUV": {
 		"name": "Vatu Vanuatu"

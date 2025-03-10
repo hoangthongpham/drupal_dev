@@ -2,24 +2,23 @@
 
 namespace Drupal\views\Plugin\views\cache;
 
-use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\Cache\Cache;
-use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\views\Attribute\ViewsCache;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Simple caching of query results for Views displays.
  *
  * @ingroup views_cache_plugins
+ *
+ * @ViewsCache(
+ *   id = "time",
+ *   title = @Translation("Time-based"),
+ *   help = @Translation("Simple time-based caching of data.")
+ * )
  */
-#[ViewsCache(
-  id: 'time',
-  title: new TranslatableMarkup('Time-based'),
-  help: new TranslatableMarkup('Simple time-based caching of data.'),
-)]
 class Time extends CachePluginBase {
 
   /**
@@ -40,20 +39,34 @@ class Time extends CachePluginBase {
    * @param array $configuration
    *   A configuration array containing information about the plugin instance.
    * @param string $plugin_id
-   *   The plugin ID for the plugin instance.
+   *   The plugin_id for the plugin instance.
    * @param mixed $plugin_definition
    *   The plugin implementation definition.
    * @param \Drupal\Core\Datetime\DateFormatterInterface $date_formatter
    *   The date formatter service.
-   * @param \Drupal\Component\Datetime\TimeInterface|null $time
-   *   The time service.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, DateFormatterInterface $date_formatter, protected ?TimeInterface $time = NULL) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition);
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, DateFormatterInterface $date_formatter) {
     $this->dateFormatter = $date_formatter;
-    if (!$time) {
-      @trigger_error('Calling ' . __METHOD__ . ' without the $time argument is deprecated in drupal:10.3.0 and it will be required in drupal:11.0.0. See https://www.drupal.org/node/3395991', E_USER_DEPRECATED);
-      $this->time = \Drupal::service('datetime.time');
+    if (func_num_args() == 5 && func_get_arg(4) instanceof Request) {
+      @trigger_error('The request object must not be passed to ' . __METHOD__ . '(). It is deprecated in drupal:9.2.0 and is removed from drupal:10.0.0. See https://www.drupal.org/node/3154016', E_USER_DEPRECATED);
+    }
+
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
+  }
+
+  /**
+   * Returns replacements for deprecated properties.
+   *
+   * @param string $name
+   *   The property name.
+   *
+   * @return mixed
+   *   The value.
+   */
+  public function __get($name) {
+    if ($name === 'request') {
+      @trigger_error('The request property of ' . __CLASS__ . ' is deprecated in drupal:9.2.0 and is removed from drupal:10.0.0. See https://www.drupal.org/node/3154016', E_USER_DEPRECATED);
+      return $this->view->getRequest();
     }
   }
 
@@ -65,8 +78,7 @@ class Time extends CachePluginBase {
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('date.formatter'),
-      $container->get('datetime.time'),
+      $container->get('date.formatter')
     );
   }
 
@@ -152,7 +164,7 @@ class Time extends CachePluginBase {
   protected function cacheExpire($type) {
     $lifespan = $this->getLifespan($type);
     if ($lifespan) {
-      $cutoff = $this->time->getRequestTime() - $lifespan;
+      $cutoff = REQUEST_TIME - $lifespan;
       return $cutoff;
     }
     else {

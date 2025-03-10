@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\views\Functional;
 
 /**
@@ -37,8 +35,8 @@ class ViewsEscapingTest extends ViewTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp($import_test_views = TRUE, $modules = ['views_test_config']): void {
-    parent::setUp(TRUE, $modules);
+  protected function setUp($import_test_views = TRUE): void {
+    parent::setUp(TRUE);
 
     $this->enableViewsTestModule();
   }
@@ -46,7 +44,7 @@ class ViewsEscapingTest extends ViewTestBase {
   /**
    * Tests for incorrectly escaped markup in the views-view-fields.html.twig.
    */
-  public function testViewsViewFieldsEscaping(): void {
+  public function testViewsViewFieldsEscaping() {
     // Test with system theme using theme function.
     $this->drupalGet('test_page_display_200');
 
@@ -74,7 +72,7 @@ class ViewsEscapingTest extends ViewTestBase {
   /**
    * Tests for incorrectly escaped markup in a header label on a display table.
    */
-  public function testViewsFieldHeaderEscaping(): void {
+  public function testViewsFieldHeaderEscaping() {
     // Test with a field header label having an html element wrapper.
     $this->drupalGet('test_field_header');
 

@@ -2,14 +2,14 @@
 
 namespace Drupal\commerce_product\ContextProvider;
 
+use Drupal\commerce_product\Entity\ProductTypeInterface;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\Context\Context;
-use Drupal\Core\Plugin\Context\ContextProviderInterface;
 use Drupal\Core\Plugin\Context\EntityContextDefinition;
+use Drupal\Core\Plugin\Context\ContextProviderInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
-use Drupal\commerce_product\Entity\ProductTypeInterface;
 
 /**
  * Sets the current product as context on commerce_product routes.

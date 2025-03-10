@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\media\Functional\Rest;
 
 use Drupal\Component\Utility\NestedArray;
@@ -21,7 +19,7 @@ abstract class MediaResourceTestBase extends EntityResourceTestBase {
   /**
    * {@inheritdoc}
    */
-  protected static $modules = ['content_translation', 'media'];
+  protected static $modules = ['media'];
 
   /**
    * {@inheritdoc}
@@ -43,7 +41,7 @@ abstract class MediaResourceTestBase extends EntityResourceTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp(): void {
+  public function setUp() {
     parent::setUp();
 
     \Drupal::configFactory()
@@ -99,7 +97,7 @@ abstract class MediaResourceTestBase extends EntityResourceTestBase {
     if (!MediaType::load('camelids')) {
       // Create a "Camelids" media type.
       $media_type = MediaType::create([
-        'label' => 'Camelids',
+        'name' => 'Camelids',
         'id' => 'camelids',
         'description' => 'Camelids are large, strictly herbivorous animals with slender necks and long legs.',
         'source' => 'file',
@@ -247,6 +245,7 @@ abstract class MediaResourceTestBase extends EntityResourceTestBase {
           'url' => base_path() . 'user/' . $author->id(),
         ],
       ],
+      'revision_log_message' => [],
       'revision_translation_affected' => [
         [
           'value' => TRUE,
@@ -267,7 +266,7 @@ abstract class MediaResourceTestBase extends EntityResourceTestBase {
       ],
       'name' => [
         [
-          'value' => 'Drama llama',
+          'value' => 'Dramallama',
         ],
       ],
       'field_media_file' => [
@@ -312,18 +311,7 @@ abstract class MediaResourceTestBase extends EntityResourceTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function getExpectedCacheContexts() {
-    return [
-      'languages:language_interface',
-      'url.site',
-      'user.permissions',
-    ];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function testPost(): void {
+  public function testPost() {
     $file_storage = $this->container->get('entity_type.manager')->getStorage('file');
 
     // Step 1: upload file, results in File entity marked temporary.
@@ -340,12 +328,8 @@ abstract class MediaResourceTestBase extends EntityResourceTestBase {
   }
 
   /**
-   * Tests the 'file_upload' REST resource plugin.
-   *
-   * This test duplicates some of the 'file_upload' REST resource plugin test
-   * coverage.
-   *
-   * @see \Drupal\Tests\rest\Functional\FileUploadResourceTestBase
+   * This duplicates some of the 'file_upload' REST resource plugin test
+   * coverage, to be able to test it on a concrete use case.
    */
   protected function uploadFile() {
     // Enable the 'file_upload' REST resource for the current format + auth.
@@ -387,9 +371,6 @@ abstract class MediaResourceTestBase extends EntityResourceTestBase {
     $actual = $this->serializer->decode((string) $response->getBody(), static::$format);
     static::recursiveKSort($actual);
     $this->assertSame($expected, $actual);
-
-    // Make sure the role save below properly invalidates cache tags.
-    $this->refreshVariables();
 
     // To still run the complete test coverage for POSTing a Media entity, we
     // must revoke the additional permissions that we granted.

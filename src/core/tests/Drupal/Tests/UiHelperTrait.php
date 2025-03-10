@@ -1,10 +1,9 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests;
 
 use Behat\Mink\Driver\BrowserKitDriver;
+use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Session\AccountInterface;
@@ -27,11 +26,6 @@ trait UiHelperTrait {
    * @var \Drupal\user\UserInterface
    */
   protected $loggedInUser = FALSE;
-
-  /**
-   * Use one-time login links instead of submitting the login form.
-   */
-  protected bool $useOneTimeLoginLinks = TRUE;
 
   /**
    * The number of meta refresh redirects to follow, or NULL if unlimited.
@@ -89,16 +83,14 @@ trait UiHelperTrait {
     foreach ($edit as $name => $value) {
       $field = $assert_session->fieldExists($name, $form);
 
-      $value = match ($field->getAttribute('type')) {
-        // Provide support for the values '1' and '0' for checkboxes instead of
-        // TRUE and FALSE.
-        // @todo Get rid of supporting 1/0 by converting all tests cases using
-        // this to boolean values.
-        'checkbox' => (bool) $value,
-        // Mink only allows strings for text, number and radio button values.
-        'text', 'number', 'radio' => (string) $value,
-        default => $value,
-      };
+      // Provide support for the values '1' and '0' for checkboxes instead of
+      // TRUE and FALSE.
+      // @todo Get rid of supporting 1/0 by converting all tests cases using
+      // this to boolean values.
+      $field_type = $field->getAttribute('type');
+      if ($field_type === 'checkbox') {
+        $value = (bool) $value;
+      }
 
       $field->setValue($value);
     }
@@ -130,12 +122,109 @@ trait UiHelperTrait {
   }
 
   /**
+   * Executes a form submission.
+   *
+   * It will be done as usual submit form with Mink.
+   *
+   * @param \Drupal\Core\Url|string $path
+   *   Location of the post form. Either a Drupal path or an absolute path or
+   *   NULL to post to the current page. For multi-stage forms you can set the
+   *   path to NULL and have it post to the last received page. Example:
+   *
+   *   @code
+   *   // First step in form.
+   *   $edit = array(...);
+   *   $this->drupalGet('some_url');
+   *   $this->submitForm($edit, 'Save');
+   *
+   *   // Second step in form.
+   *   $edit = array(...);
+   *   $this->submitForm($edit, 'Save');
+   *   @endcode
+   * @param array $edit
+   *   Field data in an associative array. Changes the current input fields
+   *   (where possible) to the values indicated.
+   *
+   *   When working with form tests, the keys for an $edit element should match
+   *   the 'name' parameter of the HTML of the form. For example, the 'body'
+   *   field for a node has the following HTML:
+   *   @code
+   *   <textarea id="edit-body-und-0-value" class="text-full form-textarea
+   *    resize-vertical" placeholder="" cols="60" rows="9"
+   *    name="body[0][value]"></textarea>
+   *   @endcode
+   *   When testing this field using an $edit parameter, the code becomes:
+   *   @code
+   *   $edit["body[0][value]"] = 'My test value';
+   *   @endcode
+   *
+   *   A checkbox can be set to TRUE to be checked and should be set to FALSE to
+   *   be unchecked. Multiple select fields can be tested using 'name[]' and
+   *   setting each of the desired values in an array:
+   *   @code
+   *   $edit = array();
+   *   $edit['name[]'] = array('value1', 'value2');
+   *   @endcode
+   * @param string $submit
+   *   The id, name, label or value of the submit button which is to be clicked.
+   *   For example, 'Save'. The first element matched by
+   *   \Drupal\Tests\WebAssert::buttonExists() will be used. The processing of
+   *   the request depends on this value. For example, a form may have one
+   *   button with the value 'Save' and another button with the value 'Delete',
+   *   and execute different code depending on which one is clicked.
+   * @param array $options
+   *   Options to be forwarded to the url generator.
+   * @param string|null $form_html_id
+   *   (optional) HTML ID of the form to be submitted. On some pages
+   *   there are many identical forms, so just using the value of the submit
+   *   button is not enough. For example: 'trigger-node-presave-assign-form'.
+   *   Note that this is not the Drupal $form_id, but rather the HTML ID of the
+   *   form, which is typically the same thing but with hyphens replacing the
+   *   underscores.
+   *
+   * @return string
+   *   (deprecated) The response content after submit form. It is necessary for
+   *   backwards compatibility and will be removed before Drupal 9.0. You should
+   *   just use the webAssert object for your assertions.
+   *
+   * @see \Drupal\Tests\WebAssert::buttonExists()
+   *
+   * @deprecated in drupal:9.1.0 and is removed from drupal:10.0.0. Use
+   *   $this->submitForm() instead.
+   *
+   * @see https://www.drupal.org/node/3168858
+   */
+  protected function drupalPostForm($path, $edit, $submit, array $options = [], $form_html_id = NULL) {
+    @trigger_error('UiHelperTrait::drupalPostForm() is deprecated in drupal:9.1.0 and is removed from drupal:10.0.0. Use $this->submitForm() instead. See https://www.drupal.org/node/3168858', E_USER_DEPRECATED);
+    if (is_object($submit)) {
+      @trigger_error('Calling ' . __METHOD__ . '() with $submit as an object is deprecated in drupal:9.2.0 and the method is removed in drupal:10.0.0. Use $this->submitForm() instead. See https://www.drupal.org/node/3168858', E_USER_DEPRECATED);
+      // Cast MarkupInterface objects to string.
+      $submit = (string) $submit;
+    }
+    if ($edit === NULL) {
+      @trigger_error('Calling ' . __METHOD__ . '() with $edit set to NULL is deprecated in drupal:9.1.0 and the method is removed in drupal:10.0.0. Use $this->submitForm() instead. See https://www.drupal.org/node/3168858', E_USER_DEPRECATED);
+      $edit = [];
+    }
+    if ($path === NULL) {
+      @trigger_error('Calling ' . __METHOD__ . '() with $path set to NULL is deprecated in drupal:9.2.0 and the method is removed in drupal:10.0.0. Use $this->submitForm() instead. See https://www.drupal.org/node/3168858', E_USER_DEPRECATED);
+    }
+
+    if (isset($path)) {
+      $this->drupalGet($path, $options);
+    }
+
+    $this->submitForm($edit, $submit, $form_html_id);
+
+    return $this->getSession()->getPage()->getContent();
+  }
+
+  /**
    * Logs in a user using the Mink controlled browser.
    *
    * If a user is already logged in, then the current user is logged out before
    * logging in the specified user.
    *
-   * Note that neither the current user nor the passed-in user object is
+   * Please note that neither the current user nor the passed-in user object is
    * populated with data of the logged in user. If you need full access to the
    * user object after logging in, it must be updated manually. If you also need
    * access to the plain-text password of the user (set by drupalCreateUser()),
@@ -143,7 +232,7 @@ trait UiHelperTrait {
    * For example:
    * @code
    *   // Create a user.
-   *   $account = $this->drupalCreateUser([]);
+   *   $account = $this->drupalCreateUser(array());
    *   $this->drupalLogin($account);
    *   // Load real user object.
    *   $pass_raw = $account->passRaw;
@@ -161,25 +250,15 @@ trait UiHelperTrait {
       $this->drupalLogout();
     }
 
-    if ($this->useOneTimeLoginLinks) {
-      // Reload to get latest login timestamp.
-      $storage = \Drupal::entityTypeManager()->getStorage('user');
-      /** @var \Drupal\user\UserInterface $accountUnchanged */
-      $accountUnchanged = $storage->loadUnchanged($account->id());
-      $login = user_pass_reset_url($accountUnchanged) . '/login?destination=user/' . $account->id();
-      $this->drupalGet($login);
-    }
-    else {
-      $this->drupalGet(Url::fromRoute('user.login'));
-      $this->submitForm([
-        'name' => $account->getAccountName(),
-        'pass' => $account->passRaw,
-      ], 'Log in');
-    }
+    $this->drupalGet(Url::fromRoute('user.login'));
+    $this->submitForm([
+      'name' => $account->getAccountName(),
+      'pass' => $account->passRaw,
+    ], 'Log in');
 
     // @see ::drupalUserIsLoggedIn()
     $account->sessionId = $this->getSession()->getCookie(\Drupal::service('session_configuration')->getOptions(\Drupal::request())['name']);
-    $this->assertTrue($this->drupalUserIsLoggedIn($account), "User {$account->getAccountName()} successfully logged in.");
+    $this->assertTrue($this->drupalUserIsLoggedIn($account), new FormattableMarkup('User %name successfully logged in.', ['%name' => $account->getAccountName()]));
 
     $this->loggedInUser = $account;
     $this->container->get('current_user')->setAccount($account);
@@ -196,20 +275,10 @@ trait UiHelperTrait {
     // screen.
     $assert_session = $this->assertSession();
     $destination = Url::fromRoute('user.page')->toString();
-    $this->drupalGet(Url::fromRoute('user.logout.confirm', options: ['query' => ['destination' => $destination]]));
-    // Target the submit button using the name rather than the value to work
-    // regardless of the user interface language.
-    $this->submitForm([], 'op', 'user-logout-confirm');
+    $this->drupalGet(Url::fromRoute('user.logout', [], ['query' => ['destination' => $destination]]));
     $assert_session->fieldExists('name');
     $assert_session->fieldExists('pass');
 
-    $this->drupalResetSession();
-  }
-
-  /**
-   * Resets the current active session back to Anonymous session.
-   */
-  protected function drupalResetSession(): void {
     // @see BrowserTestBase::drupalUserIsLoggedIn()
     unset($this->loggedInUser->sessionId);
     $this->loggedInUser = FALSE;
@@ -236,7 +305,7 @@ trait UiHelperTrait {
    * @param string|\Drupal\Core\Url $path
    *   Drupal path or URL to load into Mink controlled browser.
    * @param array $options
-   *   (optional) Options to be forwarded to the URL generator.
+   *   (optional) Options to be forwarded to the url generator.
    * @param string[] $headers
    *   An array containing additional HTTP request headers, the array keys are
    *   the header names and the array values the header values. This is useful
@@ -259,16 +328,6 @@ trait UiHelperTrait {
 
     $this->prepareRequest();
     foreach ($headers as $header_name => $header_value) {
-      if (is_int($header_name)) {
-        // @todo Trigger deprecation in
-        //   https://www.drupal.org/project/drupal/issues/3421105.
-        [$header_name, $header_value] = explode(':', $header_value);
-      }
-      if (is_null($header_value)) {
-        // @todo Trigger deprecation in
-        //   https://www.drupal.org/project/drupal/issues/3421105.
-        $header_value = '';
-      }
       $session->setRequestHeader($header_name, $header_value);
     }
 
@@ -302,7 +361,7 @@ trait UiHelperTrait {
    * Builds an absolute URL from a system path or a URL object.
    *
    * @param string|\Drupal\Core\Url $path
-   *   A system path or a URL object.
+   *   A system path or a URL.
    * @param array $options
    *   Options to be passed to Url::fromUri().
    *
@@ -310,8 +369,6 @@ trait UiHelperTrait {
    *   An absolute URL string.
    */
   protected function buildUrl($path, array $options = []) {
-    global $base_path;
-
     if ($path instanceof Url) {
       $url_options = $path->getOptions();
       $options = $url_options + $options;
@@ -321,16 +378,6 @@ trait UiHelperTrait {
     // The URL generator service is not necessarily available yet; e.g., in
     // interactive installer tests.
     elseif (\Drupal::hasService('url_generator')) {
-      // Strip $base_path, if existent.
-      $length = strlen($base_path);
-      if (substr($path, 0, $length) === $base_path) {
-        $path = substr($path, $length);
-      }
-      // Additionally strip any forward slashes.
-      if (strlen($path) > 1) {
-        $path = ltrim($path, '/');
-      }
-
       $force_internal = isset($options['external']) && $options['external'] == FALSE;
       if (!$force_internal && UrlHelper::isExternal($path)) {
         return Url::fromUri($path, $options)->toString();
@@ -526,7 +573,7 @@ trait UiHelperTrait {
    * @return string
    *   The equivalent XPath of a CSS expression.
    */
-  protected function cssSelectToXpath($selector, $html = TRUE, $prefix = 'descendant-or-self::'): string {
+  protected function cssSelectToXpath($selector, $html = TRUE, $prefix = 'descendant-or-self::') {
     return (new CssSelectorConverter($html))->toXPath($selector, $prefix);
   }
 

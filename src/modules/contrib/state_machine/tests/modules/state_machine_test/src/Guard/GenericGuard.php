@@ -35,8 +35,6 @@ class GenericGuard implements GuardInterface {
     if ($transition->getId() == 'cancel' && $entity->field_state->first()->value == 'validation') {
       return (bool) array_intersect(['merchant'], $this->currentUser->getRoles());
     }
-
-    return TRUE;
   }
 
 }

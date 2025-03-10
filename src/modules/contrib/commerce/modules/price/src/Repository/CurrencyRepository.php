@@ -5,8 +5,8 @@ namespace Drupal\commerce_price\Repository;
 use CommerceGuys\Intl\Currency\Currency;
 use CommerceGuys\Intl\Currency\CurrencyRepository as ExternalCurrencyRepository;
 use CommerceGuys\Intl\Exception\UnknownCurrencyException;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\commerce_price\Entity\CurrencyInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 
 /**
  * Defines the currency repository.
@@ -41,7 +41,7 @@ class CurrencyRepository extends ExternalCurrencyRepository implements CurrencyR
   /**
    * {@inheritdoc}
    */
-  public function get($currency_code, $locale = NULL): Currency {
+  public function get($currency_code, $locale = NULL) {
     /** @var \Drupal\commerce_price\Entity\CurrencyInterface $currency */
     $currency = $this->currencyStorage->load($currency_code);
     if (!$currency) {
@@ -54,7 +54,7 @@ class CurrencyRepository extends ExternalCurrencyRepository implements CurrencyR
   /**
    * {@inheritdoc}
    */
-  public function getAll($locale = NULL): array {
+  public function getAll($locale = NULL) {
     $all = [];
     /** @var \Drupal\commerce_price\Entity\CurrencyInterface[] $currencies */
     $currencies = $this->currencyStorage->loadMultiple();
@@ -68,7 +68,7 @@ class CurrencyRepository extends ExternalCurrencyRepository implements CurrencyR
   /**
    * {@inheritdoc}
    */
-  public function getList($locale = NULL): array {
+  public function getList($locale = NULL) {
     $list = [];
     /** @var \Drupal\commerce_price\Entity\CurrencyInterface[] $entities */
     $currencies = $this->currencyStorage->loadMultiple();
@@ -88,7 +88,7 @@ class CurrencyRepository extends ExternalCurrencyRepository implements CurrencyR
    * @return \CommerceGuys\Intl\Currency\Currency
    *   The currency value object.
    */
-  protected function createValueObjectFromEntity(CurrencyInterface $currency): Currency {
+  protected function createValueObjectFromEntity(CurrencyInterface $currency) {
     return new Currency([
       'currency_code' => $currency->getCurrencyCode(),
       'name' => $currency->getName(),

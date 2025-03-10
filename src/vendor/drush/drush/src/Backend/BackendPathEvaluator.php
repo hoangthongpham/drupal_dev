@@ -1,11 +1,8 @@
 <?php
-
-declare(strict_types=1);
-
 namespace Drush\Backend;
 
-use Consolidation\SiteAlias\HostPath;
 use Consolidation\SiteAlias\SiteAlias;
+use Consolidation\SiteAlias\HostPath;
 use Drush\Drush;
 
 class BackendPathEvaluator
@@ -35,8 +32,9 @@ class BackendPathEvaluator
      * returned.
      *
      * @param HostPath $path The host and path to resolve aliases on.
+     * @return string
      */
-    public function resolve(HostPath $path): string|false
+    public function resolve(HostPath $path)
     {
         if (!$path->hasPathAlias()) {
             return false;

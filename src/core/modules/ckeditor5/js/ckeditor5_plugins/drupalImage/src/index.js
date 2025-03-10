@@ -1,14 +1,12 @@
-// cspell:ignore imageupload insertimage drupalimage drupalimageupload drupalinsertimage
+// cspell:ignore imageupload imageresize drupalimage drupalimageupload drupalimageresize
 
 import DrupalImage from './drupalimage';
 import DrupalImageUpload from './imageupload/drupalimageupload';
-import DrupalInsertImage from './insertimage/drupalinsertimage';
 
 /**
- * @private
+ * @internal
  */
 export default {
   DrupalImage,
   DrupalImageUpload,
-  DrupalInsertImage,
 };

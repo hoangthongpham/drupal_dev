@@ -5,10 +5,8 @@ namespace Drupal\update;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\Site\Settings;
-use Drupal\Core\Utility\Error;
 use GuzzleHttp\ClientInterface;
-use Psr\Http\Client\ClientExceptionInterface;
-use Psr\Log\LoggerInterface;
+use GuzzleHttp\Exception\TransferException;
 
 /**
  * Fetches project information from remote locations.
@@ -23,7 +21,7 @@ class UpdateFetcher implements UpdateFetcherInterface {
   const UPDATE_DEFAULT_URL = 'https://updates.drupal.org/release-history';
 
   /**
-   * The fetch URL configured in the update settings.
+   * The fetch url configured in the update settings.
    *
    * @var string
    */
@@ -57,20 +55,18 @@ class UpdateFetcher implements UpdateFetcherInterface {
    *   The config factory.
    * @param \GuzzleHttp\ClientInterface $http_client
    *   A Guzzle client object.
-   * @param \Drupal\Core\Site\Settings $settings
+   * @param \Drupal\Core\Site\Settings|null $settings
    *   The settings instance.
-   * @param \Psr\Log\LoggerInterface|null $logger
-   *   The logger.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, ClientInterface $http_client, Settings $settings, protected ?LoggerInterface $logger = NULL) {
+  public function __construct(ConfigFactoryInterface $config_factory, ClientInterface $http_client, Settings $settings = NULL) {
     $this->fetchUrl = $config_factory->get('update.settings')->get('fetch.url');
     $this->httpClient = $http_client;
     $this->updateSettings = $config_factory->get('update.settings');
-    $this->withHttpFallback = $settings->get('update_fetch_with_http_fallback', FALSE);
-    if ($this->logger === NULL) {
-      @trigger_error('Calling ' . __METHOD__ . '() without the $logger argument is deprecated in drupal:10.1.0 and it will be required in drupal:11.0.0. See https://www.drupal.org/node/2932520', E_USER_DEPRECATED);
-      $this->logger = \Drupal::service('logger.channel.update');
+    if (is_null($settings)) {
+      @trigger_error('The settings service should be passed to UpdateFetcher::__construct() since 9.1.0. This will be required in Drupal 10.0.0. See https://www.drupal.org/node/3179315', E_USER_DEPRECATED);
+      $settings = \Drupal::service('settings');
     }
+    $this->withHttpFallback = $settings->get('update_fetch_with_http_fallback', FALSE);
   }
 
   /**
@@ -104,9 +100,9 @@ class UpdateFetcher implements UpdateFetcherInterface {
         ->get($url, ['headers' => ['Accept' => 'text/xml']])
         ->getBody();
     }
-    catch (ClientExceptionInterface $exception) {
-      Error::logException($this->logger, $exception);
-      if ($with_http_fallback && !str_contains($url, "http://")) {
+    catch (TransferException $exception) {
+      watchdog_exception('update', $exception);
+      if ($with_http_fallback && strpos($url, "http://") === FALSE) {
         $url = str_replace('https://', 'http://', $url);
         return $this->doRequest($url, $options, FALSE);
       }
@@ -123,11 +119,10 @@ class UpdateFetcher implements UpdateFetcherInterface {
     $url .= '/' . $name . '/current';
 
     // Only append usage information if we have a site key and the project is
-    // installed. We do not want to record usage statistics for uninstalled
-    // projects.
-    if (!empty($site_key) && !str_contains($project['project_type'], 'disabled')) {
+    // enabled. We do not want to record usage statistics for disabled projects.
+    if (!empty($site_key) && (strpos($project['project_type'], 'disabled') === FALSE)) {
       // Append the site key.
-      $url .= str_contains($url, '?') ? '&' : '?';
+      $url .= (strpos($url, '?') !== FALSE) ? '&' : '?';
       $url .= 'site_key=';
       $url .= rawurlencode($site_key);
 
@@ -137,7 +132,7 @@ class UpdateFetcher implements UpdateFetcherInterface {
         $url .= rawurlencode($project['info']['version']);
       }
 
-      // Append the list of modules or themes installed.
+      // Append the list of modules or themes enabled.
       $list = array_keys($project['includes']);
       $url .= '&list=';
       $url .= rawurlencode(implode(',', $list));

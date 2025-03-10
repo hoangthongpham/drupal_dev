@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2023 Justin Hileman
+ * (c) 2012-2020 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -23,11 +23,10 @@ use Psy\Shell;
  */
 class ProcessForker extends AbstractListener
 {
-    private ?int $savegame = null;
-    /** @var resource */
+    private $savegame;
     private $up;
 
-    private const PCNTL_FUNCTIONS = [
+    private static $pcntlFunctions = [
         'pcntl_fork',
         'pcntl_signal_dispatch',
         'pcntl_signal',
@@ -35,15 +34,17 @@ class ProcessForker extends AbstractListener
         'pcntl_wexitstatus',
     ];
 
-    private const POSIX_FUNCTIONS = [
+    private static $posixFunctions = [
         'posix_getpid',
         'posix_kill',
     ];
 
     /**
      * Process forker is supported if pcntl and posix extensions are available.
+     *
+     * @return bool
      */
-    public static function isSupported(): bool
+    public static function isSupported()
     {
         return self::isPcntlSupported() && !self::disabledPcntlFunctions() && self::isPosixSupported() && !self::disabledPosixFunctions();
     }
@@ -51,9 +52,9 @@ class ProcessForker extends AbstractListener
     /**
      * Verify that all required pcntl functions are, in fact, available.
      */
-    public static function isPcntlSupported(): bool
+    public static function isPcntlSupported()
     {
-        foreach (self::PCNTL_FUNCTIONS as $func) {
+        foreach (self::$pcntlFunctions as $func) {
             if (!\function_exists($func)) {
                 return false;
             }
@@ -67,15 +68,15 @@ class ProcessForker extends AbstractListener
      */
     public static function disabledPcntlFunctions()
     {
-        return self::checkDisabledFunctions(self::PCNTL_FUNCTIONS);
+        return self::checkDisabledFunctions(self::$pcntlFunctions);
     }
 
     /**
      * Verify that all required posix functions are, in fact, available.
      */
-    public static function isPosixSupported(): bool
+    public static function isPosixSupported()
     {
-        foreach (self::POSIX_FUNCTIONS as $func) {
+        foreach (self::$posixFunctions as $func) {
             if (!\function_exists($func)) {
                 return false;
             }
@@ -89,16 +90,16 @@ class ProcessForker extends AbstractListener
      */
     public static function disabledPosixFunctions()
     {
-        return self::checkDisabledFunctions(self::POSIX_FUNCTIONS);
+        return self::checkDisabledFunctions(self::$posixFunctions);
     }
 
-    private static function checkDisabledFunctions(array $functions): array
+    private static function checkDisabledFunctions(array $functions)
     {
         return \array_values(\array_intersect($functions, \array_map('strtolower', \array_map('trim', \explode(',', \ini_get('disable_functions'))))));
     }
 
     /**
-     * Forks into a main and a loop process.
+     * Forks into a master and a loop process.
      *
      * The loop process will handle the evaluation of all instructions, then
      * return its state via a socket upon completion.
@@ -249,8 +250,10 @@ class ProcessForker extends AbstractListener
      * we can.
      *
      * @param array $return
+     *
+     * @return string
      */
-    private function serializeReturn(array $return): string
+    private function serializeReturn(array $return)
     {
         $serializable = [];
 
@@ -265,19 +268,14 @@ class ProcessForker extends AbstractListener
                 continue;
             }
 
-            if (\version_compare(\PHP_VERSION, '8.1', '>=') && $value instanceof \UnitEnum) {
-                // Enums defined in the REPL session can't be unserialized.
-                $ref = new \ReflectionObject($value);
-                if (\strpos($ref->getFileName(), ": eval()'d code") !== false) {
-                    continue;
-                }
-            }
-
             try {
                 @\serialize($value);
                 $serializable[$key] = $value;
             } catch (\Throwable $e) {
                 // we'll just ignore this one...
+            } catch (\Exception $e) {
+                // and this one too...
+                // @todo remove this once we don't support PHP 5.x anymore :)
             }
         }
 

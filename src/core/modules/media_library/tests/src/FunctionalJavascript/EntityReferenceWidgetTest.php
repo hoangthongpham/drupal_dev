@@ -1,13 +1,9 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\media_library\FunctionalJavascript;
 
 use Drupal\field\Entity\FieldConfig;
 use Drupal\FunctionalJavascriptTests\SortableTestTrait;
-use Drupal\user\Entity\Role;
-use Drupal\user\RoleInterface;
 
 /**
  * Tests the Media library entity reference widget.
@@ -22,13 +18,6 @@ class EntityReferenceWidgetTest extends MediaLibraryTestBase {
    * {@inheritdoc}
    */
   protected static $modules = ['field_ui'];
-
-  /**
-   * The theme to install as the default for testing.
-   *
-   * @var string
-   */
-  protected $defaultTheme = 'starterkit_theme';
 
   /**
    * Test media items.
@@ -74,7 +63,7 @@ class EntityReferenceWidgetTest extends MediaLibraryTestBase {
   /**
    * Tests that disabled media items don't capture focus on page load.
    */
-  public function testFocusNotAppliedWithoutSelectionChange(): void {
+  public function testFocusNotAppliedWithoutSelectionChange() {
     // Create a node with the maximum number of values for the field_twin_media
     // field.
     $node = $this->drupalCreateNode([
@@ -99,7 +88,7 @@ class EntityReferenceWidgetTest extends MediaLibraryTestBase {
   /**
    * Tests that the Media library's widget works as expected.
    */
-  public function testWidget(): void {
+  public function testWidget() {
     $assert_session = $this->assertSession();
     $page = $this->getSession()->getPage();
 
@@ -157,7 +146,7 @@ class EntityReferenceWidgetTest extends MediaLibraryTestBase {
 
     // Insert media to test validation with null target_bundles.
     $this->switchToMediaType('One');
-    $this->assertAnnounceContains('Showing Type One media.');
+    $this->assertNotEmpty($assert_session->waitForText('Showing Type One media.'));
     $this->selectMediaItem(0);
     $this->pressInsertSelected('Added one media item.');
 
@@ -192,10 +181,10 @@ class EntityReferenceWidgetTest extends MediaLibraryTestBase {
 
     $assert_session->buttonExists('field_twin_media_settings_edit')->press();
     $this->assertElementExistsAfterWait('css', '#field-twin-media .tabledrag-toggle-weight')->press();
-    $assert_session->fieldExists('fields[field_twin_media][settings_edit_form][settings][media_types][type_one][weight]')->selectOption('0');
-    $assert_session->fieldExists('fields[field_twin_media][settings_edit_form][settings][media_types][type_three][weight]')->selectOption('1');
-    $assert_session->fieldExists('fields[field_twin_media][settings_edit_form][settings][media_types][type_four][weight]')->selectOption('2');
-    $assert_session->fieldExists('fields[field_twin_media][settings_edit_form][settings][media_types][type_two][weight]')->selectOption('3');
+    $assert_session->fieldExists('fields[field_twin_media][settings_edit_form][settings][media_types][type_one][weight]')->selectOption(0);
+    $assert_session->fieldExists('fields[field_twin_media][settings_edit_form][settings][media_types][type_three][weight]')->selectOption(1);
+    $assert_session->fieldExists('fields[field_twin_media][settings_edit_form][settings][media_types][type_four][weight]')->selectOption(2);
+    $assert_session->fieldExists('fields[field_twin_media][settings_edit_form][settings][media_types][type_two][weight]')->selectOption(3);
     $assert_session->buttonExists('Save')->press();
 
     $this->drupalGet('node/add/basic_page');
@@ -209,12 +198,12 @@ class EntityReferenceWidgetTest extends MediaLibraryTestBase {
     // Assert the announcements for media type navigation in the media library.
     $this->openMediaLibraryForField('field_unlimited_media');
     $this->switchToMediaType('Three');
-    $this->assertAnnounceContains('Showing Type Three media.');
+    $this->assertNotEmpty($assert_session->waitForText('Showing Type Three media.'));
     $this->switchToMediaType('One');
-    $this->assertAnnounceContains('Showing Type One media.');
-    // Assert the links can be triggered by via the space bar.
+    $this->assertNotEmpty($assert_session->waitForText('Showing Type One media.'));
+    // Assert the links can be triggered by via the spacebar.
     $assert_session->elementExists('named', ['link', 'Type Three'])->keyPress(32);
-    $this->assertAnnounceContains('Showing Type Three media.');
+    $this->waitForText('Showing Type Three media.');
     $assert_session->elementExists('css', '.ui-dialog-titlebar-close')->click();
 
     // Assert media is only visible on the tab for the related media type.
@@ -223,7 +212,7 @@ class EntityReferenceWidgetTest extends MediaLibraryTestBase {
     $assert_session->pageTextContains('Bear');
     $assert_session->pageTextNotContains('Turtle');
     $this->switchToMediaType('Three');
-    $this->assertAnnounceContains('Showing Type Three media.');
+    $this->assertNotEmpty($assert_session->waitForText('Showing Type Three media.'));
     $assert_session->elementExists('named', ['link', 'Show Type Three media (selected)']);
     $assert_session->pageTextNotContains('Dog');
     $assert_session->pageTextNotContains('Bear');
@@ -282,8 +271,8 @@ class EntityReferenceWidgetTest extends MediaLibraryTestBase {
 
     // Assert the same has been added twice and remove the items again.
     $this->waitForElementsCount('css', '.field--name-field-twin-media [data-media-library-item-delta]', 2);
-    $assert_session->hiddenFieldValueEquals('field_twin_media[selection][0][target_id]', '4');
-    $assert_session->hiddenFieldValueEquals('field_twin_media[selection][1][target_id]', '4');
+    $assert_session->hiddenFieldValueEquals('field_twin_media[selection][0][target_id]', 4);
+    $assert_session->hiddenFieldValueEquals('field_twin_media[selection][1][target_id]', 4);
     $wrapper->pressButton('Remove');
     $this->waitForText('Dog has been removed.');
     $wrapper->pressButton('Remove');
@@ -473,7 +462,7 @@ class EntityReferenceWidgetTest extends MediaLibraryTestBase {
   /**
    * Tests saving a required media library field.
    */
-  public function testRequiredMediaField(): void {
+  public function testRequiredMediaField() {
     $assert_session = $this->assertSession();
     $page = $this->getSession()->getPage();
 
@@ -563,23 +552,10 @@ class EntityReferenceWidgetTest extends MediaLibraryTestBase {
   }
 
   /**
-   * Checks for inclusion of text in #drupal-live-announce.
-   *
-   * @param string $expected_message
-   *   The text that is expected to be present in the #drupal-live-announce element.
-   *
-   * @internal
-   */
-  protected function assertAnnounceContains(string $expected_message): void {
-    $assert_session = $this->assertSession();
-    $this->assertNotEmpty($assert_session->waitForElement('css', "#drupal-live-announce:contains('$expected_message')"));
-  }
-
-  /**
    * {@inheritdoc}
    */
   protected function sortableUpdate($item, $from, $to = NULL) {
-    // See core/modules/media_library/js/media_library.widget.js.
+    // See core/modules/media_library/js/media_library.widget.es6.js.
     $script = <<<JS
 (function ($) {
     var selection = document.querySelectorAll('.js-media-library-selection');
@@ -593,60 +569,6 @@ class EntityReferenceWidgetTest extends MediaLibraryTestBase {
 JS;
 
     $this->getSession()->executeScript($script);
-  }
-
-  /**
-   * Tests the preview displayed by the field widget.
-   */
-  public function testWidgetPreview(): void {
-    $assert_session = $this->assertSession();
-    $page = $this->getSession()->getPage();
-
-    $node = $this->drupalCreateNode([
-      'type' => 'basic_page',
-      'field_unlimited_media' => [
-        $this->mediaItems['Horse'],
-      ],
-    ]);
-    $media_id = $this->mediaItems['Horse']->id();
-
-    // Assert that preview is present for current user, who can view media.
-    $this->drupalGet($node->toUrl('edit-form'));
-    $assert_session->elementTextContains('css', '[data-drupal-selector="edit-field-unlimited-media-selection-0"]', 'Horse');
-    $remove_button = $page->find('css', '[data-drupal-selector="edit-field-unlimited-media-selection-0-remove-button"]');
-    $this->assertSame('Remove Horse', $remove_button->getAttribute('aria-label'));
-    $assert_session->pageTextNotContains('You do not have permission to view media item');
-    $remove_button->press();
-    $this->waitForText("Removing Horse.");
-    $this->waitForText("Horse has been removed.");
-    // Logout without saving.
-    $this->drupalLogout();
-
-    // Create a user who can edit content but not view media.
-    // Must remove permission from authenticated role first, otherwise the new
-    // user will inherit that permission.
-    $role = Role::load(RoleInterface::AUTHENTICATED_ID);
-    $role->revokePermission('view media');
-    $role->save();
-    $non_media_editor = $this->drupalCreateUser([
-      'access content',
-      'create basic_page content',
-      'edit any basic_page content',
-    ]);
-    $this->drupalLogin($non_media_editor);
-
-    // Assert that preview does not reveal media name.
-    $this->drupalGet($node->toUrl('edit-form'));
-    // There should be no preview name.
-    $assert_session->elementTextNotContains('css', '[data-drupal-selector="edit-field-unlimited-media-selection-0"]', 'Horse');
-    // The remove button should have a generic message.
-    $remove_button = $page->find('css', '[data-drupal-selector="edit-field-unlimited-media-selection-0-remove-button"]');
-    $this->assertSame('Remove media', $remove_button->getAttribute('aria-label'));
-    $assert_session->pageTextContains("You do not have permission to view media item $media_id.");
-    // Confirm ajax text does not reveal media name.
-    $remove_button->press();
-    $this->waitForText("Removing media.");
-    $this->waitForText("Media has been removed.");
   }
 
 }

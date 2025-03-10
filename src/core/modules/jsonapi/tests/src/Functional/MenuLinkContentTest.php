@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\jsonapi\Functional;
 
 use Drupal\Component\Serialization\Json;
@@ -39,11 +37,6 @@ class MenuLinkContentTest extends ResourceTestBase {
    * {@inheritdoc}
    */
   protected static $resourceTypeName = 'menu_link_content--menu_link_content';
-
-  /**
-   * {@inheritdoc}
-   */
-  protected static $resourceTypeIsVersionable = TRUE;
 
   /**
    * {@inheritdoc}
@@ -87,11 +80,7 @@ class MenuLinkContentTest extends ResourceTestBase {
    * {@inheritdoc}
    */
   protected function getExpectedDocument() {
-    $base_url = Url::fromUri('base:/jsonapi/menu_link_content/menu_link_content/' . $this->entity->uuid())->setAbsolute();
-    $self_url = clone $base_url;
-    $version_identifier = 'id:' . $this->entity->getRevisionId();
-    $self_url = $self_url->setOption('query', ['resourceVersion' => $version_identifier]);
-    $version_query_string = '?resourceVersion=' . urlencode($version_identifier);
+    $self_url = Url::fromUri('base:/jsonapi/menu_link_content/menu_link_content/' . $this->entity->uuid())->setAbsolute()->toString(TRUE)->getGeneratedUrl();
     return [
       'jsonapi' => [
         'meta' => [
@@ -102,13 +91,13 @@ class MenuLinkContentTest extends ResourceTestBase {
         'version' => '1.0',
       ],
       'links' => [
-        'self' => ['href' => $base_url->toString()],
+        'self' => ['href' => $self_url],
       ],
       'data' => [
         'id' => $this->entity->uuid(),
         'type' => 'menu_link_content--menu_link_content',
         'links' => [
-          'self' => ['href' => $self_url->toString()],
+          'self' => ['href' => $self_url],
         ],
         'attributes' => [
           'bundle' => 'menu_link_content',
@@ -131,7 +120,7 @@ class MenuLinkContentTest extends ResourceTestBase {
           'weight' => 0,
           'drupal_internal__id' => 1,
           'drupal_internal__revision_id' => 1,
-          'revision_created' => (new \DateTime())->setTimestamp((int) $this->entity->getRevisionCreationTime())->setTimezone(new \DateTimeZone('UTC'))->format(\DateTime::RFC3339),
+          'revision_created' => (new \DateTime())->setTimestamp($this->entity->getRevisionCreationTime())->setTimezone(new \DateTimeZone('UTC'))->format(\DateTime::RFC3339),
           'revision_log_message' => NULL,
           // @todo Attempt to remove this in https://www.drupal.org/project/drupal/issues/2933518.
           'revision_translation_affected' => TRUE,
@@ -141,10 +130,10 @@ class MenuLinkContentTest extends ResourceTestBase {
             'data' => NULL,
             'links' => [
               'related' => [
-                'href' => $base_url->toString() . '/revision_user' . $version_query_string,
+                'href' => $self_url . '/revision_user',
               ],
               'self' => [
-                'href' => $base_url->toString() . '/relationships/revision_user' . $version_query_string,
+                'href' => $self_url . '/relationships/revision_user',
               ],
             ],
           ],
@@ -161,7 +150,7 @@ class MenuLinkContentTest extends ResourceTestBase {
       'data' => [
         'type' => 'menu_link_content--menu_link_content',
         'attributes' => [
-          'title' => 'Drama llama',
+          'title' => 'Dramallama',
           'link' => [
             'uri' => 'http://www.urbandictionary.com/define.php?term=drama%20llama',
           ],
@@ -186,7 +175,7 @@ class MenuLinkContentTest extends ResourceTestBase {
   /**
    * {@inheritdoc}
    */
-  public function testCollectionFilterAccess(): void {
+  public function testCollectionFilterAccess() {
     $this->doTestCollectionFilterAccessBasedOnPermissions('title', 'administer menu');
   }
 
@@ -195,7 +184,7 @@ class MenuLinkContentTest extends ResourceTestBase {
    *
    * @see https://security.drupal.org/node/161923
    */
-  public function testLinkOptionsSerialization(): void {
+  public function testLinkOptionsSerialization() {
     $this->config('jsonapi.settings')->set('read_only', FALSE)->save(TRUE);
 
     $document = $this->getPostDocument();
@@ -222,7 +211,7 @@ class MenuLinkContentTest extends ResourceTestBase {
     unset($document['data']['attributes']['link']['options']);
     $request_options[RequestOptions::BODY] = Json::encode($document);
     $response = $this->request('POST', $url, $request_options);
-    $document = $this->getDocumentFromResponse($response);
+    $document = Json::decode((string) $response->getBody());
     $internal_id = $document['data']['attributes']['drupal_internal__id'];
 
     // Load the created menu item and add link options to it.

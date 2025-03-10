@@ -3,14 +3,11 @@
 namespace Drupal\views\Plugin\views\argument;
 
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\views\Attribute\ViewsArgument;
 use Drupal\views\ViewExecutable;
 use Drupal\views\Plugin\views\display\DisplayPluginBase;
 use Drupal\views\ManyToOneHelper;
 
 /**
- * Argument handler for many to one relationships.
- *
  * An argument handler for use in fields that have a many to one relationship
  * with the table(s) to the left. This adds a bunch of options that are
  * reasonably common with this type of relationship.
@@ -22,21 +19,15 @@ use Drupal\views\ManyToOneHelper;
  *   a default argument can be provided or a summary can be shown.
  *
  * @ingroup views_argument_handlers
+ *
+ * @ViewsArgument("many_to_one")
  */
-#[ViewsArgument(
-  id: 'many_to_one',
-)]
 class ManyToOne extends ArgumentPluginBase {
-
-  /**
-   * The many-to-one helper.
-   */
-  public ManyToOneHelper $helper;
 
   /**
    * {@inheritdoc}
    */
-  public function init(ViewExecutable $view, DisplayPluginBase $display, ?array &$options = NULL) {
+  public function init(ViewExecutable $view, DisplayPluginBase $display, array &$options = NULL) {
     parent::init($view, $display, $options);
 
     $this->helper = new ManyToOneHelper($this);
@@ -49,7 +40,9 @@ class ManyToOne extends ArgumentPluginBase {
   protected function defineOptions() {
     $options = parent::defineOptions();
 
-    $options['break_phrase'] = ['default' => FALSE];
+    if (!empty($this->definition['numeric'])) {
+      $options['break_phrase'] = ['default' => FALSE];
+    }
 
     $options['add_table'] = ['default' => FALSE];
     $options['require_value'] = ['default' => FALSE];
@@ -68,7 +61,7 @@ class ManyToOne extends ArgumentPluginBase {
   public function buildOptionsForm(&$form, FormStateInterface $form_state) {
     parent::buildOptionsForm($form, $form_state);
 
-    // Allow '+' for "or". Allow ',' for "and".
+    // allow + for or, , for and
     $form['break_phrase'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Allow multiple values'),
@@ -96,7 +89,8 @@ class ManyToOne extends ArgumentPluginBase {
   }
 
   /**
-   * {@inheritdoc}
+   * Override ensureMyTable so we can control how this joins in.
+   * The operator actually has influence over joining.
    */
   public function ensureMyTable() {
     $this->helper->ensureMyTable();
@@ -146,7 +140,7 @@ class ManyToOne extends ArgumentPluginBase {
       $this->operator = 'or';
     }
 
-    // @todo Both of these should check definition for alternate keywords.
+    // @todo -- both of these should check definition for alternate keywords.
 
     if (empty($this->value)) {
       return !empty($this->definition['empty field name']) ? $this->definition['empty field name'] : $this->t('Uncategorized');

@@ -2,8 +2,8 @@
 
 namespace Drupal\commerce_order;
 
-use Drupal\Component\Utility\SortArray;
 use Drupal\commerce_price\RounderInterface;
+use Drupal\Component\Utility\SortArray;
 
 class AdjustmentTransformer implements AdjustmentTransformerInterface {
 

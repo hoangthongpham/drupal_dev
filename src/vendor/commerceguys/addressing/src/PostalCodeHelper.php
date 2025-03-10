@@ -12,7 +12,7 @@ class PostalCodeHelper
      *
      * @param string $postalCode  The postal code.
      * @param ?string $includeRule The rule for included postal codes.
-     * @param ?string $excludeRule (Optional) The rule for excluded postal codes.
+     * @param string $excludeRule (Optional) The rule for excluded postal codes.
      *
      * @return bool True if the provided postal code matches the provided
      *              rules, false otherwise.
@@ -44,7 +44,7 @@ class PostalCodeHelper
      */
     protected static function matchRule(string $postalCode, string $rule): bool
     {
-        if (str_starts_with($rule, '/') && str_ends_with($rule, '/')) {
+        if (substr($rule, 0, 1) == '/' && substr($rule, -1, 1) == '/') {
             $match = preg_match($rule, $postalCode);
         } else {
             $match = in_array($postalCode, self::buildList($rule));
@@ -58,6 +58,8 @@ class PostalCodeHelper
      *
      * Expands any ranges into full values (e.g. "1:3" becomes "1, 2, 3").
      *
+     * @param string $postalCodes The postal codes.
+     *
      * @return array The list of postal codes.
      */
     protected static function buildList(string $postalCodes): array
@@ -65,7 +67,7 @@ class PostalCodeHelper
         $postalCodeList = [];
         foreach (explode(',', $postalCodes) as $postalCode) {
             $postalCode = trim($postalCode);
-            if (str_contains($postalCode, ':')) {
+            if (strpos($postalCode, ':') !== false) {
                 $postalCodeRange = explode(':', $postalCode);
                 if (is_numeric($postalCodeRange[0]) && is_numeric($postalCodeRange[1])) {
                     $postalCodeRange = range($postalCodeRange[0], $postalCodeRange[1]);

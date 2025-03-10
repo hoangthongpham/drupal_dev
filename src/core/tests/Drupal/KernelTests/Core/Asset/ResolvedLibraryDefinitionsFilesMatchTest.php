@@ -1,10 +1,7 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\KernelTests\Core\Asset;
 
-use Drupal\Core\Extension\ExtensionLifecycle;
 use Drupal\KernelTests\KernelTestBase;
 
 /**
@@ -15,7 +12,6 @@ use Drupal\KernelTests\KernelTestBase;
  * applied.
  *
  * @group Asset
- * @group #slow
  */
 class ResolvedLibraryDefinitionsFilesMatchTest extends KernelTestBase {
 
@@ -63,9 +59,10 @@ class ResolvedLibraryDefinitionsFilesMatchTest extends KernelTestBase {
    * @var string[]
    */
   protected $allThemes = [
-    'claro',
-    'olivero',
-    'stable9',
+    'bartik',
+    'classy',
+    'seven',
+    'stable',
     'stark',
   ];
 
@@ -99,17 +96,16 @@ class ResolvedLibraryDefinitionsFilesMatchTest extends KernelTestBase {
   protected function setUp(): void {
     parent::setUp();
 
+    // Install all core themes.
+    sort($this->allThemes);
+    $this->container->get('theme_installer')->install($this->allThemes);
+
     // Enable all core modules.
     $all_modules = $this->container->get('extension.list.module')->getList();
     $all_modules = array_filter($all_modules, function ($module) {
       // Filter contrib, hidden, already enabled modules and modules in the
       // Testing package.
-      if ($module->origin !== 'core'
-        || !empty($module->info['hidden'])
-        || $module->status == TRUE
-        || $module->info['package'] == 'Testing'
-        || $module->info[ExtensionLifecycle::LIFECYCLE_IDENTIFIER] === ExtensionLifecycle::EXPERIMENTAL
-        || $module->info[ExtensionLifecycle::LIFECYCLE_IDENTIFIER] === ExtensionLifecycle::DEPRECATED) {
+      if ($module->origin !== 'core' || !empty($module->info['hidden']) || $module->status == TRUE || $module->info['package'] == 'Testing') {
         return FALSE;
       }
       return TRUE;
@@ -122,10 +118,6 @@ class ResolvedLibraryDefinitionsFilesMatchTest extends KernelTestBase {
     // on the workspace which will fail because the user table is not present.
     // @todo Remove this in https://www.drupal.org/node/3039217.
     $this->installEntitySchema('user');
-
-    // Install the 'path_alias' entity schema because the path alias path
-    // processor requires it.
-    $this->installEntitySchema('path_alias');
 
     // Remove demo_umami_content module as its install hook creates content
     // that relies on the presence of entity tables and various other elements
@@ -142,10 +134,6 @@ class ResolvedLibraryDefinitionsFilesMatchTest extends KernelTestBase {
     sort($this->allModules);
     $this->container->get('module_installer')->install($this->allModules);
 
-    // Install all core themes.
-    sort($this->allThemes);
-    $this->container->get('theme_installer')->install($this->allThemes);
-
     $this->themeHandler = $this->container->get('theme_handler');
     $this->themeInitialization = $this->container->get('theme.initialization');
     $this->themeManager = $this->container->get('theme.manager');
@@ -155,7 +143,7 @@ class ResolvedLibraryDefinitionsFilesMatchTest extends KernelTestBase {
   /**
    * Ensures that all core module and theme library files exist.
    */
-  public function testCoreLibraryCompleteness(): void {
+  public function testCoreLibraryCompleteness() {
     // First verify all libraries with no active theme.
     $this->verifyLibraryFilesExist($this->getAllLibraries());
 

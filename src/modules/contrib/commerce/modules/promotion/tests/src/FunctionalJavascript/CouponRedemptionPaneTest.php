@@ -2,13 +2,13 @@
 
 namespace Drupal\Tests\commerce_promotion\FunctionalJavascript;
 
-use Drupal\Core\Url;
-use Drupal\Tests\commerce\FunctionalJavascript\CommerceWebDriverTestBase;
 use Drupal\commerce_checkout\Entity\CheckoutFlow;
 use Drupal\commerce_order\Entity\OrderItem;
 use Drupal\commerce_order\Entity\OrderItemType;
 use Drupal\commerce_payment\Entity\PaymentGateway;
 use Drupal\commerce_price\Price;
+use Drupal\Core\Url;
+use Drupal\Tests\commerce\FunctionalJavascript\CommerceWebDriverTestBase;
 
 /**
  * Tests the coupon redemption checkout pane.
@@ -46,7 +46,6 @@ class CouponRedemptionPaneTest extends CommerceWebDriverTestBase {
   protected static $modules = [
     'block',
     'commerce_cart',
-    'commerce_product',
     'commerce_promotion',
     'commerce_promotion_test',
     'commerce_checkout',
@@ -146,7 +145,7 @@ class CouponRedemptionPaneTest extends CommerceWebDriverTestBase {
       'card_number' => '1111',
       'billing_profile' => $profile,
       'reusable' => TRUE,
-      'expires' => strtotime('+1 year'),
+      'expires' => strtotime('2028/03/24'),
     ]);
     $payment_method1->setBillingProfile($profile);
     $payment_method1->save();
@@ -158,7 +157,7 @@ class CouponRedemptionPaneTest extends CommerceWebDriverTestBase {
       'card_number' => '9999',
       'billing_profile' => $profile,
       'reusable' => TRUE,
-      'expires' => strtotime('+1 year'),
+      'expires' => strtotime('2028/03/24'),
     ]);
     $payment_method2->setBillingProfile($profile);
     $payment_method2->save();
@@ -278,6 +277,7 @@ class CouponRedemptionPaneTest extends CommerceWebDriverTestBase {
     // Ensure that the payment method ajax works with the coupon ajax.
     $radio_button = $this->getSession()->getPage()->findField('Visa ending in 9999');
     $radio_button->click();
+    $this->assertSession()->assertWaitOnAjaxRequest();
 
     $this->submitForm([], 'Continue to review');
     $this->assertSession()->pageTextContains('Visa ending in 9999');

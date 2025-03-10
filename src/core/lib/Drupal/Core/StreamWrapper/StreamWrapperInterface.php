@@ -82,12 +82,11 @@ interface StreamWrapperInterface extends PhpStreamWrapperInterface {
   const READ_VISIBLE = 0x0014;
 
   /**
-   * The default 'type' flag.
-   *
-   * This does not include StreamWrapperInterface::LOCAL, because PHP grants a
-   * greater trust level to local files (for example, they can be used in an
-   * "include" statement, regardless of the "allow_url_include" setting), so
-   * stream wrappers need to explicitly opt-in to this.
+   * This is the default 'type' flag. This does not include
+   * StreamWrapperInterface::LOCAL, because PHP grants a greater trust level to
+   * local files (for example, they can be used in an "include" statement,
+   * regardless of the "allow_url_include" setting), so stream wrappers need to
+   * explicitly opt-in to this.
    */
   const NORMAL = 0x001C;
 
@@ -106,7 +105,7 @@ interface StreamWrapperInterface extends PhpStreamWrapperInterface {
   /**
    * Returns the name of the stream wrapper for use in the UI.
    *
-   * @return string|\Drupal\Core\StringTranslation\TranslatableMarkup
+   * @return string
    *   The stream wrapper name.
    */
   public function getName();
@@ -114,7 +113,7 @@ interface StreamWrapperInterface extends PhpStreamWrapperInterface {
   /**
    * Returns the description of the stream wrapper for use in the UI.
    *
-   * @return string|\Drupal\Core\StringTranslation\TranslatableMarkup
+   * @return string
    *   The stream wrapper description.
    */
   public function getDescription();
@@ -143,8 +142,8 @@ interface StreamWrapperInterface extends PhpStreamWrapperInterface {
    *
    * This function should return a URL that can be embedded in a web page
    * and accessed from a browser. For example, the external URL of
-   * "youtube://random_string" might be
-   * "http://www.youtube.com/watch?v=random_string".
+   * "youtube://xIpLd0WQKCY" might be
+   * "http://www.youtube.com/watch?v=xIpLd0WQKCY".
    *
    * @return string
    *   Returns a string containing a web accessible URL for the resource.

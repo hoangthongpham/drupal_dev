@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\views\Functional;
 
 /**
@@ -26,8 +24,8 @@ class ViewsFormMultipleTest extends ViewTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp($import_test_views = TRUE, $modules = ['views_test_config']): void {
-    parent::setUp($import_test_views, $modules);
+  protected function setUp($import_test_views = TRUE): void {
+    parent::setUp($import_test_views);
 
     $this->enableViewsTestModule();
   }
@@ -48,7 +46,7 @@ class ViewsFormMultipleTest extends ViewTestBase {
   /**
    * Tests the a page with multiple View forms in it.
    */
-  public function testViewsFormMultiple(): void {
+  public function testViewsFormMultiple() {
     // Get the test page.
     $this->drupalGet('views_test_form_multiple');
 

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\system\Functional\Condition;
 
 use Drupal\node\Entity\Node;
@@ -18,9 +16,6 @@ use Drupal\Tests\BrowserTestBase;
  */
 class ConditionFormTest extends BrowserTestBase {
 
-  /**
-   * {@inheritdoc}
-   */
   protected static $modules = ['node', 'condition_test'];
 
   /**
@@ -31,7 +26,7 @@ class ConditionFormTest extends BrowserTestBase {
   /**
    * Submit the condition_node_type_test_form to test condition forms.
    */
-  public function testConfigForm(): void {
+  public function testConfigForm() {
     $this->drupalCreateContentType(['type' => 'page', 'name' => 'Page']);
     $this->drupalCreateContentType(['type' => 'article', 'name' => 'Article']);
 
@@ -42,21 +37,13 @@ class ConditionFormTest extends BrowserTestBase {
     $article->save();
 
     $this->drupalGet('condition_test');
-    $this->assertSession()->fieldExists('entity_bundle[bundles][article]');
-    $this->assertSession()->fieldExists('entity_bundle[bundles][page]');
-    $this->submitForm(['entity_bundle[bundles][page]' => 'page', 'entity_bundle[bundles][article]' => 'article'], 'Submit');
+    $this->assertSession()->fieldExists('bundles[article]');
+    $this->assertSession()->fieldExists('bundles[page]');
+    $this->submitForm(['bundles[page]' => 'page', 'bundles[article]' => 'article'], 'Submit');
     // @see \Drupal\condition_test\FormController::submitForm()
     $this->assertSession()->pageTextContains('Bundle: page');
     $this->assertSession()->pageTextContains('Bundle: article');
     $this->assertSession()->pageTextContains('Executed successfully.');
-
-    $this->assertSession()->pageTextContains('The current theme is stark');
-    /** @var \Drupal\Core\Extension\ThemeInstallerInterface $theme_installer */
-    $theme_installer = $this->container->get('theme_installer');
-    $theme_installer->install(['olivero']);
-    $this->drupalGet('condition_test');
-    $this->submitForm(['current_theme[theme]' => 'olivero', 'current_theme[negate]' => TRUE], 'Submit');
-    $this->assertSession()->pageTextContains('The current theme is not olivero');
   }
 
 }

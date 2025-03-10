@@ -7,9 +7,7 @@ use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use GuzzleHttp\ClientInterface;
-use Psr\Http\Client\ClientExceptionInterface;
-
-// cspell:ignore omitscript
+use GuzzleHttp\Exception\TransferException;
 
 /**
  * Converts oEmbed media URLs into endpoint-specific resource URLs.
@@ -75,11 +73,15 @@ class UrlResolver implements UrlResolverInterface {
    * @param \Drupal\Core\Cache\CacheBackendInterface $cache_backend
    *   The cache backend.
    */
-  public function __construct(ProviderRepositoryInterface $providers, ResourceFetcherInterface $resource_fetcher, ClientInterface $http_client, ModuleHandlerInterface $module_handler, CacheBackendInterface $cache_backend) {
+  public function __construct(ProviderRepositoryInterface $providers, ResourceFetcherInterface $resource_fetcher, ClientInterface $http_client, ModuleHandlerInterface $module_handler, CacheBackendInterface $cache_backend = NULL) {
     $this->providers = $providers;
     $this->resourceFetcher = $resource_fetcher;
     $this->httpClient = $http_client;
     $this->moduleHandler = $module_handler;
+    if (empty($cache_backend)) {
+      $cache_backend = \Drupal::cache();
+      @trigger_error('Passing NULL as the $cache_backend parameter to ' . __METHOD__ . '() is deprecated in drupal:9.3.0 and is removed from drupal:10.0.0. See https://www.drupal.org/node/3223594', E_USER_DEPRECATED);
+    }
     $this->cacheBackend = $cache_backend;
   }
 
@@ -96,7 +98,7 @@ class UrlResolver implements UrlResolverInterface {
     try {
       $response = $this->httpClient->get($url);
     }
-    catch (ClientExceptionInterface) {
+    catch (TransferException $e) {
       return FALSE;
     }
 
@@ -128,7 +130,7 @@ class UrlResolver implements UrlResolverInterface {
   public function getProviderByUrl($url) {
     // Check the URL against every scheme of every endpoint of every provider
     // until we find a match.
-    foreach ($this->providers->getAll() as $provider_info) {
+    foreach ($this->providers->getAll() as $provider_name => $provider_info) {
       foreach ($provider_info->getEndpoints() as $endpoint) {
         if ($endpoint->matchUrl($url)) {
           return $provider_info;
@@ -176,7 +178,7 @@ class UrlResolver implements UrlResolverInterface {
     // provide extra parameters in the query string. For example, Instagram also
     // supports the 'omitscript' parameter.
     $this->moduleHandler->alter('oembed_resource_url', $parsed_url, $provider);
-    $resource_url = $parsed_url['path'] . '?' . UrlHelper::buildQuery($parsed_url['query']);
+    $resource_url = $parsed_url['path'] . '?' . rawurldecode(UrlHelper::buildQuery($parsed_url['query']));
 
     $this->urlCache[$url] = $resource_url;
     $this->cacheBackend->set($cache_id, $resource_url);
@@ -193,7 +195,7 @@ class UrlResolver implements UrlResolverInterface {
    *   The oEmbed provider for the asset.
    *
    * @return string
-   *   The resource URL.
+   *   The resource url.
    */
   protected function getEndpointMatchingUrl($url, Provider $provider) {
     $endpoints = $provider->getEndpoints();

@@ -2,8 +2,8 @@
 
 namespace Drupal\commerce_order\Plugin\Field\FieldType;
 
-use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\commerce_order\Adjustment;
+use Drupal\Core\Field\FieldItemListInterface;
 
 /**
  * Represents a list of adjustment item field values.
@@ -23,6 +23,8 @@ interface AdjustmentItemListInterface extends FieldItemListInterface {
    *
    * @param \Drupal\commerce_order\Adjustment $adjustment
    *   The adjustment.
+   *
+   * @return $this
    */
   public function removeAdjustment(Adjustment $adjustment);
 

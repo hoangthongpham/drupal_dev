@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\KernelTests\Core\File;
 
 use Drupal\Core\DrupalKernel;
@@ -19,7 +17,9 @@ use Symfony\Component\HttpFoundation\Request;
 class StreamWrapperTest extends FileTestBase {
 
   /**
-   * {@inheritdoc}
+   * Modules to enable.
+   *
+   * @var array
    */
   protected static $modules = ['file_test'];
 
@@ -37,10 +37,7 @@ class StreamWrapperTest extends FileTestBase {
    */
   protected $classname = 'Drupal\file_test\StreamWrapper\DummyStreamWrapper';
 
-  /**
-   * {@inheritdoc}
-   */
-  protected function setUp(): void {
+  public function setUp(): void {
     parent::setUp();
 
     // Add file_private_path setting.
@@ -52,7 +49,7 @@ class StreamWrapperTest extends FileTestBase {
   /**
    * Tests the getClassName() function.
    */
-  public function testGetClassName(): void {
+  public function testGetClassName() {
     // Check the dummy scheme.
     $this->assertEquals($this->classname, \Drupal::service('stream_wrapper_manager')->getClass($this->scheme), 'Got correct class name for dummy scheme.');
     // Check core's scheme.
@@ -62,7 +59,7 @@ class StreamWrapperTest extends FileTestBase {
   /**
    * Tests the getViaScheme() method.
    */
-  public function testGetInstanceByScheme(): void {
+  public function testGetInstanceByScheme() {
     $instance = \Drupal::service('stream_wrapper_manager')->getViaScheme($this->scheme);
     $this->assertEquals($this->classname, get_class($instance), 'Got correct class type for dummy scheme.');
 
@@ -73,7 +70,7 @@ class StreamWrapperTest extends FileTestBase {
   /**
    * Tests the getViaUri() and getViaScheme() methods and target functions.
    */
-  public function testUriFunctions(): void {
+  public function testUriFunctions() {
     $config = $this->config('system.file');
 
     /** @var \Drupal\Core\StreamWrapper\StreamWrapperManagerInterface $stream_wrapper_manager */
@@ -111,7 +108,7 @@ class StreamWrapperTest extends FileTestBase {
   /**
    * Tests some file handle functions.
    */
-  public function testFileFunctions(): void {
+  public function testFileFunctions() {
     $filename = 'public://' . $this->randomMachineName();
     file_put_contents($filename, str_repeat('d', 1000));
 
@@ -120,8 +117,8 @@ class StreamWrapperTest extends FileTestBase {
     $this->assertNotFalse($handle, 'Able to open a file for appending, reading and writing.');
 
     // Attempt to change options on the file stream: should all fail.
-    $this->assertFalse(@stream_set_blocking($handle, FALSE), 'Unable to set to non blocking using a local stream wrapper.');
-    $this->assertFalse(@stream_set_blocking($handle, TRUE), 'Unable to set to blocking using a local stream wrapper.');
+    $this->assertFalse(@stream_set_blocking($handle, 0), 'Unable to set to non blocking using a local stream wrapper.');
+    $this->assertFalse(@stream_set_blocking($handle, 1), 'Unable to set to blocking using a local stream wrapper.');
     $this->assertFalse(@stream_set_timeout($handle, 1), 'Unable to set read time out using a local stream wrapper.');
     $this->assertEquals(-1 /*EOF*/, @stream_set_write_buffer($handle, 512), 'Unable to set write buffer using a local stream wrapper.');
 
@@ -143,7 +140,7 @@ class StreamWrapperTest extends FileTestBase {
   /**
    * Tests the scheme functions.
    */
-  public function testGetValidStreamScheme(): void {
+  public function testGetValidStreamScheme() {
 
     /** @var \Drupal\Core\StreamWrapper\StreamWrapperManagerInterface $stream_wrapper_manager */
     $stream_wrapper_manager = \Drupal::service('stream_wrapper_manager');
@@ -153,6 +150,33 @@ class StreamWrapperTest extends FileTestBase {
     $this->assertFalse($stream_wrapper_manager::getScheme('foo/bar.txt'), 'foo/bar.txt is not a valid stream.');
     $this->assertTrue($stream_wrapper_manager->isValidScheme($stream_wrapper_manager::getScheme('public://asdf')), 'Got a valid stream scheme from public://asdf');
     $this->assertFalse($stream_wrapper_manager->isValidScheme($stream_wrapper_manager::getScheme('foo://asdf')), 'Did not get a valid stream scheme from foo://asdf');
+  }
+
+  /**
+   * Tests that phar stream wrapper is registered as expected.
+   *
+   * @see \Drupal\Core\StreamWrapper\StreamWrapperManager::register()
+   */
+  public function testPharStreamWrapperRegistration() {
+    if (!in_array('phar', stream_get_wrappers(), TRUE)) {
+      $this->markTestSkipped('There is no phar stream wrapper registered. PHP is probably compiled without phar support.');
+    }
+    // Ensure that phar is not treated as a valid scheme.
+    $stream_wrapper_manager = $this->container->get('stream_wrapper_manager');
+    $this->assertFalse($stream_wrapper_manager->getViaScheme('phar'));
+
+    // Ensure that calling register again and unregister do not create errors
+    // due to the PharStreamWrapperManager singleton.
+    $stream_wrapper_manager->register();
+    $this->assertContains('public', stream_get_wrappers());
+    $this->assertContains('phar', stream_get_wrappers());
+    $stream_wrapper_manager->unregister();
+    $this->assertNotContains('public', stream_get_wrappers());
+    // This will have reverted to the builtin phar stream wrapper.
+    $this->assertContains('phar', stream_get_wrappers());
+    $stream_wrapper_manager->register();
+    $this->assertContains('public', stream_get_wrappers());
+    $this->assertContains('phar', stream_get_wrappers());
   }
 
 }

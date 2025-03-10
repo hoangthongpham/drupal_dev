@@ -2,8 +2,6 @@
 
 namespace Drupal\dynamic_page_cache_test;
 
-use Drupal\Core\Access\AccessResult;
-use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Cache\CacheableResponse;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\user\Entity\User;
@@ -137,16 +135,6 @@ class DynamicPageCacheTestController {
       ],
     ];
     return $build;
-  }
-
-  /**
-   * Returns an uncacheable access result.
-   *
-   * @return \Drupal\Core\Access\AccessResultInterface
-   *   The access result.
-   */
-  public function uncacheableAccessCheck(): AccessResultInterface {
-    return AccessResult::allowed()->addCacheContexts(['user']);
   }
 
 }

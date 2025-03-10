@@ -15,6 +15,9 @@
 	"ETB": {
 		"name": "birr etíope"
 	},
+	"VED": {
+		"name": "Bolívar Soberano"
+	},
 	"VES": {
 		"name": "bolívar venezolano"
 	},
@@ -255,11 +258,11 @@
 	"HNL": {
 		"name": "lempira hondureño"
 	},
-	"SLE": {
+	"SLL": {
 		"name": "leone de Serra Leoa"
 	},
 	"MDL": {
-		"name": "leu moldovo"
+		"name": "leu moldavo"
 	},
 	"RON": {
 		"name": "leu romanés"
@@ -435,6 +438,9 @@
 	"LKR": {
 		"name": "rupia srilankesa"
 	},
+	"SLE": {
+		"name": "Sierra Leonean Leone"
+	},
 	"PEN": {
 		"name": "sol peruano"
 	},
@@ -459,6 +465,9 @@
 	"MNT": {
 		"name": "tugrik mongol"
 	},
+	"UYW": {
+		"name": "Uruguayan Nominal Wage Index Unit"
+	},
 	"VUV": {
 		"name": "vatu vanuatiano"
 	},
@@ -480,6 +489,9 @@
 	},
 	"UGX": {
 		"name": "xilin ugandés"
+	},
+	"ZWL": {
+		"name": "Zimbabwean Dollar (2009)"
 	},
 	"PLN": {
 		"name": "zloty polaco"

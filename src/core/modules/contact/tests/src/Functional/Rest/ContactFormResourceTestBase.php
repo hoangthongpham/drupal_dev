@@ -1,13 +1,11 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\contact\Functional\Rest;
 
 use Drupal\contact\Entity\ContactForm;
-use Drupal\Tests\rest\Functional\EntityResource\ConfigEntityResourceTestBase;
+use Drupal\Tests\rest\Functional\EntityResource\EntityResourceTestBase;
 
-abstract class ContactFormResourceTestBase extends ConfigEntityResourceTestBase {
+abstract class ContactFormResourceTestBase extends EntityResourceTestBase {
 
   /**
    * {@inheritdoc}
@@ -87,7 +85,6 @@ abstract class ContactFormResourceTestBase extends ConfigEntityResourceTestBase 
    */
   protected function getNormalizedPostEntity() {
     // @todo Update in https://www.drupal.org/node/2300677.
-    return [];
   }
 
   /**

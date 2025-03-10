@@ -1,6 +1,9 @@
 <?php
 
-declare(strict_types=1);
+/**
+ * @file
+ * Contains \Drupal\Tests\migrate_drupal\Unit\source\d6\Drupal6SqlBaseTest.
+ */
 
 namespace Drupal\Tests\migrate_drupal\Unit\source\d6;
 
@@ -17,8 +20,6 @@ class Drupal6SqlBaseTest extends MigrateTestCase {
 
   /**
    * Define bare minimum migration configuration.
-   *
-   * @var string[]
    */
   protected $migrationConfiguration = [
     'id' => 'Drupal6SqlBase',
@@ -31,8 +32,6 @@ class Drupal6SqlBaseTest extends MigrateTestCase {
 
   /**
    * Minimum database contents needed to test Drupal6SqlBase.
-   *
-   * @var string[]
    */
   protected $databaseContents = [
     'system' => [
@@ -70,8 +69,6 @@ class Drupal6SqlBaseTest extends MigrateTestCase {
    * {@inheritdoc}
    */
   protected function setUp(): void {
-    parent::setUp();
-
     $plugin = 'placeholder_id';
     /** @var \Drupal\Core\State\StateInterface $state */
     $state = $this->createMock('Drupal\Core\State\StateInterface');
@@ -84,7 +81,7 @@ class Drupal6SqlBaseTest extends MigrateTestCase {
   /**
    * Tests for Drupal6SqlBase::getSystemData().
    */
-  public function testGetSystemData(): void {
+  public function testGetSystemData() {
     $system_data = $this->base->getSystemData();
     // Should be 1 theme and 2 modules.
     $this->assertCount(1, $system_data['theme']);
@@ -97,7 +94,7 @@ class Drupal6SqlBaseTest extends MigrateTestCase {
   /**
    * Tests for Drupal6SqlBase::moduleExists().
    */
-  public function testDrupal6ModuleExists(): void {
+  public function testDrupal6ModuleExists() {
     // This module should exist.
     $this->assertTrue($this->base->moduleExistsWrapper('module1'));
 
@@ -109,7 +106,7 @@ class Drupal6SqlBaseTest extends MigrateTestCase {
   /**
    * Tests for Drupal6SqlBase::getModuleSchemaVersion().
    */
-  public function testGetModuleSchemaVersion(): void {
+  public function testGetModuleSchemaVersion() {
     // Non-existent module.
     $this->assertFalse($this->base->getModuleSchemaVersionWrapper('module3'));
 
@@ -123,7 +120,7 @@ class Drupal6SqlBaseTest extends MigrateTestCase {
   /**
    * Tests for Drupal6SqlBase::variableGet().
    */
-  public function testVariableGet(): void {
+  public function testVariableGet() {
     // Test default value.
     $this->assertEquals('my_default', $this->base->variableGetWrapper('non_existent_variable', 'my_default'));
 

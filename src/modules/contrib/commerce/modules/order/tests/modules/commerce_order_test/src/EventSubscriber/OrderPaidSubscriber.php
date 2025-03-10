@@ -11,7 +11,7 @@ class OrderPaidSubscriber implements EventSubscriberInterface {
   /**
    * {@inheritdoc}
    */
-  public static function getSubscribedEvents(): array {
+  public static function getSubscribedEvents() {
     return [
       OrderEvents::ORDER_PAID => 'onPaid',
     ];

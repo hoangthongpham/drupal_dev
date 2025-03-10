@@ -21,42 +21,42 @@ class CurrencyFormatter implements CurrencyFormatterInterface
      *
      * @var NumberFormatRepositoryInterface
      */
-    protected NumberFormatRepositoryInterface $numberFormatRepository;
+    protected $numberFormatRepository;
 
     /**
      * The currency repository.
      *
      * @var CurrencyRepositoryInterface
      */
-    protected CurrencyRepositoryInterface $currencyRepository;
+    protected $currencyRepository;
 
     /**
      * The default locale.
      *
      * @var string
      */
-    protected string $defaultLocale;
+    protected $defaultLocale;
 
     /**
      * The loaded number formats.
      *
      * @var NumberFormat[]
      */
-    protected array $numberFormats = [];
+    protected $numberFormats = [];
 
     /**
      * The loaded currencies.
      *
      * @var Currency[]
      */
-    protected array $currencies = [];
+    protected $currencies = [];
 
     /**
      * The default options.
      *
      * @var array
      */
-    protected array $defaultOptions = [
+    protected $defaultOptions = [
         'locale' => 'en',
         'use_grouping' => true,
         'minimum_fraction_digits' => null,
@@ -90,7 +90,7 @@ class CurrencyFormatter implements CurrencyFormatterInterface
     /**
      * {@inheritdoc}
      */
-    public function format(string $number, string $currencyCode, array $options = []): string
+    public function format($number, $currencyCode, array $options = [])
     {
         if (!is_numeric($number)) {
             $message = sprintf('The provided value "%s" is not a valid number or numeric string.', $number);
@@ -127,7 +127,7 @@ class CurrencyFormatter implements CurrencyFormatterInterface
     /**
      * {@inheritdoc}
      */
-    public function parse(string $number, string $currencyCode, array $options = []): string|bool
+    public function parse($number, $currencyCode, array $options = [])
     {
         $this->validateOptions($options);
         $options = array_replace($this->defaultOptions, $options);
@@ -151,7 +151,7 @@ class CurrencyFormatter implements CurrencyFormatterInterface
      *
      * @return NumberFormat
      */
-    protected function getNumberFormat(string $locale): NumberFormat
+    protected function getNumberFormat($locale)
     {
         if (!isset($this->numberFormats[$locale])) {
             $this->numberFormats[$locale] = $this->numberFormatRepository->get($locale);
@@ -168,7 +168,7 @@ class CurrencyFormatter implements CurrencyFormatterInterface
      *
      * @return Currency
      */
-    protected function getCurrency(string $currencyCode, string $locale): Currency
+    protected function getCurrency($currencyCode, $locale)
     {
         if (!isset($this->currencies[$currencyCode][$locale])) {
             try {
@@ -192,7 +192,7 @@ class CurrencyFormatter implements CurrencyFormatterInterface
     /**
      * {@inheritdoc}
      */
-    protected function getAvailablePatterns(NumberFormat $numberFormat): array
+    protected function getAvailablePatterns(NumberFormat $numberFormat)
     {
         return [
             'standard' => $numberFormat->getCurrencyPattern(),

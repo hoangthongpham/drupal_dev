@@ -1,16 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\tour\Unit\Entity;
 
 use Drupal\Tests\UnitTestCase;
 
 /**
  * @coversDefaultClass \Drupal\tour\Entity\Tour
- *
  * @group tour
- * @group legacy
  */
 class TourTest extends UnitTestCase {
 
@@ -30,7 +26,7 @@ class TourTest extends UnitTestCase {
    *
    * @dataProvider routeProvider
    */
-  public function testHasMatchingRoute($routes, $route_name, $route_params, $result): void {
+  public function testHasMatchingRoute($routes, $route_name, $route_params, $result) {
     $tour = $this->getMockBuilder('\Drupal\tour\Entity\Tour')
       ->disableOriginalConstructor()
       ->onlyMethods(['getRoutes'])
@@ -38,7 +34,7 @@ class TourTest extends UnitTestCase {
 
     $tour->expects($this->any())
       ->method('getRoutes')
-      ->willReturn($routes);
+      ->will($this->returnValue($routes));
 
     $this->assertSame($result, $tour->hasMatchingRoute($route_name, $route_params));
 
@@ -48,7 +44,7 @@ class TourTest extends UnitTestCase {
   /**
    * Provides sample routes for testing.
    */
-  public static function routeProvider() {
+  public function routeProvider() {
     return [
       // Simple match.
       [

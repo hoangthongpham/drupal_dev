@@ -1,6 +1,9 @@
 <?php
 
-declare(strict_types=1);
+/**
+ * @file
+ * Contains \Drupal\KernelTests\Core\Theme\ThemeRenderAndAutoescapeTest.
+ */
 
 namespace Drupal\KernelTests\Core\Theme;
 
@@ -16,8 +19,6 @@ use Drupal\KernelTests\KernelTestBase;
  * Tests the theme_render_and_autoescape() function.
  *
  * @group Theme
- * @group legacy
- * @group #slow
  */
 class ThemeRenderAndAutoescapeTest extends KernelTestBase {
 
@@ -27,17 +28,9 @@ class ThemeRenderAndAutoescapeTest extends KernelTestBase {
   protected static $modules = ['system'];
 
   /**
-   * {@inheritdoc}
-   */
-  protected function setUp(): void {
-    parent::setUp();
-    $this->expectDeprecation('theme_render_and_autoescape() is deprecated in drupal:10.1.0 and is removed from drupal:11.0.0. There is no replacement. Theme engines must handle escaping by themselves. See https://www.drupal.org/node/3336253');
-  }
-
-  /**
    * @dataProvider providerTestThemeRenderAndAutoescape
    */
-  public function testThemeRenderAndAutoescape($arg, $expected): void {
+  public function testThemeRenderAndAutoescape($arg, $expected) {
     if (is_array($arg) && isset($arg['#type']) && $arg['#type'] === 'link') {
       $arg = Link::createFromRoute($arg['#title'], $arg['#url']);
     }
@@ -57,7 +50,7 @@ class ThemeRenderAndAutoescapeTest extends KernelTestBase {
   /**
    * Provide test examples.
    */
-  public static function providerTestThemeRenderAndAutoescape() {
+  public function providerTestThemeRenderAndAutoescape() {
     return [
       'empty string unchanged' => ['', ''],
       'simple string unchanged' => ['ab', 'ab'],
@@ -81,7 +74,7 @@ class ThemeRenderAndAutoescapeTest extends KernelTestBase {
   /**
    * Ensures invalid content is handled correctly.
    */
-  public function testThemeEscapeAndRenderNotPrintable(): void {
+  public function testThemeEscapeAndRenderNotPrintable() {
     $this->expectException(\Exception::class);
     theme_render_and_autoescape(new NonPrintable());
   }
@@ -89,7 +82,7 @@ class ThemeRenderAndAutoescapeTest extends KernelTestBase {
   /**
    * Ensure cache metadata is bubbled when using theme_render_and_autoescape().
    */
-  public function testBubblingMetadata(): void {
+  public function testBubblingMetadata() {
     $link = new GeneratedLink();
     $link->setGeneratedLink('<a href="http://example.com"></a>');
     $link->addCacheTags(['foo']);
@@ -113,7 +106,7 @@ class ThemeRenderAndAutoescapeTest extends KernelTestBase {
   /**
    * Ensure cache metadata is bubbled when using theme_render_and_autoescape().
    */
-  public function testBubblingMetadataWithRenderable(): void {
+  public function testBubblingMetadataWithRenderable() {
     $link = new Link('', Url::fromRoute('<current>'));
 
     $context = new RenderContext();

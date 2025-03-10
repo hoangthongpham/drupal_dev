@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\FunctionalTests\Theme;
 
 use Drupal\Tests\BrowserTestBase;
@@ -14,17 +12,15 @@ use Drupal\Tests\BrowserTestBase;
 class ClaroTest extends BrowserTestBase {
 
   /**
-   * Modules to install.
+   * Modules to enable.
    *
    * Install the shortcut module so that claro.settings has its schema checked.
    * There's currently no way for Claro to provide a default and have valid
    * configuration as themes cannot react to a module install.
    *
-   * Install dblog and pager_test for testing of pager attributes.
-   *
    * @var string[]
    */
-  protected static $modules = ['dblog', 'shortcut', 'pager_test'];
+  protected static $modules = ['shortcut'];
 
   /**
    * {@inheritdoc}
@@ -36,7 +32,7 @@ class ClaroTest extends BrowserTestBase {
    *
    * @see claro.info.yml
    */
-  public function testRegressionMissingElementsCss(): void {
+  public function testRegressionMissingElementsCss() {
     $this->drupalGet('');
     $this->assertSession()->statusCodeEquals(200);
     // This can be any CSS file from the global library.
@@ -46,11 +42,8 @@ class ClaroTest extends BrowserTestBase {
   /**
    * Tests Claro's configuration schema.
    */
-  public function testConfigSchema(): void {
-    $permissions = [
-      'administer modules',
-    ];
-    $this->drupalLogin($this->drupalCreateUser($permissions));
+  public function testConfigSchema() {
+    $this->drupalLogin($this->rootUser);
     $this->drupalGet('admin/modules');
     $this->assertSession()->elementNotExists('css', '#block-claro-help');
 
@@ -64,41 +57,17 @@ class ClaroTest extends BrowserTestBase {
   }
 
   /**
-   * Tests that the Claro theme can be uninstalled.
+   * Tests that the Claro theme can be uninstalled, despite being experimental.
+   *
+   * @todo Remove in https://www.drupal.org/project/drupal/issues/3066007
    */
-  public function testIsUninstallable(): void {
+  public function testIsUninstallable() {
     $this->drupalLogin($this->drupalCreateUser(['access administration pages', 'administer themes']));
 
     $this->drupalGet('admin/appearance');
-    $this->cssSelect('a[title="Install <strong>Test theme</strong> as default theme"]')[0]->click();
+    $this->cssSelect('a[title="Install Seven as default theme"]')[0]->click();
     $this->cssSelect('a[title="Uninstall Claro theme"]')[0]->click();
     $this->assertSession()->pageTextContains('The Claro theme has been uninstalled.');
-  }
-
-  /**
-   * Tests pager attribute is present using pager_test.
-   */
-  public function testPagerAttribute(): void {
-    // Insert 300 log messages.
-    $logger = $this->container->get('logger.factory')->get('pager_test');
-    for ($i = 0; $i < 300; $i++) {
-      $logger->debug($this->randomString());
-    }
-
-    $this->drupalLogin($this->drupalCreateUser(['access site reports']));
-
-    $this->drupalGet('admin/reports/dblog', ['query' => ['page' => 1]]);
-    $this->assertSession()->statusCodeEquals(200);
-    $elements = $this->xpath('//ul[contains(@class, :class)]/li', [':class' => 'pager__items']);
-    $this->assertNotEmpty($elements, 'Pager found.');
-
-    // Check all links for pager-test attribute.
-    foreach ($elements as $page => $element) {
-      $link = $element->find('css', 'a');
-      $this->assertNotEmpty($link, "Link to page $page found.");
-      $this->assertTrue($link->hasAttribute('pager-test'), 'Pager item has attribute pager-test');
-      $this->assertTrue($link->hasClass('lizards'));
-    }
   }
 
 }

@@ -2,31 +2,13 @@
 
 namespace Drupal\commerce_product\Plugin\Validation\Constraint;
 
-use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 
 /**
  * Validates the ProductVariationSku constraint.
  */
-class ProductVariationSkuConstraintValidator extends ConstraintValidator implements ContainerInjectionInterface {
-
-  /**
-   * The entity type manager.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
-   */
-  protected $entityTypeManager;
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container) {
-    $instance = new static();
-    $instance->entityTypeManager = $container->get('entity_type.manager');
-    return $instance;
-  }
+class ProductVariationSkuConstraintValidator extends ConstraintValidator {
 
   /**
    * {@inheritdoc}
@@ -38,8 +20,7 @@ class ProductVariationSkuConstraintValidator extends ConstraintValidator impleme
 
     $sku = $item->value;
     if (isset($sku) && $sku !== '') {
-      $sku_exists = (bool) $this->entityTypeManager->getStorage('commerce_product_variation')
-        ->getQuery()
+      $sku_exists = (bool) \Drupal::entityQuery('commerce_product_variation')
         ->accessCheck(FALSE)
         ->condition('sku', $sku)
         ->condition('variation_id', (int) $items->getEntity()->id(), '<>')

@@ -2,18 +2,17 @@
 
 namespace Drupal\commerce_tax\Plugin\Commerce\TaxType;
 
-use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\commerce_tax\Attribute\CommerceTaxType;
 use Drupal\commerce_tax\TaxZone;
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Provides the United Kingdom VAT tax type.
+ *
+ * @CommerceTaxType(
+ *   id = "united_kingdom_vat",
+ *   label = "United Kingdom VAT",
+ * )
  */
-#[CommerceTaxType(
-  id: "united_kingdom_vat",
-  label: new TranslatableMarkup("United Kingdom VAT"),
-)]
 class UnitedKingdomVat extends LocalTaxTypeBase {
 
   /**

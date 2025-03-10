@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\views\Kernel\Handler;
 
 use Drupal\Component\Render\FormattableMarkup;
@@ -106,7 +104,7 @@ class SortDateTest extends ViewsKernelTestBase {
             ['name' => 'Meredith'],
             ['name' => 'Paul'],
             ['name' => 'John'],
-          ];
+           ];
           break;
 
         case 'hour':
@@ -157,7 +155,7 @@ class SortDateTest extends ViewsKernelTestBase {
   /**
    * Tests numeric ordering of the result set.
    */
-  public function testDateOrdering(): void {
+  public function testDateOrdering() {
     foreach (['second', 'minute', 'hour', 'day', 'month', 'year'] as $granularity) {
       foreach ([FALSE, TRUE] as $reverse) {
         $view = Views::getView('test_view');

@@ -1,16 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\locale\Functional;
 
-use Drupal\Core\Database\Database;
-use Drupal\Core\File\FileExists;
-use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Url;
+use Drupal\Core\Database\Database;
+use Drupal\Core\File\FileSystemInterface;
 use Drupal\Tests\BrowserTestBase;
-
-// cspell:ignore chien chiens deutsch januari lundi moutons műveletek svibanj
+use Drupal\Core\Language\LanguageInterface;
 
 /**
  * Tests the import of locale files.
@@ -20,7 +16,9 @@ use Drupal\Tests\BrowserTestBase;
 class LocaleImportFunctionalTest extends BrowserTestBase {
 
   /**
-   * {@inheritdoc}
+   * Modules to enable.
+   *
+   * @var array
    */
   protected static $modules = ['locale', 'dblog'];
 
@@ -37,7 +35,8 @@ class LocaleImportFunctionalTest extends BrowserTestBase {
   protected $adminUser;
 
   /**
-   * A user able to create languages, import translations, access site reports.
+   * A user able to create languages, import translations and access site
+   * reports.
    *
    * @var \Drupal\user\Entity\User
    */
@@ -52,8 +51,8 @@ class LocaleImportFunctionalTest extends BrowserTestBase {
     // Copy test po files to the translations directory.
     /** @var \Drupal\Core\File\FileSystemInterface $file_system */
     $file_system = \Drupal::service('file_system');
-    $file_system->copy(__DIR__ . '/../../../tests/test.de.po', 'translations://', FileExists::Replace);
-    $file_system->copy(__DIR__ . '/../../../tests/test.xx.po', 'translations://', FileExists::Replace);
+    $file_system->copy(__DIR__ . '/../../../tests/test.de.po', 'translations://', FileSystemInterface::EXISTS_REPLACE);
+    $file_system->copy(__DIR__ . '/../../../tests/test.xx.po', 'translations://', FileSystemInterface::EXISTS_REPLACE);
 
     $this->adminUser = $this->drupalCreateUser([
       'administer languages',
@@ -79,7 +78,7 @@ class LocaleImportFunctionalTest extends BrowserTestBase {
   /**
    * Tests import of standalone .po files.
    */
-  public function testStandalonePoFile(): void {
+  public function testStandalonePoFile() {
     // Try importing a .po file.
     $this->importPoFile($this->getPoFile(), [
       'langcode' => 'fr',
@@ -254,7 +253,7 @@ class LocaleImportFunctionalTest extends BrowserTestBase {
   /**
    * Tests msgctxt context support.
    */
-  public function testLanguageContext(): void {
+  public function testLanguageContext() {
     // Try importing a .po file.
     $this->importPoFile($this->getPoFileWithContext(), [
       'langcode' => 'hr',
@@ -269,7 +268,7 @@ class LocaleImportFunctionalTest extends BrowserTestBase {
   /**
    * Tests empty msgstr at end of .po file see #611786.
    */
-  public function testEmptyMsgstr(): void {
+  public function testEmptyMsgstr() {
     $langcode = 'hu';
 
     // Try importing a .po file.
@@ -302,7 +301,7 @@ class LocaleImportFunctionalTest extends BrowserTestBase {
   /**
    * Tests .po file import with configuration translation.
    */
-  public function testConfigPoFile(): void {
+  public function testConfigPoFile() {
     // Values for translations to assert. Config key, original string,
     // translation and config property name.
     $config_strings = [
@@ -368,7 +367,7 @@ class LocaleImportFunctionalTest extends BrowserTestBase {
   /**
    * Tests .po file import with user.settings configuration.
    */
-  public function testConfigTranslationImportingPoFile(): void {
+  public function testConfigtranslationImportingPoFile() {
     // Set the language code.
     $langcode = 'de';
 
@@ -385,7 +384,7 @@ class LocaleImportFunctionalTest extends BrowserTestBase {
   /**
    * Tests the translation are imported when a new language is created.
    */
-  public function testCreatedLanguageTranslation(): void {
+  public function testCreatedLanguageTranslation() {
     // Import a .po file to add de language.
     $this->importPoFile($this->getPoFileWithConfigDe(), ['langcode' => 'de']);
 
@@ -507,7 +506,8 @@ EOF;
   }
 
   /**
-   * Returns a .po file that will be marked as customized.
+   * Helper function that returns a .po file which strings will be marked
+   * as customized.
    */
   public function getCustomPoFile() {
     return <<< EOF

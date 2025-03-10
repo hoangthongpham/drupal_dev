@@ -361,7 +361,7 @@
 	"SCR": {
 		"name": "Сејшелска рупија"
 	},
-	"SLE": {
+	"SLL": {
 		"name": "Сиералеонско леоне"
 	},
 	"SGD": {
@@ -473,5 +473,17 @@
 	},
 	"LKR": {
 		"name": "Шриланканска рупија"
+	},
+	"VED": {
+		"name": "Bolívar Soberano"
+	},
+	"SLE": {
+		"name": "Sierra Leonean Leone"
+	},
+	"UYW": {
+		"name": "Uruguayan Nominal Wage Index Unit"
+	},
+	"ZWL": {
+		"name": "Zimbabwean Dollar (2009)"
 	}
 }

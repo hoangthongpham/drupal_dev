@@ -37,9 +37,6 @@ use Drupal\Core\Field\FieldException;
  *     "default_value_callback",
  *     "settings",
  *     "field_type",
- *   },
- *   constraints = {
- *     "ImmutableProperties" = {"id", "entity_type", "bundle", "field_name", "field_type"},
  *   }
  * )
  */
@@ -51,11 +48,6 @@ class BaseFieldOverride extends FieldConfigBase {
    * @var \Drupal\Core\Field\BaseFieldDefinition
    */
   protected $baseFieldDefinition;
-
-  /**
-   * The original override.
-   */
-  public BaseFieldOverride $original;
 
   /**
    * Creates a base field override object.
@@ -146,13 +138,6 @@ class BaseFieldOverride extends FieldConfigBase {
    */
   public function isComputed() {
     return $this->getBaseFieldDefinition()->isComputed();
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function isInternal(): bool {
-    return $this->getBaseFieldDefinition()->isInternal();
   }
 
   /**

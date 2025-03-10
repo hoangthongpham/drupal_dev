@@ -1,11 +1,7 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\views\Kernel\Plugin;
 
-use Drupal\Component\Serialization\Json;
-use Drupal\Component\Utility\Html;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
@@ -24,7 +20,9 @@ class RowRenderCacheTest extends ViewsKernelTestBase {
   use UserCreationTrait;
 
   /**
-   * {@inheritdoc}
+   * Modules to enable.
+   *
+   * @var array
    */
   protected static $modules = ['user', 'node'];
 
@@ -66,10 +64,8 @@ class RowRenderCacheTest extends ViewsKernelTestBase {
     $this->installEntitySchema('node');
     $this->installSchema('node', 'node_access');
 
-    NodeType::create([
-      'type' => 'test',
-      'name' => 'Test',
-    ])->save();
+    $type = NodeType::create(['type' => 'test']);
+    $type->save();
 
     $this->editorUser = $this->createUser(['bypass node access']);
     $this->powerUser = $this->createUser(['access content', 'create test content', 'edit own test content', 'delete own test content']);
@@ -87,7 +83,7 @@ class RowRenderCacheTest extends ViewsKernelTestBase {
   /**
    * Tests complex field rewriting and uncacheable field handlers.
    */
-  public function testAdvancedCaching(): void {
+  public function testAdvancedCaching() {
     // Test that row field output is actually cached and with the proper cache
     // contexts.
     $this->doTestRenderedOutput($this->editorUser);
@@ -110,7 +106,7 @@ class RowRenderCacheTest extends ViewsKernelTestBase {
   /**
    * Tests that rows are not cached when the none cache plugin is used.
    */
-  public function testNoCaching(): void {
+  public function testNoCaching() {
     $this->setCurrentUser($this->regularUser);
     $view = Views::getView('test_row_render_cache_none');
     $view->setDisplay();
@@ -169,26 +165,26 @@ class RowRenderCacheTest extends ViewsKernelTestBase {
       $counter = $index + 1;
       $expected = "$nid: $counter (just in case: $nid)";
       $counter_output = $view->style_plugin->getField($index, 'counter');
-      $this->assertSame($expected, (string) $counter_output);
+      $this->assertEquals($expected, $counter_output);
 
       $node_url = $node->toUrl()->toString();
       $expected = "<a href=\"$node_url\"><span class=\"da-title\">{$node->label()}</span> <span class=\"counter\">$counter_output</span></a>";
       $output = $view->style_plugin->getField($index, 'title');
-      $this->assertSame($expected, (string) $output);
+      $this->assertEquals($expected, $output);
 
       $expected = $access ? "<a href=\"$node_url/edit?destination=/\" hreflang=\"en\">edit</a>" : "";
       $output = $view->style_plugin->getField($index, 'edit_node');
-      $this->assertSame($expected, (string) $output);
+      $this->assertEquals($expected, $output);
 
       $expected = $access ? "<a href=\"$node_url/delete?destination=/\" hreflang=\"en\">delete</a>" : "";
       $output = $view->style_plugin->getField($index, 'delete_node');
-      $this->assertSame($expected, (string) $output);
-      $expected = $access ? '  <div class="dropbutton-wrapper" data-drupal-ajax-container><div class="dropbutton-widget"><ul class="dropbutton">' .
-        '<li><a href="' . $node_url . '/edit?destination=/" aria-label="Edit ' . $node->label() . '" hreflang="en">Edit</a></li>' .
-        '<li><a href="' . $node_url . '/delete?destination=/" aria-label="Delete ' . $node->label() . '" class="use-ajax" data-dialog-type="modal" data-dialog-options="' . Html::escape(Json::encode(['width' => 880])) . '" hreflang="en">Delete</a></li>' .
+      $this->assertEquals($expected, $output);
+      $expected = $access ? '  <div class="dropbutton-wrapper"><div class="dropbutton-widget"><ul class="dropbutton">' .
+        '<li><a href="' . $node_url . '/edit?destination=/" hreflang="en">Edit</a></li>' .
+        '<li><a href="' . $node_url . '/delete?destination=/" hreflang="en">Delete</a></li>' .
         '</ul></div></div>' : '';
       $output = $view->style_plugin->getField($index, 'operations');
-      $this->assertSame($expected, (string) $output);
+      $this->assertEquals($expected, $output);
 
       if ($check_cache) {
         $keys = $cache_plugin->getRowCacheKeys($view->result[$index]);

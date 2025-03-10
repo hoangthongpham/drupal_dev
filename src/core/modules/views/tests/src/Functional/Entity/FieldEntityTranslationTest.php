@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\views\Functional\Entity;
 
 use Drupal\Core\Language\Language;
@@ -41,12 +39,12 @@ class FieldEntityTranslationTest extends ViewTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp($import_test_views = TRUE, $modules = ['views_test_config']): void {
-    parent::setUp($import_test_views, $modules);
+  protected function setUp($import_test_views = TRUE): void {
+    parent::setUp($import_test_views);
 
     $node_type = NodeType::create([
       'type' => 'article',
-      'name' => 'Article',
+      'label' => 'Article',
     ]);
     $node_type->save();
 
@@ -67,7 +65,7 @@ class FieldEntityTranslationTest extends ViewTestBase {
   /**
    * Tests that different translation mechanisms can be used for base fields.
    */
-  public function testTranslationRows(): void {
+  public function testTranslationRows() {
     $node = Node::create([
       'type' => 'article',
       'title' => 'example EN',

@@ -1,16 +1,14 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\BuildTests\Composer\Template;
 
 use Composer\Json\JsonFile;
 use Composer\Semver\VersionParser;
-use Drupal\BuildTests\Composer\ComposerBuildTestBase;
+use Drupal\BuildTests\Framework\BuildTestBase;
 use Drupal\Composer\Composer;
 
 /**
- * Demonstrate that Composer project templates can be built as patched.
+ * Demonstrate that Composer project templates are buildable as patched.
  *
  * We have to use the packages.json fixture so that Composer will use the
  * in-codebase version of the project template.
@@ -24,8 +22,10 @@ use Drupal\Composer\Composer;
  *
  * @group #slow
  * @group Template
+ *
+ * @requires externalCommand composer
  */
-class ComposerProjectTemplatesTest extends ComposerBuildTestBase {
+class ComposerProjectTemplatesTest extends BuildTestBase {
 
   /**
    * The minimum stability requirement for dependencies.
@@ -67,7 +67,7 @@ class ComposerProjectTemplatesTest extends ComposerBuildTestBase {
     return $data;
   }
 
-  public static function provideTemplateCreateProject() {
+  public function provideTemplateCreateProject() {
     return [
       'recommended-project' => [
         'drupal/recommended-project',
@@ -85,7 +85,7 @@ class ComposerProjectTemplatesTest extends ComposerBuildTestBase {
   /**
    * Make sure that static::MINIMUM_STABILITY is sufficiently strict.
    */
-  public function testMinimumStabilityStrictness(): void {
+  public function testMinimumStabilityStrictness() {
     // Ensure that static::MINIMUM_STABILITY is not less stable than the
     // current core stability. For example, if we've already released a beta on
     // the branch, ensure that we no longer allow alpha dependencies.
@@ -98,57 +98,15 @@ class ComposerProjectTemplatesTest extends ComposerBuildTestBase {
     //   to in the future accidentally commit a dependency that regresses our
     //   actual stability requirement without us explicitly changing this
     //   constant.
-    $root = $this->getDrupalRoot();
-    $process = $this->executeCommand("composer --working-dir=$root info --format=json");
-    $this->assertCommandSuccessful();
-    $installed = json_decode($process->getOutput(), TRUE);
-
-    // A lookup of the numerical position of each of the stability terms.
-    $stability_order_indexes = array_flip(static::STABILITY_ORDER);
-
-    $minimum_stability_order_index = $stability_order_indexes[static::MINIMUM_STABILITY];
-
-    $exclude = [
-      'drupal/core',
-      'drupal/core-project-message',
-      'drupal/core-vendor-hardening',
-    ];
-    foreach ($installed['installed'] as $project) {
-      // Exclude dependencies that are required with "self.version", since
-      // those stabilities will automatically match the corresponding Drupal
-      // release.
-      if (in_array($project['name'], $exclude, TRUE)) {
-        continue;
-      }
-
-      // VersionParser::parseStability doesn't play nice with (mostly dev-)
-      // versions ending with the first seven characters of the commit ID as
-      // returned by "composer info". Let's strip those suffixes here.
-      $version = preg_replace('/ [0-9a-f]{7}$/i', '', $project['version']);
-
-      $project_stability = VersionParser::parseStability($version);
-      $project_stability_order_index = $stability_order_indexes[$project_stability];
-
-      $project_stabilities[$project['name']] = $project_stability;
-
-      $this->assertGreaterThanOrEqual($minimum_stability_order_index, $project_stability_order_index, sprintf(
-        "Dependency %s with stability %s does not meet minimum stability %s.",
-        $project['name'],
-        $project_stability,
-        static::MINIMUM_STABILITY,
-      ));
-    }
-
-    // At least one project should be at the minimum stability.
-    $this->assertContains(static::MINIMUM_STABILITY, $project_stabilities);
+    $this->assertSame($this->getLowestDependencyStability(), static::MINIMUM_STABILITY);
   }
 
   /**
    * Make sure we've accounted for all the templates.
    */
-  public function testVerifyTemplateTestProviderIsAccurate(): void {
+  public function testVerifyTemplateTestProviderIsAccurate() {
     $root = $this->getDrupalRoot();
-    $data = $this->provideTemplateCreateProject();
+    $data = $this->provideTemplateCreateProject($root);
 
     // Find all the templates.
     $template_files = Composer::composerSubprojectPaths($root, 'Template');
@@ -174,7 +132,7 @@ class ComposerProjectTemplatesTest extends ComposerBuildTestBase {
   /**
    * @dataProvider provideTemplateCreateProject
    */
-  public function testTemplateCreateProject($project, $package_dir, $docroot_dir): void {
+  public function testTemplateCreateProject($project, $package_dir, $docroot_dir) {
     // Make a working COMPOSER_HOME directory for setting global composer config
     $composer_home = $this->getWorkspaceDirectory() . '/composer-home';
     mkdir($composer_home);
@@ -243,20 +201,12 @@ class ComposerProjectTemplatesTest extends ComposerBuildTestBase {
     $repository_path = $this->getWorkspaceDirectory() . '/test_repository/packages.json';
     $this->makeTestPackage($repository_path, $simulated_core_version);
 
-    $installed_composer_json = $this->getWorkspaceDirectory() . '/test_project/composer.json';
-    $autoloader = $this->getWorkspaceDirectory() . '/test_project' . $docroot_dir . '/autoload.php';
+    $installed_composer_json = $this->getWorkspaceDirectory() . '/testproject/composer.json';
+    $autoloader = $this->getWorkspaceDirectory() . '/testproject' . $docroot_dir . '/autoload.php';
     $this->assertFileDoesNotExist($autoloader);
 
-    $this->executeCommand("COMPOSER_HOME=$composer_home COMPOSER_ROOT_VERSION=$simulated_core_version composer create-project --no-ansi $project test_project $simulated_core_version -vvv --repository $repository_path");
+    $this->executeCommand("COMPOSER_HOME=$composer_home COMPOSER_ROOT_VERSION=$simulated_core_version composer create-project --no-ansi $project testproject $simulated_core_version -vvv --repository $repository_path");
     $this->assertCommandSuccessful();
-    // Check the output of the project creation for the absence of warnings
-    // about any non-allowed composer plugins.
-    // Note: There are different warnings for disallowed composer plugins
-    // depending on running in non-interactive mode or not. It seems the Drupal
-    // CI environment always forces composer commands to run in the
-    // non-interactive mode. The only thing these messages have in common is the
-    // following string.
-    $this->assertErrorOutputNotContains('See https://getcomposer.org/allow-plugins');
 
     // Ensure we used the project from our codebase.
     $this->assertErrorOutputContains("Installing $project ($simulated_core_version): Symlinking from $package_dir");
@@ -300,6 +250,26 @@ class ComposerProjectTemplatesTest extends ComposerBuildTestBase {
         }
       }
     }
+  }
+
+  /**
+   * Assert that the VERSION constant in Drupal.php is the expected value.
+   *
+   * @param string $expectedVersion
+   *   The expected version.
+   * @param string $dir
+   *   The path to the site root.
+   *
+   * @internal
+   */
+  protected function assertDrupalVersion(string $expectedVersion, string $dir): void {
+    $drupal_php_path = $dir . '/core/lib/Drupal.php';
+    $this->assertFileExists($drupal_php_path);
+
+    // Read back the Drupal version that was set and assert it matches expectations.
+    $this->executeCommand("php -r 'include \"$drupal_php_path\"; print \Drupal::VERSION;'");
+    $this->assertCommandSuccessful();
+    $this->assertCommandOutputContains($expectedVersion);
   }
 
   /**
@@ -379,22 +349,38 @@ JSON;
             "version" => $version,
           ],
         ];
-        // Ensure composer plugins are registered correctly.
-        $package_json = json_decode(file_get_contents($full_path . '/composer.json'), TRUE);
-        if (isset($package_json['type']) && $package_json['type'] === 'composer-plugin') {
-          $packages['packages'][$name][$version]['type'] = $package_json['type'];
-          $packages['packages'][$name][$version]['require'] = $package_json['require'];
-          $packages['packages'][$name][$version]['extra'] = $package_json['extra'];
-          if (isset($package_json['autoload'])) {
-            $packages['packages'][$name][$version]['autoload'] = $package_json['autoload'];
-          }
-        }
       }
     }
 
     $json = json_encode($packages, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
     mkdir(dirname($repository_path));
     file_put_contents($repository_path, $json);
+  }
+
+  /**
+   * Returns the stability of the least stable dependency.
+   */
+  protected function getLowestDependencyStability() {
+    $root = $this->getDrupalRoot();
+    $process = $this->executeCommand("composer --working-dir=$root info --format=json");
+    $this->assertCommandSuccessful();
+    $installed = json_decode($process->getOutput(), TRUE);
+
+    $lowest_stability_order_index = count(static::STABILITY_ORDER);
+    foreach ($installed['installed'] as $project) {
+      // Exclude dependencies that are required with "self.version", since
+      // those stabilities will automatically match the corresponding Drupal
+      // release.
+      $exclude = ['drupal/core', 'drupal/core-project-message', 'drupal/core-vendor-hardening'];
+      if (!in_array($project['name'], $exclude, TRUE)) {
+        $stability = VersionParser::parseStability($project['version']);
+        $stability_order_index = array_search($stability, static::STABILITY_ORDER);
+        $lowest_stability_order_index = min($lowest_stability_order_index, $stability_order_index);
+      }
+    }
+    $lowest_stability = static::STABILITY_ORDER[$lowest_stability_order_index];
+
+    return $lowest_stability;
   }
 
   /**
@@ -425,7 +411,7 @@ JSON;
       // Strip off "-dev";
       $version_towards = substr($version, 0, -4);
 
-      if (!str_ends_with($version_towards, '.0')) {
+      if (substr($version_towards, -2) !== '.0') {
         // If the current version is developing towards an x.y.z release where
         // z is not 0, it means that the x.y.0 has already been released, and
         // only stable changes are permitted on the branch.

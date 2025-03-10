@@ -5,6 +5,9 @@
  * Implements the shopping cart system and add to cart features.
  */
 
+use Drupal\commerce_cart\CartSessionInterface;
+use Drupal\commerce_order\Entity\OrderInterface;
+use Drupal\commerce_order\Entity\OrderItemInterface;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\Display\EntityFormDisplayInterface;
 use Drupal\Core\Entity\EntityForm;
@@ -13,9 +16,6 @@ use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\AnonymousUserSession;
-use Drupal\commerce_cart\CartSessionInterface;
-use Drupal\commerce_order\Entity\OrderInterface;
-use Drupal\commerce_order\Entity\OrderItemInterface;
 
 /**
  * Implements hook_cron().
@@ -45,7 +45,6 @@ function commerce_cart_theme($existing, $type, $theme, $path) {
         'content' => NULL,
         'url' => NULL,
         'links' => [],
-        'dropdown' => FALSE,
       ],
     ],
     'commerce_cart_empty_page' => [
@@ -96,9 +95,7 @@ function commerce_cart_entity_base_field_info(EntityTypeInterface $entity_type) 
  * Implements hook_entity_type_build().
  */
 function commerce_cart_entity_type_build(array &$entity_types) {
-  if (\Drupal::moduleHandler()->moduleExists('commerce_product')) {
-    $entity_types['commerce_order_item']->setFormClass('add_to_cart', '\Drupal\commerce_cart\Form\AddToCartForm');
-  }
+  $entity_types['commerce_order_item']->setFormClass('add_to_cart', '\Drupal\commerce_cart\Form\AddToCartForm');
 }
 
 /**
@@ -227,7 +224,6 @@ function commerce_cart_form_commerce_order_type_form_alter(array &$form, FormSta
   $cart_form_view = $order_type->getThirdPartySetting('commerce_cart', 'cart_form_view', 'commerce_cart_form');
   $cart_block_view = $order_type->getThirdPartySetting('commerce_cart', 'cart_block_view', 'commerce_cart_block');
   $cart_expiration = $order_type->getThirdPartySetting('commerce_cart', 'cart_expiration');
-  $enable_cart_message = $order_type->getThirdPartySetting('commerce_cart', 'enable_cart_message', TRUE);
   $view_storage = \Drupal::entityTypeManager()->getStorage('view');
   $available_form_views = [];
   $available_block_views = [];
@@ -299,11 +295,6 @@ function commerce_cart_form_commerce_order_type_form_alter(array &$form, FormSta
     ],
     '#required' => TRUE,
   ];
-  $form['commerce_cart']['enable_cart_message'] = [
-    '#type' => 'checkbox',
-    '#title' => t('Display a message when an item is added to the cart.'),
-    '#default_value' => $enable_cart_message,
-  ];
 
   $form['actions']['submit']['#submit'][] = 'commerce_cart_order_type_form_submit';
 }
@@ -326,7 +317,6 @@ function commerce_cart_order_type_form_submit($form, FormStateInterface $form_st
     ];
   }
   $order_type->setThirdPartySetting('commerce_cart', 'cart_expiration', $cart_expiration);
-  $order_type->setThirdPartySetting('commerce_cart', 'enable_cart_message', $settings['enable_cart_message']);
   $order_type->save();
 }
 
@@ -334,9 +324,7 @@ function commerce_cart_order_type_form_submit($form, FormStateInterface $form_st
  * Implements hook_form_BASE_FORM_ID_alter() for 'commerce_order_item_type_form'.
  */
 function commerce_cart_form_commerce_order_item_type_form_alter(array &$form, FormStateInterface $form_state) {
-  if (\Drupal::moduleHandler()->moduleExists('commerce_product')) {
-    $form['actions']['submit']['#submit'][] = 'commerce_cart_order_item_type_form_submit';
-  }
+  $form['actions']['submit']['#submit'][] = 'commerce_cart_order_item_type_form_submit';
 }
 
 /**

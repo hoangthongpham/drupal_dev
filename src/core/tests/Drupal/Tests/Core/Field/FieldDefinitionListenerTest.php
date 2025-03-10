@@ -1,13 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\Core\Field;
 
 use Drupal\Component\Plugin\Exception\PluginNotFoundException;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Entity\DynamicallyFieldableEntityStorageInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
@@ -79,11 +78,15 @@ class FieldDefinitionListenerTest extends UnitTestCase {
    *   (optional) An array of entity type definitions.
    */
   protected function setUpEntityTypeManager($definitions = []) {
+    $class = $this->getMockClass(EntityInterface::class);
     foreach ($definitions as $key => $entity_type) {
       // \Drupal\Core\Entity\EntityTypeInterface::getLinkTemplates() is called
       // by \Drupal\Core\Entity\EntityTypeManager::processDefinition() so it must
       // always be mocked.
       $entity_type->getLinkTemplates()->willReturn([]);
+
+      // Give the entity type a legitimate class to return.
+      $entity_type->getClass()->willReturn($class);
 
       $definitions[$key] = $entity_type->reveal();
     }
@@ -108,7 +111,7 @@ class FieldDefinitionListenerTest extends UnitTestCase {
   /**
    * @covers ::onFieldDefinitionCreate
    */
-  public function testOnFieldDefinitionCreateNewField(): void {
+  public function testOnFieldDefinitionCreateNewField() {
     $field_definition = $this->prophesize(FieldDefinitionInterface::class);
     $field_definition->getTargetEntityTypeId()->willReturn('test_entity_type');
     $field_definition->getTargetBundle()->willReturn('test_bundle');
@@ -139,7 +142,7 @@ class FieldDefinitionListenerTest extends UnitTestCase {
   /**
    * @covers ::onFieldDefinitionCreate
    */
-  public function testOnFieldDefinitionCreateExistingField(): void {
+  public function testOnFieldDefinitionCreateExistingField() {
     $field_definition = $this->prophesize(FieldDefinitionInterface::class);
     $field_definition->getTargetEntityTypeId()->willReturn('test_entity_type');
     $field_definition->getTargetBundle()->willReturn('test_bundle');
@@ -175,7 +178,7 @@ class FieldDefinitionListenerTest extends UnitTestCase {
   /**
    * @covers ::onFieldDefinitionUpdate
    */
-  public function testOnFieldDefinitionUpdate(): void {
+  public function testOnFieldDefinitionUpdate() {
     $field_definition = $this->prophesize(FieldDefinitionInterface::class);
     $field_definition->getTargetEntityTypeId()->willReturn('test_entity_type');
 
@@ -192,7 +195,7 @@ class FieldDefinitionListenerTest extends UnitTestCase {
   /**
    * @covers ::onFieldDefinitionDelete
    */
-  public function testOnFieldDefinitionDeleteMultipleBundles(): void {
+  public function testOnFieldDefinitionDeleteMultipleBundles() {
     $field_definition = $this->prophesize(FieldDefinitionInterface::class);
     $field_definition->getTargetEntityTypeId()->willReturn('test_entity_type');
     $field_definition->getTargetBundle()->willReturn('test_bundle');
@@ -232,7 +235,7 @@ class FieldDefinitionListenerTest extends UnitTestCase {
   /**
    * @covers ::onFieldDefinitionDelete
    */
-  public function testOnFieldDefinitionDeleteSingleBundles(): void {
+  public function testOnFieldDefinitionDeleteSingleBundles() {
     $field_definition = $this->prophesize(FieldDefinitionInterface::class);
     $field_definition->getTargetEntityTypeId()->willReturn('test_entity_type');
     $field_definition->getTargetBundle()->willReturn('test_bundle');

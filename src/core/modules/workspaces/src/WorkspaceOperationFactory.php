@@ -4,10 +4,7 @@ namespace Drupal\workspaces;
 
 use Drupal\Core\Cache\CacheTagsInvalidatorInterface;
 use Drupal\Core\Database\Connection;
-use Drupal\Core\DependencyInjection\DeprecatedServicePropertyTrait;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Psr\Log\LoggerInterface;
-use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Defines a factory class for workspace operations.
@@ -18,17 +15,6 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
  * @internal
  */
 class WorkspaceOperationFactory {
-
-  use DeprecatedServicePropertyTrait;
-
-  /**
-   * Defines deprecated injected properties.
-   *
-   * @var array
-   */
-  protected array $deprecatedProperties = [
-    'cacheTagInvalidator' => 'cache_tags.invalidator',
-  ];
 
   /**
    * The entity type manager.
@@ -59,21 +45,14 @@ class WorkspaceOperationFactory {
   protected $workspaceAssociation;
 
   /**
-   * An event dispatcher instance to use for configuration events.
+   * The cache tags invalidator.
    *
-   * @var \Symfony\Contracts\EventDispatcher\EventDispatcherInterface
+   * @var \Drupal\Core\Cache\CacheTagsInvalidatorInterface
    */
-  protected $eventDispatcher;
+  protected $cacheTagsInvalidator;
 
   /**
-   * The logger service.
-   *
-   * @var \Psr\Log\LoggerInterface
-   */
-  protected $logger;
-
-  /**
-   * Constructs a new WorkspaceOperationFactory.
+   * Constructs a new WorkspacePublisher.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
@@ -83,33 +62,15 @@ class WorkspaceOperationFactory {
    *   The workspace manager service.
    * @param \Drupal\workspaces\WorkspaceAssociationInterface $workspace_association
    *   The workspace association service.
-   * @param \Symfony\Contracts\EventDispatcher\EventDispatcherInterface|\Drupal\Core\Cache\CacheTagsInvalidatorInterface $event_dispatcher
-   *   The event dispatcher.
-   * @param \Psr\Log\LoggerInterface|null $logger
-   *   The logger.
+   * @param \Drupal\Core\Cache\CacheTagsInvalidatorInterface $cache_tags_invalidator
+   *   The cache tags invalidator service.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, Connection $database, WorkspaceManagerInterface $workspace_manager, WorkspaceAssociationInterface $workspace_association, EventDispatcherInterface|CacheTagsInvalidatorInterface $event_dispatcher, LoggerInterface|EventDispatcherInterface|null $logger = NULL) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, Connection $database, WorkspaceManagerInterface $workspace_manager, WorkspaceAssociationInterface $workspace_association, CacheTagsInvalidatorInterface $cache_tags_invalidator) {
     $this->entityTypeManager = $entity_type_manager;
     $this->database = $database;
     $this->workspaceManager = $workspace_manager;
     $this->workspaceAssociation = $workspace_association;
-
-    if ($event_dispatcher instanceof CacheTagsInvalidatorInterface) {
-      $event_dispatcher = \Drupal::service('event_dispatcher');
-      @trigger_error('Calling ' . __METHOD__ . '() with the $cache_tags_invalidator argument is deprecated in drupal:10.3.0 and is removed from drupal:11.0.0. See https://www.drupal.org/node/3440755', E_USER_DEPRECATED);
-    }
-    elseif (!$event_dispatcher instanceof EventDispatcherInterface) {
-      $event_dispatcher = \Drupal::service('event_dispatcher');
-      @trigger_error('Calling ' . __METHOD__ . '() without the $event_dispatcher argument is deprecated in drupal:10.1.0 and it will be required in drupal:11.0.0. See https://www.drupal.org/node/3242573', E_USER_DEPRECATED);
-    }
-    $this->eventDispatcher = $event_dispatcher;
-
-    $logger = func_get_arg(5);
-    if (!$logger instanceof LoggerInterface) {
-      $logger = \Drupal::service('logger.channel.workspaces');
-      @trigger_error('Calling ' . __METHOD__ . '() without the $logger argument is deprecated in drupal:10.1.0 and it will be required in drupal:11.0.0. See https://www.drupal.org/node/2932520', E_USER_DEPRECATED);
-    }
-    $this->logger = $logger;
+    $this->cacheTagsInvalidator = $cache_tags_invalidator;
   }
 
   /**
@@ -122,7 +83,7 @@ class WorkspaceOperationFactory {
    *   A workspace publisher object.
    */
   public function getPublisher(WorkspaceInterface $source) {
-    return new WorkspacePublisher($this->entityTypeManager, $this->database, $this->workspaceManager, $this->workspaceAssociation, $this->eventDispatcher, $source, $this->logger);
+    return new WorkspacePublisher($this->entityTypeManager, $this->database, $this->workspaceManager, $this->workspaceAssociation, $source);
   }
 
   /**
@@ -137,7 +98,7 @@ class WorkspaceOperationFactory {
    *   A workspace merger object.
    */
   public function getMerger(WorkspaceInterface $source, WorkspaceInterface $target) {
-    return new WorkspaceMerger($this->entityTypeManager, $this->database, $this->workspaceAssociation, $source, $target, $this->logger);
+    return new WorkspaceMerger($this->entityTypeManager, $this->database, $this->workspaceAssociation, $this->cacheTagsInvalidator, $source, $target);
   }
 
 }

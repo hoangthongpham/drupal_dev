@@ -1,12 +1,9 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\comment\Functional\Rest;
 
 use Drupal\comment\Entity\Comment;
 use Drupal\comment\Entity\CommentType;
-use Drupal\comment\Plugin\Field\FieldType\CommentItemInterface;
 use Drupal\comment\Tests\CommentTestTrait;
 use Drupal\Core\Cache\Cache;
 use Drupal\entity_test\Entity\EntityTest;
@@ -49,17 +46,6 @@ abstract class CommentResourceTestBase extends EntityResourceTestBase {
    * @var \Drupal\comment\CommentInterface
    */
   protected $entity;
-
-  /**
-   * Marks some tests as skipped because XML cannot be deserialized.
-   *
-   * @before
-   */
-  public function commentResourceTestBaseSkipTests(): void {
-    if (static::$format === 'xml' && in_array($this->name(), ['testPostDxWithoutCriticalBaseFields', 'testPostSkipCommentApproval'], TRUE)) {
-      $this->markTestSkipped('Deserialization of the XML format is not supported.');
-    }
-  }
 
   /**
    * {@inheritdoc}
@@ -108,7 +94,6 @@ abstract class CommentResourceTestBase extends EntityResourceTestBase {
     $commented_entity = EntityTest::create([
       'name' => 'Camelids',
       'type' => 'bar',
-      'comment' => CommentItemInterface::OPEN,
     ]);
     $commented_entity->save();
 
@@ -254,7 +239,7 @@ abstract class CommentResourceTestBase extends EntityResourceTestBase {
       ],
       'subject' => [
         [
-          'value' => 'Drama llama',
+          'value' => 'Dramallama',
         ],
       ],
       'comment_body' => [
@@ -300,7 +285,7 @@ abstract class CommentResourceTestBase extends EntityResourceTestBase {
    * - base fields that are marked as required, but yet can still result in
    *   validation errors other than "missing required field".
    */
-  public function testPostDxWithoutCriticalBaseFields(): void {
+  public function testPostDxWithoutCriticalBaseFields() {
     $this->initAuthentication();
     $this->provisionEntityResource();
     $this->setUpAuthorization('POST');
@@ -332,17 +317,16 @@ abstract class CommentResourceTestBase extends EntityResourceTestBase {
    */
   protected function getExpectedUnauthorizedAccessMessage($method) {
     switch ($method) {
-      case 'GET':
+      case 'GET';
         return "The 'access comments' permission is required and the comment must be published.";
 
-      case 'POST':
+      case 'POST';
         return "The 'post comments' permission is required.";
 
-      case 'PATCH':
+      case 'PATCH';
         return "The 'edit own comments' permission is required, the user must be the comment author, and the comment must be published.";
 
       case 'DELETE':
-      default:
         // \Drupal\comment\CommentAccessControlHandler::checkAccess() does not
         // specify a reason for not allowing a comment to be deleted.
         return '';
@@ -352,7 +336,7 @@ abstract class CommentResourceTestBase extends EntityResourceTestBase {
   /**
    * Tests POSTing a comment with and without 'skip comment approval'.
    */
-  public function testPostSkipCommentApproval(): void {
+  public function testPostSkipCommentApproval() {
     $this->initAuthentication();
     $this->provisionEntityResource();
     $this->setUpAuthorization('POST');
@@ -371,9 +355,6 @@ abstract class CommentResourceTestBase extends EntityResourceTestBase {
     $unserialized = $this->serializer->deserialize((string) $response->getBody(), get_class($this->entity), static::$format);
     $this->assertResourceResponse(201, FALSE, $response);
     $this->assertFalse($unserialized->isPublished());
-
-    // Make sure the role save below properly invalidates cache tags.
-    $this->refreshVariables();
 
     // Grant anonymous permission to skip comment approval.
     $this->grantPermissionsToTestedRole(['skip comment approval']);

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\user\Functional;
 
 use Drupal\Tests\content_translation\Functional\ContentTranslationUITestBase;
@@ -32,7 +30,9 @@ class UserTranslationUITest extends ContentTranslationUITestBase {
   ];
 
   /**
-   * {@inheritdoc}
+   * Modules to enable.
+   *
+   * @var array
    */
   protected static $modules = [
     'language',
@@ -46,15 +46,11 @@ class UserTranslationUITest extends ContentTranslationUITestBase {
    */
   protected $defaultTheme = 'stark';
 
-  /**
-   * {@inheritdoc}
-   */
   protected function setUp(): void {
     $this->entityTypeId = 'user';
     $this->testLanguageSelector = FALSE;
     $this->name = $this->randomMachineName();
     parent::setUp();
-    $this->doSetup();
 
     \Drupal::entityTypeManager()->getStorage('user')->resetCache();
   }
@@ -98,7 +94,7 @@ class UserTranslationUITest extends ContentTranslationUITestBase {
   /**
    * Tests translated user deletion.
    */
-  public function testTranslatedUserDeletion(): void {
+  public function testTranslatedUserDeletion() {
     $this->drupalLogin($this->administrator);
     $entity_id = $this->createEntity($this->getNewEntityValues('en'), 'en');
 
@@ -113,7 +109,7 @@ class UserTranslationUITest extends ContentTranslationUITestBase {
       ['language' => $this->container->get('language_manager')->getLanguage('en')]
     );
     $this->drupalGet($url);
-    $this->clickLink('Cancel account');
+    $this->submitForm([], 'Cancel account');
     $this->assertSession()->statusCodeEquals(200);
   }
 

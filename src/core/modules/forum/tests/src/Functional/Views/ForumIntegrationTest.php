@@ -1,18 +1,16 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\forum\Functional\Views;
 
 use Drupal\node\NodeInterface;
 use Drupal\views\Views;
 use Drupal\Tests\views\Functional\ViewTestBase;
+use Drupal\views\Tests\ViewTestData;
 
 /**
  * Tests the forum integration into views.
  *
  * @group forum
- * @group legacy
  */
 class ForumIntegrationTest extends ViewTestBase {
 
@@ -35,17 +33,16 @@ class ForumIntegrationTest extends ViewTestBase {
    */
   public static $testViews = ['test_forum_index'];
 
-  /**
-   * {@inheritdoc}
-   */
-  protected function setUp($import_test_views = TRUE, $modules = ['forum_test_views']): void {
-    parent::setUp($import_test_views, $modules);
+  protected function setUp($import_test_views = TRUE): void {
+    parent::setUp($import_test_views);
+
+    ViewTestData::createTestViews(static::class, ['forum_test_views']);
   }
 
   /**
    * Tests the integration.
    */
-  public function testForumIntegration(): void {
+  public function testForumIntegration() {
     // Create a forum.
     $entity_type_manager = $this->container->get('entity_type.manager');
     $term = $entity_type_manager->getStorage('taxonomy_term')->create(['vid' => 'forums', 'name' => $this->randomMachineName()]);

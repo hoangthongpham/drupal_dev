@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\views_ui\Functional;
 
 use Drupal\Tests\SchemaCheckTestTrait;
@@ -30,7 +28,7 @@ class FilterNumericWebTest extends UITestBase {
   /**
    * Tests the filter numeric UI.
    */
-  public function testFilterNumericUI(): void {
+  public function testFilterNumericUI() {
     // Add a page display to the test_view to be able to test the filtering.
     $path = 'test_view-path';
     $this->drupalGet('admin/structure/views/view/test_view/edit');
@@ -146,7 +144,8 @@ class FilterNumericWebTest extends UITestBase {
 
     // Make sure the label is visible and that there's no fieldset wrapper.
     $this->assertSession()->elementsCount('xpath', '//label[contains(@for, "edit-age") and contains(text(), "Age greater than")]', 1);
-    $this->assertSession()->elementNotExists('xpath', '//fieldset[contains(@id, "edit-age-wrapper")]');
+    $fieldset = $this->xpath('//fieldset[contains(@id, "edit-age-wrapper")]');
+    $this->assertEmpty($fieldset);
   }
 
 }

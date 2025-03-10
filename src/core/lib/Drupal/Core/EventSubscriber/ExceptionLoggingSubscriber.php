@@ -44,7 +44,7 @@ class ExceptionLoggingSubscriber implements EventSubscriberInterface {
     $error = Error::decodeException($exception);
     unset($error['@backtrace_string']);
     $error['@uri'] = $event->getRequest()->getRequestUri();
-    $this->logger->get('access denied')->warning('Path: @uri. ' . Error::DEFAULT_ERROR_MESSAGE, $error);
+    $this->logger->get('access denied')->warning('Path: @uri. %type: @message in %function (line %line of %file).', $error);
   }
 
   /**
@@ -67,29 +67,12 @@ class ExceptionLoggingSubscriber implements EventSubscriberInterface {
   public function onError(ExceptionEvent $event) {
     $exception = $event->getThrowable();
     $error = Error::decodeException($exception);
-    $this->logger->get('php')->log($error['severity_level'], Error::DEFAULT_ERROR_MESSAGE, $error);
+    $this->logger->get('php')->log($error['severity_level'], '%type: @message in %function (line %line of %file).', $error);
 
     $is_critical = !$exception instanceof HttpExceptionInterface || $exception->getStatusCode() >= 500;
     if ($is_critical) {
       error_log(sprintf('Uncaught PHP Exception %s: "%s" at %s line %s', get_class($exception), $exception->getMessage(), $exception->getFile(), $exception->getLine()));
     }
-  }
-
-  /**
-   * Log 4xx errors that are not 403 or 404.
-   *
-   * @param \Symfony\Component\HttpKernel\Event\ExceptionEvent $event
-   *   The event to process.
-   */
-  public function onClientError(ExceptionEvent $event) {
-    $exception = $event->getThrowable();
-    $error = Error::decodeException($exception);
-    $error += [
-      'status_code' => $exception->getStatusCode(),
-    ];
-    unset($error['@backtrace_string']);
-    $this->logger->get('client error')
-      ->warning(Error::DEFAULT_ERROR_MESSAGE, $error);
   }
 
   /**
@@ -105,13 +88,9 @@ class ExceptionLoggingSubscriber implements EventSubscriberInterface {
 
     // Treat any non-HTTP exception as if it were one, so we log it the same.
     if ($exception instanceof HttpExceptionInterface) {
-      $status_code = $exception->getStatusCode();
-      $possible_method = 'on' . $status_code;
+      $possible_method = 'on' . $exception->getStatusCode();
       if (method_exists($this, $possible_method)) {
         $method = $possible_method;
-      }
-      elseif ($status_code >= 400 && $status_code < 500) {
-        $method = 'onClientError';
       }
     }
 
@@ -121,7 +100,7 @@ class ExceptionLoggingSubscriber implements EventSubscriberInterface {
   /**
    * {@inheritdoc}
    */
-  public static function getSubscribedEvents(): array {
+  public static function getSubscribedEvents() {
     $events[KernelEvents::EXCEPTION][] = ['onException', 50];
     return $events;
   }

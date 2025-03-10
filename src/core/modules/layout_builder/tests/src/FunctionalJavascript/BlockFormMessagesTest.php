@@ -1,11 +1,8 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\layout_builder\FunctionalJavascript;
 
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
-use Drupal\layout_builder\Entity\LayoutBuilderEntityViewDisplay;
 use Drupal\Tests\contextual\FunctionalJavascript\ContextualLinkClickTrait;
 
 /**
@@ -30,7 +27,7 @@ class BlockFormMessagesTest extends WebDriverTestBase {
   /**
    * {@inheritdoc}
    */
-  protected $defaultTheme = 'starterkit_theme';
+  protected $defaultTheme = 'classy';
 
   /**
    * {@inheritdoc}
@@ -38,25 +35,30 @@ class BlockFormMessagesTest extends WebDriverTestBase {
   protected function setUp(): void {
     parent::setUp();
     $this->createContentType(['type' => 'bundle_with_section_field']);
-    LayoutBuilderEntityViewDisplay::load('node.bundle_with_section_field.default')
-      ->enableLayoutBuilder()
-      ->setOverridable()
-      ->save();
-    $this->createNode(['type' => 'bundle_with_section_field']);
   }
 
   /**
    * Tests that validation messages are shown on the block form.
    */
-  public function testValidationMessage(): void {
+  public function testValidationMessage() {
+    // @todo Work out why this fixes random fails in this test.
+    //   https://www.drupal.org/project/drupal/issues/3055982
+    $this->getSession()->resizeWindow(800, 1000);
     $assert_session = $this->assertSession();
     $page = $this->getSession()->getPage();
 
     $this->drupalLogin($this->drupalCreateUser([
       'access contextual links',
       'configure any layout',
+      'administer node display',
+      'administer node fields',
     ]));
-    $this->drupalGet('node/1/layout');
+    $field_ui_prefix = 'admin/structure/types/manage/bundle_with_section_field';
+    // Enable layout builder.
+    $this->drupalGet($field_ui_prefix . '/display/default');
+    $this->submitForm(['layout[enabled]' => TRUE], 'Save');
+    $page->findLink('Manage layout')->click();
+    $assert_session->addressEquals($field_ui_prefix . '/display/default/layout');
     $page->findLink('Add block')->click();
     $this->assertNotEmpty($assert_session->waitForElementVisible('css', '#drupal-off-canvas .block-categories'));
     $page->findLink('Powered by Drupal')->click();
@@ -73,10 +75,11 @@ class BlockFormMessagesTest extends WebDriverTestBase {
     $assert_session->assertWaitOnAjaxRequest();
     $this->drupalGet($this->getUrl());
     $page->findButton('Save layout')->click();
-    $this->assertNotEmpty($assert_session->waitForElement('css', 'div:contains("The layout override has been saved")'));
+    $this->assertNotEmpty($assert_session->waitForElement('css', 'div:contains("The layout has been saved")'));
 
     // Ensure that message are displayed when configuring an existing block.
-    $this->drupalGet('node/1/layout');
+    $this->drupalGet($field_ui_prefix . '/display/default/layout');
+    $assert_session->assertWaitOnAjaxRequest();
     $this->clickContextualLink($block_css_locator, 'Configure', TRUE);
     $this->assertNotEmpty($assert_session->waitForElementVisible('css', '#drupal-off-canvas [name="settings[label]"]'));
     $page->findField('Title')->setValue('');

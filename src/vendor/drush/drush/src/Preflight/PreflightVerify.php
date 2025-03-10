@@ -1,7 +1,4 @@
 <?php
-
-declare(strict_types=1);
-
 namespace Drush\Preflight;
 
 use Drush\Config\Environment;
@@ -14,13 +11,15 @@ class PreflightVerify
 {
     /**
      * Throw an exception if the environment is not right for running Drush.
+     *
+     * @param Environment $environment
      */
-    public function verify(Environment $environment): void
+    public function verify(Environment $environment)
     {
-        // Fail fast if the PHP version is not at least 8.1.0.
+        // Fail fast if the PHP version is not at least 7.1.3.
         // We'll come back and check this again later, in case someone
         // set a higher value in a configuration file.
-        $this->confirmPhpVersion('8.1.0');
+        $this->confirmPhpVersion('7.1.3');
 
         // Fail if this is not a CLI php
         $this->confirmUsingCLI($environment);
@@ -36,11 +35,8 @@ class PreflightVerify
      * @param string $minimumPhpVersion
      *   The minimum allowable php version
      */
-    public function confirmPhpVersion(string|null $minimumPhpVersion): void
+    public function confirmPhpVersion($minimumPhpVersion)
     {
-        if (empty($minimumPhpVersion)) {
-            return;
-        }
         if (version_compare(phpversion(), $minimumPhpVersion) < 0 && !getenv('DRUSH_NO_MIN_PHP')) {
             throw new \Exception(StringUtils::interpolate('Your command line PHP installation is too old. Drush requires at least PHP {version}. To suppress this check, set the environment variable DRUSH_NO_MIN_PHP=1', ['version' => $minimumPhpVersion]));
         }
@@ -48,8 +44,10 @@ class PreflightVerify
 
     /**
      * Fail if not being run from the command line.
+     *
+     * @param Environment $environment
      */
-    protected function confirmUsingCLI(Environment $environment): void
+    protected function confirmUsingCLI(Environment $environment)
     {
         if (!$environment->verifyCLI()) {
             throw new \Exception(StringUtils::interpolate('Drush is designed to run via the command line.'));
@@ -61,7 +59,7 @@ class PreflightVerify
      * begins.  If the php environment is too restrictive, then
      * notify the user that a setting change is needed and abort.
      */
-    protected function checkPhpIni(): void
+    protected function checkPhpIni()
     {
         $ini_checks = ['safe_mode' => '', 'open_basedir' => ''];
 
@@ -73,7 +71,7 @@ class PreflightVerify
                 $prohibited_list[] = $prohibited_mode;
             }
         }
-        if ($prohibited_list !== []) {
+        if (!empty($prohibited_list)) {
             throw new \Exception(StringUtils::interpolate('The following restricted PHP modes have non-empty values: {prohibited_list}. This configuration is incompatible with drush.  {php_ini_msg}', ['prohibited_list' => implode(' and ', $prohibited_list), 'php_ini_msg' => $this->loadedPhpIniMessage()]));
         }
     }
@@ -81,13 +79,14 @@ class PreflightVerify
     /**
      * Determine whether an ini value is valid based on the criteria.
      *
-     * @param mixed $ini_value
+     * @param string $ini_value
      *   The value of the ini setting being tested.
      * @param string|string[] $disallowed_value
-     *   The value that the ini setting cannot be, or a list of disallowed
+     *   The value that the ini seting cannot be, or a list of disallowed
      *   values that cannot appear in the setting.
+     * @return bool
      */
-    protected function invalidIniValue(mixed $ini_value, string|array $disallowed_value): bool
+    protected function invalidIniValue($ini_value, $disallowed_value)
     {
         if (empty($disallowed_value)) {
             return !empty($ini_value) && (strcasecmp($ini_value, 'off') != 0);
@@ -106,7 +105,7 @@ class PreflightVerify
      * varies depending on whether the php_ini_loaded_file()
      * is available or not.
      */
-    protected function loadedPhpIniMessage(): string
+    protected function loadedPhpIniMessage()
     {
         if (function_exists('php_ini_loaded_file')) {
             return StringUtils::interpolate('Please check your configuration settings in !phpini.', ['!phpini' => php_ini_loaded_file()]);

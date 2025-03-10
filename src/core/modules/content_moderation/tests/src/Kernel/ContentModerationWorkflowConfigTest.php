@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\content_moderation\Kernel;
 
 use Drupal\Core\Config\ConfigImporterException;
@@ -65,7 +63,6 @@ class ContentModerationWorkflowConfigTest extends KernelTestBase {
 
     NodeType::create([
       'type' => 'example',
-      'name' => 'Example',
     ])->save();
 
     $workflow = $this->createEditorialWorkflow();
@@ -83,7 +80,7 @@ class ContentModerationWorkflowConfigTest extends KernelTestBase {
   /**
    * Tests deleting a state via config import.
    */
-  public function testDeletingStateViaConfiguration(): void {
+  public function testDeletingStateViaConfiguration() {
     $config_sync = \Drupal::service('config.storage.sync');
 
     // Alter the workflow data.
@@ -137,9 +134,10 @@ class ContentModerationWorkflowConfigTest extends KernelTestBase {
       $this->fail('ConfigImporterException not thrown, invalid import was not stopped due to deleted workflow.');
     }
     catch (ConfigImporterException $e) {
-      $this->assertEquals('There were errors validating the config synchronization.' . PHP_EOL . 'The workflow Editorial is being used, and cannot be deleted.', $e->getMessage());
+      $this->assertEquals('There were errors validating the config synchronization.' . PHP_EOL . 'The moderation state Test two is being used, but is not in the source storage.' . PHP_EOL . 'The workflow Editorial is being used, and cannot be deleted.', $e->getMessage());
       $error_log = $this->configImporter->getErrors();
       $expected = [
+        'The moderation state Test two is being used, but is not in the source storage.',
         'The workflow Editorial is being used, and cannot be deleted.',
       ];
       $this->assertEquals($expected, $error_log);

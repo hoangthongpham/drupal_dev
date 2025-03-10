@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\system\Functional\System;
 
 use Drupal\Tests\BrowserTestBase;
@@ -14,7 +12,9 @@ use Drupal\Tests\BrowserTestBase;
 class HtaccessTest extends BrowserTestBase {
 
   /**
-   * {@inheritdoc}
+   * Modules to enable.
+   *
+   * @var array
    */
   protected static $modules = ['node', 'path'];
 
@@ -91,10 +91,6 @@ class HtaccessTest extends BrowserTestBase {
     $file_paths["$path/composer.json"] = 403;
     $file_paths["$path/composer.lock"] = 403;
 
-    // Ensure package.json and yarn.lock cannot be accessed.
-    $file_paths["$path/package.json"] = 403;
-    $file_paths["$path/yarn.lock"] = 403;
-
     // Ensure web server configuration files cannot be accessed.
     $file_paths["$path/.htaccess"] = 403;
     $file_paths["$path/web.config"] = 403;
@@ -105,7 +101,7 @@ class HtaccessTest extends BrowserTestBase {
   /**
    * Iterates over protected files and calls assertNoFileAccess().
    */
-  public function testFileAccess(): void {
+  public function testFileAccess() {
     foreach ($this->getProtectedFiles() as $file => $response_code) {
       $this->assertFileAccess($file, $response_code);
     }
@@ -155,7 +151,7 @@ class HtaccessTest extends BrowserTestBase {
   /**
    * Tests that SVGZ files are served with Content-Encoding: gzip.
    */
-  public function testSvgzContentEncoding(): void {
+  public function testSvgzContentEncoding() {
     $this->drupalGet('core/modules/system/tests/logo.svgz');
     $this->assertSession()->statusCodeEquals(200);
 

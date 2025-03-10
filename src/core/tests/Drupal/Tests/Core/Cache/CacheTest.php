@@ -1,13 +1,8 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\Core\Cache;
 
 use Drupal\Core\Cache\Cache;
-use Drupal\Tests\Core\Database\Stub\Select;
-use Drupal\Tests\Core\Database\Stub\StubConnection;
-use Drupal\Tests\Core\Database\Stub\StubPDO;
 use Drupal\Tests\UnitTestCase;
 use Prophecy\Argument;
 use Drupal\Core\Cache\Context\CacheContextsManager;
@@ -53,7 +48,7 @@ class CacheTest extends UnitTestCase {
    *
    * @return array
    */
-  public static function mergeTagsProvider() {
+  public function mergeTagsProvider() {
     return [
       [[], [], []],
       [['bar', 'foo'], ['bar'], ['foo']],
@@ -71,7 +66,7 @@ class CacheTest extends UnitTestCase {
    *
    * @dataProvider mergeTagsProvider
    */
-  public function testMergeTags(array $expected, ...$cache_tags): void {
+  public function testMergeTags(array $expected, ...$cache_tags) {
     $this->assertEqualsCanonicalizing($expected, Cache::mergeTags(...$cache_tags));
   }
 
@@ -80,7 +75,7 @@ class CacheTest extends UnitTestCase {
    *
    * @return array
    */
-  public static function mergeMaxAgesProvider() {
+  public function mergeMaxAgesProvider() {
     return [
       [Cache::PERMANENT, Cache::PERMANENT, Cache::PERMANENT],
       [60, 60, 60],
@@ -110,7 +105,7 @@ class CacheTest extends UnitTestCase {
    *
    * @dataProvider mergeMaxAgesProvider
    */
-  public function testMergeMaxAges($expected, ...$max_ages): void {
+  public function testMergeMaxAges($expected, ...$max_ages) {
     $this->assertSame($expected, Cache::mergeMaxAges(...$max_ages));
   }
 
@@ -119,7 +114,7 @@ class CacheTest extends UnitTestCase {
    *
    * @return array
    */
-  public static function mergeCacheContextsProvide() {
+  public function mergeCacheContextsProvide() {
     return [
       [[], [], []],
       [['foo'], [], ['foo']],
@@ -144,7 +139,7 @@ class CacheTest extends UnitTestCase {
    *
    * @dataProvider mergeCacheContextsProvide
    */
-  public function testMergeCacheContexts(array $expected, ...$contexts): void {
+  public function testMergeCacheContexts(array $expected, ...$contexts) {
     $cache_contexts_manager = $this->prophesize(CacheContextsManager::class);
     $cache_contexts_manager->assertValidTokens(Argument::any())->willReturn(TRUE);
     $container = $this->prophesize(Container::class);
@@ -158,7 +153,7 @@ class CacheTest extends UnitTestCase {
    *
    * @return array
    */
-  public static function buildTagsProvider() {
+  public function buildTagsProvider() {
     return [
       ['node', [1], ['node:1']],
       ['node', [1, 2, 3], ['node:1', 'node:2', 'node:3']],
@@ -185,18 +180,8 @@ class CacheTest extends UnitTestCase {
    *
    * @dataProvider buildTagsProvider
    */
-  public function testBuildTags($prefix, array $suffixes, array $expected, $glue = ':'): void {
+  public function testBuildTags($prefix, array $suffixes, array $expected, $glue = ':') {
     $this->assertEquals($expected, Cache::buildTags($prefix, $suffixes, $glue));
-  }
-
-  /**
-   * @covers ::keyFromQuery
-   * @group legacy
-   */
-  public function testKeyFromQuery(): void {
-    $this->expectDeprecation('Drupal\Core\Cache\Cache::keyFromQuery is deprecated in drupal:10.1.0 and is removed from drupal:11.0.0. No replacement provided. See https://www.drupal.org/node/3322044');
-    $query = new Select(new StubConnection(new StubPDO(), []), 'dne');
-    Cache::keyFromQuery($query);
   }
 
 }

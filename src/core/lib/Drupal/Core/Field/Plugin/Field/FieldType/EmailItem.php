@@ -3,24 +3,23 @@
 namespace Drupal\Core\Field\Plugin\Field\FieldType;
 
 use Drupal\Component\Utility\Random;
-use Drupal\Core\Field\Attribute\FieldType;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Field\FieldItemBase;
 use Drupal\Core\Render\Element\Email;
 use Drupal\Core\TypedData\DataDefinition;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * Defines the 'email' field type.
+ *
+ * @FieldType(
+ *   id = "email",
+ *   label = @Translation("Email"),
+ *   description = @Translation("An entity field containing an email value."),
+ *   default_widget = "email_default",
+ *   default_formatter = "basic_string"
+ * )
  */
-#[FieldType(
-  id: "email",
-  label: new TranslatableMarkup("Email"),
-  description: new TranslatableMarkup("Field to store an email address."),
-  default_widget: "email_default",
-  default_formatter: "basic_string"
-)]
 class EmailItem extends FieldItemBase {
 
   /**
@@ -28,7 +27,7 @@ class EmailItem extends FieldItemBase {
    */
   public static function propertyDefinitions(FieldStorageDefinitionInterface $field_definition) {
     $properties['value'] = DataDefinition::create('email')
-      ->setLabel(new TranslatableMarkup('Email'))
+      ->setLabel(t('Email'))
       ->setRequired(TRUE);
 
     return $properties;
@@ -59,10 +58,7 @@ class EmailItem extends FieldItemBase {
       'value' => [
         'Length' => [
           'max' => Email::EMAIL_MAX_LENGTH,
-          'maxMessage' => $this->t('%name: the email address can not be longer than @max characters.', [
-            '%name' => $this->getFieldDefinition()->getLabel(),
-            '@max' => Email::EMAIL_MAX_LENGTH,
-          ]),
+          'maxMessage' => t('%name: the email address can not be longer than @max characters.', ['%name' => $this->getFieldDefinition()->getLabel(), '@max' => Email::EMAIL_MAX_LENGTH]),
         ],
       ],
     ]);

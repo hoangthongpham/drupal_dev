@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\field\Unit\Plugin\migrate\process\d6;
 
 use Drupal\field\Plugin\migrate\process\d6\FieldSettings;
@@ -21,9 +19,9 @@ class FieldSettingsTest extends UnitTestCase {
    *
    * @dataProvider getSettingsProvider
    */
-  public function testGetSettings($field_type, $field_settings, $allowed_values): void {
+  public function testGetSettings($field_type, $field_settings, $allowed_values) {
     $migration = $this->createMock(MigrationInterface::class);
-    $plugin = new FieldSettings([], 'd6_field_settings', []);
+    $plugin = new FieldSettings([], 'd6_field_settings', [], $migration);
 
     $executable = $this->createMock(MigrateExecutableInterface::class);
     $row = $this->getMockBuilder(Row::class)
@@ -37,7 +35,7 @@ class FieldSettingsTest extends UnitTestCase {
   /**
    * Provides field settings for testGetSettings().
    */
-  public static function getSettingsProvider() {
+  public function getSettingsProvider() {
     return [
       [
         'list_integer',

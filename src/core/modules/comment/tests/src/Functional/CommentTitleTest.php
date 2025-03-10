@@ -1,11 +1,10 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\comment\Functional;
 
 /**
- * Tests that appropriate and accessible markup is created for comment titles.
+ * Tests to ensure that appropriate and accessible markup is created for comment
+ * titles.
  *
  * @group comment
  */
@@ -14,12 +13,12 @@ class CommentTitleTest extends CommentTestBase {
   /**
    * {@inheritdoc}
    */
-  protected $defaultTheme = 'stark';
+  protected $defaultTheme = 'classy';
 
   /**
    * Tests markup for comments with empty titles.
    */
-  public function testCommentEmptyTitles(): void {
+  public function testCommentEmptyTitles() {
     // Create a node.
     $this->drupalLogin($this->webUser);
     $this->node = $this->drupalCreateNode(['type' => 'article', 'promote' => 1, 'uid' => $this->webUser->id()]);
@@ -67,7 +66,7 @@ class CommentTitleTest extends CommentTestBase {
   /**
    * Tests markup for comments with populated titles.
    */
-  public function testCommentPopulatedTitles(): void {
+  public function testCommentPopulatedTitles() {
     // Set comments to have a subject with preview disabled.
     $this->setCommentPreview(DRUPAL_DISABLED);
     $this->setCommentForm(TRUE);
@@ -94,7 +93,7 @@ class CommentTitleTest extends CommentTestBase {
     // Tests that the comment's title link is the permalink of the comment.
     $comment_permalink = $this->cssSelect('.permalink');
     $comment_permalink = $comment_permalink[0]->getAttribute('href');
-    // Tests that the comment's title link contains the URL fragment.
+    // Tests that the comment's title link contains the url fragment.
     $this->assertStringContainsString('#comment-' . $comment1->id(), $comment_permalink, "The comment's title link contains the url fragment.");
     $this->assertEquals($comment1->permalink()->toString(), $comment_permalink, "The comment's title has the correct link.");
   }

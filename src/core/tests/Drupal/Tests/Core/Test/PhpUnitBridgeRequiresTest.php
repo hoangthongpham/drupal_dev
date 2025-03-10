@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\Core\Test;
 
 use Drupal\Tests\UnitTestCase;
@@ -35,7 +33,7 @@ class PhpUnitBridgeRequiresTest extends UnitTestCase {
   /**
    * Data provider for ::testWillNeverRun().
    */
-  public static function providerTestWillNeverRun(): array {
+  public function providerTestWillNeverRun(): array {
     return [
       ['this_will_never_run'],
     ];

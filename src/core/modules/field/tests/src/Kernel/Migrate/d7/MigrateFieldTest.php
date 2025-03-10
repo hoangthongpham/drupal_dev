@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\field\Kernel\Migrate\d7;
 
 use Drupal\field\Entity\FieldStorageConfig;
@@ -70,7 +68,7 @@ class MigrateFieldTest extends MigrateDrupal7TestBase {
   /**
    * Tests migrating D7 fields to field_storage_config entities.
    */
-  public function testFields(): void {
+  public function testFields() {
     \Drupal::service('module_installer')->install(['datetime_range']);
     $this->installConfig(static::$modules);
     $this->executeMigration('d7_field');
@@ -196,7 +194,7 @@ class MigrateFieldTest extends MigrateDrupal7TestBase {
   /**
    * Tests migrating D7 datetime fields.
    */
-  public function testDatetimeFields(): void {
+  public function testDatetimeFields() {
     $this->installConfig(static::$modules);
     $this->executeMigration('d7_field');
 
@@ -209,7 +207,7 @@ class MigrateFieldTest extends MigrateDrupal7TestBase {
     $migration = $this->getMigration('d7_field');
     $messages = iterator_to_array($migration->getIdMap()->getMessages());
     $this->assertCount(5, $messages);
-    $msg = "d7_field:type:process_field: Can't migrate field 'field_event' with 'todate' settings. Enable the datetime_range module. See https://www.drupal.org/docs/8/upgrade/known-issues-when-upgrading-from-drupal-6-or-7-to-drupal-8#datetime";
+    $msg = "d7_field:type: Can't migrate field 'field_event' with 'todate' settings. Enable the datetime_range module. See https://www.drupal.org/docs/8/upgrade/known-issues-when-upgrading-from-drupal-6-or-7-to-drupal-8#datetime";
     $this->assertSame($messages[4]->message, $msg);
   }
 

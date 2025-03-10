@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\FunctionalTests\Installer;
 
 use Drupal\Core\Serialization\Yaml;
@@ -45,14 +43,14 @@ class DistributionProfileTranslationQueryTest extends InstallerTestBase {
         'name' => 'My Distribution',
         'langcode' => $this->langcode,
         'install' => [
-          'theme' => 'claro',
+          'theme' => 'bartik',
         ],
       ],
     ];
     // File API functions are not available yet.
-    $path = $this->root . DIRECTORY_SEPARATOR . $this->siteDirectory . '/profiles/my_distribution';
+    $path = $this->root . DIRECTORY_SEPARATOR . $this->siteDirectory . '/profiles/my_distro';
     mkdir($path, 0777, TRUE);
-    file_put_contents("$path/my_distribution.info.yml", Yaml::encode($this->info));
+    file_put_contents("$path/my_distro.info.yml", Yaml::encode($this->info));
     // Place a custom local translation in the translations directory.
     mkdir($this->root . '/' . $this->siteDirectory . '/files/translations', 0777, TRUE);
     file_put_contents($this->root . '/' . $this->siteDirectory . '/files/translations/drupal-8.0.0.de.po', $this->getPo('de'));
@@ -111,7 +109,7 @@ class DistributionProfileTranslationQueryTest extends InstallerTestBase {
   /**
    * Confirms that the installation succeeded.
    */
-  public function testInstalled(): void {
+  public function testInstalled() {
     $this->assertSession()->addressEquals('user/1');
     $this->assertSession()->statusCodeEquals(200);
 
@@ -133,14 +131,14 @@ class DistributionProfileTranslationQueryTest extends InstallerTestBase {
    * @return string
    *   Contents for the test .po file.
    */
-  protected function getPo($langcode): string {
-    return <<<PO
+  protected function getPo($langcode) {
+    return <<<ENDPO
 msgid ""
 msgstr ""
 
 msgid "Save and continue"
 msgstr "Save and continue $langcode"
-PO;
+ENDPO;
   }
 
 }

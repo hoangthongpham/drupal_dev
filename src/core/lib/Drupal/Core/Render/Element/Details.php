@@ -2,7 +2,6 @@
 
 namespace Drupal\Core\Render\Element;
 
-use Drupal\Core\Render\Attribute\RenderElement;
 use Drupal\Core\Render\Element;
 
 /**
@@ -21,22 +20,23 @@ use Drupal\Core\Render\Element;
  *
  * Usage example:
  * @code
- * $form['author'] = [
+ * $form['author'] = array(
  *   '#type' => 'details',
  *   '#title' => $this->t('Author'),
- * ];
+ * );
  *
- * $form['author']['name'] = [
+ * $form['author']['name'] = array(
  *   '#type' => 'textfield',
  *   '#title' => $this->t('Name'),
- * ];
+ * );
  * @endcode
  *
  * @see \Drupal\Core\Render\Element\Fieldset
  * @see \Drupal]Core\Render\Element\VerticalTabs
+ *
+ * @RenderElement("details")
  */
-#[RenderElement('details')]
-class Details extends RenderElementBase {
+class Details extends RenderElement {
 
   /**
    * {@inheritdoc}
@@ -66,7 +66,7 @@ class Details extends RenderElementBase {
    *   An associative array containing the properties and children of the
    *   details.
    *
-   * @return array
+   * @return
    *   The modified element.
    */
   public static function preRenderDetails($element) {

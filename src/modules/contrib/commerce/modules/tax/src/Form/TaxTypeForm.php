@@ -2,6 +2,8 @@
 
 namespace Drupal\commerce_tax\Form;
 
+use Drupal\commerce\InlineFormManager;
+use Drupal\commerce_tax\TaxTypeManager;
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Form\FormStateInterface;
@@ -24,13 +26,26 @@ class TaxTypeForm extends EntityForm {
   protected $inlineFormManager;
 
   /**
+   * Constructs a new TaxTypeForm object.
+   *
+   * @param \Drupal\commerce_tax\TaxTypeManager $plugin_manager
+   *   The tax type plugin manager.
+   * @param \Drupal\commerce\InlineFormManager $inline_form_manager
+   *   The inline form manager.
+   */
+  public function __construct(TaxTypeManager $plugin_manager, InlineFormManager $inline_form_manager) {
+    $this->pluginManager = $plugin_manager;
+    $this->inlineFormManager = $inline_form_manager;
+  }
+
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    $instance = parent::create($container);
-    $instance->pluginManager = $container->get('plugin.manager.commerce_tax_type');
-    $instance->inlineFormManager = $container->get('plugin.manager.commerce_inline_form');
-    return $instance;
+    return new static(
+      $container->get('plugin.manager.commerce_tax_type'),
+      $container->get('plugin.manager.commerce_inline_form')
+    );
   }
 
   /**
@@ -142,11 +157,9 @@ class TaxTypeForm extends EntityForm {
    * {@inheritdoc}
    */
   public function save(array $form, FormStateInterface $form_state) {
-    $status = $this->entity->save();
+    $this->entity->save();
     $this->messenger()->addMessage($this->t('Saved the %label tax type.', ['%label' => $this->entity->label()]));
     $form_state->setRedirect('entity.commerce_tax_type.collection');
-
-    return $status;
   }
 
   /**

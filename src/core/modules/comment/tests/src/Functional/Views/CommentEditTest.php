@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\comment\Functional\Views;
 
 use Drupal\Tests\comment\Functional\CommentTestBase as CommentBrowserTestBase;
@@ -16,12 +14,12 @@ class CommentEditTest extends CommentBrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected $defaultTheme = 'stark';
+  protected $profile = 'standard';
 
   /**
    * Tests comment label in admin view.
    */
-  public function testCommentEdit(): void {
+  public function testCommentEdit() {
     $this->drupalLogin($this->adminUser);
     // Post a comment to node.
     $node_comment = $this->postComment($this->node, $this->randomMachineName(), $this->randomMachineName(), TRUE);

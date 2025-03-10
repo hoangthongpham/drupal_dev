@@ -4,7 +4,6 @@ namespace Drupal\breakpoint;
 
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Cache\CacheBackendInterface;
-use Drupal\Core\Extension\ModuleExtensionList;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Extension\ThemeHandlerInterface;
 use Drupal\Core\Plugin\DefaultPluginManager;
@@ -30,12 +29,13 @@ use Drupal\Core\StringTranslation\TranslationInterface;
  * @endcode
  * For example:
  * @code
- * olivero.lg:
- *   label: Large
- *   mediaQuery: 'all and (min-width: 1000px)'
- *   weight: 2
+ * bartik.mobile:
+ *   label: mobile
+ *   mediaQuery: '(min-width: 0px)'
+ *   weight: 0
  *   multipliers:
  *     - 1x
+ *     - 2x
  * @endcode
  * Optionally a breakpoint can provide a group key. By default an extensions
  * breakpoints will be placed in a group labelled with the extension name.
@@ -99,18 +99,11 @@ class BreakpointManager extends DefaultPluginManager implements BreakpointManage
    *   The cache backend.
    * @param \Drupal\Core\StringTranslation\TranslationInterface $string_translation
    *   The string translation service.
-   * @param \Drupal\Core\Extension\ModuleExtensionList|null $module_extension_list
-   *   The module extension list.
    */
-  public function __construct(ModuleHandlerInterface $module_handler, ThemeHandlerInterface $theme_handler, CacheBackendInterface $cache_backend, TranslationInterface $string_translation, ?ModuleExtensionList $module_extension_list = NULL) {
+  public function __construct(ModuleHandlerInterface $module_handler, ThemeHandlerInterface $theme_handler, CacheBackendInterface $cache_backend, TranslationInterface $string_translation) {
     $this->factory = new ContainerFactory($this);
     $this->moduleHandler = $module_handler;
     $this->themeHandler = $theme_handler;
-    if ($module_extension_list === NULL) {
-      @trigger_error('Calling ' . __METHOD__ . '() without the $module_extension_list argument is deprecated in drupal:10.3.0 and will be required in drupal:12.0.0. See https://www.drupal.org/node/3310017', E_USER_DEPRECATED);
-      $module_extension_list = \Drupal::service('extension.list.module');
-    }
-    $this->moduleExtensionList = $module_extension_list;
     $this->setStringTranslation($string_translation);
     $this->alterInfo('breakpoints');
     $this->setCacheBackend($cache_backend, 'breakpoints', ['breakpoints']);
@@ -140,9 +133,8 @@ class BreakpointManager extends DefaultPluginManager implements BreakpointManage
     if (!in_array('1x', $definition['multipliers'])) {
       $definition['multipliers'][] = '1x';
     }
-    // Ensure that multipliers are sorted numerically so 1x, 1.5x and 2x
-    // come out in that order instead of 1.5x, 1x, 2x.
-    sort($definition['multipliers'], SORT_NUMERIC);
+    // Ensure that multipliers are sorted correctly.
+    sort($definition['multipliers']);
   }
 
   /**
@@ -252,7 +244,7 @@ class BreakpointManager extends DefaultPluginManager implements BreakpointManage
   protected function getGroupLabel($group) {
     // Extension names are not translatable.
     if ($this->moduleHandler->moduleExists($group)) {
-      $label = $this->moduleExtensionList->getName($group);
+      $label = $this->moduleHandler->getName($group);
     }
     elseif ($this->themeHandler->themeExists($group)) {
       $label = $this->themeHandler->getName($group);

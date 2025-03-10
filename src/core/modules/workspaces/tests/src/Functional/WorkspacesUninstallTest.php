@@ -1,11 +1,8 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\workspaces\Functional;
 
 use Drupal\Tests\BrowserTestBase;
-use Drupal\Tests\node\Traits\ContentTypeCreationTrait;
 
 /**
  * Tests uninstalling the Workspaces module.
@@ -13,12 +10,16 @@ use Drupal\Tests\node\Traits\ContentTypeCreationTrait;
  * @group workspaces
  */
 class WorkspacesUninstallTest extends BrowserTestBase {
-  use ContentTypeCreationTrait;
 
   /**
    * {@inheritdoc}
    */
-  protected static $modules = ['workspaces', 'node'];
+  protected $profile = 'standard';
+
+  /**
+   * {@inheritdoc}
+   */
+  protected static $modules = ['workspaces'];
 
   /**
    * {@inheritdoc}
@@ -26,23 +27,10 @@ class WorkspacesUninstallTest extends BrowserTestBase {
   protected $defaultTheme = 'stark';
 
   /**
-   * {@inheritdoc}
-   */
-  protected function setUp(): void {
-    parent::setUp();
-    $permissions = [
-      'administer workspaces',
-      'administer modules',
-    ];
-
-    $this->drupalLogin($this->drupalCreateUser($permissions));
-  }
-
-  /**
    * Tests deleting workspace entities and uninstalling Workspaces module.
    */
-  public function testUninstallingWorkspace(): void {
-    $this->createContentType(['type' => 'article']);
+  public function testUninstallingWorkspace() {
+    $this->drupalLogin($this->rootUser);
     $this->drupalGet('/admin/modules/uninstall');
     $session = $this->assertSession();
     $session->linkExists('Remove workspaces');

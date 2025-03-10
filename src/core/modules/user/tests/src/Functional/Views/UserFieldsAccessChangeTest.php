@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\user\Functional\Views;
 
 /**
@@ -12,14 +10,16 @@ namespace Drupal\Tests\user\Functional\Views;
 class UserFieldsAccessChangeTest extends UserTestBase {
 
   /**
-   * {@inheritdoc}
+   * Modules to enable.
+   *
+   * @var array
    */
   protected static $modules = ['user_access_test'];
 
   /**
    * {@inheritdoc}
    */
-  protected $defaultTheme = 'stark';
+  protected $defaultTheme = 'classy';
 
   /**
    * Views used by this test.
@@ -31,7 +31,7 @@ class UserFieldsAccessChangeTest extends UserTestBase {
   /**
    * Tests if another module can change field access.
    */
-  public function testUserFieldAccess(): void {
+  public function testUserFieldAccess() {
     $this->drupalGet('test_user_fields_access');
 
     // User has access to name and created date by default.
@@ -55,30 +55,31 @@ class UserFieldsAccessChangeTest extends UserTestBase {
   }
 
   /**
-   * Test user name link.
-   *
-   * Tests that the user name formatter shows a link to the user when there is
+   * Tests the user name formatter shows a link to the user when there is
    * access but not otherwise.
    */
-  public function testUserNameLink(): void {
+  public function testUserNameLink() {
     $test_user = $this->drupalCreateUser();
-    $xpath = "//td/a[.='" . $test_user->getAccountName() . "']/@href[.='" . $test_user->toUrl()->toString() . "']";
+    $xpath = "//td/a[.='" . $test_user->getAccountName() . "'][@class='username']/@href[.='" . $test_user->toUrl()->toString() . "']";
 
     $attributes = [
       'title' => 'View user profile.',
+      'class' => 'username',
     ];
     $link = $test_user->toLink(NULL, 'canonical', ['attributes' => $attributes])->toString();
 
     // No access, so no link.
     $this->drupalGet('test_user_fields_access');
     $this->assertSession()->pageTextContains($test_user->getAccountName());
-    $this->assertSession()->elementNotExists('xpath', $xpath);
+    $result = $this->xpath($xpath);
+    $this->assertCount(0, $result, 'User is not a link');
 
     // Assign sub-admin role to grant extra access.
     $user = $this->drupalCreateUser(['sub-admin']);
     $this->drupalLogin($user);
     $this->drupalGet('test_user_fields_access');
-    $this->assertSession()->elementsCount('xpath', $xpath, 1);
+    $result = $this->xpath($xpath);
+    $this->assertCount(1, $result, 'User is a link');
   }
 
 }

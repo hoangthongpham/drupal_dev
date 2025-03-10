@@ -1,13 +1,10 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\Component\PhpStorage;
 
 use Drupal\Component\PhpStorage\FileStorage;
 use Drupal\Component\PhpStorage\FileReadOnlyStorage;
 use Drupal\Component\Utility\Random;
-use Symfony\Bridge\PhpUnit\ExpectDeprecationTrait;
 
 /**
  * @coversDefaultClass \Drupal\Component\PhpStorage\FileReadOnlyStorage
@@ -16,8 +13,6 @@ use Symfony\Bridge\PhpUnit\ExpectDeprecationTrait;
  * @group PhpStorage
  */
 class FileStorageReadOnlyTest extends PhpStorageTestBase {
-
-  use ExpectDeprecationTrait;
 
   /**
    * Standard test settings to pass to storage instances.
@@ -53,7 +48,7 @@ class FileStorageReadOnlyTest extends PhpStorageTestBase {
   /**
    * Tests writing with one class and reading with another.
    */
-  public function testReadOnly(): void {
+  public function testReadOnly() {
     // Random generator.
     $random = new Random();
 
@@ -62,11 +57,11 @@ class FileStorageReadOnlyTest extends PhpStorageTestBase {
 
     // Find a global that doesn't exist.
     do {
-      $random = 'test' . mt_rand(10000, 100000);
+      $random = mt_rand(10000, 100000);
     } while (isset($GLOBALS[$random]));
 
     // Write out a PHP file and ensure it's successfully loaded.
-    $code = "<?php\n\$GLOBALS['$random'] = TRUE;";
+    $code = "<?php\n\$GLOBALS[$random] = TRUE;";
     $success = $php->save($name, $code);
     $this->assertTrue($success);
     $php_read = new FileReadOnlyStorage($this->readonlyStorage);
@@ -84,10 +79,8 @@ class FileStorageReadOnlyTest extends PhpStorageTestBase {
 
   /**
    * @covers ::writeable
-   * @group legacy
    */
-  public function testWritable(): void {
-    $this->expectDeprecation('Drupal\Component\PhpStorage\FileReadOnlyStorage::writeable() is deprecated in drupal:10.1.0 and will be removed from drupal:11.0.0. There is no replacement. See https://www.drupal.org/node/3155413');
+  public function testWriteable() {
     $php_read = new FileReadOnlyStorage($this->readonlyStorage);
     $this->assertFalse($php_read->writeable());
   }
@@ -95,7 +88,7 @@ class FileStorageReadOnlyTest extends PhpStorageTestBase {
   /**
    * @covers ::deleteAll
    */
-  public function testDeleteAll(): void {
+  public function testDeleteAll() {
     // Random generator.
     $random = new Random();
 

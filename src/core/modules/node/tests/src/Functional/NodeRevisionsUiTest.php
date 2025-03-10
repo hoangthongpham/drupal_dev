@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\node\Functional;
 
 use Drupal\Core\Link;
@@ -20,11 +18,6 @@ class NodeRevisionsUiTest extends NodeTestBase {
    * {@inheritdoc}
    */
   protected $defaultTheme = 'stark';
-
-  /**
-   * {@inheritdoc}
-   */
-  protected static $modules = ['block'];
 
   /**
    * @var \Drupal\user\Entity\User
@@ -49,7 +42,7 @@ class NodeRevisionsUiTest extends NodeTestBase {
   /**
    * Checks that unchecking 'Create new revision' works when editing a node.
    */
-  public function testNodeFormSaveWithoutRevision(): void {
+  public function testNodeFormSaveWithoutRevision() {
     $this->drupalLogin($this->editor);
     $node_storage = $this->container->get('entity_type.manager')->getStorage('node');
 
@@ -94,7 +87,7 @@ class NodeRevisionsUiTest extends NodeTestBase {
   /**
    * Checks HTML double escaping of revision logs.
    */
-  public function testNodeRevisionDoubleEscapeFix(): void {
+  public function testNodeRevisionDoubleEscapeFix() {
     $this->drupalLogin($this->editor);
     $nodes = [];
 
@@ -105,7 +98,7 @@ class NodeRevisionsUiTest extends NodeTestBase {
       '#theme' => 'username',
       '#account' => $this->editor,
     ];
-    $editor = \Drupal::service('renderer')->renderInIsolation($username);
+    $editor = \Drupal::service('renderer')->renderPlain($username);
 
     // Get original node.
     $nodes[] = clone $node;
@@ -139,7 +132,7 @@ class NodeRevisionsUiTest extends NodeTestBase {
   /**
    * Checks the Revisions tab.
    */
-  public function testNodeRevisionsTabWithDefaultRevision(): void {
+  public function testNodeRevisionsTabWithDefaultRevision() {
     $this->drupalLogin($this->editor);
 
     // Create the node.
@@ -192,29 +185,6 @@ class NodeRevisionsUiTest extends NodeTestBase {
     $this->assertSession()->linkByHrefNotExists('/node/' . $node_id . '/revisions/2/revert');
     $this->assertSession()->linkByHrefNotExists('/node/' . $node_id . '/revisions/3/revert');
     $this->assertSession()->linkByHrefNotExists('/node/' . $node_id . '/revisions/5/revert');
-  }
-
-  /**
-   * Checks the Revisions tab.
-   *
-   * Tests two 'Revisions' local tasks are not added by both Node and
-   * VersionHistoryLocalTasks.
-   *
-   * This can be removed after 'entity.node.version_history' local task is
-   * removed by https://www.drupal.org/project/drupal/issues/3153559.
-   *
-   * @covers node_local_tasks_alter
-   */
-  public function testNodeDuplicateRevisionsTab(): void {
-    $this->drupalPlaceBlock('local_tasks_block');
-    $this->drupalLogin($this->editor);
-
-    $node = $this->drupalCreateNode();
-    $this->drupalGet($node->toUrl('edit-form'));
-
-    // There must be exactly one 'Revisions' local task.
-    $xpath = $this->assertSession()->buildXPathQuery('//a[contains(@href, :href)]', [':href' => $node->toUrl('version-history')->toString()]);
-    $this->assertSession()->elementsCount('xpath', $xpath, 1);
   }
 
 }

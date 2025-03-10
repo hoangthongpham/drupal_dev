@@ -16,8 +16,10 @@ class PerformanceTestRecorder implements EventSubscriberInterface {
 
   /**
    * The state service for persistent storage if necessary.
+   *
+   * @var \Drupal\Core\State\StateInterface
    */
-  protected ?StateInterface $state;
+  protected $service;
 
   /**
    * @var array
@@ -79,7 +81,7 @@ class PerformanceTestRecorder implements EventSubscriberInterface {
   /**
    * {@inheritdoc}
    */
-  public static function getSubscribedEvents(): array {
+  public static function getSubscribedEvents() {
     $events = [];
     $events[RoutingEvents::FINISHED][] = ['onRouteBuilderFinish', -9999999];
     return $events;

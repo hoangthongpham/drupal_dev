@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\Component\Graph;
 
 use Drupal\Component\Graph\Graph;
@@ -16,7 +14,7 @@ class GraphTest extends TestCase {
   /**
    * Tests depth-first-search features.
    */
-  public function testDepthFirstSearch(): void {
+  public function testDepthFirstSearch() {
     // The sample graph used is:
     // @code
     // 1 --> 2 --> 3     5 ---> 6
@@ -191,7 +189,7 @@ class GraphTest extends TestCase {
    * @param $keys
    *   (optional) Whether to output the keys of $paths instead of the values.
    */
-  protected function displayArray($paths, $keys = FALSE): string {
+  protected function displayArray($paths, $keys = FALSE) {
     if (!empty($paths)) {
       return implode(', ', $keys ? array_keys($paths) : $paths);
     }

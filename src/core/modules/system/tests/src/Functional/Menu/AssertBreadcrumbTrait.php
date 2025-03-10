@@ -1,9 +1,8 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\system\Functional\Menu;
 
+use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Url;
 
@@ -17,10 +16,9 @@ trait AssertBreadcrumbTrait {
   /**
    * Assert that a given path shows certain breadcrumb links.
    *
-   * @param \Drupal\Core\Url|string|null $goto
+   * @param \Drupal\Core\Url|string $goto
    *   (optional) A path or URL to pass to
-   *   \Drupal\Tests\UiHelperTrait::drupalGet() otherwise a NULL value can be
-   *   passed.
+   *   \Drupal\Tests\UiHelperTrait::drupalGet().
    * @param array $trail
    *   An associative array whose keys are expected breadcrumb link paths and
    *   whose values are expected breadcrumb link texts (not sanitized).
@@ -34,13 +32,8 @@ trait AssertBreadcrumbTrait {
    * @param $last_active
    *   (optional) Whether the last link in $tree is expected to be active (TRUE)
    *   or just to be in the active trail (FALSE).
-   * @param string $active_trail_class
-   *   (optional) The class of the active trail. Defaults to
-   *   'menu-item--active-trail'.
-   * @param string $active_class
-   *   (optional) The class of the active element. Defaults to 'is-active'.
    */
-  protected function assertBreadcrumb($goto, array $trail, $page_title = NULL, array $tree = [], $last_active = TRUE, $active_trail_class = 'menu-item--active-trail', $active_class = 'is-active') {
+  protected function assertBreadcrumb($goto, array $trail, $page_title = NULL, array $tree = [], $last_active = TRUE) {
     if (isset($goto)) {
       $this->drupalGet($goto);
     }
@@ -53,7 +46,7 @@ trait AssertBreadcrumbTrait {
 
     // Additionally assert active trail in a menu tree output, if given.
     if ($tree) {
-      $this->assertMenuActiveTrail($tree, $last_active, $active_trail_class, $active_class);
+      $this->assertMenuActiveTrail($tree, $last_active);
     }
   }
 
@@ -67,10 +60,14 @@ trait AssertBreadcrumbTrait {
   protected function assertBreadcrumbParts($trail) {
     // Compare paths with actual breadcrumb.
     $parts = $this->getBreadcrumbParts();
-    $found = $parts;
     $pass = TRUE;
-
-    if (!empty($trail) && !empty($parts)) {
+    // Fail if there is no breadcrumb and we have a trail.
+    if (!empty($trail) && empty($parts)) {
+      $pass = FALSE;
+    }
+    // There may be more than one breadcrumb on the page. If $trail is empty
+    // this test would go into an infinite loop, so we need to check that too.
+    while ($trail && !empty($parts)) {
       foreach ($trail as $path => $title) {
         // If the path is empty, generate the path from the <front> route.  If
         // the path does not start with a leading slash, then run it through
@@ -89,22 +86,13 @@ trait AssertBreadcrumbTrait {
         $pass = ($pass && $part['href'] === $url && $part['text'] === Html::escape($title));
       }
     }
-    elseif (!empty($trail) && empty($parts) || empty($trail) && !empty($parts)) {
-      // Fail if there is no breadcrumb and we have a trail or breadcrumb
-      // exists but trail is empty.
-      $pass = FALSE;
-    }
-
     // No parts must be left, or an expected "Home" will always pass.
     $pass = ($pass && empty($parts));
 
-    $this->assertTrue($pass, sprintf('Expected breadcrumb %s on %s but found %s.',
-      implode(' » ', $trail),
-      $this->getUrl(),
-      implode(' » ', array_map(function (array $item) {
-        return $item['text'];
-      }, $found)),
-    ));
+    $this->assertTrue($pass, new FormattableMarkup('Breadcrumb %parts found on @path.', [
+      '%parts' => implode(' » ', $trail),
+      '@path' => $this->getUrl(),
+    ]));
   }
 
   /**
@@ -112,7 +100,7 @@ trait AssertBreadcrumbTrait {
    */
   protected function getBreadcrumbParts() {
     $parts = [];
-    $elements = $this->xpath('//nav[@aria-labelledby="system-breadcrumb"]//ol/li/a');
+    $elements = $this->xpath('//nav[@aria-labelledby="system-breadcrumb"]/ol/li/a');
     if (!empty($elements)) {
       foreach ($elements as $element) {
         $parts[] = [

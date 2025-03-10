@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\taxonomy\Kernel;
 
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
@@ -33,8 +31,8 @@ class TermHierarchyValidationTest extends EntityKernelTestBase {
   /**
    * Tests the term hierarchy validation with re-parenting in pending revisions.
    */
-  public function testTermHierarchyValidation(): void {
-    $vocabulary_id = $this->randomMachineName();
+  public function testTermHierarchyValidation() {
+    $vocabulary_id = mb_strtolower($this->randomMachineName());
     $vocabulary = Vocabulary::create([
       'name' => $vocabulary_id,
       'vid' => $vocabulary_id,
@@ -79,7 +77,7 @@ class TermHierarchyValidationTest extends EntityKernelTestBase {
     $this->assertEmpty($violations);
     $child1->save();
 
-    $validation_message = 'You can only change the hierarchy for the published version of this term.';
+    $validation_message = 'You can only change the hierarchy for the <em>published</em> version of this term.';
 
     // Add a pending revision without changing the term parent.
     $pending_name = $this->randomMachineName();

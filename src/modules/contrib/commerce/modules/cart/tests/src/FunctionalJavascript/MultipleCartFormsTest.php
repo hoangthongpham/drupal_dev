@@ -2,9 +2,9 @@
 
 namespace Drupal\Tests\commerce_cart\FunctionalJavascript;
 
-use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\commerce_order\Entity\Order;
 use Drupal\commerce_product\Entity\ProductVariationType;
+use Drupal\Core\Entity\Entity\EntityFormDisplay;
 
 /**
  * Tests pages with multiple products rendered with add to cart forms.
@@ -169,9 +169,10 @@ class MultipleCartFormsTest extends CartWebDriverTestBase {
     $forms = $this->getSession()->getPage()->findAll('css', '.commerce-order-item-add-to-cart-form');
     $current_form = $forms[0];
     $current_form->fillField('quantity[0][value]', '2');
-    // Values already selected, no ajax request expected.
     $current_form->selectFieldOption('Color', 'Red');
+    $this->assertSession()->assertWaitOnAjaxRequest();
     $current_form->selectFieldOption('Size', 'Small');
+    $this->assertSession()->assertWaitOnAjaxRequest();
     $current_form->selectFieldOption('Color', 'Blue');
     $this->assertSession()->assertWaitOnAjaxRequest();
     $forms[1]->selectFieldOption('Size', 'Large');

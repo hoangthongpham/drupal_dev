@@ -2,6 +2,7 @@
 
 namespace Drupal\commerce_order;
 
+use Drupal\commerce\AvailabilityCheckerInterface as LegacyCheckerInterface;
 use Drupal\commerce\Context;
 use Drupal\commerce_order\Entity\OrderItemInterface;
 
@@ -26,6 +27,14 @@ interface AvailabilityManagerInterface {
    *   The checker.
    */
   public function addChecker(AvailabilityCheckerInterface $checker);
+
+  /**
+   * Adds a "legacy" (i.e "deprecated") checker.
+   *
+   * @param \Drupal\commerce\AvailabilityCheckerInterface $checker
+   *   The "legacy" (i.e "deprecated") checker.
+   */
+  public function addLegacyChecker(LegacyCheckerInterface $checker);
 
   /**
    * Checks the availability of the given order item.

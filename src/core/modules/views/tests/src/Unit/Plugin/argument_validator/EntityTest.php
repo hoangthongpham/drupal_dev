@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\views\Unit\Plugin\argument_validator;
 
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
@@ -62,7 +60,7 @@ class EntityTest extends UnitTestCase {
     $mock_entity = $this->getMockForAbstractClass('Drupal\Core\Entity\EntityBase', [], '', FALSE, TRUE, TRUE, ['bundle', 'access']);
     $mock_entity->expects($this->any())
       ->method('bundle')
-      ->willReturn('test_bundle');
+      ->will($this->returnValue('test_bundle'));
     $mock_entity->expects($this->any())
       ->method('access')
       ->willReturnMap([
@@ -74,7 +72,7 @@ class EntityTest extends UnitTestCase {
     $mock_entity_bundle_2 = $this->getMockForAbstractClass('Drupal\Core\Entity\EntityBase', [], '', FALSE, TRUE, TRUE, ['bundle', 'access']);
     $mock_entity_bundle_2->expects($this->any())
       ->method('bundle')
-      ->willReturn('test_bundle_2');
+      ->will($this->returnValue('test_bundle_2'));
     $mock_entity_bundle_2->expects($this->any())
       ->method('access')
       ->willReturnMap([
@@ -102,7 +100,7 @@ class EntityTest extends UnitTestCase {
     $this->entityTypeManager->expects($this->any())
       ->method('getStorage')
       ->with('entity_test')
-      ->willReturn($storage);
+      ->will($this->returnValue($storage));
 
     $this->executable = $this->getMockBuilder('Drupal\views\ViewExecutable')
       ->disableOriginalConstructor()
@@ -123,7 +121,7 @@ class EntityTest extends UnitTestCase {
    *
    * @see \Drupal\views\Plugin\views\argument_validator\Entity::validateArgument()
    */
-  public function testValidateArgumentNoAccess(): void {
+  public function testValidateArgumentNoAccess() {
     $options = [];
     $options['access'] = FALSE;
     $options['bundles'] = [];
@@ -131,7 +129,6 @@ class EntityTest extends UnitTestCase {
 
     $this->assertFalse($this->argumentValidator->validateArgument(3));
     $this->assertFalse($this->argumentValidator->validateArgument(''));
-    $this->assertFalse($this->argumentValidator->validateArgument(NULL));
 
     $this->assertTrue($this->argumentValidator->validateArgument(1));
     $this->assertTrue($this->argumentValidator->validateArgument(2));
@@ -143,7 +140,7 @@ class EntityTest extends UnitTestCase {
    *
    * @see \Drupal\views\Plugin\views\argument_validator\Entity::validateArgument()
    */
-  public function testValidateArgumentAccess(): void {
+  public function testValidateArgumentAccess() {
     $options = [];
     $options['access'] = TRUE;
     $options['bundles'] = [];
@@ -171,7 +168,7 @@ class EntityTest extends UnitTestCase {
   /**
    * Tests the validate argument method with bundle checking.
    */
-  public function testValidateArgumentBundle(): void {
+  public function testValidateArgumentBundle() {
     $options = [];
     $options['access'] = FALSE;
     $options['bundles'] = ['test_bundle' => 1];
@@ -190,7 +187,7 @@ class EntityTest extends UnitTestCase {
   /**
    * @covers ::calculateDependencies
    */
-  public function testCalculateDependencies(): void {
+  public function testCalculateDependencies() {
     // Create an entity type manager, storage, entity type, and entity to mock the
     // loading of entities providing bundles.
     $entity_type_manager = $this->createMock(EntityTypeManagerInterface::class);
@@ -238,7 +235,7 @@ class EntityTest extends UnitTestCase {
   /**
    * Tests the validate argument method with multiple argument splitting.
    */
-  public function testValidateArgumentMultiple(): void {
+  public function testValidateArgumentMultiple() {
     $options = [];
     $options['access'] = TRUE;
     $options['bundles'] = [];
@@ -251,8 +248,6 @@ class EntityTest extends UnitTestCase {
 
     $this->assertFalse($this->argumentValidator->validateArgument('1,2'));
     $this->assertFalse($this->argumentValidator->validateArgument('1+2'));
-
-    $this->assertFalse($this->argumentValidator->validateArgument(NULL));
 
     $options = [];
     $options['access'] = TRUE;

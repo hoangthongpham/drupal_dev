@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\rest\Functional;
 
 use Behat\Mink\Driver\BrowserKitDriver;
@@ -91,14 +89,16 @@ abstract class ResourceTestBase extends BrowserTestBase {
   protected $serializer;
 
   /**
-   * {@inheritdoc}
+   * Modules to install.
+   *
+   * @var array
    */
   protected static $modules = ['rest'];
 
   /**
    * {@inheritdoc}
    */
-  protected function setUp(): void {
+  public function setUp() {
     parent::setUp();
 
     $this->serializer = $this->container->get('serializer');
@@ -404,8 +404,7 @@ abstract class ResourceTestBase extends BrowserTestBase {
     // Expected cache contexts: X-Drupal-Cache-Contexts header.
     $this->assertSame($expected_cache_contexts !== FALSE, $response->hasHeader('X-Drupal-Cache-Contexts'));
     if (is_array($expected_cache_contexts)) {
-      $optimized_expected_cache_contexts = \Drupal::service('cache_contexts_manager')->optimizeTokens($expected_cache_contexts);
-      $this->assertEqualsCanonicalizing($optimized_expected_cache_contexts, explode(' ', $response->getHeader('X-Drupal-Cache-Contexts')[0]));
+      $this->assertEqualsCanonicalizing($expected_cache_contexts, explode(' ', $response->getHeader('X-Drupal-Cache-Contexts')[0]));
     }
 
     // Expected Page Cache header value: X-Drupal-Cache header.
@@ -413,8 +412,8 @@ abstract class ResourceTestBase extends BrowserTestBase {
       $this->assertTrue($response->hasHeader('X-Drupal-Cache'));
       $this->assertSame($expected_page_cache_header_value, $response->getHeader('X-Drupal-Cache')[0]);
     }
-    elseif ($response->hasHeader('X-Drupal-Cache')) {
-      $this->assertMatchesRegularExpression('#^UNCACHEABLE \((no cacheability|(request|response) policy)\)$#', $response->getHeader('X-Drupal-Cache')[0]);
+    else {
+      $this->assertFalse($response->hasHeader('X-Drupal-Cache'));
     }
 
     // Expected Dynamic Page Cache header value: X-Drupal-Dynamic-Cache header.
@@ -422,8 +421,8 @@ abstract class ResourceTestBase extends BrowserTestBase {
       $this->assertTrue($response->hasHeader('X-Drupal-Dynamic-Cache'));
       $this->assertSame($expected_dynamic_page_cache_header_value, $response->getHeader('X-Drupal-Dynamic-Cache')[0]);
     }
-    elseif ($response->hasHeader('X-Drupal-Dynamic-Cache')) {
-      $this->assertMatchesRegularExpression('#^UNCACHEABLE \(((no|poor) cacheability|(request|response) policy)\)$#', $response->getHeader('X-Drupal-Dynamic-Cache')[0]);
+    else {
+      $this->assertFalse($response->hasHeader('X-Drupal-Dynamic-Cache'));
     }
   }
 
@@ -432,7 +431,7 @@ abstract class ResourceTestBase extends BrowserTestBase {
    *
    * @param int $expected_status_code
    *   The expected response status.
-   * @param string|false $expected_message
+   * @param string $expected_message
    *   The expected error message.
    * @param \Psr\Http\Message\ResponseInterface $response
    *   The error response to assert.
@@ -488,6 +487,9 @@ abstract class ResourceTestBase extends BrowserTestBase {
    *
    * @param array $array
    *   An array to sort.
+   *
+   * @return array
+   *   The sorted array.
    */
   protected static function recursiveKSort(array &$array) {
     // First, sort the main array.

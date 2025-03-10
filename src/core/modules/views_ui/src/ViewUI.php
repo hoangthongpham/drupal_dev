@@ -4,11 +4,10 @@ namespace Drupal\views_ui;
 
 use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\Timer;
-use Drupal\Component\Utility\Xss;
+use Drupal\Core\EventSubscriber\AjaxResponseSubscriber;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Link;
 use Drupal\Core\TempStore\Lock;
-use Drupal\views\Controller\ViewAjaxController;
 use Drupal\views\Views;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\views\ViewExecutable;
@@ -18,13 +17,12 @@ use Drupal\views\Plugin\views\query\Sql;
 use Drupal\views\Entity\View;
 use Drupal\views\ViewEntityInterface;
 use Drupal\Core\Routing\RouteObjectInterface;
-use Symfony\Component\HttpFoundation\InputBag;
+use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Stores UI related temporary settings.
  */
-#[\AllowDynamicProperties]
 class ViewUI implements ViewEntityInterface {
 
   /**
@@ -39,7 +37,6 @@ class ViewUI implements ViewEntityInterface {
    *
    * @var array
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   public $changed_display;
 
   /**
@@ -47,7 +44,6 @@ class ViewUI implements ViewEntityInterface {
    *
    * @var float
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   public $render_time;
 
   /**
@@ -72,7 +68,6 @@ class ViewUI implements ViewEntityInterface {
    *
    * @var array
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   public $temporary_options;
 
   /**
@@ -87,7 +82,6 @@ class ViewUI implements ViewEntityInterface {
    *
    * @var bool
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   public $live_preview;
 
   public $renderPreview = FALSE;
@@ -127,9 +121,8 @@ class ViewUI implements ViewEntityInterface {
   ];
 
   /**
-   * Whether the config is being synced through the import process.
-   *
-   * This is the case with create, update or delete.
+   * Whether the config is being created, updated or deleted through the
+   * import process.
    *
    * @var bool
    */
@@ -141,11 +134,6 @@ class ViewUI implements ViewEntityInterface {
    * @var bool
    */
   private $isUninstalling = FALSE;
-
-  /**
-   * The entity type.
-   */
-  protected string $entityType;
 
   /**
    * Constructs a View UI object.
@@ -281,13 +269,12 @@ class ViewUI implements ViewEntityInterface {
   }
 
   /**
-   * Provides a standard set of Apply/Cancel/OK buttons for the forms.
+   * Provide a standard set of Apply/Cancel/OK buttons for the forms. Also provide
+   * a hidden op operator because the forms plugin doesn't seem to properly
+   * provide which button was clicked.
    *
-   * This will also provide a hidden op operator because the forms plugin
-   * doesn't seem to properly provide which button was clicked.
-   *
-   * @todo Is the hidden op operator still here somewhere, or is that part of
-   *   the docblock outdated?
+   * TODO: Is the hidden op operator still here somewhere, or is that part of the
+   * docblock outdated?
    */
   public function getStandardButtons(&$form, FormStateInterface $form_state, $form_id, $name = NULL) {
     $form['actions'] = [
@@ -386,9 +373,8 @@ class ViewUI implements ViewEntityInterface {
   }
 
   /**
-   * Adds another form to the stack.
-   *
-   * Clicking 'apply' will go to this form rather than closing the ajax popup.
+   * Add another form to the stack; clicking 'apply' will go to this form
+   * rather than closing the ajax popup.
    */
   public function addFormToStack($key, $display_id, $type, $id = NULL, $top = FALSE, $rebuild_keys = FALSE) {
     // Reset the cache of IDs. Drupal rather aggressively prevents ID
@@ -471,7 +457,7 @@ class ViewUI implements ViewEntityInterface {
         }
         $id = $this->getExecutable()->addHandler($display_id, $type, $table, $field);
 
-        // Check to see if we have group by settings
+        // check to see if we have group by settings
         $key = $type;
         // Footer,header and empty text have a different internal handler type(area).
         if (isset($types[$type]['type'])) {
@@ -486,7 +472,7 @@ class ViewUI implements ViewEntityInterface {
           $this->addFormToStack('handler-group', $display_id, $type, $id);
         }
 
-        // Check to see if this type has settings, if so add the settings form first
+        // check to see if this type has settings, if so add the settings form first
         if ($handler && $handler->hasExtraOptions()) {
           $this->addFormToStack('handler-extra', $display_id, $type, $id);
         }
@@ -516,7 +502,7 @@ class ViewUI implements ViewEntityInterface {
   }
 
   /**
-   * Add the list of queries run during render to build info.
+   * Add the list of queries run during render to buildinfo.
    *
    * @see ViewUI::startQueryCapture()
    */
@@ -550,16 +536,16 @@ class ViewUI implements ViewEntityInterface {
     $errors = $executable->validate();
     $executable->destroy();
     if (empty($errors)) {
+      $this->ajax = TRUE;
       $executable->live_preview = TRUE;
 
-      // AJAX can happen via HTTP POST but everything expects exposed data to
-      // be in GET. If we're clicking on links in a preview, though, we could
-      // actually have some input in the query parameters, so we merge request()
-      // and query() to ensure we get have all the values exposed.
-      // We also make sure to remove ajax-framework specific keys and form
-      // tokens to avoid any problems.
+      // AJAX happens via HTTP POST but everything expects exposed data to
+      // be in GET. Copy stuff but remove ajax-framework specific keys.
+      // If we're clicking on links in a preview, though, we could actually
+      // have some input in the query parameters, so we merge request() and
+      // query() to ensure we get it all.
       $exposed_input = array_merge(\Drupal::request()->request->all(), \Drupal::request()->query->all());
-      foreach (array_merge(ViewAjaxController::FILTERED_QUERY_PARAMETERS, ['form_id', 'form_build_id', 'form_token']) as $key) {
+      foreach (['view_name', 'view_display_id', 'view_args', 'view_path', 'view_dom_id', 'pager_element', 'view_base_path', AjaxResponseSubscriber::AJAX_REQUEST_PARAMETER, 'ajax_page_state', 'form_id', 'form_build_id', 'form_token'] as $key) {
         if (isset($exposed_input[$key])) {
           unset($exposed_input[$key]);
         }
@@ -588,7 +574,7 @@ class ViewUI implements ViewEntityInterface {
       $request->attributes->set(RouteObjectInterface::ROUTE_OBJECT, \Drupal::service('router.route_provider')->getRouteByName('entity.view.preview_form'));
       $request->attributes->set('view', $this->storage);
       $request->attributes->set('display_id', $display_id);
-      $raw_parameters = new InputBag();
+      $raw_parameters = new ParameterBag();
       $raw_parameters->set('view', $this->id());
       $raw_parameters->set('display_id', $display_id);
       $request->attributes->set('_raw_variables', $raw_parameters);
@@ -596,7 +582,6 @@ class ViewUI implements ViewEntityInterface {
       foreach ($args as $key => $arg) {
         $request->attributes->set('arg_' . $key, $arg);
       }
-      $request->setSession($request_stack->getSession());
       $request_stack->push($request);
 
       // Suppress contextual links of entities within the result set during a
@@ -688,9 +673,9 @@ class ViewUI implements ViewEntityInterface {
                 [
                   'data' => [
                     '#prefix' => '<pre>',
-                    'queries' => $queries,
-                    '#suffix' => '</pre>',
-                  ],
+                     'queries' => $queries,
+                     '#suffix' => '</pre>',
+                    ],
                 ],
               ];
             }
@@ -706,7 +691,6 @@ class ViewUI implements ViewEntityInterface {
               [
                 'data' => [
                   '#markup' => $executable->getTitle(),
-                  '#allowed_tags' => Xss::getHtmlTagList(),
                 ],
               ],
             ];
@@ -846,7 +830,7 @@ class ViewUI implements ViewEntityInterface {
   /**
    * Get the user's current progress through the form stack.
    *
-   * @return array|bool
+   * @return
    *   FALSE if the user is not currently in a multiple-form stack. Otherwise,
    *   an associative array with the following keys:
    *   - current: The number of the current form on the stack.
@@ -982,7 +966,7 @@ class ViewUI implements ViewEntityInterface {
   /**
    * {@inheritdoc}
    */
-  public static function loadMultiple(?array $ids = NULL) {
+  public static function loadMultiple(array $ids = NULL) {
     return View::loadMultiple($ids);
   }
 
@@ -1010,7 +994,7 @@ class ViewUI implements ViewEntityInterface {
   /**
    * {@inheritdoc}
    */
-  public function toUrl($rel = NULL, array $options = []) {
+  public function toUrl($rel = 'edit-form', array $options = []) {
     return $this->storage->toUrl($rel, $options);
   }
 
@@ -1052,7 +1036,7 @@ class ViewUI implements ViewEntityInterface {
   /**
    * {@inheritdoc}
    */
-  public function access($operation = 'view', ?AccountInterface $account = NULL, $return_as_object = FALSE) {
+  public function access($operation = 'view', AccountInterface $account = NULL, $return_as_object = FALSE) {
     return $this->storage->access($operation, $account, $return_as_object);
   }
 

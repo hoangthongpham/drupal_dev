@@ -15,6 +15,9 @@
 	"ETB": {
 		"name": "bir"
 	},
+	"VED": {
+		"name": "Bolívar Soberano"
+	},
 	"VES": {
 		"name": "bolívar venezolano"
 	},
@@ -262,7 +265,7 @@
 	"HNL": {
 		"name": "lempira hondureño"
 	},
-	"SLE": {
+	"SLL": {
 		"name": "leona"
 	},
 	"MDL": {
@@ -429,6 +432,9 @@
 	},
 	"SCR": {
 		"name": "rupia seychellense"
+	},
+	"SLE": {
+		"name": "Sierra Leonean Leone"
 	},
 	"PEN": {
 		"name": "sol peruano"

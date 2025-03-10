@@ -3,7 +3,7 @@
 		"name": "Afghani Afghanistan"
 	},
 	"MGA": {
-		"name": "Ariary Madagascar"
+		"name": "Ariary Malagasy"
 	},
 	"PAB": {
 		"name": "Balboa Panama"
@@ -42,6 +42,9 @@
 	},
 	"ETB": {
 		"name": "Birr Ethiopia"
+	},
+	"VED": {
+		"name": "Bolívar Soberano"
 	},
 	"VES": {
 		"name": "Bolívar Venezuela"
@@ -241,6 +244,9 @@
 	"UAH": {
 		"name": "Hryvnia Ukraina"
 	},
+	"LSL": {
+		"name": "Ioti Lesotho"
+	},
 	"PGK": {
 		"name": "Kina Papua New Guinea"
 	},
@@ -283,7 +289,7 @@
 	"HNL": {
 		"name": "Lempira Honduras"
 	},
-	"SLE": {
+	"SLL": {
 		"name": "Leone Sierra Leone"
 	},
 	"MDL": {
@@ -300,9 +306,6 @@
 	},
 	"SZL": {
 		"name": "Lilangeni Swaziland"
-	},
-	"LSL": {
-		"name": "Loti Lesotho"
 	},
 	"AZN": {
 		"name": "Manat Azerbaijan"
@@ -431,6 +434,9 @@
 	"IDR": {
 		"name": "Rupiah Indonesia"
 	},
+	"SOS": {
+		"name": "Schilling Somali"
+	},
 	"ILS": {
 		"name": "Sheqel Israel mới",
 		"symbol": "₪"
@@ -438,14 +444,14 @@
 	"KES": {
 		"name": "Shilling Kenya"
 	},
-	"SOS": {
-		"name": "Shilling Somali"
-	},
 	"TZS": {
 		"name": "Shilling Tanzania"
 	},
 	"UGX": {
 		"name": "Shilling Uganda"
+	},
+	"SLE": {
+		"name": "Sierra Leonean Leone"
 	},
 	"PEN": {
 		"name": "Sol Peru"
@@ -470,6 +476,9 @@
 	},
 	"MNT": {
 		"name": "Tugrik Mông Cổ"
+	},
+	"UYW": {
+		"name": "Uruguayan Nominal Wage Index Unit"
 	},
 	"VUV": {
 		"name": "Vatu Vanuatu"

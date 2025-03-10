@@ -1,17 +1,12 @@
 <?php
-
-declare(strict_types=1);
-
 namespace Drush\Exec;
 
-use Consolidation\SiteProcess\Util\Escape;
 use Consolidation\SiteProcess\Util\Shell;
+use Consolidation\SiteProcess\Util\Escape;
 use Drush\Drush;
 
 trait ExecTrait
 {
-    protected $uri;
-
     /**
      * Starts a background browser/tab for the current site or a specified URL.
      *
@@ -21,17 +16,19 @@ trait ExecTrait
      *   Optional URI or site path to open in browser. If omitted, or if a site path
      *   is specified, the current site home page uri will be prepended if the site's
      *   hostname resolves.
+     * @param int $sleep
+     * @param bool $port
+     * @param bool $browser
      * @return bool
      *   TRUE if browser was opened. FALSE if browser was disabled by the user or a
      *   default browser could not be found.
      */
-    public function startBrowser(?string $uri = null, int $sleep = 0, ?int $port = null, string|bool $browser = false): bool
+    public function startBrowser($uri = null, $sleep = 0, $port = false, $browser = true)
     {
         if ($browser) {
             // We can only open a browser if we have a DISPLAY environment variable on
             // POSIX or are running Windows or OS X.
-            if (!Drush::simulate() && !getenv('DISPLAY') && !in_array(PHP_OS_FAMILY, ['Windows', 'Darwin'])) {
-                // @phpstan-ignore-next-line
+            if (!Drush::simulate() && !getenv('DISPLAY') && !drush_is_windows() && !drush_is_osx()) {
                 $this->logger()->info(dt('No graphical display appears to be available, not starting browser.'));
                 return false;
             }
@@ -47,7 +44,6 @@ trait ExecTrait
             $hosterror = (gethostbynamel($host) === false);
             $iperror = (ip2long($host) && gethostbyaddr($host) == $host);
             if (!Drush::simulate() && ($hosterror || $iperror)) {
-                // @phpstan-ignore-next-line
                 $this->logger()->warning(dt('!host does not appear to be a resolvable hostname or IP, not starting browser. You may need to use the --uri option in your command or site alias to indicate the correct URL of this site.', ['!host' => $host]));
                 return false;
             }
@@ -58,9 +54,9 @@ trait ExecTrait
                 // See if we can find an OS helper to open URLs in default browser.
                 if (self::programExists('xdg-open')) {
                     $browser = 'xdg-open';
-                } elseif (self::programExists('open')) {
+                } else if (self::programExists('open')) {
                     $browser = 'open';
-                } elseif (self::programExists('start')) {
+                } else if (self::programExists('start')) {
                     $browser = 'start';
                 } else {
                     // Can't find a valid browser.
@@ -69,7 +65,6 @@ trait ExecTrait
             }
 
             if ($browser) {
-                // @phpstan-ignore-next-line
                 $this->logger()->info(dt('Opening browser !browser at !uri', ['!browser' => $browser, '!uri' => $uri]));
                 $args = [];
                 if (!Drush::simulate()) {
@@ -88,8 +83,11 @@ trait ExecTrait
 
     /*
      * Determine if program exists on user's PATH.
+     *
+     * @return bool
+     *   True if program exists on PATH.
      */
-    public static function programExists($program): bool
+    public static function programExists($program)
     {
         $command = Escape::isWindows() ? "where $program" : "command -v $program";
         $process = Drush::shell($command);
@@ -101,9 +99,9 @@ trait ExecTrait
         return $process->isSuccessful();
     }
 
-    public static function getEditor(?string $editor = null): string
+    public static function getEditor()
     {
         // See http://drupal.org/node/1740294
-        return $editor ? "$editor %s" : '${VISUAL-${EDITOR-vi}} %s';
+        return '${VISUAL-${EDITOR-vi}} %s';
     }
 }

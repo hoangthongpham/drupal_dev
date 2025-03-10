@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\taxonomy\Functional;
 
 use Drupal\Core\Language\LanguageInterface;
@@ -14,9 +12,6 @@ use Drupal\language\Entity\ConfigurableLanguage;
  */
 class TermLanguageTest extends TaxonomyTestBase {
 
-  /**
-   * {@inheritdoc}
-   */
   protected static $modules = ['language'];
 
   /**
@@ -31,9 +26,6 @@ class TermLanguageTest extends TaxonomyTestBase {
    */
   protected $vocabulary;
 
-  /**
-   * {@inheritdoc}
-   */
   protected function setUp(): void {
     parent::setUp();
 
@@ -52,7 +44,7 @@ class TermLanguageTest extends TaxonomyTestBase {
     }
   }
 
-  public function testTermLanguage(): void {
+  public function testTermLanguage() {
     // Configure the vocabulary to not hide the language selector.
     $edit = [
       'default_language[language_alterable]' => TRUE,
@@ -90,7 +82,7 @@ class TermLanguageTest extends TaxonomyTestBase {
     $this->assertTrue($this->assertSession()->optionExists('edit-langcode-0-value', $edit['langcode[0][value]'])->isSelected());
   }
 
-  public function testDefaultTermLanguage(): void {
+  public function testDefaultTermLanguage() {
     // Configure the vocabulary to not hide the language selector, and make the
     // default language of the terms fixed.
     $edit = [
@@ -130,7 +122,7 @@ class TermLanguageTest extends TaxonomyTestBase {
   /**
    * Tests that translated terms are displayed correctly on the term overview.
    */
-  public function testTermTranslatedOnOverviewPage(): void {
+  public function testTermTranslatedOnOverviewPage() {
     // Configure the vocabulary to not hide the language selector.
     $edit = [
       'default_language[language_alterable]' => TRUE,

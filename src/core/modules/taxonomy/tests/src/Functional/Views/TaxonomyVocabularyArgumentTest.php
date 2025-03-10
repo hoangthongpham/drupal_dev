@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\taxonomy\Functional\Views;
 
 use Drupal\taxonomy\Entity\Vocabulary;
@@ -43,8 +41,8 @@ class TaxonomyVocabularyArgumentTest extends TaxonomyTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp($import_test_views = TRUE, $modules = []): void {
-    parent::setUp($import_test_views, $modules);
+  protected function setUp($import_test_views = TRUE): void {
+    parent::setUp($import_test_views);
 
     // Add default vocabulary to list of vocabularies.
     $this->vocabularies[] = $this->vocabulary;
@@ -72,7 +70,7 @@ class TaxonomyVocabularyArgumentTest extends TaxonomyTestBase {
    *
    * @see Drupal\taxonomy\Plugin\views\argument\VocabularyVid
    */
-  public function testTermWithVocabularyArgument(): void {
+  public function testTermWithVocabularyArgument() {
     $this->drupalGet('test_argument_taxonomy_vocabulary/' . $this->vocabularies[0]->id());
     // First term should be present.
     $this->assertSession()->pageTextContains($this->terms[0]->label());

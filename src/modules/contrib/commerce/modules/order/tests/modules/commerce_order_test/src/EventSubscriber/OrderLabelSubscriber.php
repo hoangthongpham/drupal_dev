@@ -14,7 +14,7 @@ class OrderLabelSubscriber implements EventSubscriberInterface {
   /**
    * {@inheritdoc}
    */
-  public static function getSubscribedEvents(): array {
+  public static function getSubscribedEvents() {
     return [
       OrderEvents::ORDER_LABEL => 'onLabel',
     ];

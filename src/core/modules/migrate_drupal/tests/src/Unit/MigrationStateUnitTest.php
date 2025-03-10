@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\migrate_drupal\Unit;
 
 use Drupal\Core\Extension\ModuleHandlerInterface;
@@ -38,7 +36,7 @@ class MigrationStateUnitTest extends UnitTestCase {
    * @covers ::getSourceState
    * @covers ::getDestinationsForSource
    */
-  public function testGetUpgradeStates($modules_to_enable, $files, $field_plugins, $migrations, $source_system_data, $expected_7, $expected_6): void {
+  public function testGetUpgradeStates($modules_to_enable, $files, $field_plugins, $migrations, $source_system_data, $expected_7, $expected_6) {
     $fieldPluginManager = $this->prophesize(MigrateFieldPluginManagerInterface::class);
     $fieldPluginManager->getDefinitions()->willReturn($field_plugins);
     $moduleHandler = $this->prophesize(ModuleHandlerInterface::class);
@@ -50,7 +48,7 @@ class MigrationStateUnitTest extends UnitTestCase {
 
     foreach ($files as $module => $contents) {
       $path = $url . '/' . $module . '/migrations/state';
-      mkdir($path, 0755, TRUE);
+      mkdir($path, '0755', TRUE);
       file_put_contents($path . '/' . $module . '.migrate_drupal.yml', $contents);
     }
     $moduleHandler->getModuleDirectories()
@@ -91,7 +89,7 @@ class MigrationStateUnitTest extends UnitTestCase {
   /**
    * Data provider for testGetUpgradeStates.
    */
-  public static function providerGetUpgradeStates() {
+  public function providerGetUpgradeStates() {
 
     // Tests multiple scenarios:
     // Not enabled and not declared.
@@ -398,6 +396,7 @@ MENU_UI
     // Test menu migration with menu_ui uninstalled.
     $tests[3] = $tests[1];
     unset($tests[3]['modules_to_enable']['menu_ui']);
+    unset($tests[3]['files']['menu_ui']);
     unset($tests[3]['migrations']['menu_ui']);
     $tests[3]['expected_7'] = [
       MigrationState::NOT_FINISHED => [

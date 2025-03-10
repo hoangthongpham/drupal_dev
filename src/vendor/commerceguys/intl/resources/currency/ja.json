@@ -1,7 +1,16 @@
 {
+	"VED": {
+		"name": "Bolívar Soberano"
+	},
 	"XPF": {
 		"name": "CFP フラン",
 		"symbol": "CFPF"
+	},
+	"SLE": {
+		"name": "Sierra Leonean Leone"
+	},
+	"UYW": {
+		"name": "Uruguayan Nominal Wage Index Unit"
 	},
 	"ISK": {
 		"name": "アイスランド クローナ"
@@ -160,7 +169,7 @@
 	"ZMW": {
 		"name": "ザンビア クワチャ"
 	},
-	"SLE": {
+	"SLL": {
 		"name": "シエラレオネ レオン"
 	},
 	"DJF": {
@@ -246,9 +255,6 @@
 	},
 	"TMT": {
 		"name": "トルクメニスタン マナト"
-	},
-	"TRY": {
-		"name": "トルコ リラ"
 	},
 	"TOP": {
 		"name": "トンガ パ・アンガ"
@@ -449,6 +455,9 @@
 	"HKD": {
 		"name": "香港ドル",
 		"symbol": "HK$"
+	},
+	"TRY": {
+		"name": "新トルコリラ"
 	},
 	"TWD": {
 		"name": "新台湾ドル",

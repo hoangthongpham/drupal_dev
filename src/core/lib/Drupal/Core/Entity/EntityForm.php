@@ -2,7 +2,6 @@
 
 namespace Drupal\Core\Entity;
 
-use Drupal\Component\Serialization\Json;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormStateInterface;
@@ -62,7 +61,7 @@ class EntityForm extends FormBase implements EntityFormInterface {
    * {@inheritdoc}
    */
   public function getBaseFormId() {
-    // Assign ENTITY_TYPE_form as base form ID to invoke corresponding
+    // Assign ENTITYTYPE_form as base form ID to invoke corresponding
     // hook_form_alter(), #validate, #submit, and #theme callbacks, but only if
     // it is different from the actual form ID, since callbacks would be invoked
     // twice otherwise.
@@ -247,17 +246,10 @@ class EntityForm extends FormBase implements EntityFormInterface {
         '#title' => $this->t('Delete'),
         '#access' => $this->entity->access('delete'),
         '#attributes' => [
-          'class' => ['button', 'button--danger', 'use-ajax'],
-          'data-dialog-type' => 'modal',
-          'data-dialog-options' => Json::encode([
-            'width' => 880,
-          ]),
-        ],
-        '#url' => $route_info,
-        '#attached' => [
-          'library' => ['core/drupal.dialog.ajax'],
+          'class' => ['button', 'button--danger'],
         ],
       ];
+      $actions['delete']['#url'] = $route_info;
     }
 
     return $actions;
@@ -323,8 +315,6 @@ class EntityForm extends FormBase implements EntityFormInterface {
    *   A nested array of form elements comprising the form.
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   The current state of the form.
-   *
-   * @see \Drupal\Core\Form\ConfigFormBase::copyFormValuesToConfig()
    */
   protected function copyFormValuesToEntity(EntityInterface $entity, array $form, FormStateInterface $form_state) {
     $values = $form_state->getValues();
@@ -397,11 +387,16 @@ class EntityForm extends FormBase implements EntityFormInterface {
    *   The current state of the form.
    */
   protected function prepareInvokeAll($hook, FormStateInterface $form_state) {
-    $this->moduleHandler->invokeAllWith($hook, function (callable $hook, string $module) use ($form_state) {
-      // Ensure we pass an updated translation object and form display at
-      // each invocation, since they depend on form state which is alterable.
-      $hook($this->entity, $this->operation, $form_state);
-    });
+    $implementations = $this->moduleHandler->getImplementations($hook);
+    foreach ($implementations as $module) {
+      $function = $module . '_' . $hook;
+      if (function_exists($function)) {
+        // Ensure we pass an updated translation object and form display at
+        // each invocation, since they depend on form state which is alterable.
+        $args = [$this->entity, $this->operation, &$form_state];
+        call_user_func_array($function, $args);
+      }
+    }
   }
 
   /**

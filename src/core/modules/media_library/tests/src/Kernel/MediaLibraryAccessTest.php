@@ -1,15 +1,14 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\media_library\Kernel;
 
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Access\AccessResultReasonInterface;
+use Drupal\entity_test\Entity\EntityTest;
 use Drupal\entity_test\Entity\EntityTestBundle;
-use Drupal\entity_test\Entity\EntityTestWithBundle;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\image\Entity\ImageStyle;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\media_library\MediaLibraryState;
 use Drupal\Tests\media\Traits\MediaTypeCreationTrait;
@@ -52,7 +51,8 @@ class MediaLibraryAccessTest extends KernelTestBase {
     $this->installEntitySchema('user');
     $this->installEntitySchema('file');
     $this->installSchema('file', 'file_usage');
-    $this->installEntitySchema('entity_test_with_bundle');
+    $this->installSchema('system', ['sequences']);
+    $this->installEntitySchema('entity_test');
     $this->installEntitySchema('filter_format');
     $this->installEntitySchema('media');
     $this->installConfig([
@@ -69,7 +69,7 @@ class MediaLibraryAccessTest extends KernelTestBase {
     $field_storage = FieldStorageConfig::create([
       'type' => 'entity_reference',
       'field_name' => 'field_test_media',
-      'entity_type' => 'entity_test_with_bundle',
+      'entity_type' => 'entity_test',
       'settings' => [
         'target_type' => 'media',
       ],
@@ -86,15 +86,31 @@ class MediaLibraryAccessTest extends KernelTestBase {
   }
 
   /**
+   * Tests that users can't delete the 'media_library' image style.
+   */
+  public function testMediaLibraryImageStyleAccess() {
+    // Create a user who can manage the image styles.
+    $user = $this->createUser([
+      'access administration pages',
+      'administer image styles',
+    ]);
+
+    // The user should be able to delete the 'medium' image style, but not the
+    // 'media_library' image style.
+    $this->assertTrue(ImageStyle::load('medium')->access('delete', $user));
+    $this->assertFalse(ImageStyle::load('media_library')->access('delete', $user));
+  }
+
+  /**
    * Tests that the field widget opener respects entity creation permissions.
    */
-  public function testFieldWidgetEntityCreateAccess(): void {
+  public function testFieldWidgetEntityCreateAccess() {
     /** @var \Drupal\media_library\MediaLibraryUiBuilder $ui_builder */
     $ui_builder = $this->container->get('media_library.ui_builder');
 
     // Create a media library state to test access.
     $state = MediaLibraryState::create('media_library.opener.field_widget', ['file', 'image'], 'file', 2, [
-      'entity_type_id' => 'entity_test_with_bundle',
+      'entity_type_id' => 'entity_test',
       'bundle' => 'test',
       'field_name' => 'field_test_media',
     ]);
@@ -122,7 +138,7 @@ class MediaLibraryAccessTest extends KernelTestBase {
    *
    * @dataProvider editorOpenerAccessProvider
    */
-  public function testEditorOpenerAccess($media_embed_enabled, $can_use_format): void {
+  public function testEditorOpenerAccess($media_embed_enabled, $can_use_format) {
     $format = $this->container
       ->get('entity_type.manager')
       ->getStorage('filter_format')->create([
@@ -165,7 +181,7 @@ class MediaLibraryAccessTest extends KernelTestBase {
   /**
    * Data provider for ::testEditorOpenerAccess.
    */
-  public static function editorOpenerAccessProvider() {
+  public function editorOpenerAccessProvider() {
     return [
       'media_embed filter enabled' => [
         TRUE,
@@ -185,11 +201,11 @@ class MediaLibraryAccessTest extends KernelTestBase {
   /**
    * Tests that the field widget opener respects entity-specific access.
    */
-  public function testFieldWidgetEntityEditAccess(): void {
+  public function testFieldWidgetEntityEditAccess() {
     /** @var \Drupal\media_library\MediaLibraryUiBuilder $ui_builder */
     $ui_builder = $this->container->get('media_library.ui_builder');
 
-    $forbidden_entity = EntityTestWithBundle::create([
+    $forbidden_entity = EntityTest::create([
       'type' => 'test',
       // This label will automatically cause an access denial.
       // @see \Drupal\entity_test\EntityTestAccessControlHandler::checkAccess()
@@ -208,7 +224,7 @@ class MediaLibraryAccessTest extends KernelTestBase {
     $access_result = $ui_builder->checkAccess($this->createUser(), $state);
     $this->assertAccess($access_result, FALSE, NULL, [], ['url.query_args']);
 
-    $neutral_entity = EntityTestWithBundle::create([
+    $neutral_entity = EntityTest::create([
       'type' => 'test',
       // This label will result in neutral access.
       // @see \Drupal\entity_test\EntityTestAccessControlHandler::checkAccess()
@@ -241,30 +257,12 @@ class MediaLibraryAccessTest extends KernelTestBase {
   }
 
   /**
-   * Data provider for ::testFieldWidgetEntityFieldAccess().
-   *
-   * @return array[]
-   *   Sets of arguments to pass to the test method.
-   */
-  public static function providerFieldWidgetEntityFieldAccess(): array {
-    return [
-      ['entity_reference'],
-      ['entity_reference_subclass'],
-    ];
-  }
-
-  /**
    * Tests that the field widget opener respects entity field-level access.
-   *
-   * @param string $field_type
-   *   The field type.
-   *
-   * @dataProvider providerFieldWidgetEntityFieldAccess
    */
-  public function testFieldWidgetEntityFieldAccess(string $field_type): void {
+  public function testFieldWidgetEntityFieldAccess() {
     $field_storage = FieldStorageConfig::create([
-      'type' => $field_type,
-      'entity_type' => 'entity_test_with_bundle',
+      'type' => 'entity_reference',
+      'entity_type' => 'entity_test',
       // The media_library_test module will deny access to this field.
       // @see media_library_test_entity_field_access()
       'field_name' => 'field_media_no_access',
@@ -288,7 +286,7 @@ class MediaLibraryAccessTest extends KernelTestBase {
 
     // Test that access is denied even without an entity to work with.
     $state = MediaLibraryState::create('media_library.opener.field_widget', ['file', 'image'], 'file', 2, [
-      'entity_type_id' => 'entity_test_with_bundle',
+      'entity_type_id' => 'entity_test',
       'bundle' => 'test',
       'field_name' => $field_storage->getName(),
     ]);
@@ -296,7 +294,7 @@ class MediaLibraryAccessTest extends KernelTestBase {
     $this->assertAccess($access_result, FALSE, 'Field access denied by test module', [], ['url.query_args', 'user.permissions']);
 
     // Assert that field access is also checked with a real entity.
-    $entity = EntityTestWithBundle::create([
+    $entity = EntityTest::create([
       'type' => 'test',
       'name' => $this->randomString(),
     ]);
@@ -319,13 +317,13 @@ class MediaLibraryAccessTest extends KernelTestBase {
   /**
    * Tests that media library access respects the media_library view.
    */
-  public function testViewAccess(): void {
+  public function testViewAccess() {
     /** @var \Drupal\media_library\MediaLibraryUiBuilder $ui_builder */
     $ui_builder = $this->container->get('media_library.ui_builder');
 
     // Create a media library state to test access.
     $state = MediaLibraryState::create('media_library.opener.field_widget', ['file', 'image'], 'file', 2, [
-      'entity_type_id' => 'entity_test_with_bundle',
+      'entity_type_id' => 'entity_test',
       'bundle' => 'test',
       'field_name' => 'field_test_media',
     ]);
@@ -414,7 +412,7 @@ class MediaLibraryAccessTest extends KernelTestBase {
    * @param string[] $expected_cache_contexts
    *   (optional) The expected cache contexts attached to the access result.
    */
-  private function assertAccess(AccessResult $access_result, bool $is_allowed, ?string $expected_reason = NULL, array $expected_cache_tags = [], array $expected_cache_contexts = []): void {
+  private function assertAccess(AccessResult $access_result, bool $is_allowed, string $expected_reason = NULL, array $expected_cache_tags = [], array $expected_cache_contexts = []): void {
     $this->assertSame($is_allowed, $access_result->isAllowed());
     if ($access_result instanceof AccessResultReasonInterface && isset($expected_reason)) {
       $this->assertSame($expected_reason, $access_result->getReason());

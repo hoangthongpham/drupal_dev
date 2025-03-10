@@ -1,5 +1,5 @@
 /* eslint-disable import/no-extraneous-dependencies */
-/* cspell:ignore drupalimagealternativetextui contextualballoon componentfactory imagealternativetextformview missingalternativetextview imagetextalternativeui imagealternativetext */
+/* cspell:words drupalimagealternativetextui contextualballoon componentfactory imagealternativetextformview missingalternativetextview imagetextalternativeui imagealternativetext */
 
 /**
  * @module drupalImage/imagealternativetext/drupalimagealternativetextui
@@ -40,47 +40,41 @@ import MissingAlternativeTextView from './ui/missingalternativetextview';
  */
 export default class DrupalImageAlternativeTextUi extends Plugin {
   /**
-   * @inheritdoc
+   * @inheritDoc
    */
   static get requires() {
     return [ContextualBalloon];
   }
 
   /**
-   * @inheritdoc
+   * @inheritDoc
    */
   static get pluginName() {
     return 'DrupalImageTextAlternativeUI';
   }
 
   /**
-   * @inheritdoc
+   * @inheritDoc
    */
   init() {
     this._createButton();
     this._createForm();
     this._createMissingAltTextComponent();
 
-    const showAlternativeTextForm = () => {
-      const imageUtils = this.editor.plugins.get('ImageUtils');
-      // Show form after upload if there's an image widget in the current
-      // selection.
-      if (
-        imageUtils.getClosestSelectedImageWidget(
-          this.editor.editing.view.document.selection,
-        )
-      ) {
-        this._showForm();
-      }
-    };
-
-    if (this.editor.commands.get('insertImage')) {
-      const insertImage = this.editor.commands.get('insertImage');
-      insertImage.on('execute', showAlternativeTextForm);
-    }
     if (this.editor.plugins.has('ImageUploadEditing')) {
       const imageUploadEditing = this.editor.plugins.get('ImageUploadEditing');
-      imageUploadEditing.on('uploadComplete', showAlternativeTextForm);
+      const imageUtils = this.editor.plugins.get('ImageUtils');
+      imageUploadEditing.on('uploadComplete', () => {
+        // Show form after upload if there's image widget in the current
+        // selection.
+        if (
+          imageUtils.getClosestSelectedImageWidget(
+            this.editor.editing.view.document.selection,
+          )
+        ) {
+          this._showForm();
+        }
+      });
     }
   }
 
@@ -118,7 +112,7 @@ export default class DrupalImageAlternativeTextUi extends Plugin {
   }
 
   /**
-   * @inheritdoc
+   * @inheritDoc
    */
   destroy() {
     super.destroy();

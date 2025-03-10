@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\KernelTests\Core\Config;
 
 use Drupal\KernelTests\KernelTestBase;
@@ -14,21 +12,23 @@ use Drupal\KernelTests\KernelTestBase;
 class ConfigDiffTest extends KernelTestBase {
 
   /**
-   * {@inheritdoc}
+   * Modules to enable.
+   *
+   * @var array
    */
   protected static $modules = ['config_test', 'system'];
 
   /**
    * Tests calculating the difference between two sets of configuration.
    */
-  public function testDiff(): void {
+  public function testDiff() {
     $active = $this->container->get('config.storage');
     $sync = $this->container->get('config.storage.sync');
     $config_name = 'config_test.system';
     $change_key = 'foo';
     $remove_key = '404';
     $add_key = 'biff';
-    $add_data = 'bangPow';
+    $add_data = 'bangpow';
     $change_data = 'foobar';
 
     // Install the default config.
@@ -108,7 +108,7 @@ class ConfigDiffTest extends KernelTestBase {
   /**
    * Tests calculating the difference between two sets of config collections.
    */
-  public function testCollectionDiff(): void {
+  public function testCollectionDiff() {
     /** @var \Drupal\Core\Config\StorageInterface $active */
     $active = $this->container->get('config.storage');
     /** @var \Drupal\Core\Config\StorageInterface $sync */
@@ -137,7 +137,7 @@ class ConfigDiffTest extends KernelTestBase {
   }
 
   /**
-   * Helper method to test that an edit is found in the diff of two storages.
+   * Helper method to test that an edit is found in a diff'd YAML file.
    *
    * @param array $edits
    *   A list of edits.
@@ -162,7 +162,7 @@ class ConfigDiffTest extends KernelTestBase {
       // Look through each line and try and find the key.
       if (is_array($haystack)) {
         foreach ($haystack as $item) {
-          if (str_starts_with($item, $field . ':')) {
+          if (strpos($item, $field . ':') === 0) {
             $match = TRUE;
             // Assert that the edit is of the type specified.
             $this->assertEquals($type, $edit->type, "The {$field} item in the diff is a {$type}");

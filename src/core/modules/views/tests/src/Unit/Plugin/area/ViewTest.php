@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\views\Unit\Plugin\area;
 
 use Drupal\Tests\UnitTestCase;
@@ -42,7 +40,7 @@ class ViewTest extends UnitTestCase {
   /**
    * @covers ::calculateDependencies
    */
-  public function testCalculateDependencies(): void {
+  public function testCalculateDependencies() {
     /** @var \Drupal\views\Entity\View $view_this */
     /** @var \Drupal\views\Entity\View $view_other */
     $view_this = $this->createMock('Drupal\views\ViewEntityInterface');
@@ -57,7 +55,7 @@ class ViewTest extends UnitTestCase {
       ->willReturnMap([
         ['this', $view_this],
         ['other', $view_other],
-      ]);
+    ]);
     $this->viewHandler->view->storage = $view_this;
 
     $this->viewHandler->options['view_to_insert'] = 'other:default';

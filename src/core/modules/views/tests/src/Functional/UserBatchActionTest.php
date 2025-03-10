@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\views\Functional;
 
 use Drupal\Tests\BrowserTestBase;
@@ -15,14 +13,11 @@ use Drupal\Tests\BrowserTestBase;
 class UserBatchActionTest extends BrowserTestBase {
 
   /**
-   * {@inheritdoc}
+   * Modules to install.
+   *
+   * @var array
    */
-  protected static $modules = [
-    'user',
-    'user_batch_action_test',
-    'views',
-  ];
-
+  protected static $modules = ['user', 'user_batch_action_test', 'views'];
 
   /**
    * {@inheritdoc}
@@ -32,11 +27,11 @@ class UserBatchActionTest extends BrowserTestBase {
   /**
    * Tests user admin batch.
    */
-  public function testUserAction(): void {
-    $themes = ['stark', 'olivero', 'claro'];
+  public function testUserAction() {
+    $themes = ['classy', 'seven', 'bartik', 'test_subseven'];
     $this->container->get('theme_installer')->install($themes);
 
-    $this->drupalLogin($this->createUser(['administer users']));
+    $this->drupalLogin($this->rootUser);
 
     foreach ($themes as $theme) {
       $this->config('system.theme')->set('default', $theme)->save();

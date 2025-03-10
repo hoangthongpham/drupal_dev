@@ -112,7 +112,7 @@ abstract class InlineEntityFormBase extends WidgetBase implements ContainerFacto
   /**
    * {@inheritdoc}
    */
-  public function __sleep(): array {
+  public function __sleep() {
     $keys = array_diff(parent::__sleep(), ['inlineFormHandler']);
     return $keys;
   }
@@ -120,7 +120,7 @@ abstract class InlineEntityFormBase extends WidgetBase implements ContainerFacto
   /**
    * {@inheritdoc}
    */
-  public function __wakeup(): void {
+  public function __wakeup() {
     parent::__wakeup();
     $this->createInlineFormHandler();
   }
@@ -468,10 +468,8 @@ abstract class InlineEntityFormBase extends WidgetBase implements ContainerFacto
    * @todo Replace line 472 \Drupal call with Dependency Injection.
    */
   protected function isTranslating(FormStateInterface $form_state) {
-    // phpcs:disable DrupalPractice.Objects.GlobalDrupal.GlobalDrupal
     if (\Drupal::hasService('content_translation.manager') && TranslationHelper::isTranslating($form_state)) {
       $translation_manager = \Drupal::service('content_translation.manager');
-      //phpcs:enable
       $target_type = $this->getFieldSetting('target_type');
       foreach ($this->getTargetBundles() as $bundle) {
         if ($translation_manager->isEnabled($target_type, $bundle)) {

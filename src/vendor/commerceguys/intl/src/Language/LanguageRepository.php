@@ -15,49 +15,51 @@ class LanguageRepository implements LanguageRepositoryInterface
      *
      * @var string
      */
-    protected string $defaultLocale;
+    protected $defaultLocale;
 
     /**
      * The fallback locale.
      *
      * @var string
      */
-    protected string $fallbackLocale;
+    protected $fallbackLocale;
 
     /**
      * The path where per-locale definitions are stored.
      *
      * @var string
      */
-    protected string $definitionPath;
+    protected $definitionPath;
 
     /**
      * Per-locale language definitions.
      *
      * @var array
      */
-    protected array $definitions = [];
+    protected $definitions = [];
 
     /**
      * The available locales.
      *
      * @var array
      */
-    protected array $availableLocales = [
-        'af', 'am', 'ar', 'ar-EG', 'ar-LY', 'ar-SA', 'as', 'az', 'be', 'bg',
-        'bn', 'bs', 'ca', 'chr', 'cs', 'cy', 'da', 'de', 'de-AT', 'dsb', 'el',
-        'el-polyton', 'en', 'en-AU', 'en-CA', 'en-IN', 'es', 'es-419', 'es-AR',
-        'es-BO', 'es-CL', 'es-CO', 'es-CR', 'es-DO', 'es-EC', 'es-GT', 'es-HN',
-        'es-MX', 'es-NI', 'es-PA', 'es-PE', 'es-PY', 'es-US', 'es-VE', 'et',
-        'eu', 'fa', 'fa-AF', 'fi', 'fil', 'fr', 'fr-BE', 'fr-CA', 'fr-CH', 'ga',
-        'gd', 'gl', 'gu', 'he', 'hi', 'hi-Latn', 'hr', 'hsb', 'hu', 'hy', 'id',
-        'ig', 'is', 'it', 'ja', 'ka', 'kk', 'km', 'ko', 'kok', 'ky', 'lo', 'lt',
-        'lv', 'mk', 'mn', 'mr', 'ms', 'my', 'ne', 'nl', 'nn', 'no', 'or', 'pa',
-        'pl', 'ps', 'ps-PK', 'pt', 'pt-PT', 'ro', 'ro-MD', 'ru', 'si', 'sk',
-        'sl', 'so', 'sq', 'sr', 'sr-Cyrl-BA', 'sr-Cyrl-ME', 'sr-Cyrl-XK',
-        'sr-Latn', 'sr-Latn-BA', 'sr-Latn-ME', 'sr-Latn-XK', 'sv', 'sw',
-        'sw-CD', 'sw-KE', 'ta', 'te', 'th', 'tk', 'tr', 'uk', 'ur', 'ur-IN',
-        'uz', 'vi', 'yue', 'yue-Hans', 'zh', 'zh-Hant', 'zh-Hant-HK', 'zu',
+    protected $availableLocales = [
+        'af', 'ar', 'ar-EG', 'ar-LY', 'ar-SA', 'as', 'ast', 'az', 'az-Cyrl',
+        'be', 'bg', 'bn', 'bn-IN', 'brx', 'bs', 'bs-Cyrl', 'ca', 'ce', 'cs',
+        'cy', 'da', 'de', 'de-AT', 'dz', 'el', 'en', 'en-001', 'en-AU', 'en-CA',
+        'en-GB', 'en-IN', 'en-MV', 'es', 'es-419', 'es-AR', 'es-BO', 'es-CL',
+        'es-CO', 'es-CR', 'es-DO', 'es-EC', 'es-GT', 'es-HN', 'es-MX', 'es-NI',
+        'es-PA', 'es-PE', 'es-PR', 'es-PY', 'es-SV', 'es-US', 'es-VE', 'et',
+        'eu', 'fa', 'fa-AF', 'fi', 'fil', 'fr', 'fr-BE', 'fr-CA', 'fr-CH',
+        'ga', 'gd', 'gl', 'gsw', 'gu', 'he', 'hi', 'hi-Latn', 'hr', 'hu', 'hy',
+        'id', 'is', 'it', 'ja', 'ka', 'kk', 'km', 'ko', 'kok', 'ks', 'ku', 'ky',
+        'lb', 'lo', 'lt', 'lv', 'mai', 'mg', 'mk', 'ml', 'mn', 'mr', 'ms', 'mt',
+        'my', 'ne', 'nl', 'nn', 'no', 'pa', 'pl', 'ps', 'ps-PK', 'pt', 'pt-PT',
+        'rn', 'ro', 'ro-MD', 'ru', 'rw', 'sd', 'si', 'sk', 'sl', 'so', 'sq',
+        'sr', 'sr-Cyrl-BA', 'sr-Cyrl-ME', 'sr-Cyrl-XK', 'sr-Latn', 'sr-Latn-BA',
+        'sr-Latn-ME', 'sr-Latn-XK', 'sv', 'sw', 'sw-CD', 'sw-KE', 'ta', 'te',
+        'tg', 'th', 'tk', 'to', 'tr', 'uk', 'ur', 'ur-IN', 'uz', 'uz-Cyrl',
+        'vi', 'yue', 'yue-Hans', 'zh', 'zh-Hant', 'zh-Hant-HK'
     ];
 
     /**
@@ -65,20 +67,20 @@ class LanguageRepository implements LanguageRepositoryInterface
      *
      * @param string $defaultLocale  The default locale. Defaults to 'en'.
      * @param string $fallbackLocale The fallback locale. Defaults to 'en'.
-     * @param string|null $definitionPath The path to the currency definitions.
+     * @param string $definitionPath The path to the currency definitions.
      *                               Defaults to 'resources/language'.
      */
-    public function __construct(string $defaultLocale = 'en', string $fallbackLocale = 'en', string $definitionPath = null)
+    public function __construct($defaultLocale = 'en', $fallbackLocale = 'en', $definitionPath = null)
     {
         $this->defaultLocale = $defaultLocale;
         $this->fallbackLocale = $fallbackLocale;
-        $this->definitionPath = $definitionPath ?: __DIR__ . '/../../resources/language/';
+        $this->definitionPath = $definitionPath ? $definitionPath : __DIR__ . '/../../resources/language/';
     }
 
     /**
      * {@inheritdoc}
      */
-    public function get(string $languageCode, string $locale = null): Language
+    public function get($languageCode, $locale = null)
     {
         $locale = $locale ?: $this->defaultLocale;
         $locale = Locale::resolve($this->availableLocales, $locale, $this->fallbackLocale);
@@ -99,7 +101,7 @@ class LanguageRepository implements LanguageRepositoryInterface
     /**
      * {@inheritdoc}
      */
-    public function getAll(string $locale = null): array
+    public function getAll($locale = null)
     {
         $locale = $locale ?: $this->defaultLocale;
         $locale = Locale::resolve($this->availableLocales, $locale, $this->fallbackLocale);
@@ -119,7 +121,7 @@ class LanguageRepository implements LanguageRepositoryInterface
     /**
      * {@inheritdoc}
      */
-    public function getList(string $locale = null): array
+    public function getList($locale = null)
     {
         $locale = $locale ?: $this->defaultLocale;
         $locale = Locale::resolve($this->availableLocales, $locale, $this->fallbackLocale);
@@ -139,7 +141,7 @@ class LanguageRepository implements LanguageRepositoryInterface
      *
      * @return array
      */
-    protected function loadDefinitions(string $locale): array
+    protected function loadDefinitions($locale)
     {
         if (!isset($this->definitions[$locale])) {
             $filename = $this->definitionPath . $locale . '.json';

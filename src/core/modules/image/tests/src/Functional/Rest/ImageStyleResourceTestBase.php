@@ -1,16 +1,14 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\image\Functional\Rest;
 
 use Drupal\image\Entity\ImageStyle;
-use Drupal\Tests\rest\Functional\EntityResource\ConfigEntityResourceTestBase;
+use Drupal\Tests\rest\Functional\EntityResource\EntityResourceTestBase;
 
 /**
  * ResourceTestBase for ImageStyle entity.
  */
-abstract class ImageStyleResourceTestBase extends ConfigEntityResourceTestBase {
+abstract class ImageStyleResourceTestBase extends EntityResourceTestBase {
 
   /**
    * {@inheritdoc}
@@ -35,18 +33,6 @@ abstract class ImageStyleResourceTestBase extends ConfigEntityResourceTestBase {
    * @var string
    */
   protected $effectUuid;
-
-  /**
-   * Marks some tests as skipped because XML cannot be deserialized.
-   *
-   * @before
-   */
-  public function imageStyleResourceTestBaseSkipTests(): void {
-    if ($this->name() === 'testGet' && static::$format === 'xml') {
-      // @todo Remove this method override in https://www.drupal.org/node/2905655
-      $this->markTestSkipped('XML encoder does not support UUIDs as keys: makes ImageStyle config entity XML serialization crash');
-    }
-  }
 
   /**
    * {@inheritdoc}
@@ -113,7 +99,6 @@ abstract class ImageStyleResourceTestBase extends ConfigEntityResourceTestBase {
    */
   protected function getNormalizedPostEntity() {
     // @todo Update in https://www.drupal.org/node/2300677.
-    return [];
   }
 
   /**

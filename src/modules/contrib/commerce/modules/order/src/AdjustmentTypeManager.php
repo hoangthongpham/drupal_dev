@@ -2,6 +2,7 @@
 
 namespace Drupal\commerce_order;
 
+use Drupal\commerce_order\Plugin\Commerce\AdjustmentType\AdjustmentType;
 use Drupal\Component\Plugin\Exception\PluginException;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
@@ -9,7 +10,6 @@ use Drupal\Core\Plugin\DefaultPluginManager;
 use Drupal\Core\Plugin\Discovery\ContainerDerivativeDiscoveryDecorator;
 use Drupal\Core\Plugin\Discovery\YamlDiscovery;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
-use Drupal\commerce_order\Plugin\Commerce\AdjustmentType\AdjustmentType;
 
 /**
  * Manages discovery and instantiation of commerce_adjustment_type plugins.

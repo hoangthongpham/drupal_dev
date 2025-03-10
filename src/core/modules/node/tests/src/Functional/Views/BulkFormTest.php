@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\node\Functional\Views;
 
 use Drupal\language\Entity\ConfigurableLanguage;
@@ -44,8 +42,8 @@ class BulkFormTest extends NodeTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp($import_test_views = TRUE, $modules = ['node_test_views']): void {
-    parent::setUp($import_test_views, $modules);
+  protected function setUp($import_test_views = TRUE): void {
+    parent::setUp($import_test_views);
 
     ConfigurableLanguage::createFromLangcode('en-gb')->save();
     ConfigurableLanguage::createFromLangcode('it')->save();
@@ -70,7 +68,7 @@ class BulkFormTest extends NodeTestBase {
       foreach ($langcodes as $langcode) {
         if (!$node->hasTranslation($langcode)) {
           $title = $this->randomMachineName() . ' [' . $node->id() . ':' . $langcode . ']';
-          $node->addTranslation($langcode, ['title' => $title, 'promote' => FALSE]);
+          $translation = $node->addTranslation($langcode, ['title' => $title, 'promote' => FALSE]);
         }
       }
       $node->save();
@@ -80,7 +78,7 @@ class BulkFormTest extends NodeTestBase {
     $node = $this->nodes[2];
     $langcode = 'en';
     $title = $this->randomMachineName() . ' [' . $node->id() . ':' . $langcode . ']';
-    $node->addTranslation($langcode, ['title' => $title]);
+    $translation = $node->addTranslation($langcode, ['title' => $title]);
     $node->save();
 
     // Check that all created translations are selected by the test view.
@@ -96,13 +94,13 @@ class BulkFormTest extends NodeTestBase {
     ]));
     $this->drupalGet('test-node-bulk-form');
     $elements = $this->assertSession()->selectExists('edit-action')->findAll('css', 'option');
-    $this->assertCount(9, $elements, 'All node operations are found.');
+    $this->assertCount(8, $elements, 'All node operations are found.');
   }
 
   /**
    * Tests the node bulk form.
    */
-  public function testBulkForm(): void {
+  public function testBulkForm() {
     // Unpublish a node using the bulk form.
     $node = reset($this->nodes);
     $this->assertTrue($node->isPublished(), 'Node is initially published');
@@ -223,7 +221,7 @@ class BulkFormTest extends NodeTestBase {
   /**
    * Tests multiple deletion.
    */
-  public function testBulkDeletion(): void {
+  public function testBulkDeletion() {
     // Select a bunch of translated and untranslated nodes and check that
     // nodes and individual translations are properly deleted.
     $edit = [

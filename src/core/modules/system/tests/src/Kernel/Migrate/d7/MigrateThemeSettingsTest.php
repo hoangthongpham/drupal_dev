@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\system\Kernel\Migrate\d7;
 
 use Drupal\Tests\migrate_drupal\Kernel\d7\MigrateDrupal7TestBase;
@@ -19,16 +17,16 @@ class MigrateThemeSettingsTest extends MigrateDrupal7TestBase {
   protected function setUp(): void {
     parent::setUp();
 
-    // Install Olivero and Claro themes.
-    \Drupal::service('theme_installer')->install(['olivero', 'claro']);
+    // Install bartik and seven themes.
+    \Drupal::service('theme_installer')->install(['bartik', 'seven']);
     $this->executeMigration('d7_theme_settings');
   }
 
   /**
    * Tests migration of theme settings to variables to configuration.
    */
-  public function testMigrateThemeSettings(): void {
-    $config = $this->config('olivero.settings');
+  public function testMigrateThemeSettings() {
+    $config = $this->config('bartik.settings');
 
     $this->assertSame('', $config->get('favicon.path'));
     $this->assertTrue($config->get('favicon.use_default'));
@@ -42,7 +40,7 @@ class MigrateThemeSettingsTest extends MigrateDrupal7TestBase {
     $this->assertSame('public://gnu.png', $config->get('logo.path'));
     $this->assertFalse($config->get('logo.use_default'));
 
-    $config = $this->config('claro.settings');
+    $config = $this->config('seven.settings');
     $this->assertSame('', $config->get('favicon.path'));
     $this->assertTrue($config->get('favicon.use_default'));
     $this->assertFalse($config->get('features.comment_user_picture'));

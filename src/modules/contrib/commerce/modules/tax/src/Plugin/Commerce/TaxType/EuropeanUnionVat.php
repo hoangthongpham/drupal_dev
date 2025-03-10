@@ -2,24 +2,20 @@
 
 namespace Drupal\commerce_tax\Plugin\Commerce\TaxType;
 
-use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\commerce_order\Entity\OrderItemInterface;
-use Drupal\commerce_tax\Attribute\CommerceTaxType;
-use Drupal\commerce_tax\TaxZone;
 use Drupal\commerce_tax\TaxableType;
+use Drupal\commerce_tax\TaxZone;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\profile\Entity\ProfileInterface;
-
-// cspell:ignore Jungholz Heligoland Mittelberg Melilla Büsingen Lugano Campione
-// cspell:ignore Livigno
 
 /**
  * Provides the European Union VAT tax type.
+ *
+ * @CommerceTaxType(
+ *   id = "european_union_vat",
+ *   label = "European Union VAT",
+ * )
  */
-#[CommerceTaxType(
-  id: "european_union_vat",
-  label: new TranslatableMarkup("European Union VAT"),
-)]
 class EuropeanUnionVat extends LocalTaxTypeBase {
 
   /**
@@ -80,11 +76,7 @@ class EuropeanUnionVat extends LocalTaxTypeBase {
     $taxable_type = $this->getTaxableType($order_item);
     $year = $order->getCalculationDate()->format('Y');
     $is_digital = $taxable_type == TaxableType::DIGITAL_GOODS && $year >= 2015;
-    $is_non_taxable = $taxable_type == TaxableType::NON_TAXABLE;
-    if ($is_non_taxable) {
-      $resolved_zones = [];
-    }
-    elseif (empty($store_zones)) {
+    if (empty($store_zones)) {
       // The store is not in the EU but is registered to collect VAT for
       // digital goods.
       $resolved_zones = [];
@@ -294,15 +286,14 @@ class EuropeanUnionVat extends LocalTaxTypeBase {
           'id' => 'reduced',
           'label' => $labels['reduced'],
           'percentages' => [
-            ['number' => '0.15', 'start_date' => '2013-01-01', 'end_date' => '2023-12-31'],
-            ['number' => '0.12', 'start_date' => '2024-01-01'],
+            ['number' => '0.15', 'start_date' => '2013-01-01'],
           ],
         ],
         [
           'id' => 'super_reduced',
           'label' => $labels['super_reduced'],
           'percentages' => [
-            ['number' => '0.1', 'start_date' => '2015-01-01', 'end_date' => '2023-12-31'],
+            ['number' => '0.1', 'start_date' => '2015-01-01'],
           ],
         ],
         [
@@ -383,8 +374,7 @@ class EuropeanUnionVat extends LocalTaxTypeBase {
           'id' => 'standard',
           'label' => $labels['standard'],
           'percentages' => [
-            ['number' => '0.2', 'start_date' => '2009-07-01', 'end_date' => '2023-12-31'],
-            ['number' => '0.22', 'start_date' => '2024-01-01'],
+            ['number' => '0.2', 'start_date' => '2009-07-01'],
           ],
           'default' => TRUE,
         ],
@@ -392,8 +382,7 @@ class EuropeanUnionVat extends LocalTaxTypeBase {
           'id' => 'reduced',
           'label' => $labels['reduced'],
           'percentages' => [
-            ['number' => '0.09', 'start_date' => '2009-01-01', 'end_date' => '2023-12-31'],
-            ['number' => '0.13', 'start_date' => '2024-01-01'],
+            ['number' => '0.09', 'start_date' => '2009-01-01'],
           ],
         ],
       ],
@@ -444,8 +433,7 @@ class EuropeanUnionVat extends LocalTaxTypeBase {
           'id' => 'standard',
           'label' => $labels['standard'],
           'percentages' => [
-            ['number' => '0.24', 'start_date' => '2013-01-01', 'end_date' => '2024-08-31'],
-            ['number' => '0.255', 'start_date' => '2024-09-01'],
+            ['number' => '0.24', 'start_date' => '2013-01-01'],
           ],
           'default' => TRUE,
         ],
@@ -758,13 +746,6 @@ class EuropeanUnionVat extends LocalTaxTypeBase {
           ],
         ],
         [
-          'id' => 'second_reduced',
-          'label' => $labels['second_reduced'],
-          'percentages' => [
-            ['number' => '0.05', 'start_date' => '2016-01-01'],
-          ],
-        ],
-        [
           'id' => 'super_reduced',
           'label' => $labels['super_reduced'],
           'percentages' => [
@@ -817,9 +798,7 @@ class EuropeanUnionVat extends LocalTaxTypeBase {
           'id' => 'standard',
           'label' => $labels['standard'],
           'percentages' => [
-            ['number' => '0.17', 'start_date' => '2015-01-01', 'end_date' => '2022-12-31'],
-            ['number' => '0.16', 'start_date' => '2023-01-01', 'end_date' => '2023-12-31'],
-            ['number' => '0.17', 'start_date' => '2024-01-01'],
+            ['number' => '0.17', 'start_date' => '2015-01-01'],
           ],
           'default' => TRUE,
         ],
@@ -827,18 +806,14 @@ class EuropeanUnionVat extends LocalTaxTypeBase {
           'id' => 'intermediate',
           'label' => $labels['intermediate'],
           'percentages' => [
-            ['number' => '0.14', 'start_date' => '2015-01-01', 'end_date' => '2022-12-31'],
-            ['number' => '0.13', 'start_date' => '2023-01-01', 'end_date' => '2023-12-31'],
-            ['number' => '0.14', 'start_date' => '2024-01-01'],
+            ['number' => '0.14', 'start_date' => '2015-01-01'],
           ],
         ],
         [
           'id' => 'reduced',
           'label' => $labels['reduced'],
           'percentages' => [
-            ['number' => '0.08', 'start_date' => '2015-01-01', 'end_date' => '2022-12-31'],
-            ['number' => '0.07', 'start_date' => '2023-01-01', 'end_date' => '2023-12-31'],
-            ['number' => '0.08', 'start_date' => '2024-01-01'],
+            ['number' => '0.08', 'start_date' => '2015-01-01'],
           ],
         ],
         [
@@ -936,13 +911,6 @@ class EuropeanUnionVat extends LocalTaxTypeBase {
           'percentages' => [
             ['number' => '0.06', 'start_date' => '1986-10-01', 'end_date' => '2018-12-31'],
             ['number' => '0.09', 'start_date' => '2019-01-01'],
-          ],
-        ],
-        [
-          'id' => 'zero',
-          'label' => $labels['zero'],
-          'percentages' => [
-            ['number' => '0', 'start_date' => '2020-05-25'],
           ],
         ],
       ],
@@ -1185,8 +1153,7 @@ class EuropeanUnionVat extends LocalTaxTypeBase {
           'id' => 'standard',
           'label' => $labels['standard'],
           'percentages' => [
-            ['number' => '0.2', 'start_date' => '2011-01-01', 'end_date' => '2024-12-31'],
-            ['number' => '0.23', 'start_date' => '2025-01-01'],
+            ['number' => '0.2', 'start_date' => '2011-01-01'],
           ],
           'default' => TRUE,
         ],
@@ -1194,15 +1161,7 @@ class EuropeanUnionVat extends LocalTaxTypeBase {
           'id' => 'reduced',
           'label' => $labels['reduced'],
           'percentages' => [
-            ['number' => '0.1', 'start_date' => '2011-01-01', 'end_date' => '2024-12-31'],
-            ['number' => '0.19', 'start_date' => '2025-01-01'],
-          ],
-        ],
-        [
-          'id' => 'second_reduced',
-          'label' => $labels['second_reduced'],
-          'percentages' => [
-            ['number' => '0.05', 'start_date' => '2023-01-01'],
+            ['number' => '0.1', 'start_date' => '2011-01-01'],
           ],
         ],
       ],

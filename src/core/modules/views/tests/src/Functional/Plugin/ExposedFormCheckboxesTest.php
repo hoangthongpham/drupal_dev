@@ -1,13 +1,11 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\views\Functional\Plugin;
 
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\taxonomy\Entity\Vocabulary;
-use Drupal\Tests\field\Traits\EntityReferenceFieldCreationTrait;
+use Drupal\Tests\field\Traits\EntityReferenceTestTrait;
 use Drupal\Tests\views\Functional\ViewTestBase;
 use Drupal\views\Tests\ViewTestData;
 use Drupal\views\Views;
@@ -19,7 +17,7 @@ use Drupal\views\Views;
  */
 class ExposedFormCheckboxesTest extends ViewTestBase {
 
-  use EntityReferenceFieldCreationTrait;
+  use EntityReferenceTestTrait;
 
   /**
    * {@inheritdoc}
@@ -53,8 +51,8 @@ class ExposedFormCheckboxesTest extends ViewTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp($import_test_views = TRUE, $modules = []): void {
-    parent::setUp(FALSE, $modules);
+  protected function setUp($import_test_views = TRUE): void {
+    parent::setUp(FALSE);
 
     // Create a vocabulary and entity reference field so we can test the "is all
     // of" filter operator. Must be done ahead of the view import so the
@@ -84,7 +82,7 @@ class ExposedFormCheckboxesTest extends ViewTestBase {
   /**
    * Tests overriding the default render option with checkboxes.
    */
-  public function testExposedFormRenderCheckboxes(): void {
+  public function testExposedFormRenderCheckboxes() {
     // Use a test theme to convert multi-select elements into checkboxes.
     \Drupal::service('theme_installer')->install(['views_test_checkboxes_theme']);
     $this->config('system.theme')
@@ -111,13 +109,13 @@ class ExposedFormCheckboxesTest extends ViewTestBase {
     // checked.
     $this->clickLink('Page 2');
     $this->assertSession()->elementsCount('xpath', "//div[contains(@class, 'views-row')]", 1);
-    $this->assertSession()->pageTextNotContains('The submitted value in the Type element is not allowed.');
+    $this->assertSession()->pageTextNotContains('An illegal choice has been detected. Please contact the site administrator.');
   }
 
   /**
    * Tests that "is all of" filters work with checkboxes.
    */
-  public function testExposedIsAllOfFilter(): void {
+  public function testExposedIsAllOfFilter() {
     foreach (['Term 1', 'Term 2', 'Term 3'] as $term_name) {
       // Add a few terms to the new vocabulary.
       $term = Term::create([
@@ -129,14 +127,14 @@ class ExposedFormCheckboxesTest extends ViewTestBase {
     }
 
     // Create a field.
-    $field_name = $this->randomMachineName();
+    $field_name = mb_strtolower($this->randomMachineName());
     $handler_settings = [
       'target_bundles' => [
         $this->vocabulary->id() => $this->vocabulary->id(),
       ],
       'auto_create' => FALSE,
     ];
-    $this->createEntityReferenceField('node', 'article', $field_name, 'Reference Field', 'taxonomy_term', 'default', $handler_settings, FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED);
+    $this->createEntityReferenceField('node', 'article', $field_name, NULL, 'taxonomy_term', 'default', $handler_settings, FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED);
 
     // Add some test nodes.
     $this->createNode([
@@ -160,14 +158,14 @@ class ExposedFormCheckboxesTest extends ViewTestBase {
     // All rows are displayed by default on the first page when no options are
     // checked.
     $this->assertSession()->elementsCount('xpath', "//div[contains(@class, 'views-row')]", 8);
-    $this->assertSession()->pageTextNotContains('The submitted value in the Reference Field element is not allowed.');
+    $this->assertSession()->pageTextNotContains('An illegal choice has been detected. Please contact the site administrator.');
 
     // Select one option and ensure we still have results.
     $tid = $this->terms[0]->id();
     $this->submitForm(["tid[$tid]" => $tid], 'Apply');
     // Ensure only nodes tagged with $tid are displayed.
     $this->assertSession()->elementsCount('xpath', "//div[contains(@class, 'views-row')]", 2);
-    $this->assertSession()->pageTextNotContains('The submitted value in the Reference Field element is not allowed.');
+    $this->assertSession()->pageTextNotContains('An illegal choice has been detected. Please contact the site administrator.');
   }
 
 }

@@ -2,11 +2,11 @@
 
 namespace Drupal\commerce_tax;
 
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\commerce_order\OrderProcessorInterface;
 use Drupal\commerce_price\RounderInterface;
 use Drupal\commerce_tax\Entity\TaxType;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 
 /**
  * Applies taxes to orders during the order refresh process.

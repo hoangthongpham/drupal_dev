@@ -2,13 +2,14 @@
 
 namespace Drupal\Tests\commerce\FunctionalJavascript;
 
+use Drupal\commerce_price\Comparator\NumberComparator;
+use Drupal\commerce_price\Comparator\PriceComparator;
+use Drupal\commerce_store\StoreCreationTrait;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 use Drupal\Tests\block\Traits\BlockCreationTrait;
 use Drupal\Tests\commerce\Traits\CommerceBrowserTestTrait;
-use Drupal\commerce_price\Comparator\NumberComparator;
-use Drupal\commerce_price\Comparator\PriceComparator;
-use Drupal\commerce_store\StoreCreationTrait;
+use Drupal\Tests\commerce\Traits\DeprecationSuppressionTrait;
 use SebastianBergmann\Comparator\Factory as PhpUnitComparatorFactory;
 
 /**
@@ -19,6 +20,7 @@ abstract class CommerceWebDriverTestBase extends WebDriverTestBase {
   use BlockCreationTrait;
   use StoreCreationTrait;
   use CommerceBrowserTestTrait;
+  use DeprecationSuppressionTrait;
   use StringTranslationTrait;
 
   /**
@@ -68,6 +70,7 @@ abstract class CommerceWebDriverTestBase extends WebDriverTestBase {
    * {@inheritdoc}
    */
   protected function setUp(): void {
+    $this->setErrorHandler();
     parent::setUp();
 
     $factory = PhpUnitComparatorFactory::getInstance();
@@ -84,6 +87,14 @@ abstract class CommerceWebDriverTestBase extends WebDriverTestBase {
 
     $this->adminUser = $this->drupalCreateUser($this->getAdministratorPermissions());
     $this->drupalLogin($this->adminUser);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function tearDown(): void {
+    parent::tearDown();
+    $this->restoreErrorHandler();
   }
 
   /**
@@ -158,6 +169,16 @@ abstract class CommerceWebDriverTestBase extends WebDriverTestBase {
     $message = $message ?: "Javascript condition met:\n" . $condition;
     $result = $this->getSession()->getDriver()->wait($timeout, $condition);
     $this->assertNotEmpty($result, $message);
+  }
+
+  /**
+   * Waits for jQuery to become active and animations to complete.
+   *
+   * @deprecated in commerce:8.x-2.16 and is removed from commerce:3.x.
+   */
+  protected function waitForAjaxToFinish() {
+    $condition = "(0 === jQuery.active && 0 === jQuery(':animated').length)";
+    $this->assertJsCondition($condition, 10000);
   }
 
 }

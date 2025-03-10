@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\migrate\Unit\Event;
 
 use Drupal\migrate\Event\EventBase;
@@ -19,10 +17,11 @@ class EventBaseTest extends UnitTestCase {
    * @covers ::__construct
    * @covers ::getMigration
    */
-  public function testGetMigration(): void {
+  public function testGetMigration() {
     $migration = $this->prophesize('\Drupal\migrate\Plugin\MigrationInterface')->reveal();
     $message_service = $this->prophesize('\Drupal\migrate\MigrateMessageInterface')->reveal();
-    $event = new EventBase($migration, $message_service);
+    $row = $this->prophesize('\Drupal\migrate\Row')->reveal();
+    $event = new EventBase($migration, $message_service, $row, [1, 2, 3]);
     $this->assertSame($migration, $event->getMigration());
   }
 
@@ -32,7 +31,7 @@ class EventBaseTest extends UnitTestCase {
    * @covers ::__construct
    * @covers ::logMessage
    */
-  public function testLogMessage(): void {
+  public function testLogMessage() {
     $migration = $this->prophesize('\Drupal\migrate\Plugin\MigrationInterface')->reveal();
     $message_service = $this->prophesize('\Drupal\migrate\MigrateMessageInterface');
     $event = new EventBase($migration, $message_service->reveal());

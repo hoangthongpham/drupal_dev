@@ -2,21 +2,20 @@
 
 namespace Drupal\commerce_checkout\Plugin\Commerce\CheckoutPane;
 
-use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\Core\Utility\Token;
-use Drupal\commerce_checkout\Attribute\CommerceCheckoutPane;
 use Drupal\commerce_checkout\Plugin\Commerce\CheckoutFlow\CheckoutFlowInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Utility\Token;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides the completion message pane.
+ *
+ * @CommerceCheckoutPane(
+ *   id = "completion_message",
+ *   label = @Translation("Completion message"),
+ *   default_step = "complete",
+ * )
  */
-#[CommerceCheckoutPane(
-  id: "completion_message",
-  label: new TranslatableMarkup("Completion message"),
-  default_step: "complete",
-)]
 class CompletionMessage extends CheckoutPaneBase {
 
   /**
@@ -29,7 +28,7 @@ class CompletionMessage extends CheckoutPaneBase {
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition, ?CheckoutFlowInterface $checkout_flow = NULL) {
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition, CheckoutFlowInterface $checkout_flow = NULL) {
     $instance = new static(
       $configuration,
       $plugin_id,

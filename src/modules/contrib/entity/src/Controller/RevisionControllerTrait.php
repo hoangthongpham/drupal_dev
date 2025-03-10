@@ -19,7 +19,7 @@ trait RevisionControllerTrait {
   abstract protected function entityTypeManager();
 
   /**
-   * Returns the language manager.
+   * Returns the langauge manager.
    *
    * @return \Drupal\Core\Language\LanguageManagerInterface
    */

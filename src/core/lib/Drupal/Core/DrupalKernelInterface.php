@@ -3,7 +3,6 @@
 namespace Drupal\Core;
 
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -75,9 +74,7 @@ interface DrupalKernelInterface extends HttpKernelInterface, ContainerAwareInter
   public function getCachedContainerDefinition();
 
   /**
-   * Set the current site path directory.
-   *
-   * Format: "folder-name/child-folder" usually uses "sites/default".
+   * Set the current site path.
    *
    * @param string $path
    *   The current site path.
@@ -88,10 +85,10 @@ interface DrupalKernelInterface extends HttpKernelInterface, ContainerAwareInter
   public function setSitePath($path);
 
   /**
-   * Gets the site path directory.
+   * Get the site path.
    *
    * @return string
-   *   The current site path directory.
+   *   The current site path.
    */
   public function getSitePath();
 
@@ -123,13 +120,6 @@ interface DrupalKernelInterface extends HttpKernelInterface, ContainerAwareInter
   public function rebuildContainer();
 
   /**
-   * Force a container reset.
-   *
-   * @return \Symfony\Component\DependencyInjection\ContainerInterface
-   */
-  public function resetContainer(): ContainerInterface;
-
-  /**
    * Invalidate the service container for the next request.
    */
   public function invalidateContainer();
@@ -146,15 +136,5 @@ interface DrupalKernelInterface extends HttpKernelInterface, ContainerAwareInter
    * Helper method that loads legacy Drupal include files.
    */
   public function loadLegacyIncludes();
-
-  /**
-   * Get a mapping from service hashes to service IDs.
-   *
-   * @deprecated in drupal:9.5.1 and is removed from drupal:11.0.0. Use the
-   *   'Drupal\Component\DependencyInjection\ReverseContainer' service instead.
-   *
-   * @see https://www.drupal.org/node/3327942
-   */
-  public function getServiceIdMapping();
 
 }

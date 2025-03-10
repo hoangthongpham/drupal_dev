@@ -12,10 +12,10 @@ use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 class RegisterSerializationClassesCompilerPass implements CompilerPassInterface {
 
   /**
-   * {@inheritdoc}
+   * Adds services to the Serializer.
    *
-   * phpcs:ignore Drupal.Commenting.FunctionComment.VoidReturn
-   * @return void
+   * @param \Symfony\Component\DependencyInjection\ContainerBuilder $container
+   *   The container to process.
    */
   public function process(ContainerBuilder $container) {
     $definition = $container->getDefinition('serializer');
@@ -74,8 +74,15 @@ class RegisterSerializationClassesCompilerPass implements CompilerPassInterface 
    *   to low priority.
    */
   protected function sort($services) {
+    $sorted = [];
     krsort($services);
-    return array_merge(...$services);
+
+    // Flatten the array.
+    foreach ($services as $a) {
+      $sorted = array_merge($sorted, $a);
+    }
+
+    return $sorted;
   }
 
 }

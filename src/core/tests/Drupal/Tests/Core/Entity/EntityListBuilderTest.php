@@ -1,6 +1,9 @@
 <?php
 
-declare(strict_types=1);
+/**
+ * @file
+ * Contains \Drupal\Tests\Core\Entity\EntityListBuilderTest.
+ */
 
 namespace Drupal\Tests\Core\Entity;
 
@@ -9,12 +12,11 @@ use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityListBuilder;
 use Drupal\Core\Routing\RedirectDestinationInterface;
-use Drupal\Core\Url;
 use Drupal\entity_test\EntityTestListBuilder;
 use Drupal\Tests\UnitTestCase;
 
 /**
- * @coversDefaultClass \Drupal\Core\Entity\EntityListBuilder
+ * @coversDefaultClass \Drupal\entity_test\EntityTestListBuilder
  * @group Entity
  */
 class EntityListBuilderTest extends UnitTestCase {
@@ -95,7 +97,7 @@ class EntityListBuilderTest extends UnitTestCase {
   /**
    * @covers ::getOperations
    */
-  public function testGetOperations(): void {
+  public function testGetOperations() {
     $operation_name = $this->randomMachineName();
     $operations = [
       $operation_name => [
@@ -105,7 +107,7 @@ class EntityListBuilderTest extends UnitTestCase {
     $this->moduleHandler->expects($this->once())
       ->method('invokeAll')
       ->with('entity_operation', [$this->role])
-      ->willReturn($operations);
+      ->will($this->returnValue($operations));
     $this->moduleHandler->expects($this->once())
       ->method('alter')
       ->with('entity_operation');
@@ -114,14 +116,19 @@ class EntityListBuilderTest extends UnitTestCase {
 
     $this->role->expects($this->any())
       ->method('access')
-      ->willReturn(AccessResult::allowed());
+      ->will($this->returnValue(AccessResult::allowed()));
     $this->role->expects($this->any())
       ->method('hasLinkTemplate')
-      ->willReturn(TRUE);
-    $url = Url::fromRoute('entity.user_role.collection');
+      ->will($this->returnValue(TRUE));
+    $url = $this->getMockBuilder('\Drupal\Core\Url')
+      ->disableOriginalConstructor()
+      ->getMock();
+    $url->expects($this->atLeastOnce())
+      ->method('mergeOptions')
+      ->with(['query' => ['destination' => '/foo/bar']]);
     $this->role->expects($this->any())
       ->method('toUrl')
-      ->willReturn($url);
+      ->will($this->returnValue($url));
 
     $this->redirectDestination->expects($this->atLeastOnce())
       ->method('getAsArray')

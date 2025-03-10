@@ -2,8 +2,8 @@
 
 namespace Drupal\Tests\commerce_price\Unit;
 
-use Drupal\Tests\UnitTestCase;
 use Drupal\commerce_price\Calculator;
+use Drupal\Tests\UnitTestCase;
 
 /**
  * Tests the Calculator class.

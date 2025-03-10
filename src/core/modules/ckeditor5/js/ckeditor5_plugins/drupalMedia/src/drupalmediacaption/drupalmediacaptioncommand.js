@@ -1,5 +1,5 @@
 /* eslint-disable import/no-extraneous-dependencies */
-/* cspell:ignore imagecaption */
+/* cspell:words imagecaption */
 import { Command } from 'ckeditor5/src/core';
 import { getClosestSelectedDrupalMediaElement, isDrupalMedia } from '../utils';
 import { getMediaCaptionFromModelSelection } from './utils';
@@ -36,11 +36,11 @@ function getCaptionFromDrupalMediaModelElement(drupalMediaModelElement) {
  *
  * @extends module:core/command~Command
  *
- * @private
+ * @internal
  */
 export default class ToggleDrupalMediaCaptionCommand extends Command {
   /**
-   * @inheritdoc
+   * @inheritDoc
    */
   refresh() {
     const selection = this.editor.model.document.selection;
@@ -106,7 +106,7 @@ export default class ToggleDrupalMediaCaptionCommand extends Command {
    *
    * @param {module:engine/model/writer~Writer} writer
    *   The model writer.
-   * @param {boolean} focusCaptionOnShow
+   * @param {bool} focusCaptionOnShow
    *   Flag indicating whether the caption should be focused.
    */
   _showDrupalMediaCaption(writer, focusCaptionOnShow) {

@@ -11,29 +11,27 @@ interface LanguageRepositoryInterface
      * Gets a language matching the provided language code.
      *
      * @param string $languageCode The language code.
-     * @param string|null $locale       The locale (i.e. fr-FR).
+     * @param string $locale       The locale (i.e. fr-FR).
      *
      * @return Language
-     *
-     * @throws \CommerceGuys\Intl\Exception\UnknownLanguageException
      */
-    public function get(string $languageCode, string $locale = null): Language;
+    public function get($languageCode, $locale = null);
 
     /**
      * Gets all languages.
      *
-     * @param string|null $locale The locale (i.e. fr-FR).
+     * @param string $locale The locale (i.e. fr-FR).
      *
      * @return Language[] An array of languages, keyed by language code.
      */
-    public function getAll(string $locale = null): array;
+    public function getAll($locale = null);
 
     /**
      * Gets a list of languages.
      *
-     * @param string|null $locale The locale (i.e. fr-FR).
+     * @param string $locale The locale (i.e. fr-FR).
      *
      * @return array An array of language names, keyed by language code.
      */
-    public function getList(string $locale = null): array;
+    public function getList($locale = null);
 }

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\jsonapi\Functional;
 
 use Drupal\Core\Entity\Entity\EntityViewDisplay;
@@ -13,7 +11,7 @@ use Drupal\node\Entity\NodeType;
  *
  * @group jsonapi
  */
-class EntityViewDisplayTest extends ConfigEntityResourceTestBase {
+class EntityViewDisplayTest extends ResourceTestBase {
 
   /**
    * {@inheritdoc}
@@ -129,13 +127,12 @@ class EntityViewDisplayTest extends ConfigEntityResourceTestBase {
    */
   protected function getPostDocument() {
     // @todo Update in https://www.drupal.org/node/2300677.
-    return [];
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function getExpectedUnauthorizedAccessMessage($method): string {
+  protected function getExpectedUnauthorizedAccessMessage($method) {
     return "The 'administer node display' permission is required.";
   }
 

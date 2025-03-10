@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\views\Functional\Handler;
 
 use Drupal\Tests\views\Functional\ViewTestBase;
@@ -30,8 +28,8 @@ class AreaTitleWebTest extends ViewTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp($import_test_views = TRUE, $modules = ['views_test_config']): void {
-    parent::setUp($import_test_views, $modules);
+  protected function setUp($import_test_views = TRUE): void {
+    parent::setUp($import_test_views);
 
     $this->enableViewsTestModule();
   }
@@ -39,7 +37,7 @@ class AreaTitleWebTest extends ViewTestBase {
   /**
    * Tests the title area handler.
    */
-  public function testTitleText(): void {
+  public function testTitleText() {
     // Confirm that the view has the normal title before making the view return
     // no result.
     $this->drupalGet('test-area-title');

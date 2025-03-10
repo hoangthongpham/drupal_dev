@@ -6,7 +6,7 @@ import { getMediaCaptionFromModelSelection } from './utils';
 /**
  * The caption media UI plugin.
  *
- * @private
+ * @internal
  */
 export default class DrupalMediaCaptionUI extends Plugin {
   /**
@@ -70,7 +70,6 @@ export default class DrupalMediaCaptionUI extends Plugin {
             );
           });
         }
-        editor.editing.view.focus();
       });
 
       return button;

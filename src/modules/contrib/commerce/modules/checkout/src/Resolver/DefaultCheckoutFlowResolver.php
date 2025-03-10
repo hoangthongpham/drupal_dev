@@ -2,8 +2,8 @@
 
 namespace Drupal\commerce_checkout\Resolver;
 
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\commerce_order\Entity\OrderInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 
 /**
  * Returns the order type's default checkout flow.

@@ -5,33 +5,24 @@ namespace Drupal\views\Plugin\views\argument;
 use Drupal\Core\Database\Database;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\Context\ContextDefinition;
-use Drupal\views\Attribute\ViewsArgument;
 use Drupal\views\ViewExecutable;
 use Drupal\views\Plugin\views\display\DisplayPluginBase;
 use Drupal\views\ManyToOneHelper;
 
 /**
- * Argument handler for string.
- *
  * Basic argument handler to implement string arguments that may have length
  * limits.
  *
  * @ingroup views_argument_handlers
-  */
-#[ViewsArgument(
-  id: 'string',
-)]
+ *
+ * @ViewsArgument("string")
+ */
 class StringArgument extends ArgumentPluginBase {
-
-  /**
-   * The many-to-one helper.
-   */
-  public ManyToOneHelper $helper;
 
   /**
    * {@inheritdoc}
    */
-  public function init(ViewExecutable $view, DisplayPluginBase $display, ?array &$options = NULL) {
+  public function init(ViewExecutable $view, DisplayPluginBase $display, array &$options = NULL) {
     parent::init($view, $display, $options);
 
     if (!empty($this->definition['many to one'])) {
@@ -139,7 +130,7 @@ class StringArgument extends ArgumentPluginBase {
       ];
     }
 
-    // Allow '+' for "or". Allow ',' for "and".
+    // allow + for or, , for and
     $form['break_phrase'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Allow multiple values'),
@@ -187,7 +178,7 @@ class StringArgument extends ArgumentPluginBase {
     if ($this->options['case'] != 'none') {
       // Support case-insensitive substring comparisons for SQLite by using the
       // 'NOCASE_UTF8' collation.
-      // @see Drupal\sqlite\Driver\Database\sqlite\Connection::open()
+      // @see Drupal\Core\Database\Driver\sqlite\Connection::open()
       if (Database::getConnection()->databaseType() == 'sqlite') {
         $formula .= ' COLLATE NOCASE_UTF8';
       }

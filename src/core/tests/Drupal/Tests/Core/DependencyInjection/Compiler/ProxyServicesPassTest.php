@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\Core\DependencyInjection\Compiler;
 
 use Drupal\Core\DependencyInjection\Compiler\ProxyServicesPass;
@@ -35,7 +33,7 @@ class ProxyServicesPassTest extends UnitTestCase {
   /**
    * @covers ::process
    */
-  public function testContainerWithoutLazyServices(): void {
+  public function testContainerWithoutLazyServices() {
     $container = new ContainerBuilder();
     $container->register('plugin_cache_clearer', 'Drupal\Core\Plugin\CachedDiscoveryClearer');
 
@@ -48,7 +46,7 @@ class ProxyServicesPassTest extends UnitTestCase {
   /**
    * @covers ::process
    */
-  public function testContainerWithLazyServices(): void {
+  public function testContainerWithLazyServices() {
     $container = new ContainerBuilder();
     $container->register('plugin_cache_clearer', 'Drupal\Core\Plugin\CachedDiscoveryClearer')
       ->setLazy(TRUE);
@@ -68,7 +66,7 @@ class ProxyServicesPassTest extends UnitTestCase {
   /**
    * @covers ::process
    */
-  public function testContainerWithLazyServicesWithoutProxyClass(): void {
+  public function testContainerWithLazyServicesWithoutProxyClass() {
     $container = new ContainerBuilder();
     $container->register('path.current', CurrentPathStack::class)
       ->setLazy(TRUE);

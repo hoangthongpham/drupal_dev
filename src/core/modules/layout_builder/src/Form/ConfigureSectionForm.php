@@ -7,7 +7,6 @@ use Drupal\Core\Ajax\AjaxFormHelperTrait;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Form\SubformState;
-use Drupal\Core\Form\WorkspaceDynamicSafeFormInterface;
 use Drupal\Core\Layout\LayoutInterface;
 use Drupal\Core\Plugin\ContextAwarePluginInterface;
 use Drupal\Core\Plugin\PluginFormFactoryInterface;
@@ -27,13 +26,12 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * @internal
  *   Form classes are internal.
  */
-class ConfigureSectionForm extends FormBase implements WorkspaceDynamicSafeFormInterface {
+class ConfigureSectionForm extends FormBase {
 
   use AjaxFormHelperTrait;
   use LayoutBuilderContextTrait;
   use LayoutBuilderHighlightTrait;
   use LayoutRebuildTrait;
-  use WorkspaceSafeFormTrait;
 
   /**
    * The layout tempstore repository.
@@ -48,13 +46,6 @@ class ConfigureSectionForm extends FormBase implements WorkspaceDynamicSafeFormI
    * @var \Drupal\Core\Layout\LayoutInterface|\Drupal\Core\Plugin\PluginFormInterface
    */
   protected $layout;
-
-  /**
-   * The section being configured.
-   *
-   * @var \Drupal\layout_builder\Section
-   */
-  protected $section;
 
   /**
    * The plugin form manager.
@@ -76,13 +67,6 @@ class ConfigureSectionForm extends FormBase implements WorkspaceDynamicSafeFormI
    * @var int
    */
   protected $delta;
-
-  /**
-   * The plugin ID.
-   *
-   * @var string
-   */
-  protected $pluginId;
 
   /**
    * Indicates whether the section is being added or updated.
@@ -124,18 +108,19 @@ class ConfigureSectionForm extends FormBase implements WorkspaceDynamicSafeFormI
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, ?SectionStorageInterface $section_storage = NULL, $delta = NULL, $plugin_id = NULL) {
+  public function buildForm(array $form, FormStateInterface $form_state, SectionStorageInterface $section_storage = NULL, $delta = NULL, $plugin_id = NULL) {
     $this->sectionStorage = $section_storage;
     $this->delta = $delta;
     $this->isUpdate = is_null($plugin_id);
-    $this->pluginId = $plugin_id;
-
-    $section = $this->getCurrentSection();
 
     if ($this->isUpdate) {
+      $section = $this->sectionStorage->getSection($this->delta);
       if ($label = $section->getLayoutSettings()['label']) {
         $form['#title'] = $this->t('Configure @section', ['@section' => $label]);
       }
+    }
+    else {
+      $section = new Section($plugin_id);
     }
     // Passing available contexts to the layout plugin here could result in an
     // exception since the layout may not have a context mapping for a required
@@ -194,12 +179,14 @@ class ConfigureSectionForm extends FormBase implements WorkspaceDynamicSafeFormI
       $this->layout->setContextMapping($subform_state->getValue('context_mapping', []));
     }
 
+    $plugin_id = $this->layout->getPluginId();
     $configuration = $this->layout->getConfiguration();
 
-    $section = $this->getCurrentSection();
-    $section->setLayoutSettings($configuration);
-    if (!$this->isUpdate) {
-      $this->sectionStorage->insertSection($this->delta, $section);
+    if ($this->isUpdate) {
+      $this->sectionStorage->getSection($this->delta)->setLayoutSettings($configuration);
+    }
+    else {
+      $this->sectionStorage->insertSection($this->delta, new Section($plugin_id, $configuration));
     }
 
     $this->layoutTempstoreRepository->set($this->sectionStorage);
@@ -221,8 +208,6 @@ class ConfigureSectionForm extends FormBase implements WorkspaceDynamicSafeFormI
    *
    * @return \Drupal\Core\Plugin\PluginFormInterface
    *   The plugin form for the layout.
-   *
-   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    */
   protected function getPluginForm(LayoutInterface $layout) {
     if ($layout instanceof PluginWithFormsInterface) {
@@ -237,42 +222,13 @@ class ConfigureSectionForm extends FormBase implements WorkspaceDynamicSafeFormI
   }
 
   /**
-   * Retrieves the section storage property.
+   * Retrieve the section storage property.
    *
    * @return \Drupal\layout_builder\SectionStorageInterface
    *   The section storage for the current form.
    */
   public function getSectionStorage() {
     return $this->sectionStorage;
-  }
-
-  /**
-   * Retrieves the layout being modified by the form.
-   *
-   * @return \Drupal\Core\Layout\LayoutInterface|\Drupal\Core\Plugin\PluginFormInterface
-   *   The layout for the current form.
-   */
-  public function getCurrentLayout(): LayoutInterface {
-    return $this->layout;
-  }
-
-  /**
-   * Retrieves the section being modified by the form.
-   *
-   * @return \Drupal\layout_builder\Section
-   *   The section for the current form.
-   */
-  public function getCurrentSection(): Section {
-    if (!isset($this->section)) {
-      if ($this->isUpdate) {
-        $this->section = $this->sectionStorage->getSection($this->delta);
-      }
-      else {
-        $this->section = new Section($this->pluginId);
-      }
-    }
-
-    return $this->section;
   }
 
 }

@@ -53,6 +53,9 @@
 	"BGN": {
 		"name": "bolgár új leva"
 	},
+	"VED": {
+		"name": "Bolívar Soberano"
+	},
 	"BOB": {
 		"name": "bolíviai boliviano"
 	},
@@ -370,8 +373,11 @@
 	"SCR": {
 		"name": "seychelle-szigeteki rúpia"
 	},
-	"SLE": {
+	"SLL": {
 		"name": "Sierra Leone-i leone"
+	},
+	"SLE": {
+		"name": "Sierra Leonean Leone"
 	},
 	"LKR": {
 		"name": "Srí Lanka-i rúpia"
@@ -447,6 +453,9 @@
 	},
 	"UYU": {
 		"name": "uruguay-i peso"
+	},
+	"UYW": {
+		"name": "Uruguayan Nominal Wage Index Unit"
 	},
 	"USD": {
 		"name": "USA-dollár"

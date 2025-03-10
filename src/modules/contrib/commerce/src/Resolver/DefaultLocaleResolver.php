@@ -2,9 +2,9 @@
 
 namespace Drupal\commerce\Resolver;
 
-use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\commerce\CurrentCountryInterface;
 use Drupal\commerce\Locale;
+use Drupal\Core\Language\LanguageManagerInterface;
 
 /**
  * Returns the locale based on the current language and country.

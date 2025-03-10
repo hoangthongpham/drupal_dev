@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\forum\Unit\Breadcrumb;
 
 use Drupal\Core\Cache\Cache;
@@ -13,7 +11,6 @@ use Symfony\Component\DependencyInjection\Container;
 /**
  * @coversDefaultClass \Drupal\forum\Breadcrumb\ForumBreadcrumbBuilderBase
  * @group forum
- * @group legacy
  */
 class ForumBreadcrumbBuilderBaseTest extends UnitTestCase {
 
@@ -37,7 +34,7 @@ class ForumBreadcrumbBuilderBaseTest extends UnitTestCase {
    *
    * @covers ::__construct
    */
-  public function testConstructor(): void {
+  public function testConstructor() {
     // Make some test doubles.
     $entity_type_manager = $this->createMock(EntityTypeManagerInterface::class);
     $config_factory = $this->getConfigFactoryStub(
@@ -63,6 +60,7 @@ class ForumBreadcrumbBuilderBaseTest extends UnitTestCase {
     // Test that the constructor made a config object with our info in it.
     $reflector = new \ReflectionClass($builder);
     $ref_property = $reflector->getProperty('config');
+    $ref_property->setAccessible(TRUE);
     $config = $ref_property->getValue($builder);
     $this->assertEquals('IAmATestValue', $config->get('IAmATestKey'));
   }
@@ -74,7 +72,7 @@ class ForumBreadcrumbBuilderBaseTest extends UnitTestCase {
    *
    * @covers ::build
    */
-  public function testBuild(): void {
+  public function testBuild() {
     // Build all our dependencies, backwards.
     $translation_manager = $this->getMockBuilder('Drupal\Core\StringTranslation\TranslationInterface')
       ->disableOriginalConstructor()
@@ -94,16 +92,16 @@ class ForumBreadcrumbBuilderBaseTest extends UnitTestCase {
     $vocab_storage = $this->createMock('Drupal\Core\Entity\EntityStorageInterface');
     $vocab_storage->expects($this->any())
       ->method('load')
-      ->willReturnMap([
+      ->will($this->returnValueMap([
         ['forums', $prophecy->reveal()],
-      ]);
+      ]));
 
     $entity_type_manager = $this->createMock(EntityTypeManagerInterface::class);
     $entity_type_manager->expects($this->any())
       ->method('getStorage')
-      ->willReturnMap([
+      ->will($this->returnValueMap([
         ['taxonomy_vocabulary', $vocab_storage],
-      ]);
+      ]));
 
     $config_factory = $this->getConfigFactoryStub(
       [

@@ -3,7 +3,6 @@
 namespace Drupal\file\Plugin\Field\FieldWidget;
 
 use Drupal\Component\Utility\NestedArray;
-use Drupal\Core\Field\Attribute\FieldWidget;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
@@ -11,7 +10,6 @@ use Drupal\Core\Field\WidgetBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Render\ElementInfoManagerInterface;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\file\Element\ManagedFile;
 use Drupal\file\Entity\File;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -19,18 +17,16 @@ use Symfony\Component\Validator\ConstraintViolationListInterface;
 
 /**
  * Plugin implementation of the 'file_generic' widget.
+ *
+ * @FieldWidget(
+ *   id = "file_generic",
+ *   label = @Translation("File"),
+ *   field_types = {
+ *     "file"
+ *   }
+ * )
  */
-#[FieldWidget(
-  id: 'file_generic',
-  label: new TranslatableMarkup('File'),
-  field_types: ['file'],
-)]
 class FileWidget extends WidgetBase {
-
-  /**
-   * The element info manager.
-   */
-  protected ElementInfoManagerInterface $elementInfo;
 
   /**
    * {@inheritdoc}
@@ -62,15 +58,15 @@ class FileWidget extends WidgetBase {
   public function settingsForm(array $form, FormStateInterface $form_state) {
     $element['progress_indicator'] = [
       '#type' => 'radios',
-      '#title' => $this->t('Progress indicator'),
+      '#title' => t('Progress indicator'),
       '#options' => [
-        'throbber' => $this->t('Throbber'),
-        'bar' => $this->t('Bar with progress meter'),
+        'throbber' => t('Throbber'),
+        'bar' => t('Bar with progress meter'),
       ],
       '#default_value' => $this->getSetting('progress_indicator'),
-      '#description' => $this->t('The throbber display does not show the status of uploads but takes up less space. The progress bar is helpful for monitoring progress on large uploads.'),
+      '#description' => t('The throbber display does not show the status of uploads but takes up less space. The progress bar is helpful for monitoring progress on large uploads.'),
       '#weight' => 16,
-      '#access' => extension_loaded('uploadprogress'),
+      '#access' => file_progress_implementation(),
     ];
     return $element;
   }
@@ -80,7 +76,7 @@ class FileWidget extends WidgetBase {
    */
   public function settingsSummary() {
     $summary = [];
-    $summary[] = $this->t('Progress indicator: @progress_indicator', ['@progress_indicator' => $this->getSetting('progress_indicator')]);
+    $summary[] = t('Progress indicator: @progress_indicator', ['@progress_indicator' => $this->getSetting('progress_indicator')]);
     return $summary;
   }
 
@@ -136,7 +132,7 @@ class FileWidget extends WidgetBase {
           // defined by widget.
           $element['_weight'] = [
             '#type' => 'weight',
-            '#title' => $this->t('Weight for row @number', ['@number' => $delta + 1]),
+            '#title' => t('Weight for row @number', ['@number' => $delta + 1]),
             '#title_display' => 'invisible',
             // Note: this 'delta' is the FAPI #type 'weight' element's property.
             '#delta' => $max,
@@ -192,7 +188,7 @@ class FileWidget extends WidgetBase {
       // Add some properties that will eventually be added to the file upload
       // field. These are added here so that they may be referenced easily
       // through a hook_form_alter().
-      $elements['#file_upload_title'] = $this->t('Add a new file');
+      $elements['#file_upload_title'] = t('Add a new file');
       $elements['#file_upload_description'] = [
         '#theme' => 'file_upload_help',
         '#description' => '',
@@ -264,7 +260,7 @@ class FileWidget extends WidgetBase {
         '#upload_validators' => $element['#upload_validators'],
         '#cardinality' => $cardinality,
       ];
-      $element['#description'] = \Drupal::service('renderer')->renderInIsolation($file_upload_help);
+      $element['#description'] = \Drupal::service('renderer')->renderPlain($file_upload_help);
       $element['#multiple'] = $cardinality != 1 ? TRUE : FALSE;
       if ($cardinality != 1 && $cardinality != -1) {
         $element['#element_validate'] = [[static::class, 'validateMultipleCount']];
@@ -316,18 +312,10 @@ class FileWidget extends WidgetBase {
    */
   public static function value($element, $input, FormStateInterface $form_state) {
     if ($input) {
+      // Checkboxes lose their value when empty.
+      // If the display field is present make sure its unchecked value is saved.
       if (empty($input['display'])) {
-        // Updates the display field with the default value because
-        // #display_field is invisible.
-        if (empty($input['fids'])) {
-          $input['display'] = $element['#display_default'];
-        }
-        // Checkboxes lose their value when empty.
-        // If the display field is present, make sure its unchecked value is
-        // saved.
-        else {
-          $input['display'] = $element['#display_field'] ? 0 : 1;
-        }
+        $input['display'] = $element['#display_field'] ? 0 : 1;
       }
     }
 
@@ -345,7 +333,8 @@ class FileWidget extends WidgetBase {
   }
 
   /**
-   * Validates the number of uploaded files.
+   * Form element validation callback for upload element on file widget. Checks
+   * if user has uploaded more files than allowed.
    *
    * This validator is used only when cardinality not set to 1 or unlimited.
    */
@@ -374,7 +363,7 @@ class FileWidget extends WidgetBase {
         '@count' => $total_uploaded_count,
         '%list' => implode(', ', $removed_names),
       ];
-      $message = new TranslatableMarkup('Field %field can only hold @max values but there were @count uploaded. The following files have been omitted as a result: %list.', $args);
+      $message = t('Field %field can only hold @max values but there were @count uploaded. The following files have been omitted as a result: %list.', $args);
       \Drupal::messenger()->addWarning($message);
       $values['fids'] = array_slice($values['fids'], 0, $keep);
       NestedArray::setValue($form_state->getValues(), $element['#parents'], $values);
@@ -397,7 +386,7 @@ class FileWidget extends WidgetBase {
     if ($element['#display_field']) {
       $element['display'] = [
         '#type' => empty($item['fids']) ? 'hidden' : 'checkbox',
-        '#title' => new TranslatableMarkup('Include file in display'),
+        '#title' => t('Include file in display'),
         '#attributes' => ['class' => ['file-display']],
       ];
       if (isset($item['display'])) {
@@ -419,10 +408,10 @@ class FileWidget extends WidgetBase {
       $config = \Drupal::config('file.settings');
       $element['description'] = [
         '#type' => $config->get('description.type'),
-        '#title' => new TranslatableMarkup('Description'),
+        '#title' => t('Description'),
         '#value' => $item['description'] ?? '',
         '#maxlength' => $config->get('description.length'),
-        '#description' => new TranslatableMarkup('The description may be used as the label of the link to the file.'),
+        '#description' => t('The description may be used as the label of the link to the file.'),
       ];
     }
 
@@ -489,7 +478,7 @@ class FileWidget extends WidgetBase {
         $description = static::getDescriptionFromElement($element[$key]);
         $element[$key]['_weight'] = [
           '#type' => 'weight',
-          '#title' => $description ? new TranslatableMarkup('Weight for @title', ['@title' => $description]) : new TranslatableMarkup('Weight for new file'),
+          '#title' => $description ? t('Weight for @title', ['@title' => $description]) : t('Weight for new file'),
           '#title_display' => 'invisible',
           '#delta' => $count,
           '#default_value' => $delta,

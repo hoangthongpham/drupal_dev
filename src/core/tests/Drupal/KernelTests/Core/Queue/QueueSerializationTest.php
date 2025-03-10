@@ -1,14 +1,11 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\KernelTests\Core\Queue;
 
 use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\Form\FormInterface;
 use Drupal\Core\Form\FormState;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Queue\DatabaseQueue;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\user\Entity\User;
 
@@ -22,14 +19,18 @@ class QueueSerializationTest extends KernelTestBase implements FormInterface {
   use DependencySerializationTrait;
 
   /**
-   * {@inheritdoc}
-   */
-  protected static $modules = ['system', 'user'];
-
-  /**
+   * A queue instance.
+   *
    * @var \Drupal\Core\Queue\DatabaseQueue
    */
-  protected DatabaseQueue $queue;
+  protected $queue;
+
+  /**
+   * Modules to enable.
+   *
+   * @var array
+   */
+  protected static $modules = ['system', 'user', 'aggregator'];
 
   /**
    * {@inheritdoc}
@@ -76,10 +77,9 @@ class QueueSerializationTest extends KernelTestBase implements FormInterface {
    */
   protected function setUp(): void {
     parent::setUp();
+    $this->installSchema('system', ['sequences']);
     $this->installEntitySchema('user');
-    // We only need a valid \Drupal\Core\Queue\DatabaseQueue object here, not
-    // an actual valid queue.
-    $this->queue = \Drupal::service('queue.database')->get('fake_a_queue');
+    $this->queue = \Drupal::service('queue.database')->get('aggregator_refresh');
     $test_user = User::create([
       'name' => 'foobar',
       'mail' => 'foobar@example.com',
@@ -91,7 +91,7 @@ class QueueSerializationTest extends KernelTestBase implements FormInterface {
   /**
    * Tests queue injection serialization.
    */
-  public function testQueueSerialization(): void {
+  public function testQueueSerialization() {
     $form_state = new FormState();
     $form_state->setRequestMethod('POST');
     $form_state->setCached();

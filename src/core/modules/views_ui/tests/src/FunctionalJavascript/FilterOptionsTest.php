@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\views_ui\FunctionalJavascript;
 
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
@@ -31,7 +29,7 @@ class FilterOptionsTest extends WebDriverTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp(): void {
+  public function setUp(): void {
     parent::setUp();
 
     $admin_user = $this->drupalCreateUser([
@@ -43,7 +41,7 @@ class FilterOptionsTest extends WebDriverTestBase {
   /**
    * Tests filtering options in the 'Add fields' dialog.
    */
-  public function testFilterOptionsAddFields(): void {
+  public function testFilterOptionsAddFields() {
     $this->drupalGet('admin/structure/views/view/content');
 
     $session = $this->getSession();

@@ -2,9 +2,9 @@
 
 namespace Drupal\Tests\commerce_store\Kernel\Entity;
 
-use Drupal\Tests\commerce\Kernel\CommerceKernelTestBase;
 use Drupal\commerce_price\Entity\Currency;
 use Drupal\commerce_store\Entity\Store;
+use Drupal\Tests\commerce\Kernel\CommerceKernelTestBase;
 use Drupal\user\UserInterface;
 
 /**
@@ -61,11 +61,6 @@ class StoreTest extends CommerceKernelTestBase {
     $store->setName('French store');
     $this->assertEquals('French store', $store->getName());
 
-    \Drupal::configFactory()
-      ->getEditable('system.site')
-      ->set('mail', 'foo@example.com')
-      ->save();
-    $this->assertEquals('foo@example.com', $store->getEmail());
     $store->setEmail('owner@example.com');
     $this->assertEquals('owner@example.com', $store->getEmail());
 

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\serialization\Unit\EntityResolver;
 
 use Drupal\Core\Entity\EntityRepositoryInterface;
@@ -32,8 +30,6 @@ class UuidResolverTest extends UnitTestCase {
    * {@inheritdoc}
    */
   protected function setUp(): void {
-    parent::setUp();
-
     $this->entityRepository = $this->createMock(EntityRepositoryInterface::class);
 
     $this->resolver = new UuidResolver($this->entityRepository);
@@ -42,7 +38,7 @@ class UuidResolverTest extends UnitTestCase {
   /**
    * Tests resolve() with a class using the incorrect interface.
    */
-  public function testResolveNotInInterface(): void {
+  public function testResolveNotInInterface() {
     $this->entityRepository->expects($this->never())
       ->method('loadEntityByUuid');
 
@@ -53,7 +49,7 @@ class UuidResolverTest extends UnitTestCase {
   /**
    * Tests resolve() with a class using the correct interface but no UUID.
    */
-  public function testResolveNoUuid(): void {
+  public function testResolveNoUuid() {
     $this->entityRepository->expects($this->never())
       ->method('loadEntityByUuid');
 
@@ -61,26 +57,26 @@ class UuidResolverTest extends UnitTestCase {
     $normalizer->expects($this->once())
       ->method('getUuid')
       ->with([])
-      ->willReturn(NULL);
+      ->will($this->returnValue(NULL));
     $this->assertNull($this->resolver->resolve($normalizer, [], 'test_type'));
   }
 
   /**
    * Tests resolve() with correct interface but no matching entity for the UUID.
    */
-  public function testResolveNoEntity(): void {
+  public function testResolveNoEntity() {
     $uuid = '392eab92-35c2-4625-872d-a9dab4da008e';
 
     $this->entityRepository->expects($this->once())
       ->method('loadEntityByUuid')
       ->with('test_type')
-      ->willReturn(NULL);
+      ->will($this->returnValue(NULL));
 
     $normalizer = $this->createMock('Drupal\serialization\EntityResolver\UuidReferenceInterface');
     $normalizer->expects($this->once())
       ->method('getUuid')
       ->with([])
-      ->willReturn($uuid);
+      ->will($this->returnValue($uuid));
 
     $this->assertNull($this->resolver->resolve($normalizer, [], 'test_type'));
   }
@@ -88,24 +84,24 @@ class UuidResolverTest extends UnitTestCase {
   /**
    * Tests resolve() when a UUID corresponds to an entity.
    */
-  public function testResolveWithEntity(): void {
+  public function testResolveWithEntity() {
     $uuid = '392eab92-35c2-4625-872d-a9dab4da008e';
 
     $entity = $this->createMock('Drupal\Core\Entity\EntityInterface');
     $entity->expects($this->once())
       ->method('id')
-      ->willReturn(1);
+      ->will($this->returnValue(1));
 
     $this->entityRepository->expects($this->once())
       ->method('loadEntityByUuid')
       ->with('test_type', $uuid)
-      ->willReturn($entity);
+      ->will($this->returnValue($entity));
 
     $normalizer = $this->createMock('Drupal\serialization\EntityResolver\UuidReferenceInterface');
     $normalizer->expects($this->once())
       ->method('getUuid')
       ->with([])
-      ->willReturn($uuid);
+      ->will($this->returnValue($uuid));
     $this->assertSame(1, $this->resolver->resolve($normalizer, [], 'test_type'));
   }
 

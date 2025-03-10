@@ -1,16 +1,14 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\Component\Gettext;
 
 use Drupal\Component\Gettext\PoHeader;
 use Drupal\Component\Gettext\PoItem;
 use Drupal\Component\Gettext\PoStreamWriter;
+use Drupal\Tests\PhpUnitCompatibilityTrait;
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamFile;
 use PHPUnit\Framework\TestCase;
-use Prophecy\PhpUnit\ProphecyTrait;
 
 /**
  * @coversDefaultClass \Drupal\Component\Gettext\PoStreamWriter
@@ -18,7 +16,7 @@ use Prophecy\PhpUnit\ProphecyTrait;
  */
 class PoStreamWriterTest extends TestCase {
 
-  use ProphecyTrait;
+  use PhpUnitCompatibilityTrait;
 
   /**
    * The PO writer object under test.
@@ -46,16 +44,15 @@ class PoStreamWriterTest extends TestCase {
     $this->poWriter->setHeader($poHeader->reveal());
 
     $root = vfsStream::setup();
-    $this->poFile = new vfsStreamFile('poWriter.po');
+    $this->poFile = new vfsStreamFile('powriter.po');
     $root->addChild($this->poFile);
   }
 
   /**
    * @covers ::getURI
    */
-  public function testGetUriException(): void {
-    $this->expectException(\Exception::class);
-    $this->expectExceptionMessage('No URI set.');
+  public function testGetUriException() {
+    $this->expectException(\Exception::class, 'No URI set.');
 
     $this->poWriter->getURI();
   }
@@ -64,10 +61,9 @@ class PoStreamWriterTest extends TestCase {
    * @covers ::writeItem
    * @dataProvider providerWriteData
    */
-  public function testWriteItem($poContent, $expected, $long): void {
+  public function testWriteItem($poContent, $expected, $long) {
     if ($long) {
-      $this->expectException(\Exception::class);
-      $this->expectExceptionMessage('Unable to write data:');
+      $this->expectException(\Exception::class, 'Unable to write data:');
     }
 
     // Limit the file system quota to make the write fail on long strings.
@@ -90,7 +86,7 @@ class PoStreamWriterTest extends TestCase {
    *   - Written content.
    *   - Content longer than 10 bytes.
    */
-  public static function providerWriteData() {
+  public function providerWriteData() {
     // cSpell:disable
     return [
       ['', '', FALSE],
@@ -107,9 +103,8 @@ class PoStreamWriterTest extends TestCase {
   /**
    * @covers ::close
    */
-  public function testCloseException(): void {
-    $this->expectException(\Exception::class);
-    $this->expectExceptionMessage('Cannot close stream that is not open.');
+  public function testCloseException() {
+    $this->expectException(\Exception::class, 'Cannot close stream that is not open.');
 
     $this->poWriter->close();
   }

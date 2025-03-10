@@ -15,7 +15,7 @@ class BuildZonesEventSubscriber implements EventSubscriberInterface {
   /**
    * {@inheritdoc}
    */
-  public static function getSubscribedEvents(): array {
+  public static function getSubscribedEvents() {
     return [
       TaxEvents::BUILD_ZONES => 'onBuildZones',
     ];

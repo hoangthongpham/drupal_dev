@@ -6,8 +6,6 @@ use Drupal\user\UserInterface;
 
 /**
  * Defines methods for an entity that supports revision logging and ownership.
- *
- * @ingroup entity_type_characteristics
  */
 interface RevisionLogInterface extends RevisionableInterface {
 
@@ -32,9 +30,8 @@ interface RevisionLogInterface extends RevisionableInterface {
   /**
    * Gets the entity revision author.
    *
-   * @return \Drupal\user\UserInterface|null
-   *   The user entity for the revision author, or NULL if not set or user was
-   *   deleted.
+   * @return \Drupal\user\UserInterface
+   *   The user entity for the revision author.
    */
   public function getRevisionUser();
 
@@ -51,8 +48,8 @@ interface RevisionLogInterface extends RevisionableInterface {
   /**
    * Gets the entity revision author ID.
    *
-   * @return int|null
-   *   The user ID, or NULL if not set or user was deleted.
+   * @return int
+   *   The user ID.
    */
   public function getRevisionUserId();
 
@@ -69,8 +66,8 @@ interface RevisionLogInterface extends RevisionableInterface {
   /**
    * Returns the entity revision log message.
    *
-   * @return string|null
-   *   The revision log message, or NULL if not set.
+   * @return string
+   *   The revision log message.
    */
   public function getRevisionLogMessage();
 

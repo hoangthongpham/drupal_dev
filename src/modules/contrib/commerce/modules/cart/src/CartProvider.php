@@ -2,12 +2,12 @@
 
 namespace Drupal\commerce_cart;
 
-use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Session\AccountInterface;
 use Drupal\commerce_cart\Exception\DuplicateCartException;
 use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\commerce_store\CurrentStoreInterface;
 use Drupal\commerce_store\Entity\StoreInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Session\AccountInterface;
 
 /**
  * Default implementation of the cart provider.
@@ -75,7 +75,7 @@ class CartProvider implements CartProviderInterface {
   /**
    * {@inheritdoc}
    */
-  public function createCart($order_type, ?StoreInterface $store = NULL, ?AccountInterface $account = NULL) {
+  public function createCart($order_type, StoreInterface $store = NULL, AccountInterface $account = NULL) {
     $store = $store ?: $this->currentStore->getStore();
     $account = $account ?: $this->currentUser;
     $uid = $account->id();
@@ -131,7 +131,7 @@ class CartProvider implements CartProviderInterface {
   /**
    * {@inheritdoc}
    */
-  public function getCart($order_type, ?StoreInterface $store = NULL, ?AccountInterface $account = NULL) {
+  public function getCart($order_type, StoreInterface $store = NULL, AccountInterface $account = NULL) {
     $cart = NULL;
     $cart_id = $this->getCartId($order_type, $store, $account);
     if ($cart_id) {
@@ -144,7 +144,7 @@ class CartProvider implements CartProviderInterface {
   /**
    * {@inheritdoc}
    */
-  public function getCartId($order_type, ?StoreInterface $store = NULL, ?AccountInterface $account = NULL) {
+  public function getCartId($order_type, StoreInterface $store = NULL, AccountInterface $account = NULL) {
     $cart_id = NULL;
     $cart_data = $this->loadCartData($account);
     if ($cart_data) {
@@ -162,7 +162,7 @@ class CartProvider implements CartProviderInterface {
   /**
    * {@inheritdoc}
    */
-  public function getCarts(?AccountInterface $account = NULL, ?StoreInterface $store = NULL) {
+  public function getCarts(AccountInterface $account = NULL, StoreInterface $store = NULL) {
     $carts = [];
     $cart_ids = $this->getCartIds($account, $store);
     if ($cart_ids) {
@@ -175,7 +175,7 @@ class CartProvider implements CartProviderInterface {
   /**
    * {@inheritdoc}
    */
-  public function getCartIds(?AccountInterface $account = NULL, ?StoreInterface $store = NULL) {
+  public function getCartIds(AccountInterface $account = NULL, StoreInterface $store = NULL) {
     // Filter out cart IDS that do not belong to the store passed.
     $cart_data = array_filter($this->loadCartData($account), function ($data) use ($store) {
       return !$store || $store->id() === $data['store_id'];
@@ -200,7 +200,7 @@ class CartProvider implements CartProviderInterface {
    * @return array
    *   The cart data.
    */
-  protected function loadCartData(?AccountInterface $account = NULL) {
+  protected function loadCartData(AccountInterface $account = NULL) {
     $account = $account ?: $this->currentUser;
     $uid = $account->id();
     if (isset($this->cartData[$uid])) {

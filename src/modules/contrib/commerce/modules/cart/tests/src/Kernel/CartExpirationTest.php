@@ -2,9 +2,9 @@
 
 namespace Drupal\Tests\commerce_cart\Kernel;
 
-use Drupal\Core\Database\Database;
 use Drupal\commerce_order\Entity\Order;
 use Drupal\commerce_order\Entity\OrderType;
+use Drupal\Core\Database\Database;
 
 /**
  * Tests cart expiration.
@@ -132,10 +132,8 @@ class CartExpirationTest extends CartKernelTestBase {
     $this->orderStorage->resetCache();
     $orders = $this->orderStorage->getQuery()->accessCheck(FALSE)->execute();
     $this->assertEquals(2, count($orders));
-    $cart1 = $this->orderStorage->load($cart1->id());
-    $cart2 = $this->orderStorage->load($cart2->id());
-    $this->assertNull($cart1);
-    $this->assertNull($cart2);
+    $this->assertNull($this->reloadEntity($cart1));
+    $this->assertNull($this->reloadEntity($cart2));
   }
 
   /**
@@ -187,7 +185,7 @@ class CartExpirationTest extends CartKernelTestBase {
     $orders = $this->orderStorage->getQuery()->accessCheck(FALSE)->execute();
     $this->assertEquals(1, count($orders));
     $this->assertNotNull($this->reloadEntity($cart1));
-    $this->assertNull($this->orderStorage->load($cart2->id()));
+    $this->assertNull($this->reloadEntity($cart2));
   }
 
   /**
@@ -237,7 +235,7 @@ class CartExpirationTest extends CartKernelTestBase {
     $this->orderStorage->resetCache();
     $orders = $this->orderStorage->getQuery()->accessCheck(FALSE)->execute();
     $this->assertEquals(0, count($orders));
-    $this->assertNull($this->orderStorage->load($cart2->id()));
+    $this->assertNull($this->reloadEntity($cart2));
   }
 
 }

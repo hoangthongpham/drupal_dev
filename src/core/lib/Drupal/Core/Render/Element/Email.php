@@ -3,7 +3,6 @@
 namespace Drupal\Core\Render\Element;
 
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Render\Attribute\FormElement;
 use Drupal\Core\Render\Element;
 
 /**
@@ -24,9 +23,10 @@ use Drupal\Core\Render\Element;
  * @endcode
  *
  * @see \Drupal\Core\Render\Element\Textfield
+ *
+ * @FormElement("email")
  */
-#[FormElement('email')]
-class Email extends FormElementBase {
+class Email extends FormElement {
 
   /**
    * Defines the max length for an email address.
@@ -76,7 +76,7 @@ class Email extends FormElementBase {
     $form_state->setValueForElement($element, $value);
 
     if ($value !== '' && !\Drupal::service('email.validator')->isValid($value)) {
-      $form_state->setError($element, t('The email address %mail is not valid. Use the format user@example.com.', ['%mail' => $value]));
+      $form_state->setError($element, t('The email address %mail is not valid.', ['%mail' => $value]));
     }
   }
 

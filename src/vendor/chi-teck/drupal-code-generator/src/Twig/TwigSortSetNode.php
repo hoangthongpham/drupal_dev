@@ -1,32 +1,27 @@
 <?php
 
-declare(strict_types=1);
-
 namespace DrupalCodeGenerator\Twig;
 
-use Twig\Attribute\YieldReady;
-use Twig\Compiler;
-use Twig\Node\Node;
+use Twig_Node;
+use Twig_Compiler;
 
 /**
  * A class that defines the compiler for 'sort' token.
  */
-#[YieldReady]
-final class TwigSortSetNode extends Node {
+class TwigSortSetNode extends Twig_Node {
 
   /**
    * {@inheritdoc}
    */
-  public function compile(Compiler $compiler): void {
+  public function compile(Twig_Compiler $compiler) {
     $compiler
       ->addDebugInfo($this)
-      ->write('$data = ')
-      ->subcompile($this->getNode('ref'))
-      ->raw(";\n")
-      ->write('$data = explode("\n", $data);' . "\n")
+      ->write("ob_start();\n")
+      ->subcompile($this->getNode('body'))
+      ->write('$data = explode("\n", ob_get_clean());' . "\n")
       ->write('$data = array_unique($data);' . "\n")
-      ->write('sort($data, SORT_FLAG_CASE|SORT_NATURAL);' . "\n")
-      ->write('yield ltrim(implode("\n", $data)) . "\n";' . "\n");
+      ->write('sort($data);' . "\n")
+      ->write('echo ltrim(implode("\n", $data)) . "\n";' . "\n");
   }
 
 }

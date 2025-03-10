@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\TestSite;
 
 use Drupal\Core\Extension\ModuleInstallerInterface;
@@ -12,7 +10,7 @@ use Drupal\comment\Entity\Comment;
 /**
  * Setup file used by TestSiteInstallTestScript.
  *
- * @see \Drupal\KernelTests\Scripts\TestSiteApplicationTest
+ * @see \Drupal\Tests\Scripts\TestSiteApplicationTest
  */
 class TestSiteOliveroInstallTestScript implements TestSetupInterface {
 

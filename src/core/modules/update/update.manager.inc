@@ -6,7 +6,7 @@
  *
  * This allows site administrators with the 'administer software updates'
  * permission to either upgrade existing projects, or download and install new
- * ones, so long as the kill switch setting ('allow_authorize_operations') is
+ * ones, so long as the killswitch setting ('allow_authorize_operations') is
  * not FALSE.
  *
  * To install new code, the administrator is prompted for either the URL of an
@@ -36,11 +36,9 @@
  * root.
  */
 
-use Drupal\Core\File\Exception\FileException;
-use Drupal\Core\File\Exception\InvalidStreamWrapperException;
-use Drupal\Core\File\FileExists;
 use Drupal\Core\Url;
-use Psr\Http\Client\ClientExceptionInterface;
+use Drupal\Core\File\Exception\FileException;
+use Drupal\Core\File\FileSystemInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
@@ -81,7 +79,7 @@ function update_manager_download_batch_finished($success, $results) {
  *   The update manager operation we're in the middle of. Can be either 'update'
  *   or 'install'. Use to provide operation-specific interface text.
  *
- * @return bool
+ * @return
  *   TRUE if the update manager should continue to the next step in the
  *   workflow, or FALSE if we've hit a fatal configuration and must halt the
  *   workflow.
@@ -193,7 +191,7 @@ function update_manager_archive_extract($file, $directory) {
  * @param string $project
  *   The short name of the project to download.
  * @param string $archive_file
- *   The filename of the un-extracted archive.
+ *   The filename of the unextracted archive.
  * @param string $directory
  *   The directory that the archive was extracted into.
  *
@@ -213,8 +211,8 @@ function update_manager_archive_verify($project, $archive_file, $directory) {
  * @param $url
  *   The URL of the file on the server.
  *
- * @return string|false
- *   Path to local file, or FALSE if it could not be retrieved.
+ * @return string
+ *   Path to local file.
  */
 function update_manager_file_get($url) {
   $parsed_url = parse_url($url);
@@ -229,17 +227,7 @@ function update_manager_file_get($url) {
   $local = $cache_directory . '/' . \Drupal::service('file_system')->basename($parsed_url['path']);
 
   if (!file_exists($local) || update_delete_file_if_stale($local)) {
-    try {
-      $data = (string) \Drupal::httpClient()->get($url)->getBody();
-      return \Drupal::service('file_system')->saveData($data, $local, FileExists::Replace);
-    }
-    catch (ClientExceptionInterface $exception) {
-      \Drupal::messenger()->addError(t('Failed to fetch file due to error "%error"', ['%error' => $exception->getMessage()]));
-    }
-    catch (FileException | InvalidStreamWrapperException $e) {
-      \Drupal::messenger()->addError(t('Failed to save file due to error "%error"', ['%error' => $e->getMessage()]));
-    }
-    return FALSE;
+    return system_retrieve_file($url, $local, FALSE, FileSystemInterface::EXISTS_REPLACE);
   }
   else {
     return $local;
@@ -319,7 +307,7 @@ function update_manager_batch_project_get($project, $url, &$context) {
  * it. However, it is supported here because it is a common configuration on
  * shared hosting, and there is nothing Drupal can do to prevent it.
  *
- * @return bool
+ * @return
  *   TRUE if local file transfers are allowed on this server, or FALSE if not.
  *
  * @see install_check_requirements()

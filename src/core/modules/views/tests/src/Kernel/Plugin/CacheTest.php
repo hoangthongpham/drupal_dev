@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\views\Kernel\Plugin;
 
 use Drupal\Core\Database\Database;
@@ -27,7 +25,9 @@ class CacheTest extends ViewsKernelTestBase {
   public static $testViews = ['test_view', 'test_cache', 'test_groupwise_term_ui', 'test_display', 'test_filter'];
 
   /**
-   * {@inheritdoc}
+   * Modules to enable.
+   *
+   * @var array
    */
   protected static $modules = ['taxonomy', 'text', 'user', 'node'];
 
@@ -42,7 +42,7 @@ class CacheTest extends ViewsKernelTestBase {
     $this->installEntitySchema('user');
 
     // Setup the current time properly.
-    \Drupal::request()->server->set('REQUEST_TIME', \Drupal::time()->getCurrentTime());
+    \Drupal::request()->server->set('REQUEST_TIME', time());
   }
 
   /**
@@ -67,7 +67,7 @@ class CacheTest extends ViewsKernelTestBase {
    *
    * @see views_plugin_cache_time
    */
-  public function testTimeResultCaching(): void {
+  public function testTimeResultCaching() {
     $view = Views::getView('test_cache');
     $view->setDisplay();
     $view->display_handler->overrideOption('cache', [
@@ -105,7 +105,7 @@ class CacheTest extends ViewsKernelTestBase {
    *
    * @see views_plugin_cache_time
    */
-  public function testTimeResultCachingWithFilter(): void {
+  public function testTimeResultCachingWithFilter() {
     // Check that we can find the test filter plugin.
     $plugin = $this->container->get('plugin.manager.views.filter')->createInstance('test_filter');
     $this->assertInstanceOf(FilterPlugin::class, $plugin);
@@ -181,7 +181,7 @@ class CacheTest extends ViewsKernelTestBase {
   /**
    * Tests result caching with a pager.
    */
-  public function testTimeResultCachingWithPager(): void {
+  public function testTimeResultCachingWithPager() {
     $view = Views::getView('test_cache');
     $view->setDisplay();
     $view->display_handler->overrideOption('cache', [
@@ -224,7 +224,7 @@ class CacheTest extends ViewsKernelTestBase {
    *
    * @see views_plugin_cache_time
    */
-  public function testNoneResultCaching(): void {
+  public function testNoneResultCaching() {
     // Create a basic result which just 2 results.
     $view = Views::getView('test_cache');
     $view->setDisplay();
@@ -261,7 +261,7 @@ class CacheTest extends ViewsKernelTestBase {
   /**
    * Tests css/js storage and restoring mechanism.
    */
-  public function testHeaderStorage(): void {
+  public function testHeaderStorage() {
     // Create a view with output caching enabled.
     // Some hook_views_pre_render in views_test_data.module adds the test css/js file.
     // so they should be added to the css/js storage.
@@ -302,7 +302,7 @@ class CacheTest extends ViewsKernelTestBase {
   /**
    * Tests that Subqueries are cached as expected.
    */
-  public function testSubqueryStringCache(): void {
+  public function testSubqueryStringCache() {
     // Execute the view.
     $view = Views::getView('test_groupwise_term_ui');
     $view->setDisplay();
@@ -316,7 +316,7 @@ class CacheTest extends ViewsKernelTestBase {
   /**
    * Tests the data contained in cached items.
    */
-  public function testCacheData(): void {
+  public function testCacheData() {
     for ($i = 1; $i <= 5; $i++) {
       Node::create([
         'title' => $this->randomMachineName(8),
@@ -354,7 +354,7 @@ class CacheTest extends ViewsKernelTestBase {
   /**
    * Tests the cache context integration for views result cache.
    */
-  public function testCacheContextIntegration(): void {
+  public function testCacheContextIntegration() {
     $view = Views::getView('test_cache');
     $view->setDisplay('page_2');
     \Drupal::state()->set('views_test_cache_context', 'George');
@@ -366,7 +366,7 @@ class CacheTest extends ViewsKernelTestBase {
     // Update the entry in the DB to ensure that result caching works.
     \Drupal::database()->update('views_test_data')
       ->condition('name', 'George')
-      ->fields(['name' => 'notGeorge'])
+      ->fields(['name' => 'egroeG'])
       ->execute();
 
     $view = Views::getView('test_cache');
@@ -386,7 +386,7 @@ class CacheTest extends ViewsKernelTestBase {
   /**
    * Tests that cacheability metadata is carried over from argument defaults.
    */
-  public function testArgumentDefaultCache(): void {
+  public function testArgumentDefaultCache() {
     $view = Views::getView('test_view');
 
     // Add a new argument and set the test plugin for the argument_default.
@@ -405,7 +405,7 @@ class CacheTest extends ViewsKernelTestBase {
     /** @var \Drupal\Core\Render\RendererInterface $renderer */
     $renderer = \Drupal::service('renderer');
 
-    $renderer->renderInIsolation($output);
+    $renderer->renderPlain($output);
     $this->assertEquals(['config:views.view.test_view', 'example_tag'], $output['#cache']['tags']);
   }
 

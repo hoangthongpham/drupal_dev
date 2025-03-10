@@ -1,16 +1,14 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\FunctionalTests\Rest;
 
 use Drupal\Core\Datetime\Entity\DateFormat;
-use Drupal\Tests\rest\Functional\EntityResource\ConfigEntityResourceTestBase;
+use Drupal\Tests\rest\Functional\EntityResource\EntityResourceTestBase;
 
 /**
  * ResourceTestBase for DateFormat entity.
  */
-abstract class DateFormatResourceTestBase extends ConfigEntityResourceTestBase {
+abstract class DateFormatResourceTestBase extends EntityResourceTestBase {
 
   /**
    * {@inheritdoc}
@@ -73,7 +71,6 @@ abstract class DateFormatResourceTestBase extends ConfigEntityResourceTestBase {
    */
   protected function getNormalizedPostEntity() {
     // @todo Update in https://www.drupal.org/node/2300677.
-    return [];
   }
 
 }

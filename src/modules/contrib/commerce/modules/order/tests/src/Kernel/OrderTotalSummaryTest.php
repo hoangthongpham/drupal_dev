@@ -53,7 +53,7 @@ class OrderTotalSummaryTest extends OrderKernelTestBase {
 
     $this->orderTotalSummary = $this->container->get('commerce_order.order_total_summary');
 
-    $user = $this->createUser();
+    $user = $this->createUser(['mail' => $this->randomString() . '@example.com']);
 
     // Turn off title generation to allow explicit values to be used.
     $variation_type = ProductVariationType::load('default');

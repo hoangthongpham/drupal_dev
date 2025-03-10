@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\Core\Security;
 
 use Drupal\Core\Security\RequestSanitizer;
@@ -52,7 +50,7 @@ class RequestSanitizerTest extends UnitTestCase {
    *
    * @dataProvider providerTestRequestSanitization
    */
-  public function testRequestSanitization(Request $request, array $expected = [], ?array $expected_errors = NULL, array $whitelist = []): void {
+  public function testRequestSanitization(Request $request, array $expected = [], array $expected_errors = NULL, array $whitelist = []) {
     // Set up globals.
     $_GET = $request->query->all();
     $_POST = $request->request->all();
@@ -99,7 +97,7 @@ class RequestSanitizerTest extends UnitTestCase {
    *
    * @return array
    */
-  public static function providerTestRequestSanitization() {
+  public function providerTestRequestSanitization() {
     $tests = [];
 
     $request = new Request(['q' => 'index.php']);
@@ -207,7 +205,7 @@ class RequestSanitizerTest extends UnitTestCase {
    *
    * @dataProvider providerTestAcceptableDestinations
    */
-  public function testAcceptableDestinationGet($destination): void {
+  public function testAcceptableDestinationGet($destination) {
     // Set up a GET request.
     $request = $this->createRequestForTesting(['destination' => $destination]);
 
@@ -229,7 +227,7 @@ class RequestSanitizerTest extends UnitTestCase {
    *
    * @dataProvider providerTestSanitizedDestinations
    */
-  public function testSanitizedDestinationGet($destination): void {
+  public function testSanitizedDestinationGet($destination) {
     // Set up a GET request.
     $request = $this->createRequestForTesting(['destination' => $destination]);
 
@@ -251,7 +249,7 @@ class RequestSanitizerTest extends UnitTestCase {
    *
    * @dataProvider providerTestAcceptableDestinations
    */
-  public function testAcceptableDestinationPost($destination): void {
+  public function testAcceptableDestinationPost($destination) {
     // Set up a POST request.
     $request = $this->createRequestForTesting([], ['destination' => $destination]);
 
@@ -273,7 +271,7 @@ class RequestSanitizerTest extends UnitTestCase {
    *
    * @dataProvider providerTestSanitizedDestinations
    */
-  public function testSanitizedDestinationPost($destination): void {
+  public function testSanitizedDestinationPost($destination) {
     // Set up a POST request.
     $request = $this->createRequestForTesting([], ['destination' => $destination]);
 
@@ -314,7 +312,7 @@ class RequestSanitizerTest extends UnitTestCase {
   /**
    * Data provider for testing acceptable destinations.
    */
-  public static function providerTestAcceptableDestinations() {
+  public function providerTestAcceptableDestinations() {
     $data = [];
     // Standard internal example node path is present in the 'destination'
     // parameter.
@@ -331,7 +329,7 @@ class RequestSanitizerTest extends UnitTestCase {
   /**
    * Data provider for testing sanitized destinations.
    */
-  public static function providerTestSanitizedDestinations() {
+  public function providerTestSanitizedDestinations() {
     $data = [];
     // External URL without scheme is not allowed.
     $data[] = ['//example.com/test'];

@@ -106,10 +106,10 @@ class Merge extends Query implements ConditionInterface {
    *
    * This variable is a nested array in the following format:
    * @code
-   * <some field> => [
+   * <some field> => array(
    *  'condition' => <condition to execute, as a string>,
    *  'arguments' => <array of arguments for condition, or NULL for none>,
-   * ];
+   * );
    * @endcode
    *
    * @var array
@@ -134,8 +134,6 @@ class Merge extends Query implements ConditionInterface {
    *   Array of database options.
    */
   public function __construct(Connection $connection, $table, array $options = []) {
-    // @todo Remove $options['return'] in Drupal 11.
-    // @see https://www.drupal.org/project/drupal/issues/3256524
     $options['return'] = Database::RETURN_AFFECTED;
     parent::__construct($connection, $options);
     $this->table = $table;
@@ -193,7 +191,7 @@ class Merge extends Query implements ConditionInterface {
    * @return $this
    *   The called object.
    */
-  public function expression($field, $expression, ?array $arguments = NULL) {
+  public function expression($field, $expression, array $arguments = NULL) {
     $this->expressionFields[$field] = [
       'expression' => $expression,
       'arguments' => $arguments,
@@ -333,7 +331,6 @@ class Merge extends Query implements ConditionInterface {
   public function key($field, $value = NULL) {
     // @todo D9: Remove this backwards-compatibility shim.
     if (is_array($field)) {
-      @trigger_error("Passing an array to the \$field argument of " . __METHOD__ . '() is deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. See https://www.drupal.org/node/2205327', E_USER_DEPRECATED);
       $this->keys($field, $value ?? []);
     }
     else {
@@ -357,58 +354,70 @@ class Merge extends Query implements ConditionInterface {
   /**
    * Executes the merge database query.
    *
-   * @return int|null
+   * @return
    *   One of the following values:
    *   - Merge::STATUS_INSERT: If the entry does not already exist,
    *     and an INSERT query is executed.
    *   - Merge::STATUS_UPDATE: If the entry already exists,
    *     and an UPDATE query is executed.
+   *   - NULL: (deprecated) If there is a problem and
+   *     queryOptions['throw_exception'] is FALSE.
    *
    * @throws \Drupal\Core\Database\Query\InvalidMergeQueryException
    *   When there are no conditions found to merge.
    */
   public function execute() {
-    if (!count($this->condition)) {
-      throw new InvalidMergeQueryException('Invalid merge query: no conditions');
-    }
 
-    $select = $this->connection->select($this->conditionTable)
-      ->condition($this->condition);
-    $select->addExpression('1');
-
-    if (!$select->execute()->fetchField()) {
-      try {
-        $insert = $this->connection->insert($this->table)->fields($this->insertFields);
-        if ($this->defaultFields) {
-          $insert->useDefaults($this->defaultFields);
-        }
-        $insert->execute();
-        return self::STATUS_INSERT;
+    try {
+      if (!count($this->condition)) {
+        throw new InvalidMergeQueryException('Invalid merge query: no conditions');
       }
-      catch (IntegrityConstraintViolationException $e) {
-        // The insert query failed, maybe it's because a racing insert query
-        // beat us in inserting the same row. Retry the select query, if it
-        // returns a row, ignore the error and continue with the update
-        // query below.
-        if (!$select->execute()->fetchField()) {
-          throw $e;
-        }
-      }
-    }
-
-    if ($this->needsUpdate) {
-      $update = $this->connection->update($this->table)
-        ->fields($this->updateFields)
+      $select = $this->connection->select($this->conditionTable)
         ->condition($this->condition);
-      if ($this->expressionFields) {
-        foreach ($this->expressionFields as $field => $data) {
-          $update->expression($field, $data['expression'], $data['arguments']);
+      $select->addExpression('1');
+      if (!$select->execute()->fetchField()) {
+        try {
+          $insert = $this->connection->insert($this->table)->fields($this->insertFields);
+          if ($this->defaultFields) {
+            $insert->useDefaults($this->defaultFields);
+          }
+          $insert->execute();
+          return self::STATUS_INSERT;
+        }
+        catch (IntegrityConstraintViolationException $e) {
+          // The insert query failed, maybe it's because a racing insert query
+          // beat us in inserting the same row. Retry the select query, if it
+          // returns a row, ignore the error and continue with the update
+          // query below.
+          if (!$select->execute()->fetchField()) {
+            throw $e;
+          }
         }
       }
-      $update->execute();
-      return self::STATUS_UPDATE;
+      if ($this->needsUpdate) {
+        $update = $this->connection->update($this->table)
+          ->fields($this->updateFields)
+          ->condition($this->condition);
+        if ($this->expressionFields) {
+          foreach ($this->expressionFields as $field => $data) {
+            $update->expression($field, $data['expression'], $data['arguments']);
+          }
+        }
+        $update->execute();
+        return self::STATUS_UPDATE;
+      }
     }
-    return NULL;
+    catch (\Exception $e) {
+      // @todo 'throw_exception' option is deprecated. Remove in D10.
+      // @see https://www.drupal.org/project/drupal/issues/3210310
+      if (array_key_exists('throw_exception', $this->queryOptions)) {
+        @trigger_error('Passing a \'throw_exception\' option to ' . __METHOD__ . ' is deprecated in drupal:9.2.0 and is removed in drupal:10.0.0. Always catch exceptions. See https://www.drupal.org/node/3201187', E_USER_DEPRECATED);
+        if (!($this->queryOptions['throw_exception'])) {
+          return NULL;
+        }
+      }
+      throw $e;
+    }
   }
 
 }

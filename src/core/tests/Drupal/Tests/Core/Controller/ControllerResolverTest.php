@@ -1,6 +1,9 @@
 <?php
 
-declare(strict_types=1);
+/**
+ * @file
+ * Contains \Drupal\Tests\Core\Controller\ControllerResolverTest.
+ */
 
 namespace Drupal\Tests\Core\Controller;
 
@@ -8,13 +11,18 @@ use Drupal\Core\Controller\ControllerResolver;
 use Drupal\Core\DependencyInjection\ClassResolver;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
-use Drupal\Core\Utility\CallableResolver;
 use Drupal\Tests\UnitTestCase;
-use Psr\Http\Message\ServerRequestInterface;
+use Laminas\Diactoros\ResponseFactory;
+use Laminas\Diactoros\ServerRequestFactory;
+use Laminas\Diactoros\StreamFactory;
+use Laminas\Diactoros\UploadedFileFactory;
+use Symfony\Bridge\PsrHttpMessage\Factory\PsrHttpFactory;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
+use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * @coversDefaultClass \Drupal\Core\Controller\ControllerResolver
@@ -37,27 +45,31 @@ class ControllerResolverTest extends UnitTestCase {
   protected $container;
 
   /**
+   * The PSR-7 converter.
+   *
+   * @var \Symfony\Bridge\PsrHttpMessage\HttpMessageFactoryInterface
+   */
+  protected $httpMessageFactory;
+
+  /**
    * {@inheritdoc}
    */
   protected function setUp(): void {
     parent::setUp();
 
     $this->container = new ContainerBuilder();
-    $class_resolver = new ClassResolver($this->container);
-    $callable_resolver = new CallableResolver($class_resolver);
-    $this->controllerResolver = new ControllerResolver($callable_resolver);
+    $class_resolver = new ClassResolver();
+    $class_resolver->setContainer($this->container);
+    $this->httpMessageFactory = new PsrHttpFactory(new ServerRequestFactory(), new StreamFactory(), new UploadedFileFactory(), new ResponseFactory());
+    $this->controllerResolver = new ControllerResolver($this->httpMessageFactory, $class_resolver);
   }
 
   /**
    * Tests createController().
    *
    * @dataProvider providerTestCreateController
-   * @group legacy
    */
-  public function testCreateController($controller, $class, $output, ?string $deprecation = NULL): void {
-    if ($deprecation) {
-      $this->expectDeprecation($deprecation);
-    }
+  public function testCreateController($controller, $class, $output) {
     $this->container->set('some_service', new MockController());
     $result = $this->controllerResolver->getControllerFromDefinition($controller);
     $this->assertCallableController($result, $class, $output);
@@ -66,7 +78,7 @@ class ControllerResolverTest extends UnitTestCase {
   /**
    * Provides test data for testCreateController().
    */
-  public static function providerTestCreateController() {
+  public function providerTestCreateController() {
     return [
       // Tests class::method.
       ['Drupal\Tests\Core\Controller\MockController::getResult', 'Drupal\Tests\Core\Controller\MockController', 'This is a regular controller.'],
@@ -75,19 +87,14 @@ class ControllerResolverTest extends UnitTestCase {
       // Tests a class with injection.
       ['Drupal\Tests\Core\Controller\MockContainerInjection::getResult', 'Drupal\Tests\Core\Controller\MockContainerInjection', 'This used injection.'],
       // Tests a ContainerAware class.
-      [
-        'Drupal\Tests\Core\Controller\MockContainerAware::getResult',
-        'Drupal\Tests\Core\Controller\MockContainerAware',
-        'This is container aware.',
-        'Implementing \Symfony\Component\DependencyInjection\ContainerAwareInterface is deprecated in drupal:10.3.0 and it will be removed in drupal:11.0.0. Implement \Drupal\Core\DependencyInjection\ContainerInjectionInterface and use dependency injection instead. See https://www.drupal.org/node/3428661',
-      ],
+      ['Drupal\Tests\Core\Controller\MockContainerAware::getResult', 'Drupal\Tests\Core\Controller\MockContainerAware', 'This is container aware.'],
     ];
   }
 
   /**
    * Tests createController() with a non-existent class.
    */
-  public function testCreateControllerNonExistentClass(): void {
+  public function testCreateControllerNonExistentClass() {
     $this->expectException(\InvalidArgumentException::class);
     $this->controllerResolver->getControllerFromDefinition('Class::method');
   }
@@ -95,7 +102,7 @@ class ControllerResolverTest extends UnitTestCase {
   /**
    * Tests createController() with an invalid name.
    */
-  public function testCreateControllerInvalidName(): void {
+  public function testCreateControllerInvalidName() {
     $this->expectException(\LogicException::class);
     $this->controllerResolver->getControllerFromDefinition('ClassWithoutMethod');
   }
@@ -104,12 +111,8 @@ class ControllerResolverTest extends UnitTestCase {
    * Tests getController().
    *
    * @dataProvider providerTestGetController
-   * @group legacy
    */
-  public function testGetController($attributes, $class, $output = NULL): void {
-    if ($class) {
-      $this->expectDeprecation('Implementing \Symfony\Component\DependencyInjection\ContainerAwareInterface is deprecated in drupal:10.3.0 and it will be removed in drupal:11.0.0. Implement \Drupal\Core\DependencyInjection\ContainerInjectionInterface and use dependency injection instead. See https://www.drupal.org/node/3428661');
-    }
+  public function testGetController($attributes, $class, $output = NULL) {
     $request = new Request([], [], $attributes);
     $result = $this->controllerResolver->getController($request);
     if ($class) {
@@ -123,7 +126,7 @@ class ControllerResolverTest extends UnitTestCase {
   /**
    * Provides test data for testGetController().
    */
-  public static function providerTestGetController() {
+  public function providerTestGetController() {
     return [
       // Tests passing a controller via the request.
       [['_controller' => 'Drupal\Tests\Core\Controller\MockContainerAware::getResult'], 'Drupal\Tests\Core\Controller\MockContainerAware', 'This is container aware.'],
@@ -137,7 +140,7 @@ class ControllerResolverTest extends UnitTestCase {
    *
    * @dataProvider providerTestGetControllerFromDefinition
    */
-  public function testGetControllerFromDefinition($definition, $output): void {
+  public function testGetControllerFromDefinition($definition, $output) {
     $this->container->set('invoke_service', new MockInvokeController());
     $controller = $this->controllerResolver->getControllerFromDefinition($definition);
     $this->assertCallableController($controller, NULL, $output);
@@ -146,7 +149,7 @@ class ControllerResolverTest extends UnitTestCase {
   /**
    * Provides test data for testGetControllerFromDefinition().
    */
-  public static function providerTestGetControllerFromDefinition() {
+  public function providerTestGetControllerFromDefinition() {
     return [
       // Tests a method on an object.
       [[new MockController(), 'getResult'], 'This is a regular controller.'],
@@ -164,7 +167,7 @@ class ControllerResolverTest extends UnitTestCase {
   /**
    * Tests getControllerFromDefinition() without a callable.
    */
-  public function testGetControllerFromDefinitionNotCallable(): void {
+  public function testGetControllerFromDefinitionNotCallable() {
     $this->expectException(\InvalidArgumentException::class);
     $this->controllerResolver->getControllerFromDefinition('Drupal\Tests\Core\Controller\MockController::bananas');
   }
@@ -233,23 +236,9 @@ class MockContainerInjection implements ContainerInjectionInterface {
 
 }
 class MockContainerAware implements ContainerAwareInterface {
-
-  /**
-   * The service container.
-   */
-  protected ContainerInterface $container;
-
-  /**
-   * Sets the service container.
-   */
-  public function setContainer(?ContainerInterface $container): void {
-    $this->container = $container;
-  }
+  use ContainerAwareTrait;
 
   public function getResult() {
-    if (empty($this->container)) {
-      throw new \Exception('Container was not injected.');
-    }
     return 'This is container aware.';
   }
 

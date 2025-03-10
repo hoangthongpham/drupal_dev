@@ -1,13 +1,11 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\field\Functional\EntityReference;
 
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\Tests\BrowserTestBase;
-use Drupal\Tests\field\Traits\EntityReferenceFieldCreationTrait;
+use Drupal\Tests\field\Traits\EntityReferenceTestTrait;
 use Drupal\taxonomy\Entity\Vocabulary;
 use Drupal\node\Entity\Node;
 use Drupal\field\Entity\FieldStorageConfig;
@@ -19,11 +17,8 @@ use Drupal\field\Entity\FieldStorageConfig;
  */
 class EntityReferenceAutoCreateTest extends BrowserTestBase {
 
-  use EntityReferenceFieldCreationTrait;
+  use EntityReferenceTestTrait;
 
-  /**
-   * {@inheritdoc}
-   */
   protected static $modules = ['node', 'taxonomy', 'entity_test'];
 
   /**
@@ -45,9 +40,6 @@ class EntityReferenceAutoCreateTest extends BrowserTestBase {
    */
   protected $referencedType;
 
-  /**
-   * {@inheritdoc}
-   */
   protected function setUp(): void {
     parent::setUp();
 
@@ -108,9 +100,10 @@ class EntityReferenceAutoCreateTest extends BrowserTestBase {
   }
 
   /**
-   * Tests the autocomplete input element and entity auto-creation.
+   * Tests that the autocomplete input element appears and the creation of a new
+   * entity.
    */
-  public function testAutoCreate(): void {
+  public function testAutoCreate() {
     $this->drupalGet('node/add/' . $this->referencingType);
     $target = $this->assertSession()->fieldExists("edit-test-field-0-target-id");
     $this->assertTrue($target->hasClass("form-autocomplete"));
@@ -158,16 +151,14 @@ class EntityReferenceAutoCreateTest extends BrowserTestBase {
   }
 
   /**
-   * Tests multiple target bundles.
-   *
    * Tests if an entity reference field having multiple target bundles is
    * storing the auto-created entity in the right destination.
    */
-  public function testMultipleTargetBundles(): void {
+  public function testMultipleTargetBundles() {
     /** @var \Drupal\taxonomy\Entity\Vocabulary[] $vocabularies */
     $vocabularies = [];
     for ($i = 0; $i < 2; $i++) {
-      $vid = $this->randomMachineName();
+      $vid = mb_strtolower($this->randomMachineName());
       $vocabularies[$i] = Vocabulary::create([
         'name' => $this->randomMachineName(),
         'vid' => $vid,
@@ -178,7 +169,7 @@ class EntityReferenceAutoCreateTest extends BrowserTestBase {
     // Create a taxonomy term entity reference field that saves the auto-created
     // taxonomy terms in the second vocabulary from the two that were configured
     // as targets.
-    $field_name = $this->randomMachineName();
+    $field_name = mb_strtolower($this->randomMachineName());
     $handler_settings = [
       'target_bundles' => [
         $vocabularies[0]->id() => $vocabularies[0]->id(),
@@ -258,7 +249,7 @@ class EntityReferenceAutoCreateTest extends BrowserTestBase {
   /**
    * Tests autocreation for an entity that has no bundles.
    */
-  public function testNoBundles(): void {
+  public function testNoBundles() {
     $account = $this->drupalCreateUser([
       'access content',
       "create $this->referencingType content",
@@ -266,7 +257,7 @@ class EntityReferenceAutoCreateTest extends BrowserTestBase {
     ]);
     $this->drupalLogin($account);
 
-    $field_name = $this->randomMachineName();
+    $field_name = mb_strtolower($this->randomMachineName());
     $handler_settings = [
       'auto_create' => TRUE,
     ];

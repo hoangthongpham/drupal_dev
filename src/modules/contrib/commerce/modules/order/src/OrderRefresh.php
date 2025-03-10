@@ -2,14 +2,14 @@
 
 namespace Drupal\commerce_order;
 
-use Drupal\Component\Datetime\TimeInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Session\AccountInterface;
 use Drupal\commerce\Context;
+use Drupal\commerce_price\Calculator;
+use Drupal\Component\Datetime\TimeInterface;
 use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\commerce_order\Entity\OrderType;
-use Drupal\commerce_price\Calculator;
 use Drupal\commerce_price\Resolver\ChainPriceResolverInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Session\AccountInterface;
 
 /**
  * Default implementation for order refresh.
@@ -102,9 +102,6 @@ class OrderRefresh implements OrderRefreshInterface {
     $order_type = $this->orderTypeStorage->load($order->bundle());
     // Ensure the order is only refreshed for its customer, when configured so.
     if ($order_type->getRefreshMode() == OrderType::REFRESH_CUSTOMER) {
-      if (!$this->currentUser->isAuthenticated() && !$order->access('update')) {
-        return FALSE;
-      }
       if ($order->getCustomerId() != $this->currentUser->id()) {
         return FALSE;
       }
@@ -149,10 +146,6 @@ class OrderRefresh implements OrderRefreshInterface {
    * {@inheritdoc}
    */
   public function refresh(OrderInterface $order) {
-    // It's no use refreshing a store-orphaned order.
-    if (!$order->getStore()) {
-      return;
-    }
     // First invoke order preprocessors if any.
     foreach ($this->preprocessors as $processor) {
       $processor->preprocess($order);
@@ -179,9 +172,7 @@ class OrderRefresh implements OrderRefreshInterface {
     foreach ($order->getItems() as $order_item) {
       $purchased_entity = $order_item->getPurchasedEntity();
       if ($purchased_entity) {
-        if (!$order_item->isTitleOverridden()) {
-          $order_item->setTitle($purchased_entity->getOrderItemTitle());
-        }
+        $order_item->setTitle($purchased_entity->getOrderItemTitle());
         if (!$order_item->isUnitPriceOverridden()) {
           $unit_price = $this->chainPriceResolver->resolve($purchased_entity, $order_item->getQuantity(), $context);
           $unit_price ? $order_item->setUnitPrice($unit_price) : $order_item->set('unit_price', NULL);

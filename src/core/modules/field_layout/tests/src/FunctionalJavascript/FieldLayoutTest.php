@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\field_layout\FunctionalJavascript;
 
 use Drupal\entity_test\Entity\EntityTest;
@@ -27,7 +25,7 @@ class FieldLayoutTest extends WebDriverTestBase {
   /**
    * {@inheritdoc}
    */
-  protected $defaultTheme = 'stark';
+  protected $defaultTheme = 'classy';
 
   /**
    * {@inheritdoc}
@@ -56,12 +54,12 @@ class FieldLayoutTest extends WebDriverTestBase {
   /**
    * Tests that layouts are unique per view mode.
    */
-  public function testEntityViewModes(): void {
+  public function testEntityViewModes() {
     // By default, the field is not visible.
     $this->drupalGet('entity_test/1/test');
-    $this->assertSession()->elementNotExists('css', '.layout__region--content ');
+    $this->assertSession()->elementNotExists('css', '.layout__region--content .field--name-field-test-text');
     $this->drupalGet('entity_test/1');
-    $this->assertSession()->elementNotExists('css', '.layout__region--content');
+    $this->assertSession()->elementNotExists('css', '.layout__region--content .field--name-field-test-text');
 
     // Change the layout for the "test" view mode. See
     // core.entity_view_mode.entity_test.test.yml.
@@ -72,19 +70,20 @@ class FieldLayoutTest extends WebDriverTestBase {
     $this->clickLink('configure them');
     $this->getSession()->getPage()->pressButton('Show row weights');
     $this->getSession()->getPage()->selectFieldOption('fields[field_test_text][region]', 'content');
+    $this->assertSession()->assertWaitOnAjaxRequest();
     $this->submitForm([], 'Save');
 
     // Each view mode has a different layout.
     $this->drupalGet('entity_test/1/test');
-    $this->assertSession()->elementTextContains('css', '.layout__region--content', 'The field test text value');
+    $this->assertSession()->elementExists('css', '.layout__region--content .field--name-field-test-text');
     $this->drupalGet('entity_test/1');
-    $this->assertSession()->elementNotExists('css', '.layout__region--content');
+    $this->assertSession()->elementNotExists('css', '.layout__region--content .field--name-field-test-text');
   }
 
   /**
    * Tests the use of field layout for entity form displays.
    */
-  public function testEntityForm(): void {
+  public function testEntityForm() {
     // By default, the one-column layout is used.
     $this->drupalGet('entity_test/manage/1/edit');
     $this->assertFieldInRegion('field_test_text[0][value]', 'content');
@@ -128,15 +127,11 @@ class FieldLayoutTest extends WebDriverTestBase {
     $this->assertSession()->elementExists('css', '.layout__region--second .field--name-field-test-text');
     $this->assertFieldInRegion('field_test_text[0][value]', 'second');
 
-    // Tests if this layout works in an embedded context.
-    $this->drupalGet('/field-layout-embedded-form');
-    $this->assertSession()->elementExists('css', '.layout__region--second .field--name-field-test-text');
-    $this->assertFieldInRegion('foo[field_test_text][0][value]', 'second');
-
     // Move the field to the second region without tabledrag.
     $this->drupalGet('entity_test/structure/entity_test/form-display');
     $this->getSession()->getPage()->pressButton('Show row weights');
     $this->getSession()->getPage()->selectFieldOption('fields[field_test_text][region]', 'second');
+    $this->assertSession()->assertWaitOnAjaxRequest();
     $this->submitForm([], 'Save');
     $this->assertSession()->pageTextContains('Your settings have been saved.');
 
@@ -153,7 +148,7 @@ class FieldLayoutTest extends WebDriverTestBase {
   /**
    * Tests the use of field layout for entity view displays.
    */
-  public function testEntityView(): void {
+  public function testEntityView() {
     // The one-column layout is in use.
     $this->drupalGet('entity_test/structure/entity_test/display');
     $this->assertEquals(['Content', 'Disabled'], $this->getRegionTitles());
@@ -171,7 +166,7 @@ class FieldLayoutTest extends WebDriverTestBase {
     // No fields are visible, and the regions don't display when empty.
     $this->assertSession()->elementNotExists('css', '.layout--twocol');
     $this->assertSession()->elementNotExists('css', '.layout__region');
-    $this->assertSession()->pageTextNotContains('The field test text value');
+    $this->assertSession()->elementNotExists('css', '.field--name-field-test-text');
 
     // After a refresh the new regions are still there.
     $this->drupalGet('entity_test/structure/entity_test/display');
@@ -193,50 +188,52 @@ class FieldLayoutTest extends WebDriverTestBase {
     // The new layout is used.
     $this->drupalGet('entity_test/1');
     $this->assertSession()->elementExists('css', '.layout--twocol');
-    $this->assertSession()->elementTextContains('css', '.layout__region--first', 'The field test text value');
+    $this->assertSession()->elementExists('css', '.layout__region--first .field--name-field-test-text');
 
     // Move the field to the second region without tabledrag.
     $this->drupalGet('entity_test/structure/entity_test/display');
     $this->getSession()->getPage()->pressButton('Show row weights');
     $this->getSession()->getPage()->selectFieldOption('fields[field_test_text][region]', 'second');
+    $this->assertSession()->assertWaitOnAjaxRequest();
     $this->submitForm([], 'Save');
     $this->assertSession()->pageTextContains('Your settings have been saved.');
 
     // The updated region is used.
     $this->drupalGet('entity_test/1');
-    $this->assertSession()->elementTextContains('css', '.layout__region--second', 'The field test text value');
+    $this->assertSession()->elementExists('css', '.layout__region--second .field--name-field-test-text');
 
     // The layout is still in use without Field UI.
     $this->container->get('module_installer')->uninstall(['field_ui']);
     $this->drupalGet('entity_test/1');
     $this->assertSession()->elementExists('css', '.layout--twocol');
-    $this->assertSession()->elementTextContains('css', '.layout__region--second', 'The field test text value');
+    $this->assertSession()->elementExists('css', '.layout__region--second .field--name-field-test-text');
   }
 
   /**
    * Tests layout plugins with forms.
    */
-  public function testLayoutForms(): void {
+  public function testLayoutForms() {
     $this->drupalGet('entity_test/structure/entity_test/display');
     // Switch to a field layout with settings.
     $this->click('#edit-field-layouts');
 
     // Test switching between layouts with and without forms.
     $this->getSession()->getPage()->selectFieldOption('field_layout', 'layout_test_plugin');
-    $this->assertSession()->assertExpectedAjaxRequest(1);
+    $this->assertSession()->assertWaitOnAjaxRequest();
     $this->assertSession()->fieldExists('settings_wrapper[layout_settings][setting_1]');
 
     $this->getSession()->getPage()->selectFieldOption('field_layout', 'layout_test_2col');
-    $this->assertSession()->assertExpectedAjaxRequest(2);
+    $this->assertSession()->assertWaitOnAjaxRequest();
     $this->assertSession()->fieldNotExists('settings_wrapper[layout_settings][setting_1]');
 
     $this->getSession()->getPage()->selectFieldOption('field_layout', 'layout_test_plugin');
-    $this->assertSession()->assertExpectedAjaxRequest(3);
+    $this->assertSession()->assertWaitOnAjaxRequest();
     $this->assertSession()->fieldExists('settings_wrapper[layout_settings][setting_1]');
 
     // Move the test field to the content region.
     $this->getSession()->getPage()->pressButton('Show row weights');
     $this->getSession()->getPage()->selectFieldOption('fields[field_test_text][region]', 'content');
+    $this->assertSession()->assertWaitOnAjaxRequest();
     $this->submitForm([], 'Save');
 
     $this->drupalGet('entity_test/1');
@@ -255,7 +252,7 @@ class FieldLayoutTest extends WebDriverTestBase {
   /**
    * Tests changing the formatter and region at the same time.
    */
-  public function testChangingFormatterAndRegion(): void {
+  public function testChangingFormatterAndRegion() {
     $assert_session = $this->assertSession();
     $page = $this->getSession()->getPage();
 

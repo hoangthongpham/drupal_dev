@@ -2,14 +2,14 @@
 
 namespace Drupal\commerce_product;
 
-use Drupal\Core\Cache\CacheBackendInterface;
-use Drupal\Core\Entity\Display\EntityFormDisplayInterface;
+use Drupal\commerce_product\Entity\ProductAttributeInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
+use Drupal\Core\Entity\Display\EntityFormDisplayInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\commerce_product\Entity\ProductAttributeInterface;
-use Drupal\field\Entity\FieldConfig;
+use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\field\Entity\FieldConfig;
 
 /**
  * Default implementation of the ProductAttributeFieldManagerInterface.
@@ -191,9 +191,7 @@ class ProductAttributeFieldManager implements ProductAttributeFieldManagerInterf
         'settings' => [
           'handler' => 'default',
           'handler_settings' => [
-            'target_bundles' => [
-              $attribute->id() => $attribute->id(),
-            ],
+            'target_bundles' => [$attribute->id()],
           ],
         ],
         'translatable' => FALSE,

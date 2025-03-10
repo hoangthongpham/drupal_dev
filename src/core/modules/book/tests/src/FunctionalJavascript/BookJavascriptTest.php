@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\book\FunctionalJavascript;
 
 use Behat\Mink\Exception\ExpectationException;
@@ -13,7 +11,6 @@ use Drupal\node\Entity\Node;
  * Tests Book javascript functionality.
  *
  * @group book
- * @group legacy
  */
 class BookJavascriptTest extends WebDriverTestBase {
 
@@ -30,7 +27,7 @@ class BookJavascriptTest extends WebDriverTestBase {
   /**
    * Tests re-ordering of books.
    */
-  public function testBookOrdering(): void {
+  public function testBookOrdering() {
     $book = Node::create([
       'type' => 'book',
       'title' => 'Book',
@@ -170,7 +167,7 @@ class BookJavascriptTest extends WebDriverTestBase {
   /**
    * Tests book outline AJAX request.
    */
-  public function testBookAddOutline(): void {
+  public function testBookAddOutline() {
     $this->drupalLogin($this->drupalCreateUser(['create book content', 'create new books', 'add content to books']));
     $this->drupalGet('node/add/book');
     $assert_session = $this->assertSession();

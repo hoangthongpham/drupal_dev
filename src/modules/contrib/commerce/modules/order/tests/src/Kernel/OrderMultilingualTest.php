@@ -8,8 +8,6 @@ use Drupal\commerce_product\Entity\ProductVariation;
 use Drupal\commerce_product\Entity\ProductVariationType;
 use Drupal\language\Entity\ConfigurableLanguage;
 
-// cspell:ignore produit Magasin défaut
-
 /**
  * Tests orders and order items in a multilingual context.
  *
@@ -48,7 +46,7 @@ class OrderMultilingualTest extends OrderKernelTestBase {
       'name' => 'Magasin par défaut',
     ])->save();
 
-    $user = $this->createUser();
+    $user = $this->createUser(['mail' => $this->randomString() . '@example.com']);
     $order = Order::create([
       'type' => 'default',
       'store_id' => $this->store->id(),

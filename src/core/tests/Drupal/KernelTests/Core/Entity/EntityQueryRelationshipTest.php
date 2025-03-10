@@ -1,14 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\KernelTests\Core\Entity;
 
 use Drupal\Component\Plugin\Exception\PluginNotFoundException;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\taxonomy\Entity\Vocabulary;
 use Drupal\taxonomy\Entity\Term;
-use Drupal\Tests\field\Traits\EntityReferenceFieldCreationTrait;
+use Drupal\Tests\field\Traits\EntityReferenceTestTrait;
 
 /**
  * Tests the Entity Query relationship API.
@@ -17,10 +15,12 @@ use Drupal\Tests\field\Traits\EntityReferenceFieldCreationTrait;
  */
 class EntityQueryRelationshipTest extends EntityKernelTestBase {
 
-  use EntityReferenceFieldCreationTrait;
+  use EntityReferenceTestTrait;
 
   /**
-   * {@inheritdoc}
+   * Modules to enable.
+   *
+   * @var array
    */
   protected static $modules = ['taxonomy'];
 
@@ -59,9 +59,6 @@ class EntityQueryRelationshipTest extends EntityKernelTestBase {
    */
   protected $queryResults;
 
-  /**
-   * {@inheritdoc}
-   */
   protected function setUp(): void {
     parent::setUp();
 
@@ -70,18 +67,17 @@ class EntityQueryRelationshipTest extends EntityKernelTestBase {
     // We want an entity reference field. It needs a vocabulary, terms, a field
     // storage and a field. First, create the vocabulary.
     $vocabulary = Vocabulary::create([
-      'vid' => $this->randomMachineName(),
-      'name' => 'Tags',
+      'vid' => mb_strtolower($this->randomMachineName()),
     ]);
     $vocabulary->save();
 
     // Second, create the field.
     entity_test_create_bundle('test_bundle');
-    $this->fieldName = $this->randomMachineName();
+    $this->fieldName = strtolower($this->randomMachineName());
     $handler_settings = [
       'target_bundles' => [
         $vocabulary->id() => $vocabulary->id(),
-      ],
+       ],
       'auto_create' => TRUE,
     ];
     $this->createEntityReferenceField('entity_test', 'test_bundle', $this->fieldName, NULL, 'taxonomy_term', 'default', $handler_settings);
@@ -113,7 +109,7 @@ class EntityQueryRelationshipTest extends EntityKernelTestBase {
   /**
    * Tests querying.
    */
-  public function testQuery(): void {
+  public function testQuery() {
     $storage = $this->container->get('entity_type.manager')->getStorage('entity_test');
     // This returns the 0th entity as that's the only one pointing to the 0th
     // account.
@@ -212,7 +208,7 @@ class EntityQueryRelationshipTest extends EntityKernelTestBase {
   /**
    * Tests the invalid specifier in the query relationship.
    */
-  public function testInvalidSpecifier(): void {
+  public function testInvalidSpecifier() {
     $this->expectException(PluginNotFoundException::class);
     $this->container
       ->get('entity_type.manager')

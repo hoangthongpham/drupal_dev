@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\responsive_image\Kernel\Plugin\migrate\source\d7;
 
 use Drupal\Tests\migrate\Kernel\MigrateSqlSourceTestBase;
@@ -17,15 +15,12 @@ class ResponsiveImageStylesTest extends MigrateSqlSourceTestBase {
   /**
    * {@inheritdoc}
    */
-  protected static $modules = [
-    'migrate_drupal',
-    'responsive_image',
-  ];
+  protected static $modules = ['responsive_image'];
 
   /**
    * {@inheritdoc}
    */
-  public static function providerSource() {
+  public function providerSource() {
     $tests = [];
 
     // The source data.

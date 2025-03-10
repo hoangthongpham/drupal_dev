@@ -1,7 +1,4 @@
 <?php
-
-declare(strict_types=1);
-
 namespace Drush\Config;
 
 trait ConfigAwareTrait
@@ -15,11 +12,11 @@ trait ConfigAwareTrait
      * DrushConfig as return type. Helps with IDE completion.
      *
      * @see https://stackoverflow.com/a/37687295.
+     *
+     * @return \Drush\Config\DrushConfig
      */
-    public function getConfig(): DrushConfig
+    public function getConfig()
     {
-        $return = $this->parentGetConfig();
-        assert($return instanceof DrushConfig, 'Expected DrushConfig, got ' . get_class($return) . '.');
-        return $return;
+        return $this->parentGetConfig();
     }
 }

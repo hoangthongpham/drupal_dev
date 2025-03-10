@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\block\Kernel;
 
 use Drupal\block\Entity\Block;
@@ -22,9 +20,13 @@ class BlockConfigSchemaTest extends KernelTestBase {
    */
   protected static $modules = [
     'block',
+    'aggregator',
+    'book',
     'block_content',
     'comment',
+    'forum',
     'node',
+    'statistics',
     // \Drupal\block\Entity\Block->preSave() calls system_region_list().
     'system',
     'taxonomy',
@@ -57,18 +59,18 @@ class BlockConfigSchemaTest extends KernelTestBase {
     $this->installEntitySchema('block_content');
     $this->installEntitySchema('taxonomy_term');
     $this->installEntitySchema('node');
-    $this->container->get('theme_installer')->install(['stark']);
+    $this->installSchema('book', ['book']);
   }
 
   /**
    * Tests the block config schema for block plugins.
    */
-  public function testBlockConfigSchema(): void {
+  public function testBlockConfigSchema() {
     foreach ($this->blockManager->getDefinitions() as $block_id => $definition) {
-      $id = $this->randomMachineName();
+      $id = strtolower($this->randomMachineName());
       $block = Block::create([
         'id' => $id,
-        'theme' => 'stark',
+        'theme' => 'classy',
         'weight' => 00,
         'status' => TRUE,
         'region' => 'content',

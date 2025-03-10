@@ -4,8 +4,7 @@ namespace Drupal\Core\EventSubscriber;
 
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Ajax\AjaxResponse;
-use Drupal\Core\DependencyInjection\DeprecatedServicePropertyTrait;
-use Symfony\Component\DependencyInjection\Attribute\AutowireServiceClosure;
+use Drupal\Core\Render\AttachmentsResponseProcessorInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
@@ -16,25 +15,22 @@ use Symfony\Component\HttpKernel\KernelEvents;
  */
 class AjaxResponseSubscriber implements EventSubscriberInterface {
 
-  use DeprecatedServicePropertyTrait;
-
   /**
-   * {@inheritdoc}
+   * The AJAX response attachments processor service.
+   *
+   * @var \Drupal\Core\Render\AttachmentsResponseProcessorInterface
    */
-  protected array $deprecatedProperties = [
-    'ajaxResponseAttachmentsProcessor' => 'ajax_response.attachments_processor',
-  ];
+  protected $ajaxResponseAttachmentsProcessor;
 
   /**
    * Constructs an AjaxResponseSubscriber object.
    *
-   * @param \Closure $processorClosure
-   *   The AJAX response attachments processor service, wrapped in a closure.
+   * @param \Drupal\Core\Render\AttachmentsResponseProcessorInterface $ajax_response_attachments_processor
+   *   The AJAX response attachments processor service.
    */
-  public function __construct(
-    #[AutowireServiceClosure('ajax_response.attachments_processor')]
-    protected \Closure $processorClosure,
-  ) {}
+  public function __construct(AttachmentsResponseProcessorInterface $ajax_response_attachments_processor) {
+    $this->ajaxResponseAttachmentsProcessor = $ajax_response_attachments_processor;
+  }
 
   /**
    * Request parameter to indicate that a request is a Drupal Ajax request.
@@ -49,7 +45,7 @@ class AjaxResponseSubscriber implements EventSubscriberInterface {
    */
   public function onRequest(RequestEvent $event) {
     // Pass to the Html class that the current request is an Ajax request.
-    if ($event->getRequest()->get(static::AJAX_REQUEST_PARAMETER)) {
+    if ($event->getRequest()->request->get(static::AJAX_REQUEST_PARAMETER)) {
       Html::setIsAjax(TRUE);
     }
   }
@@ -63,7 +59,7 @@ class AjaxResponseSubscriber implements EventSubscriberInterface {
   public function onResponse(ResponseEvent $event) {
     $response = $event->getResponse();
     if ($response instanceof AjaxResponse) {
-      ($this->processorClosure)()->processAttachments($response);
+      $this->ajaxResponseAttachmentsProcessor->processAttachments($response);
 
       // IE 9 does not support XHR 2 (http://caniuse.com/#feat=xhr2), so
       // for that browser, jquery.form submits requests containing a file upload
@@ -89,7 +85,7 @@ class AjaxResponseSubscriber implements EventSubscriberInterface {
       // @see Drupal.ajax.prototype.beforeSend()
       $accept = $event->getRequest()->headers->get('accept', '');
 
-      if (str_contains($accept, 'text/html')) {
+      if (strpos($accept, 'text/html') !== FALSE) {
         $response->headers->set('Content-Type', 'text/html; charset=utf-8');
 
         // Browser IFRAMEs expect HTML. Browser extensions, such as Linkification
@@ -113,7 +109,7 @@ class AjaxResponseSubscriber implements EventSubscriberInterface {
   /**
    * {@inheritdoc}
    */
-  public static function getSubscribedEvents(): array {
+  public static function getSubscribedEvents() {
     $events[KernelEvents::RESPONSE][] = ['onResponse', -100];
     $events[KernelEvents::REQUEST][] = ['onRequest', 50];
 

@@ -14,5 +14,5 @@ interface NumberFormatRepositoryInterface
      *
      * @return NumberFormat
      */
-    public function get(string $locale): NumberFormat;
+    public function get($locale);
 }

@@ -1,8 +1,8 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\node\Functional;
+
+use Drupal\Component\Utility\Html;
 
 /**
  * Tests the node/{node} page.
@@ -15,12 +15,12 @@ class NodeViewTest extends NodeTestBase {
   /**
    * {@inheritdoc}
    */
-  protected $defaultTheme = 'stark';
+  protected $defaultTheme = 'classy';
 
   /**
    * Tests the html head links.
    */
-  public function testHtmlHeadLinks(): void {
+  public function testHtmlHeadLinks() {
     $node = $this->drupalCreateNode();
 
     $this->drupalGet($node->toUrl());
@@ -35,16 +35,24 @@ class NodeViewTest extends NodeTestBase {
   /**
    * Tests the Link header.
    */
-  public function testLinkHeader(): void {
+  public function testLinkHeader() {
     $node = $this->drupalCreateNode();
+
+    $expected = [
+      '<' . Html::escape($node->toUrl('canonical')->setAbsolute()->toString()) . '>; rel="canonical"',
+      '<' . Html::escape($node->toUrl('canonical', ['alias' => TRUE])->setAbsolute()->toString()) . '>; rel="shortlink"',
+    ];
+
     $this->drupalGet($node->toUrl());
-    $this->assertArrayNotHasKey('Link', $this->getSession()->getResponseHeaders());
+
+    $links = $this->getSession()->getResponseHeaders()['Link'];
+    $this->assertEquals($expected, $links);
   }
 
   /**
    * Tests that we store and retrieve multi-byte UTF-8 characters correctly.
    */
-  public function testMultiByteUtf8(): void {
+  public function testMultiByteUtf8() {
     $title = '🐝';
     // To ensure that the title has multi-byte characters, we compare the byte
     // length to the character length.
@@ -52,7 +60,7 @@ class NodeViewTest extends NodeTestBase {
     $node = $this->drupalCreateNode(['title' => $title]);
     $this->drupalGet($node->toUrl());
     // Verify that the passed title was returned.
-    $this->assertSession()->elementTextEquals('xpath', '//h1/span', $title);
+    $this->assertSession()->elementTextEquals('xpath', '//span[contains(@class, "field--name-title")]', $title);
   }
 
 }

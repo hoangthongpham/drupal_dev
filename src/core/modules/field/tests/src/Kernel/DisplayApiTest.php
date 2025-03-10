@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\field\Kernel;
 
 use Drupal\Component\Render\FormattableMarkup;
@@ -64,9 +62,6 @@ class DisplayApiTest extends FieldKernelTestBase {
    */
   protected static $modules = ['system'];
 
-  /**
-   * {@inheritdoc}
-   */
   protected function setUp(): void {
     parent::setUp();
 
@@ -113,11 +108,7 @@ class DisplayApiTest extends FieldKernelTestBase {
       ->setComponent($this->fieldName, $this->displayOptions['default'])
       ->save();
     // Create a display for the teaser view mode.
-    EntityViewMode::create([
-      'id' => 'entity_test.teaser',
-      'label' => 'Teaser',
-      'targetEntityType' => 'entity_test',
-    ])->save();
+    EntityViewMode::create(['id' => 'entity_test.teaser', 'targetEntityType' => 'entity_test'])->save();
     $display_repository->getViewDisplay($field['entity_type'], $field['bundle'], 'teaser')
       ->setComponent($this->fieldName, $this->displayOptions['teaser'])
       ->save();
@@ -132,11 +123,11 @@ class DisplayApiTest extends FieldKernelTestBase {
   /**
    * Tests the FieldItemListInterface::view() method.
    */
-  public function testFieldItemListView(): void {
+  public function testFieldItemListView() {
     $items = $this->entity->get($this->fieldName);
 
-    \Drupal::service('theme_installer')->install(['stark']);
-    $this->config('system.theme')->set('default', 'stark')->save();
+    \Drupal::service('theme_installer')->install(['classy']);
+    $this->config('system.theme')->set('default', 'classy')->save();
 
     // No display settings: check that default display settings are used.
     $build = $items->view();
@@ -231,7 +222,7 @@ class DisplayApiTest extends FieldKernelTestBase {
   /**
    * Tests the FieldItemInterface::view() method.
    */
-  public function testFieldItemView(): void {
+  public function testFieldItemView() {
     // No display settings: check that default display settings are used.
     $settings = \Drupal::service('plugin.manager.field.formatter')->getDefaultSettings('field_test_default');
     $setting = $settings['test_formatter_setting'];
@@ -295,7 +286,7 @@ class DisplayApiTest extends FieldKernelTestBase {
   /**
    * Tests that the prepareView() formatter method still fires for empty values.
    */
-  public function testFieldEmpty(): void {
+  public function testFieldEmpty() {
     // Uses \Drupal\field_test\Plugin\Field\FieldFormatter\TestFieldEmptyFormatter.
     $display = [
       'label' => 'hidden',

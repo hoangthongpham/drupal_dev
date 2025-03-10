@@ -2,7 +2,6 @@
 
 namespace Drupal\system\Controller;
 
-use Drupal\Core\Asset\AssetQueryStringInterface;
 use Drupal\Core\Batch\BatchBuilder;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Controller\ControllerBase;
@@ -15,8 +14,8 @@ use Drupal\Core\State\StateInterface;
 use Drupal\Core\Update\UpdateRegistry;
 use Drupal\Core\Url;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Controller routines for database update routes.
@@ -98,10 +97,8 @@ class DbUpdateController extends ControllerBase {
    *   The bare HTML page renderer.
    * @param \Drupal\Core\Update\UpdateRegistry $post_update_registry
    *   The post update registry.
-   * @param \Drupal\Core\Asset\AssetQueryStringInterface $assetQueryString
-   *   The asset query string.
    */
-  public function __construct($root, KeyValueExpirableFactoryInterface $key_value_expirable_factory, CacheBackendInterface $cache, StateInterface $state, ModuleHandlerInterface $module_handler, AccountInterface $account, BareHtmlPageRendererInterface $bare_html_page_renderer, UpdateRegistry $post_update_registry, protected ?AssetQueryStringInterface $assetQueryString = NULL) {
+  public function __construct($root, KeyValueExpirableFactoryInterface $key_value_expirable_factory, CacheBackendInterface $cache, StateInterface $state, ModuleHandlerInterface $module_handler, AccountInterface $account, BareHtmlPageRendererInterface $bare_html_page_renderer, UpdateRegistry $post_update_registry) {
     $this->root = $root;
     $this->keyValueExpirableFactory = $key_value_expirable_factory;
     $this->cache = $cache;
@@ -110,11 +107,6 @@ class DbUpdateController extends ControllerBase {
     $this->account = $account;
     $this->bareHtmlPageRenderer = $bare_html_page_renderer;
     $this->postUpdateRegistry = $post_update_registry;
-    if ($this->assetQueryString === NULL) {
-      $this->assetQueryString = \Drupal::service('asset.query_string');
-      @trigger_error('Calling' . __METHOD__ . '() without the $assetQueryString argument is deprecated in drupal:10.2.0 and is required in drupal:11.0.0. See https://www.drupal.org/node/3358337', E_USER_DEPRECATED);
-    }
-
   }
 
   /**
@@ -129,8 +121,7 @@ class DbUpdateController extends ControllerBase {
       $container->get('module_handler'),
       $container->get('current_user'),
       $container->get('bare_html_page_renderer'),
-      $container->get('update.post_update_registry'),
-      $container->get('asset.query_string')
+      $container->get('update.post_update_registry')
     );
   }
 
@@ -216,13 +207,13 @@ class DbUpdateController extends ControllerBase {
    */
   protected function info(Request $request) {
     // Change query-strings on css/js files to enforce reload for all users.
-    $this->assetQueryString->reset();
+    _drupal_flush_css_js();
     // Flush the cache of all data for the update status module.
     $this->keyValueExpirableFactory->get('update')->deleteAll();
     $this->keyValueExpirableFactory->get('update_available_release')->deleteAll();
 
     $build['info_header'] = [
-      '#markup' => '<p>' . $this->t('Use this utility to update your database whenever a module, theme, or the core software is updated.') . '</p><p>' . $this->t('For more detailed information, see the <a href="https://www.drupal.org/upgrade">upgrading handbook</a>. If you are unsure what these terms mean you should probably contact your hosting provider.') . '</p>',
+      '#markup' => '<p>' . $this->t('Use this utility to update your database whenever a new release of Drupal or a module is installed.') . '</p><p>' . $this->t('For more detailed information, see the <a href="https://www.drupal.org/docs/updating-drupal">Updating Drupal guide</a>. If you are unsure what these terms mean you should probably contact your hosting provider.') . '</p>',
     ];
 
     $info[] = $this->t("<strong>Back up your code</strong>. Hint: when backing up module code, do not leave that backup in the 'modules' or 'sites/*/modules' directories as this may confuse Drupal's auto-discovery mechanism.");
@@ -232,7 +223,7 @@ class DbUpdateController extends ControllerBase {
       ':url' => Url::fromRoute('system.site_maintenance_mode')->setOption('base_url', $base_url)->toString(TRUE)->getGeneratedUrl(),
     ]);
     $info[] = $this->t('<strong>Back up your database</strong>. This process will change your database values and in case of emergency you may need to revert to a backup.');
-    $info[] = $this->t('Update your files (as described in the handbook page linked above).');
+    $info[] = $this->t('Install your new files in the appropriate location, as described in the handbook.');
     $build['info'] = [
       '#theme' => 'item_list',
       '#list_type' => 'ol',
@@ -277,7 +268,7 @@ class DbUpdateController extends ControllerBase {
 
     $starting_updates = [];
     $incompatible_updates_exist = FALSE;
-    $updates_per_extension = [];
+    $updates_per_module = [];
     foreach (['update', 'post_update'] as $update_type) {
       switch ($update_type) {
         case 'update':
@@ -288,11 +279,11 @@ class DbUpdateController extends ControllerBase {
           $updates = $this->postUpdateRegistry->getPendingUpdateInformation();
           break;
       }
-      foreach ($updates as $extension => $update) {
+      foreach ($updates as $module => $update) {
         if (!isset($update['start'])) {
-          $build['start'][$extension] = [
+          $build['start'][$module] = [
             '#type' => 'item',
-            '#title' => $extension . ($this->moduleHandler->moduleExists($extension) ? ' module' : ' theme'),
+            '#title' => $module . ' module',
             '#markup' => $update['warning'],
             '#prefix' => '<div class="messages messages--warning">',
             '#suffix' => '</div>',
@@ -301,22 +292,22 @@ class DbUpdateController extends ControllerBase {
           continue;
         }
         if (!empty($update['pending'])) {
-          $updates_per_extension += [$extension => []];
-          $updates_per_extension[$extension] = array_merge($updates_per_extension[$extension], $update['pending']);
-          $build['start'][$extension] = [
+          $updates_per_module += [$module => []];
+          $updates_per_module[$module] = array_merge($updates_per_module[$module], $update['pending']);
+          $build['start'][$module] = [
             '#type' => 'hidden',
             '#value' => $update['start'],
           ];
           // Store the previous items in order to merge normal updates and
           // post_update functions together.
-          $build['start'][$extension] = [
+          $build['start'][$module] = [
             '#theme' => 'item_list',
-            '#items' => $updates_per_extension[$extension],
-            '#title' => $extension . ($this->moduleHandler->moduleExists($extension) ? ' module' : ' theme'),
+            '#items' => $updates_per_module[$module],
+            '#title' => $module . ' module',
           ];
 
           if ($update_type === 'update') {
-            $starting_updates[$extension] = $update['start'];
+            $starting_updates[$module] = $update['start'];
           }
         }
         if (isset($update['pending'])) {
@@ -455,9 +446,9 @@ class DbUpdateController extends ControllerBase {
     // Output a list of info messages.
     if (!empty($update_results)) {
       $all_messages = [];
-      foreach ($update_results as $extension => $updates) {
-        if ($extension != '#abort') {
-          $extension_has_message = FALSE;
+      foreach ($update_results as $module => $updates) {
+        if ($module != '#abort') {
+          $module_has_message = FALSE;
           $info_messages = [];
           foreach ($updates as $name => $queries) {
             $messages = [];
@@ -482,7 +473,7 @@ class DbUpdateController extends ControllerBase {
             }
 
             if ($messages) {
-              $extension_has_message = TRUE;
+              $module_has_message = TRUE;
               if (is_numeric($name)) {
                 $title = $this->t('Update #@count', ['@count' => $name]);
               }
@@ -497,15 +488,12 @@ class DbUpdateController extends ControllerBase {
             }
           }
 
-          // If there were any messages then prefix them with the extension name
+          // If there were any messages then prefix them with the module name
           // and add it to the global message list.
-          if ($extension_has_message) {
-            $header = $this->moduleHandler->moduleExists($extension) ?
-              $this->t('@module module', ['@module' => $extension]) :
-              $this->t('@theme theme', ['@theme' => $extension]);
+          if ($module_has_message) {
             $all_messages[] = [
               '#type' => 'container',
-              '#prefix' => '<h3>' . $header . '</h3>',
+              '#prefix' => '<h3>' . $this->t('@module module', ['@module' => $module]) . '</h3>',
               '#children' => $info_messages,
             ];
           }

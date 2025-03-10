@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\commerce_tax\Kernel\Plugin\Commerce\TaxType;
 
-use Drupal\Tests\commerce_order\Kernel\OrderKernelTestBase;
 use Drupal\commerce_order\Entity\Order;
 use Drupal\commerce_order\Entity\OrderItem;
 use Drupal\commerce_order\Entity\OrderItemType;
@@ -11,8 +10,7 @@ use Drupal\commerce_store\Entity\Store;
 use Drupal\commerce_tax\Entity\TaxType;
 use Drupal\commerce_tax\TaxableType;
 use Drupal\profile\Entity\Profile;
-
-// cspell:ignore Mittelberg Büsingen
+use Drupal\Tests\commerce_order\Kernel\OrderKernelTestBase;
 
 /**
  * @coversDefaultClass \Drupal\commerce_tax\Plugin\Commerce\TaxType\EuropeanUnionVat

@@ -51,6 +51,9 @@
 	"AED": {
 		"name": "Birləşmiş Ərəb Əmirlikləri Dirhəmi"
 	},
+	"VED": {
+		"name": "Bolívar Soberano"
+	},
 	"BOB": {
 		"name": "Boliviya Bolivianosu"
 	},
@@ -387,8 +390,11 @@
 	"SAR": {
 		"name": "Səudiyyə Riyalı"
 	},
-	"SLE": {
+	"SLL": {
 		"name": "Sierra Leon Leonu"
+	},
+	"SLE": {
+		"name": "Sierra Leonean Leone"
 	},
 	"SGD": {
 		"name": "Sinqapur Dolları"
@@ -455,6 +461,9 @@
 	},
 	"UGX": {
 		"name": "Uqanda Şillinqi"
+	},
+	"UYW": {
+		"name": "Uruguayan Nominal Wage Index Unit"
 	},
 	"UYU": {
 		"name": "Uruqvay Pesosu"

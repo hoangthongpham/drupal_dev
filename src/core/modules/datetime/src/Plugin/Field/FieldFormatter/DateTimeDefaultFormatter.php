@@ -3,20 +3,19 @@
 namespace Drupal\datetime\Plugin\Field\FieldFormatter;
 
 use Drupal\Core\Datetime\DrupalDateTime;
-use Drupal\Core\Field\Attribute\FieldFormatter;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * Plugin implementation of the 'Default' formatter for 'datetime' fields.
+ *
+ * @FieldFormatter(
+ *   id = "datetime_default",
+ *   label = @Translation("Default"),
+ *   field_types = {
+ *     "datetime"
+ *   }
+ * )
  */
-#[FieldFormatter(
-  id: 'datetime_default',
-  label: new TranslatableMarkup('Default'),
-  field_types: [
-    'datetime',
-  ],
-)]
 class DateTimeDefaultFormatter extends DateTimeFormatterBase {
 
   /**
@@ -53,8 +52,8 @@ class DateTimeDefaultFormatter extends DateTimeFormatterBase {
 
     $form['format_type'] = [
       '#type' => 'select',
-      '#title' => $this->t('Date format'),
-      '#description' => $this->t("Choose a format for displaying the date. Be sure to set a format appropriate for the field, i.e. omitting time for a field that only has a date."),
+      '#title' => t('Date format'),
+      '#description' => t("Choose a format for displaying the date. Be sure to set a format appropriate for the field, i.e. omitting time for a field that only has a date."),
       '#options' => $options,
       '#default_value' => $this->getSetting('format_type'),
     ];
@@ -69,7 +68,7 @@ class DateTimeDefaultFormatter extends DateTimeFormatterBase {
     $summary = parent::settingsSummary();
 
     $date = new DrupalDateTime();
-    $summary[] = $this->t('Format: @display', ['@display' => $this->formatDate($date)]);
+    $summary[] = t('Format: @display', ['@display' => $this->formatDate($date)]);
 
     return $summary;
   }

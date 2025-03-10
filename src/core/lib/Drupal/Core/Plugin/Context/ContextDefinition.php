@@ -4,14 +4,16 @@ namespace Drupal\Core\Plugin\Context;
 
 use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\TypedData\TypedDataTrait;
-use Symfony\Component\Validator\ConstraintViolationList;
 
 /**
  * Defines a class for context definitions.
  */
 class ContextDefinition implements ContextDefinitionInterface {
 
-  use DependencySerializationTrait;
+  use DependencySerializationTrait {
+    __sleep as traitSleep;
+  }
+
   use TypedDataTrait;
 
   /**
@@ -78,7 +80,7 @@ class ContextDefinition implements ContextDefinitionInterface {
    *   The created context definition object.
    */
   public static function create($data_type = 'any') {
-    if (str_starts_with($data_type, 'entity:')) {
+    if (strpos($data_type, 'entity:') === 0) {
       return new EntityContextDefinition($data_type);
     }
     return new static(
@@ -91,7 +93,7 @@ class ContextDefinition implements ContextDefinitionInterface {
    *
    * @param string $data_type
    *   The required data type.
-   * @param string|null|\Stringable $label
+   * @param string|null $label
    *   The label of this context definition for the UI.
    * @param bool $required
    *   Whether the context definition is required.
@@ -101,22 +103,16 @@ class ContextDefinition implements ContextDefinitionInterface {
    *   The description of this context definition for the UI.
    * @param mixed $default_value
    *   The default value of this definition.
-   * @param array $constraints
-   *   An array of constraints keyed by the constraint name and a value of an
-   *   array constraint options or a NULL.
    */
-  public function __construct($data_type = 'any', $label = NULL, $required = TRUE, $multiple = FALSE, $description = NULL, $default_value = NULL, array $constraints = []) {
+  public function __construct($data_type = 'any', $label = NULL, $required = TRUE, $multiple = FALSE, $description = NULL, $default_value = NULL) {
     $this->dataType = $data_type;
     $this->label = $label;
     $this->isRequired = $required;
     $this->isMultiple = $multiple;
     $this->description = $description;
     $this->defaultValue = $default_value;
-    foreach ($constraints as $constraint_name => $options) {
-      $this->addConstraint($constraint_name, $options);
-    }
 
-    assert(!str_starts_with($data_type, 'entity:') || $this instanceof EntityContextDefinition);
+    assert(strpos($data_type, 'entity:') !== 0 || $this instanceof EntityContextDefinition);
   }
 
   /**
@@ -283,7 +279,7 @@ class ContextDefinition implements ContextDefinitionInterface {
       // Allow a more generic data type like 'entity' to be fulfilled by a more
       // specific data type like 'entity:user'. However, if this type is more
       // specific, do not consider a more generic type to be a match.
-      str_starts_with($that_type, "$this_type:")
+      strpos($that_type, "$this_type:") === 0
     );
   }
 
@@ -311,15 +307,7 @@ class ContextDefinition implements ContextDefinitionInterface {
     $validator = $this->getTypedDataManager()->getValidator();
     foreach ($values as $value) {
       $constraints = array_values($this->getConstraintObjects());
-      if ($definition->isMultiple()) {
-        $violations = new ConstraintViolationList();
-        foreach ($value as $item) {
-          $violations->addAll($validator->validate($item, $constraints));
-        }
-      }
-      else {
-        $violations = $validator->validate($value, $constraints);
-      }
+      $violations = $validator->validate($value, $constraints);
       foreach ($violations as $delta => $violation) {
         // Remove any violation that does not correspond to the constraints.
         if (!in_array($violation->getConstraint(), $constraints)) {

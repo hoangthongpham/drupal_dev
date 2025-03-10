@@ -2,20 +2,19 @@
 
 namespace Drupal\file\Plugin\Field\FieldFormatter;
 
-use Drupal\Core\Field\Attribute\FieldFormatter;
 use Drupal\Core\Field\FieldItemListInterface;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * Plugin implementation of the 'file_rss_enclosure' formatter.
+ *
+ * @FieldFormatter(
+ *   id = "file_rss_enclosure",
+ *   label = @Translation("RSS enclosure"),
+ *   field_types = {
+ *     "file"
+ *   }
+ * )
  */
-#[FieldFormatter(
-  id: 'file_rss_enclosure',
-  label: new TranslatableMarkup('RSS enclosure'),
-  field_types: [
-    'file',
-  ],
-)]
 class RSSEnclosureFormatter extends FileFormatterBase {
 
   /**
@@ -25,7 +24,7 @@ class RSSEnclosureFormatter extends FileFormatterBase {
     $entity = $items->getEntity();
     // Add the first file as an enclosure to the RSS item. RSS allows only one
     // enclosure per item. See: http://wikipedia.org/wiki/RSS_enclosure
-    foreach ($this->getEntitiesToView($items, $langcode) as $file) {
+    foreach ($this->getEntitiesToView($items, $langcode) as $delta => $file) {
       /** @var \Drupal\file\FileInterface $file */
       $entity->rss_elements[] = [
         'key' => 'enclosure',

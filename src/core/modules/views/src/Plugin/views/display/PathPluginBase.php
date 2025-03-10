@@ -2,7 +2,6 @@
 
 namespace Drupal\views\Plugin\views\display;
 
-use Drupal\Component\Utility\Unicode;
 use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\LanguageInterface;
@@ -44,7 +43,7 @@ abstract class PathPluginBase extends DisplayPluginBase implements DisplayRouter
    * @param array $configuration
    *   A configuration array containing information about the plugin instance.
    * @param string $plugin_id
-   *   The plugin ID for the plugin instance.
+   *   The plugin_id for the plugin instance.
    * @param mixed $plugin_definition
    *   The plugin implementation definition.
    * @param \Drupal\Core\Routing\RouteProviderInterface $route_provider
@@ -160,7 +159,7 @@ abstract class PathPluginBase extends DisplayPluginBase implements DisplayRouter
           $bits[$pos] = '{' . $arg_id . '}';
           $argument_map[$arg_id] = $arg_id;
         }
-        elseif (str_starts_with($bit, '%')) {
+        elseif (strpos($bit, '%') === 0) {
           // Use the name defined in the path.
           $parameter_name = substr($bit, 1);
           $arg_id = 'arg_' . $arg_counter++;
@@ -339,10 +338,13 @@ abstract class PathPluginBase extends DisplayPluginBase implements DisplayRouter
 
     // Replace % with %views_arg for menu autoloading and add to the
     // page arguments so the argument actually comes through.
-    if (in_array('%', $bits, TRUE)) {
-      // If a view requires any arguments we cannot create a static menu link.
-      return [];
+    foreach ($bits as $pos => $bit) {
+      if ($bit == '%') {
+        // If a view requires any arguments we cannot create a static menu link.
+        return [];
+      }
     }
+
     $path = implode('/', $bits);
     $view_id = $this->view->storage->id();
     $display_id = $this->display['id'];
@@ -427,7 +429,7 @@ abstract class PathPluginBase extends DisplayPluginBase implements DisplayRouter
     $options['path'] = [
       'category' => 'page',
       'title' => $this->t('Path'),
-      'value' => Unicode::truncate($path, 24, FALSE, TRUE),
+      'value' => views_ui_truncate($path, 24),
     ];
   }
 
@@ -493,7 +495,7 @@ abstract class PathPluginBase extends DisplayPluginBase implements DisplayRouter
    */
   protected function validatePath($path) {
     $errors = [];
-    if (str_starts_with($path, '%')) {
+    if (strpos($path, '%') === 0) {
       $errors[] = $this->t('"%" may not be used for the first segment of a path.');
     }
 
@@ -518,7 +520,7 @@ abstract class PathPluginBase extends DisplayPluginBase implements DisplayRouter
         && is_numeric($matches[1]));
     });
     if (!empty($numeric_placeholders)) {
-      $errors[] = $this->t("Numeric placeholders may not be used. Use plain placeholders (%).");
+      $errors[] = $this->t("Numeric placeholders may not be used. Please use plain placeholders (%).");
     }
     return $errors;
   }

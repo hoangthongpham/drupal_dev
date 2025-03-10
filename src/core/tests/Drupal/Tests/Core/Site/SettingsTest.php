@@ -1,11 +1,7 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\Core\Site;
 
-use Composer\Autoload\ClassLoader;
-use Drupal\Core\Database\Database;
 use Drupal\Core\Site\Settings;
 use Drupal\Tests\UnitTestCase;
 use org\bovigo\vfs\vfsStream;
@@ -35,8 +31,6 @@ class SettingsTest extends UnitTestCase {
    * @covers ::__construct
    */
   protected function setUp(): void {
-    parent::setUp();
-
     $this->config = [
       'one' => '1',
       'two' => '2',
@@ -48,7 +42,7 @@ class SettingsTest extends UnitTestCase {
   /**
    * @covers ::get
    */
-  public function testGet(): void {
+  public function testGet() {
     // Test stored settings.
     $this->assertEquals($this->config['one'], Settings::get('one'), 'The correct setting was not returned.');
     $this->assertEquals($this->config['two'], Settings::get('two'), 'The correct setting was not returned.');
@@ -61,14 +55,14 @@ class SettingsTest extends UnitTestCase {
   /**
    * @covers ::getAll
    */
-  public function testGetAll(): void {
+  public function testGetAll() {
     $this->assertEquals($this->config, Settings::getAll());
   }
 
   /**
    * @covers ::getInstance
    */
-  public function testGetInstance(): void {
+  public function testGetInstance() {
     $singleton = $this->settings->getInstance();
     $this->assertEquals($singleton, $this->settings);
   }
@@ -78,7 +72,7 @@ class SettingsTest extends UnitTestCase {
    *
    * @covers ::getHashSalt
    */
-  public function testGetHashSalt(): void {
+  public function testGetHashSalt() {
     $this->assertSame($this->config['hash_salt'], $this->settings->getHashSalt());
   }
 
@@ -89,7 +83,7 @@ class SettingsTest extends UnitTestCase {
    *
    * @dataProvider providerTestGetHashSaltEmpty
    */
-  public function testGetHashSaltEmpty(array $config): void {
+  public function testGetHashSaltEmpty(array $config) {
     // Re-create settings with no 'hash_salt' key.
     $settings = new Settings($config);
     $this->expectException(\RuntimeException::class);
@@ -101,7 +95,7 @@ class SettingsTest extends UnitTestCase {
    *
    * @return array
    */
-  public static function providerTestGetHashSaltEmpty() {
+  public function providerTestGetHashSaltEmpty() {
     return [
       [[]],
       [['hash_salt' => '']],
@@ -114,7 +108,7 @@ class SettingsTest extends UnitTestCase {
    *
    * @covers ::__sleep
    */
-  public function testSerialize(): void {
+  public function testSerialize() {
     $this->expectException(\LogicException::class);
     serialize(new Settings([]));
   }
@@ -124,7 +118,7 @@ class SettingsTest extends UnitTestCase {
    *
    * @covers ::getApcuPrefix
    */
-  public function testGetApcuPrefix(): void {
+  public function testGetApcuPrefix() {
     $settings = new Settings([
       'hash_salt' => 123,
       'apcu_ensure_unique_prefix' => TRUE,
@@ -143,12 +137,13 @@ class SettingsTest extends UnitTestCase {
    *
    * @covers ::getInstance
    */
-  public function testGetInstanceReflection(): void {
+  public function testGetInstanceReflection() {
     $settings = new Settings([]);
 
     $class = new \ReflectionClass(Settings::class);
     $instance_property = $class->getProperty("instance");
-    $instance_property->setValue(NULL, NULL);
+    $instance_property->setAccessible(TRUE);
+    $instance_property->setValue(NULL);
 
     $this->expectException(\BadMethodCallException::class);
     $settings->getInstance();
@@ -201,9 +196,10 @@ class SettingsTest extends UnitTestCase {
 
     $class = new \ReflectionClass(Settings::class);
     $instance_property = $class->getProperty('deprecatedSettings');
+    $instance_property->setAccessible(TRUE);
     $deprecated_settings = $instance_property->getValue();
     $deprecated_settings['deprecated_legacy'] = $deprecated_setting;
-    $instance_property->setValue(NULL, $deprecated_settings);
+    $instance_property->setValue($deprecated_settings);
 
     if ($expect_deprecation_message) {
       $this->expectDeprecation($deprecated_setting['message']);
@@ -220,7 +216,7 @@ class SettingsTest extends UnitTestCase {
    *
    * @see self::providerTestRealDeprecatedSettings()
    */
-  public static function providerTestFakeDeprecatedSettings(): array {
+  public function providerTestFakeDeprecatedSettings(): array {
 
     $only_legacy = [
       'deprecated_legacy' => 'old',
@@ -306,90 +302,24 @@ class SettingsTest extends UnitTestCase {
   /**
    * Provides data for testRealDeprecatedSettings().
    */
-  public static function providerTestRealDeprecatedSettings(): array {
+  public function providerTestRealDeprecatedSettings(): array {
     return [
       [
-        'block_interest_cohort',
-        'The "block_interest_cohort" setting is deprecated in drupal:9.5.0. This setting should be removed from the settings file, since its usage has been removed. See https://www.drupal.org/node/3320787.',
+        'sanitize_input_whitelist',
+        'The "sanitize_input_whitelist" setting is deprecated in drupal:9.1.0 and will be removed in drupal:10.0.0. Use Drupal\Core\Security\RequestSanitizer::SANITIZE_INPUT_SAFE_KEYS instead. See https://www.drupal.org/node/3163148.',
       ],
-    ];
-  }
-
-  /**
-   * Tests initialization performed for the $databases variable.
-   *
-   * @dataProvider providerTestDatabaseInfoInitialization
-   */
-  public function testDatabaseInfoInitialization(string $driver, ?string $namespace, ?string $autoload, string $expected_namespace, ?string $expected_autoload): void {
-    $databases['mock'][$driver] = [
-      'driver' => $driver,
-      'prefix' => '',
-    ];
-    if (!is_null($namespace)) {
-      $databases['mock'][$driver]['namespace'] = $namespace;
-    }
-    if (!is_null($autoload)) {
-      $databases['mock'][$driver]['autoload'] = $autoload;
-    }
-    $settings_file_content = "<?php\n\$databases = " . var_export($databases, TRUE) . ";\n";
-
-    $vfs_root = vfsStream::setup('root');
-    $sites_directory = vfsStream::newDirectory('sites')->at($vfs_root);
-    vfsStream::newFile('settings.php')
-      ->at($sites_directory)
-      ->setContent($settings_file_content);
-
-    $class_loader = $this->createMock(ClassLoader::class);
-    if (!empty($expected_autoload)) {
-      $class_loader->expects($this->once())
-        ->method('addPsr4')
-        ->with($expected_namespace . '\\', vfsStream::url('root') . '/' . $expected_autoload);
-    }
-    else {
-      $class_loader->expects($this->never())
-        ->method('addPsr4');
-    }
-
-    Settings::initialize(vfsStream::url('root'), 'sites', $class_loader);
-
-    $expected = [
-      $driver => [
-        'driver' => $driver,
-        'namespace' => $expected_namespace,
-        'prefix' => '',
+      [
+        'twig_sandbox_whitelisted_classes',
+        'The "twig_sandbox_whitelisted_classes" setting is deprecated in drupal:9.1.0 and is removed from drupal:10.0.0. Use "twig_sandbox_allowed_classes" instead. See https://www.drupal.org/node/3162897.',
       ],
-    ];
-    if (!is_null($expected_autoload)) {
-      $expected[$driver]['autoload'] = $expected_autoload;
-    }
-    $this->assertEquals($expected, Database::getConnectionInfo('mock'));
-  }
-
-  /**
-   * Provides data for testDatabaseInfoInitialization().
-   */
-  public static function providerTestDatabaseInfoInitialization(): array {
-    return [
-      ['mysql', NULL, NULL, 'Drupal\\mysql\\Driver\\Database\\mysql', 'core/modules/mysql/src/Driver/Database/mysql/'],
-      ['mysql', '', NULL, 'Drupal\\mysql\\Driver\\Database\\mysql', 'core/modules/mysql/src/Driver/Database/mysql/'],
-      ['mysql', 'Drupal\\Core\\Database\\Driver\\mysql', NULL, 'Drupal\\mysql\\Driver\\Database\\mysql', 'core/modules/mysql/src/Driver/Database/mysql/'],
-      ['mysql', 'Drupal\\mysql\\Driver\\Database\\mysql', NULL, 'Drupal\\mysql\\Driver\\Database\\mysql', 'core/modules/mysql/src/Driver/Database/mysql/'],
-      ['mysql', 'Drupal\\Driver\\Database\\mysql', NULL, 'Drupal\\Driver\\Database\\mysql', NULL],
-      ['mysql', 'Drupal\\mysql\\Driver\\Database\\mysql', 'modules/custom/mysql/src/Driver/Database/mysql/', 'Drupal\\mysql\\Driver\\Database\\mysql', 'modules/custom/mysql/src/Driver/Database/mysql/'],
-
-      ['pgsql', NULL, NULL, 'Drupal\\pgsql\\Driver\\Database\\pgsql', 'core/modules/pgsql/src/Driver/Database/pgsql/'],
-      ['pgsql', '', NULL, 'Drupal\\pgsql\\Driver\\Database\\pgsql', 'core/modules/pgsql/src/Driver/Database/pgsql/'],
-      ['pgsql', 'Drupal\\Core\\Database\\Driver\\pgsql', NULL, 'Drupal\\pgsql\\Driver\\Database\\pgsql', 'core/modules/pgsql/src/Driver/Database/pgsql/'],
-      ['pgsql', 'Drupal\\pgsql\\Driver\\Database\\pgsql', NULL, 'Drupal\\pgsql\\Driver\\Database\\pgsql', 'core/modules/pgsql/src/Driver/Database/pgsql/'],
-      ['pgsql', 'Drupal\\Driver\\Database\\pgsql', NULL, 'Drupal\\Driver\\Database\\pgsql', NULL],
-      ['pgsql', 'Drupal\\pgsql\\Driver\\Database\\pgsql', 'modules/custom/pgsql/src/Driver/Database/pgsql/', 'Drupal\\pgsql\\Driver\\Database\\pgsql', 'modules/custom/pgsql/src/Driver/Database/pgsql/'],
-
-      ['sqlite', NULL, NULL, 'Drupal\\sqlite\\Driver\\Database\\sqlite', 'core/modules/sqlite/src/Driver/Database/sqlite/'],
-      ['sqlite', '', NULL, 'Drupal\\sqlite\\Driver\\Database\\sqlite', 'core/modules/sqlite/src/Driver/Database/sqlite/'],
-      ['sqlite', 'Drupal\\Core\\Database\\Driver\\sqlite', NULL, 'Drupal\\sqlite\\Driver\\Database\\sqlite', 'core/modules/sqlite/src/Driver/Database/sqlite/'],
-      ['sqlite', 'Drupal\\sqlite\\Driver\\Database\\sqlite', NULL, 'Drupal\\sqlite\\Driver\\Database\\sqlite', 'core/modules/sqlite/src/Driver/Database/sqlite/'],
-      ['sqlite', 'Drupal\\Driver\\Database\\sqlite', NULL, 'Drupal\\Driver\\Database\\sqlite', NULL],
-      ['sqlite', 'Drupal\\sqlite\\Driver\\Database\\sqlite', 'modules/custom/sqlite/src/Driver/Database/sqlite/', 'Drupal\\sqlite\\Driver\\Database\\sqlite', 'modules/custom/sqlite/src/Driver/Database/sqlite/'],
+      [
+        'twig_sandbox_whitelisted_methods',
+        'The "twig_sandbox_whitelisted_methods" setting is deprecated in drupal:9.1.0 and is removed from drupal:10.0.0. Use "twig_sandbox_allowed_methods" instead. See https://www.drupal.org/node/3162897.',
+      ],
+      [
+        'twig_sandbox_whitelisted_prefixes',
+        'The "twig_sandbox_whitelisted_prefixes" setting is deprecated in drupal:9.1.0 and is removed from drupal:10.0.0. Use "twig_sandbox_allowed_prefixes" instead. See https://www.drupal.org/node/3162897.',
+      ],
     ];
   }
 

@@ -110,7 +110,7 @@ class CurrencyRepositoryTest extends CommerceKernelTestBase {
    * @return array
    *   The test data.
    */
-  public static function fractionDigitsData() {
+  public function fractionDigitsData() {
     return [
       ['BHD', 3],
       ['UGX', 0],

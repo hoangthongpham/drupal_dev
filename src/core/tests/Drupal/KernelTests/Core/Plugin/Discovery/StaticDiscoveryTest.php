@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\KernelTests\Core\Plugin\Discovery;
 
 use Drupal\Component\Plugin\Discovery\StaticDiscovery;
@@ -13,9 +11,6 @@ use Drupal\Component\Plugin\Discovery\StaticDiscovery;
  */
 class StaticDiscoveryTest extends DiscoveryTestBase {
 
-  /**
-   * {@inheritdoc}
-   */
   protected function setUp(): void {
     parent::setUp();
     $this->expectedDefinitions = [

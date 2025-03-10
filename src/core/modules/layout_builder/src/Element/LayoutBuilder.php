@@ -5,9 +5,8 @@ namespace Drupal\layout_builder\Element;
 use Drupal\Core\Ajax\AjaxHelperTrait;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\PluginFormInterface;
-use Drupal\Core\Render\Attribute\RenderElement;
 use Drupal\Core\Render\Element;
-use Drupal\Core\Render\Element\RenderElementBase;
+use Drupal\Core\Render\Element\RenderElement;
 use Drupal\Core\Url;
 use Drupal\layout_builder\Context\LayoutBuilderContextTrait;
 use Drupal\layout_builder\Event\PrepareLayoutEvent;
@@ -20,11 +19,12 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 /**
  * Defines a render element for building the Layout Builder UI.
  *
+ * @RenderElement("layout_builder")
+ *
  * @internal
  *   Plugin classes are internal.
  */
-#[RenderElement('layout_builder')]
-class LayoutBuilder extends RenderElementBase implements ContainerFactoryPluginInterface {
+class LayoutBuilder extends RenderElement implements ContainerFactoryPluginInterface {
 
   use AjaxHelperTrait;
   use LayoutBuilderContextTrait;
@@ -48,10 +48,22 @@ class LayoutBuilder extends RenderElementBase implements ContainerFactoryPluginI
    *   The plugin implementation definition.
    * @param \Symfony\Contracts\EventDispatcher\EventDispatcherInterface $event_dispatcher
    *   The event dispatcher service.
+   * @param \Drupal\Core\Messenger\MessengerInterface|null $messenger
+   *   The messenger service. This is no longer used and will be removed in
+   *   drupal:10.0.0.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, EventDispatcherInterface $event_dispatcher) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, $event_dispatcher, $messenger = NULL) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
+
+    if (!($event_dispatcher instanceof EventDispatcherInterface)) {
+      @trigger_error('The event_dispatcher service should be passed to LayoutBuilder::__construct() instead of the layout_builder.tempstore_repository service since 9.1.0. This will be required in Drupal 10.0.0. See https://www.drupal.org/node/3152690', E_USER_DEPRECATED);
+      $event_dispatcher = \Drupal::service('event_dispatcher');
+    }
     $this->eventDispatcher = $event_dispatcher;
+
+    if ($messenger) {
+      @trigger_error('Calling LayoutBuilder::__construct() with the $messenger argument is deprecated in drupal:9.1.0 and will be removed in drupal:10.0.0. See https://www.drupal.org/node/3152690', E_USER_DEPRECATED);
+    }
   }
 
   /**

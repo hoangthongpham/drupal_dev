@@ -2,10 +2,9 @@
 
 namespace Drupal\commerce_product\Element;
 
-use Drupal\Component\Utility\Html as HtmlUtility;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Render\Attribute\FormElement;
 use Drupal\Core\Render\Element\Radios;
+use Drupal\Component\Utility\Html as HtmlUtility;
 
 /**
  * Provides a form input element for rendering attributes as radio buttons.
@@ -21,10 +20,9 @@ use Drupal\Core\Render\Element\Radios;
  *   '#options' => [0 => 'Red', 1 => 'Blue'],
  * ];
  * @endcode
+ *
+ * @FormElement("commerce_product_rendered_attribute")
  */
-#[FormElement(
-  id: "commerce_product_rendered_attribute",
-)]
 class CommerceProductRenderedAttribute extends Radios {
 
   /**

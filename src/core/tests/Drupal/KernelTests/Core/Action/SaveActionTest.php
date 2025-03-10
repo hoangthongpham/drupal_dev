@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\KernelTests\Core\Action;
 
 use Drupal\Core\Action\Plugin\Action\Derivative\EntityChangedActionDeriver;
@@ -30,14 +28,14 @@ class SaveActionTest extends KernelTestBase {
   /**
    * @covers \Drupal\Core\Action\Plugin\Action\Derivative\EntityChangedActionDeriver::getDerivativeDefinitions
    */
-  public function testGetDerivativeDefinitions(): void {
+  public function testGetDerivativeDefinitions() {
     $deriver = new EntityChangedActionDeriver(\Drupal::entityTypeManager(), \Drupal::translation());
     $definitions = $deriver->getDerivativeDefinitions([
       'action_label' => 'Save',
     ]);
     $this->assertEquals([
       'type' => 'entity_test_mul_changed',
-      'label' => 'Save test entity - multiple changed and data table',
+      'label' => 'Save test entity - data table',
       'action_label' => 'Save',
     ], $definitions['entity_test_mul_changed']);
   }
@@ -45,7 +43,7 @@ class SaveActionTest extends KernelTestBase {
   /**
    * @covers \Drupal\Core\Action\Plugin\Action\SaveAction::execute
    */
-  public function testSaveAction(): void {
+  public function testSaveAction() {
     $entity = EntityTestMulChanged::create(['name' => 'test']);
     $entity->save();
     $saved_time = $entity->getChangedTime();

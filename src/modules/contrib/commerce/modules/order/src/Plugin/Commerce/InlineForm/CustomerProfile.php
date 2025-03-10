@@ -2,17 +2,15 @@
 
 namespace Drupal\commerce_order\Plugin\Commerce\InlineForm;
 
+use Drupal\commerce\CurrentCountryInterface;
+use Drupal\commerce\EntityHelper;
+use Drupal\commerce\Plugin\Commerce\InlineForm\EntityInlineFormBase;
+use Drupal\commerce_order\AddressBookInterface;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\commerce\Attribute\CommerceInlineForm;
-use Drupal\commerce\CurrentCountryInterface;
-use Drupal\commerce\EntityHelper;
-use Drupal\commerce\Plugin\Commerce\InlineForm\EntityInlineFormBase;
-use Drupal\commerce_order\AddressBookInterface;
 use Drupal\profile\Entity\ProfileInterface;
 use Drupal\user\Entity\User;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -25,11 +23,12 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * Supports two modes, based on the profile type setting:
  * - Single: The customer can have only a single profile of this type.
  * - Multiple: The customer can have multiple profiles of this type.
+ *
+ * @CommerceInlineForm(
+ *   id = "customer_profile",
+ *   label = @Translation("Customer profile"),
+ * )
  */
-#[CommerceInlineForm(
-  id: "customer_profile",
-  label: new TranslatableMarkup("Customer profile"),
-)]
 class CustomerProfile extends EntityInlineFormBase {
 
   /**
@@ -156,8 +155,7 @@ class CustomerProfile extends EntityInlineFormBase {
   public function buildInlineForm(array $inline_form, FormStateInterface $form_state) {
     $inline_form = parent::buildInlineForm($inline_form, $form_state);
     // Allows a widget to vary when used for billing versus shipping purposes.
-    // Available in hook_field_widget_single_element_form_alter()
-    // via $context['form'].
+    // Available in hook_field_widget_form_alter() via $context['form'].
     $inline_form['#profile_scope'] = $this->configuration['profile_scope'];
 
     assert($this->entity instanceof ProfileInterface);
@@ -166,7 +164,7 @@ class CustomerProfile extends EntityInlineFormBase {
     $customer = $this->loadUser($this->configuration['address_book_uid']);
     $available_countries = $this->configuration['available_countries'];
     $address_book_profile = NULL;
-    if (!$customer->isAnonymous() && $allows_multiple) {
+    if ($customer->isAuthenticated() && $allows_multiple) {
       // Multiple address book profiles are allowed, prepare the dropdown.
       $address_book_profiles = $this->addressBook->loadAll($customer, $profile_type_id, $available_countries);
       if ($address_book_profiles) {
@@ -211,7 +209,7 @@ class CustomerProfile extends EntityInlineFormBase {
         '#weight' => -999,
       ];
     }
-    elseif (!$customer->isAnonymous() && $this->entity->isNew()) {
+    elseif ($customer->isAuthenticated() && $this->entity->isNew()) {
       // A single address book profile is allowed.
       // The customer profile form is being rendered for the first time.
       // Use the default profile to pre-fill the profile form.
@@ -295,7 +293,7 @@ class CustomerProfile extends EntityInlineFormBase {
         '#weight' => 999,
         // Anonymous customers don't have an address book until they register
         // or log in, so the checkbox is not shown to them, to avoid confusion.
-        '#access' => !$customer->isAnonymous() && $visible,
+        '#access' => $customer->isAuthenticated() && $visible,
       ];
     }
 

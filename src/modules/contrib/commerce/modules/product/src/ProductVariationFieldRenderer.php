@@ -2,11 +2,11 @@
 
 namespace Drupal\commerce_product;
 
+use Drupal\commerce_product\Entity\ProductVariationInterface;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\ReplaceCommand;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Render\Element;
-use Drupal\commerce_product\Entity\ProductVariationInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 
 class ProductVariationFieldRenderer implements ProductVariationFieldRendererInterface {
 
@@ -112,11 +112,10 @@ class ProductVariationFieldRenderer implements ProductVariationFieldRendererInte
       if (isset($rendered_field['#type']) && $rendered_field['#type'] == 'view') {
         return $rendered_field;
       }
-      // Ensure that a <span> is rendered even if the field is empty, to allow
+      // Ensure that a <div> is rendered even if the field is empty, to allow
       // field replacement to work when the variation changes.
       if (!Element::children($rendered_field)) {
-        $rendered_field['#type'] = 'html_tag';
-        $rendered_field['#tag'] = 'span';
+        $rendered_field['#type'] = 'container';
       }
     }
 

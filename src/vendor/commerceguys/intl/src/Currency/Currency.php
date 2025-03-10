@@ -12,42 +12,42 @@ final class Currency
      *
      * @var string
      */
-    protected string $currencyCode;
+    protected $currencyCode;
 
     /**
      * The currency name.
      *
      * @var string
      */
-    protected string $name;
+    protected $name;
 
     /**
      * The numeric currency code.
      *
      * @var string
      */
-    protected string $numericCode;
+    protected $numericCode;
 
     /**
      * The currency symbol.
      *
      * @var string
      */
-    protected string $symbol;
+    protected $symbol;
 
     /**
      * The number of fraction digits.
      *
      * @var int
      */
-    protected int $fractionDigits = 2;
+    protected $fractionDigits = 2;
 
     /**
      * The locale (i.e. "en_US").
      *
      * @var string
      */
-    protected string $locale;
+    protected $locale;
 
     /**
      * Creates a new Currency instance.
@@ -80,7 +80,7 @@ final class Currency
      *
      * @return string
      */
-    public function __toString(): string
+    public function __toString()
     {
         return $this->currencyCode;
     }
@@ -90,7 +90,7 @@ final class Currency
      *
      * @return string
      */
-    public function getCurrencyCode(): string
+    public function getCurrencyCode()
     {
         return $this->currencyCode;
     }
@@ -102,7 +102,7 @@ final class Currency
      *
      * @return string
      */
-    public function getName(): string
+    public function getName()
     {
         return $this->name;
     }
@@ -115,7 +115,7 @@ final class Currency
      *
      * @return string
      */
-    public function getNumericCode(): string
+    public function getNumericCode()
     {
         return $this->numericCode;
     }
@@ -127,7 +127,7 @@ final class Currency
      *
      * @return string
      */
-    public function getSymbol(): string
+    public function getSymbol()
     {
         return $this->symbol;
     }
@@ -140,7 +140,7 @@ final class Currency
      *
      * @return int
      */
-    public function getFractionDigits(): int
+    public function getFractionDigits()
     {
         return $this->fractionDigits;
     }
@@ -152,7 +152,7 @@ final class Currency
      *
      * @return string
      */
-    public function getLocale(): string
+    public function getLocale()
     {
         return $this->locale;
     }

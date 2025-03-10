@@ -26,7 +26,7 @@ interface SelectInterface extends ConditionInterface, AlterableInterface, Extend
    * $fields =& $query->getFields();
    * @endcode
    *
-   * @return array
+   * @return
    *   A reference to the fields array structure.
    */
   public function &getFields();
@@ -44,7 +44,7 @@ interface SelectInterface extends ConditionInterface, AlterableInterface, Extend
    * $fields =& $query->getExpressions();
    * @endcode
    *
-   * @return array
+   * @return
    *   A reference to the expression array structure.
    */
   public function &getExpressions();
@@ -62,7 +62,7 @@ interface SelectInterface extends ConditionInterface, AlterableInterface, Extend
    * $fields =& $query->getOrderBy();
    * @endcode
    *
-   * @return array
+   * @return
    *   A reference to the expression array structure.
    */
   public function &getOrderBy();
@@ -80,7 +80,7 @@ interface SelectInterface extends ConditionInterface, AlterableInterface, Extend
    * $fields =& $query->getGroupBy();
    * @endcode
    *
-   * @return array
+   * @return
    *   A reference to the group-by array structure.
    */
   public function &getGroupBy();
@@ -98,15 +98,14 @@ interface SelectInterface extends ConditionInterface, AlterableInterface, Extend
    * $tables =& $query->getTables();
    * @endcode
    *
-   * @return array
+   * @return
    *   A reference to the tables array structure.
    */
   public function &getTables();
 
   /**
-   * Returns a reference to the union queries for this query.
-   *
-   * This includes queries for UNION, UNION ALL, and UNION DISTINCT.
+   * Returns a reference to the union queries for this query. This include
+   * queries for UNION, UNION ALL, and UNION DISTINCT.
    *
    * Because this method returns by reference, alter hooks may edit the tables
    * array directly to make their changes. If just adding union queries,
@@ -118,7 +117,7 @@ interface SelectInterface extends ConditionInterface, AlterableInterface, Extend
    * $fields =& $query->getUnion();
    * @endcode
    *
-   * @return array
+   * @return
    *   A reference to the union query array structure.
    */
   public function &getUnion();
@@ -146,7 +145,7 @@ interface SelectInterface extends ConditionInterface, AlterableInterface, Extend
    * @param string $string
    *   An unsanitized field name.
    *
-   * @return string
+   * @return
    *   The sanitized field name string.
    */
   public function escapeField($string);
@@ -158,10 +157,10 @@ interface SelectInterface extends ConditionInterface, AlterableInterface, Extend
    *   When collecting the arguments of a subquery, the main placeholder
    *   object should be passed as this parameter.
    *
-   * @return array
+   * @return
    *   An associative array of all placeholder arguments for this query.
    */
-  public function getArguments(?PlaceholderInterface $queryPlaceholder = NULL);
+  public function getArguments(PlaceholderInterface $queryPlaceholder = NULL);
 
   /* Query building operations */
 
@@ -191,7 +190,7 @@ interface SelectInterface extends ConditionInterface, AlterableInterface, Extend
    *   checked for uniqueness, so the requested alias may not be the alias
    *   that is assigned in all cases.
    *
-   * @return string
+   * @return
    *   The unique alias that was assigned for this field.
    */
   public function addField($table_alias, $field, $alias = NULL);
@@ -237,7 +236,7 @@ interface SelectInterface extends ConditionInterface, AlterableInterface, Extend
    * @param $arguments
    *   Any placeholder arguments needed for this expression.
    *
-   * @return string
+   * @return
    *   The unique alias that was assigned for this expression.
    */
   public function addExpression($expression, $alias = NULL, $arguments = []);
@@ -266,7 +265,7 @@ interface SelectInterface extends ConditionInterface, AlterableInterface, Extend
    * @param $arguments
    *   An array of arguments to replace into the $condition of this join.
    *
-   * @return string
+   * @return
    *   The unique alias that was assigned for this table.
    */
   public function join($table, $alias = NULL, $condition = NULL, $arguments = []);
@@ -293,7 +292,7 @@ interface SelectInterface extends ConditionInterface, AlterableInterface, Extend
    * @param $arguments
    *   An array of arguments to replace into the $condition of this join.
    *
-   * @return string
+   * @return
    *   The unique alias that was assigned for this table.
    */
   public function innerJoin($table, $alias = NULL, $condition = NULL, $arguments = []);
@@ -320,7 +319,7 @@ interface SelectInterface extends ConditionInterface, AlterableInterface, Extend
    * @param $arguments
    *   An array of arguments to replace into the $condition of this join.
    *
-   * @return string
+   * @return
    *   The unique alias that was assigned for this table.
    */
   public function leftJoin($table, $alias = NULL, $condition = NULL, $arguments = []);
@@ -328,7 +327,7 @@ interface SelectInterface extends ConditionInterface, AlterableInterface, Extend
   /**
    * Join against another table in the database.
    *
-   * This method does the "hard" work of queueing up a table to be joined against.
+   * This method does the "hard" work of queuing up a table to be joined against.
    * In some cases, that may include dipping into the Schema API to find the necessary
    * fields on which to join.
    *
@@ -354,7 +353,7 @@ interface SelectInterface extends ConditionInterface, AlterableInterface, Extend
    * @param $arguments
    *   An array of arguments to replace into the $condition of this join.
    *
-   * @return string
+   * @return
    *   The unique alias that was assigned for this table.
    */
   public function addJoin($type, $table, $alias = NULL, $condition = NULL, $arguments = []);
@@ -479,7 +478,7 @@ interface SelectInterface extends ConditionInterface, AlterableInterface, Extend
   /**
    * Indicates if preExecute() has already been called on that object.
    *
-   * @return bool
+   * @return
    *   TRUE is this query has already been prepared, FALSE otherwise.
    */
   public function isPrepared();
@@ -487,10 +486,10 @@ interface SelectInterface extends ConditionInterface, AlterableInterface, Extend
   /**
    * Generic preparation and validation for a SELECT query.
    *
-   * @return bool
+   * @return
    *   TRUE if the validation was successful, FALSE if not.
    */
-  public function preExecute(?SelectInterface $query = NULL);
+  public function preExecute(SelectInterface $query = NULL);
 
   /**
    * Runs the query against the database.

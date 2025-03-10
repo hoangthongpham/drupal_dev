@@ -18,15 +18,21 @@ class TwoFactorVerifyForm extends FormBase
 
   public function buildForm(array $form, FormStateInterface $form_state)
   {
-    $form['otp_code'] = [
+    if (!isset($_SESSION['tfa_user_id'])) {
+      \Drupal::messenger()->addError(t('Session expired. Please login again.'));
+      $form_state->setRedirect('custom_auth.login_form');
+      return [];
+    }
+
+    $form['otp'] = [
       '#type' => 'textfield',
-      '#title' => 'Enter OTP Code',
+      '#title' => t('Enter OTP'),
       '#required' => TRUE,
     ];
 
     $form['submit'] = [
       '#type' => 'submit',
-      '#value' => 'Verify',
+      '#value' => t('Verify OTP'),
     ];
 
     return $form;
@@ -34,18 +40,25 @@ class TwoFactorVerifyForm extends FormBase
 
   public function submitForm(array &$form, FormStateInterface $form_state)
   {
-    $entered_otp = $form_state->getValue('otp_code');
-    $user = \Drupal::currentUser();
-    $user_entity = User::load($user->id());
+    $otp = $form_state->getValue('otp');
+    $user_id = $_SESSION['tfa_user_id'];
+    $user = User::load($user_id);
 
-    $secret = $user_entity->get('field_2fa_secret')->value;
-    $totp = TOTP::create($secret);
+    // Lấy secret key từ user (lưu trong field_tfa_secret)
+    $secret_key = $user->get('field_tfa_secret')->value;
+    $totp = TOTP::create($secret_key);
 
-    if ($totp->verify($entered_otp)) {
-      \Drupal::messenger()->addMessage('2FA verification successful.');
-      return new RedirectResponse('/');
+    if ($totp->verify($otp)) {
+      // Xác thực thành công, login user
+      user_login_finalize($user);
+      \Drupal::messenger()->addStatus(t('Login successful!'));
+
+      // Xóa session để tránh lạm dụng
+      unset($_SESSION['tfa_user_id']);
+
+      $form_state->setRedirect('<front>');
     } else {
-      \Drupal::messenger()->addError('Invalid OTP code.');
+      \Drupal::messenger()->addError(t('Invalid OTP. Please try again.'));
     }
   }
 }

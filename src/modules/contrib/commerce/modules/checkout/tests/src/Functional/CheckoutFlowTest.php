@@ -17,7 +17,6 @@ class CheckoutFlowTest extends CommerceBrowserTestBase {
    */
   protected static $modules = [
     'commerce_checkout',
-    'commerce_product',
   ];
 
   /**

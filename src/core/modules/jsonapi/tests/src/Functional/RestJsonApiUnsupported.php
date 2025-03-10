@@ -1,10 +1,7 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\jsonapi\Functional;
 
-use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Url;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
@@ -64,10 +61,12 @@ class RestJsonApiUnsupported extends ResourceTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp(): void {
+  public function setUp(): void {
     parent::setUp();
 
-    $this->config('system.logging')->set('error_level', ERROR_REPORTING_HIDE)->save();
+    // Set up a HTTP client that accepts relative URLs.
+    $this->httpClient = $this->container->get('http_client_factory')
+      ->fromOptions(['base_uri' => $this->baseUrl]);
 
     // Create a "Camelids" node type.
     NodeType::create([
@@ -88,7 +87,7 @@ class RestJsonApiUnsupported extends ResourceTestBase {
    *
    * @see \Drupal\jsonapi\EventSubscriber\JsonApiRequestValidator::validateQueryParams()
    */
-  public function testApiJsonNotSupportedInRest(): void {
+  public function testApiJsonNotSupportedInRest() {
     $this->assertSame(['json', 'xml'], $this->container->getParameter('serializer.formats'));
 
     $this->provisionResource(['api_json'], []);
@@ -103,8 +102,8 @@ class RestJsonApiUnsupported extends ResourceTestBase {
       400,
       FALSE,
       $response,
-      ['4xx-response', 'config:system.logging', 'config:user.role.anonymous', 'http_response', 'node:1'],
-      ['url.query_args', 'url.site', 'user.permissions'],
+      ['4xx-response', 'config:user.role.anonymous', 'http_response', 'node:1'],
+      ['url.query_args:_format', 'url.site', 'user.permissions'],
       'MISS',
       'MISS'
     );
@@ -118,15 +117,11 @@ class RestJsonApiUnsupported extends ResourceTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function getExpectedUnauthorizedAccessMessage($method): string {
-    return '';
-  }
+  protected function getExpectedUnauthorizedAccessMessage($method) {}
 
   /**
    * {@inheritdoc}
    */
-  protected function getExpectedUnauthorizedAccessCacheability() {
-    return (new CacheableMetadata());
-  }
+  protected function getExpectedUnauthorizedAccessCacheability() {}
 
 }

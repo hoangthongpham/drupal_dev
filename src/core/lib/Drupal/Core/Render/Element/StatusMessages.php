@@ -2,8 +2,6 @@
 
 namespace Drupal\Core\Render\Element;
 
-use Drupal\Core\Render\Attribute\RenderElement;
-
 /**
  * Provides a messages element.
  *
@@ -15,9 +13,10 @@ use Drupal\Core\Render\Attribute\RenderElement;
  *   '#type' => 'status_messages',
  * ];
  * @endcode
+ *
+ * @RenderElement("status_messages")
  */
-#[RenderElement('status_messages')]
-class StatusMessages extends RenderElementBase {
+class StatusMessages extends RenderElement {
 
   /**
    * {@inheritdoc}
@@ -31,7 +30,7 @@ class StatusMessages extends RenderElementBase {
       // of that specific type.
       '#display' => NULL,
       '#pre_render' => [
-        static::class . '::generatePlaceholder',
+        get_class() . '::generatePlaceholder',
       ],
       '#include_fallback' => FALSE,
     ];
@@ -48,7 +47,7 @@ class StatusMessages extends RenderElementBase {
    */
   public static function generatePlaceholder(array $element) {
     $build = [
-      '#lazy_builder' => [static::class . '::renderMessages', [$element['#display']]],
+      '#lazy_builder' => [get_class() . '::renderMessages', [$element['#display']]],
       '#create_placeholder' => TRUE,
     ];
 

@@ -1,10 +1,8 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\migrate\Unit;
 
-use Drupal\sqlite\Driver\Database\sqlite\Connection;
+use Drupal\Core\Database\Driver\sqlite\Connection;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\migrate\Plugin\MigrateIdMapInterface;
 use Drupal\migrate\Plugin\MigrationInterface;
@@ -108,7 +106,7 @@ abstract class MigrateTestCase extends UnitTestCase {
    *   (optional) Options for the database connection. Defaults to an empty
    *   array.
    *
-   * @return \Drupal\sqlite\Driver\Database\sqlite\Connection
+   * @return \Drupal\Core\Database\Driver\sqlite\Connection
    *   The database connection.
    */
   protected function getDatabase(array $database_contents, $connection_options = []) {

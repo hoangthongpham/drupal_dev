@@ -1,6 +1,9 @@
 <?php
 
-declare(strict_types=1);
+/**
+ * @file
+ * Contains \Drupal\Tests\Component\Utility\VariableTest.
+ */
 
 namespace Drupal\Tests\Component\Utility;
 
@@ -18,21 +21,27 @@ use PHPUnit\Framework\TestCase;
 class VariableTest extends TestCase {
 
   /**
+   * A bogus callable for testing ::callableToString().
+   */
+  public static function fake(): void {
+  }
+
+  /**
    * Data provider for testCallableToString().
    *
    * @return array[]
    *   Sets of arguments to pass to the test method.
    */
-  public static function providerCallableToString(): array {
-    $mock = VariableTestMock::class;
+  public function providerCallableToString(): array {
+    $self = static::class;
     return [
       'string' => [
-        "$mock::fake",
-        "$mock::fake",
+        "$self::fake",
+        "$self::fake",
       ],
       'static method as array' => [
-        [$mock, 'fake'],
-        "$mock::fake",
+        [$self, 'fake'],
+        "$self::fake",
       ],
       'closure' => [
         function () {
@@ -41,8 +50,8 @@ class VariableTest extends TestCase {
         '[closure]',
       ],
       'object method' => [
-        [new VariableTestMock(), 'fake'],
-        "$mock::fake",
+        [new static(), 'fake'],
+        "$self::fake",
       ],
       'service method' => [
         'fake_service:method',
@@ -91,7 +100,7 @@ class VariableTest extends TestCase {
    *     - The expected export string.
    *     - The variable to export.
    */
-  public static function providerTestExport() {
+  public function providerTestExport() {
     return [
       // Array.
       [
@@ -153,10 +162,7 @@ class VariableTest extends TestCase {
         new \stdClass(),
       ],
       [
-        // A not-stdClass object. Since PHP 8.2 exported namespace is prefixed,
-        // see https://github.com/php/php-src/pull/8233 for reasons.
-        PHP_VERSION_ID >= 80200 ?
-        "\Drupal\Tests\Component\Utility\StubVariableTestClass::__set_state(array(\n))" :
+        // A not-stdClass object.
         "Drupal\Tests\Component\Utility\StubVariableTestClass::__set_state(array(\n))",
         new StubVariableTestClass(),
       ],
@@ -174,18 +180,8 @@ class VariableTest extends TestCase {
    * @param mixed $variable
    *   The variable to be exported.
    */
-  public function testExport($expected, $variable): void {
+  public function testExport($expected, $variable) {
     $this->assertEquals($expected, Variable::export($variable));
-  }
-
-}
-
-class VariableTestMock {
-
-  /**
-   * A bogus callable for testing ::callableToString().
-   */
-  public static function fake(): void {
   }
 
 }
@@ -193,8 +189,8 @@ class VariableTestMock {
 /**
  * No-op test class for VariableTest::testExport().
  *
- * @see \Drupal\Tests\Component\Utility\VariableTest::testExport()
- * @see \Drupal\Tests\Component\Utility\VariableTest::providerTestExport()
+ * @see Drupal\Tests\Component\Utility\VariableTest::testExport()
+ * @see Drupal\Tests\Component\Utility\VariableTest::providerTestExport()
  */
 class StubVariableTestClass {
 

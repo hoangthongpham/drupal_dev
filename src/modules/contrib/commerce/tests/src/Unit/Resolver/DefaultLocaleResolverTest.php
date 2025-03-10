@@ -2,8 +2,8 @@
 
 namespace Drupal\Tests\commerce\Unit\Resolver;
 
-use Drupal\Tests\UnitTestCase;
 use Drupal\commerce\Resolver\DefaultLocaleResolver;
+use Drupal\Tests\UnitTestCase;
 
 /**
  * @coversDefaultClass \Drupal\commerce\Resolver\DefaultLocaleResolver
@@ -20,21 +20,21 @@ class DefaultLocaleResolverTest extends UnitTestCase {
       ->getMock();
     $language->expects($this->once())
       ->method('getId')
-      ->willReturn('sr');
+      ->will($this->returnValue('sr'));
 
     $language_manager = $this->getMockBuilder('\Drupal\Core\Language\LanguageManagerInterface')
       ->disableOriginalConstructor()
       ->getMock();
     $language_manager->expects($this->once())
       ->method('getConfigOverrideLanguage')
-      ->willReturn($language);
+      ->will($this->returnValue($language));
 
     $country_context = $this->getMockBuilder('\Drupal\commerce\CurrentCountry')
       ->disableOriginalConstructor()
       ->getMock();
     $country_context->expects($this->once())
       ->method('getCountry')
-      ->willReturn('RS');
+      ->will($this->returnValue('RS'));
 
     $resolver = new DefaultLocaleResolver($language_manager, $country_context);
     $this->assertEquals('sr-RS', $resolver->resolve());
@@ -49,14 +49,14 @@ class DefaultLocaleResolverTest extends UnitTestCase {
       ->getMock();
     $language->expects($this->once())
       ->method('getId')
-      ->willReturn('pt-br');
+      ->will($this->returnValue('pt-br'));
 
     $language_manager = $this->getMockBuilder('\Drupal\Core\Language\LanguageManagerInterface')
       ->disableOriginalConstructor()
       ->getMock();
     $language_manager->expects($this->once())
       ->method('getConfigOverrideLanguage')
-      ->willReturn($language);
+      ->will($this->returnValue($language));
 
     $country_context = $this->getMockBuilder('\Drupal\commerce\CurrentCountry')
       ->disableOriginalConstructor()
@@ -75,21 +75,21 @@ class DefaultLocaleResolverTest extends UnitTestCase {
       ->getMock();
     $language->expects($this->once())
       ->method('getId')
-      ->willReturn('sr');
+      ->will($this->returnValue('sr'));
 
     $language_manager = $this->getMockBuilder('\Drupal\Core\Language\LanguageManagerInterface')
       ->disableOriginalConstructor()
       ->getMock();
     $language_manager->expects($this->once())
       ->method('getConfigOverrideLanguage')
-      ->willReturn($language);
+      ->will($this->returnValue($language));
 
     $country_context = $this->getMockBuilder('\Drupal\commerce\CurrentCountry')
       ->disableOriginalConstructor()
       ->getMock();
     $country_context->expects($this->once())
       ->method('getCountry')
-      ->willReturn(NULL);
+      ->will($this->returnValue(NULL));
 
     $resolver = new DefaultLocaleResolver($language_manager, $country_context);
     $this->assertEquals('sr', $resolver->resolve());

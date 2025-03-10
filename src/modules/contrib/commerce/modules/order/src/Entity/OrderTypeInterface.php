@@ -36,8 +36,8 @@ interface OrderTypeInterface extends CommerceBundleEntityInterface {
   /**
    * Gets the order type's number pattern.
    *
-   * @return \Drupal\commerce_number_pattern\Entity\NumberPatternInterface|null
-   *   The number pattern, NULL if not set.
+   * @return \Drupal\commerce_number_pattern\Entity\NumberPatternInterface
+   *   The number pattern.
    */
   public function getNumberPattern();
 
@@ -134,25 +134,5 @@ interface OrderTypeInterface extends CommerceBundleEntityInterface {
    * @return $this
    */
   public function setReceiptBcc($receipt_bcc);
-
-  /**
-   * Gets the receipt subject.
-   *
-   * If provided, this value will be used for the receipt email subject.
-   *
-   * @return string
-   *   The receipt subject.
-   */
-  public function getReceiptSubject(): string;
-
-  /**
-   * Sets the receipt subject.
-   *
-   * @param string $receipt_subject
-   *   The receipt subject.
-   *
-   * @return $this
-   */
-  public function setReceiptSubject(string $receipt_subject);
 
 }

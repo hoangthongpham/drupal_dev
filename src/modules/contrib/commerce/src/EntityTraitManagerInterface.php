@@ -2,8 +2,8 @@
 
 namespace Drupal\commerce;
 
-use Drupal\Component\Plugin\PluginManagerInterface;
 use Drupal\commerce\Plugin\Commerce\EntityTrait\EntityTraitInterface;
+use Drupal\Component\Plugin\PluginManagerInterface;
 
 /**
  * Defines the interface for commerce_entity_trait plugin managers.

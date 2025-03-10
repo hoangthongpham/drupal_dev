@@ -3,11 +3,14 @@
 namespace Drupal\Tests\commerce_product\Functional;
 
 use Drupal\Tests\commerce\Functional\CommerceBrowserTestBase;
+use Drupal\Tests\field\Traits\EntityReferenceTestTrait;
 
 /**
  * Defines base class for shortcut test cases.
  */
 abstract class ProductBrowserTestBase extends CommerceBrowserTestBase {
+
+  use EntityReferenceTestTrait;
 
   /**
    * Modules to enable.

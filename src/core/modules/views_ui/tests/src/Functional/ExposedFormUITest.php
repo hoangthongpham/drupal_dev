@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\views_ui\Functional;
 
 use Drupal\views\Entity\View;
@@ -46,11 +44,8 @@ class ExposedFormUITest extends UITestBase {
    */
   protected $groupFormUiErrors = [];
 
-  /**
-   * {@inheritdoc}
-   */
-  protected function setUp($import_test_views = TRUE, $modules = ['views_test_config']): void {
-    parent::setUp($import_test_views, $modules);
+  protected function setUp($import_test_views = TRUE): void {
+    parent::setUp($import_test_views);
 
     $this->drupalCreateContentType(['type' => 'article']);
     $this->drupalCreateContentType(['type' => 'page']);
@@ -69,7 +64,7 @@ class ExposedFormUITest extends UITestBase {
   /**
    * Tests the admin interface of exposed filter and sort items.
    */
-  public function testExposedAdminUi(): void {
+  public function testExposedAdminUi() {
     $edit = [];
 
     $this->drupalGet('admin/structure/views/nojs/handler/test_exposed_admin_ui/default/filter/type');
@@ -152,11 +147,8 @@ class ExposedFormUITest extends UITestBase {
     $this->submitForm($edit, 'Apply');
     $this->assertSession()->pageTextContains('Sort field identifier field is required.');
 
-    // Try with an invalid identifiers.
+    // Try with an invalid identifier.
     $edit['options[expose][field_identifier]'] = 'abc&! ###08.';
-    $this->submitForm($edit, 'Apply');
-    $this->assertSession()->pageTextContains('This identifier has illegal characters.');
-    $edit['options[expose][field_identifier]'] = '^abcde';
     $this->submitForm($edit, 'Apply');
     $this->assertSession()->pageTextContains('This identifier has illegal characters.');
 
@@ -186,7 +178,7 @@ class ExposedFormUITest extends UITestBase {
   /**
    * Tests the admin interface of exposed grouped filters.
    */
-  public function testGroupedFilterAdminUi(): void {
+  public function testGroupedFilterAdminUi() {
     $edit = [];
 
     $this->drupalGet('admin/structure/views/nojs/handler/test_exposed_admin_ui/default/filter/type');
@@ -268,7 +260,7 @@ class ExposedFormUITest extends UITestBase {
     $this->assertNoGroupedFilterErrors();
   }
 
-  public function testGroupedFilterAdminUiErrors(): void {
+  public function testGroupedFilterAdminUiErrors() {
     // Select the empty operator without a title specified.
     $this->drupalGet('admin/structure/views/nojs/handler/test_exposed_admin_ui/default/filter/body_value');
     $edit = [];
@@ -316,7 +308,7 @@ class ExposedFormUITest extends UITestBase {
   /**
    * Tests the configuration of grouped exposed filters.
    */
-  public function testExposedGroupedFilter(): void {
+  public function testExposedGroupedFilter() {
     // Click the Expose filter button.
     $this->drupalGet('admin/structure/views/nojs/handler/test_exposed_admin_ui/default/filter/type');
     $this->submitForm([], 'Expose filter');
@@ -332,27 +324,12 @@ class ExposedFormUITest extends UITestBase {
       'options[group_info][group_items][2][value][article]' => 'article',
       'options[group_info][group_items][3][title]' => '3rd',
       'options[group_info][group_items][3][value][page]' => 'page',
-      'options[group_info][default_group]' => '3',
     ];
     // Apply the filter settings.
     $this->submitForm($edit, 'Apply');
     // Check that the view is saved without errors.
     $this->submitForm([], 'Save');
     $this->assertSession()->statusCodeEquals(200);
-    // Check the default filter value.
-    $this->drupalGet('test_exposed_admin_ui');
-    $this->assertSession()->fieldValueEquals('type', '3');
-    // Enable "Allow multiple selections" option and set a default group.
-    $this->drupalGet('admin/structure/views/nojs/handler/test_exposed_admin_ui/default/filter/type');
-    $edit['options[group_info][multiple]'] = 1;
-    $edit['options[group_info][default_group_multiple][1]'] = 1;
-    $this->submitForm($edit, 'Apply');
-    $this->submitForm([], 'Save');
-    // Check the default filter values again.
-    $this->drupalGet('test_exposed_admin_ui');
-    $this->assertSession()->checkboxChecked('type[1]');
-    $this->assertSession()->checkboxNotChecked('type[2]');
-    $this->assertSession()->checkboxNotChecked('type[3]');
 
     // Click the Expose filter button.
     $this->drupalGet('admin/structure/views/nojs/add-handler/test_exposed_admin_ui/default/filter');
@@ -371,33 +348,18 @@ class ExposedFormUITest extends UITestBase {
       'options[group_info][group_items][2][value]' => 1,
       'options[group_info][group_items][3][title]' => 'Unpublished',
       'options[group_info][group_items][3][value]' => 0,
-      'options[group_info][default_group]' => 2,
     ];
     // Apply the filter settings.
     $this->submitForm($edit, 'Apply');
     // Check that the view is saved without errors.
     $this->submitForm([], 'Save');
     $this->assertSession()->statusCodeEquals(200);
+
     $this->drupalGet('admin/structure/views/nojs/handler/test_exposed_admin_ui/default/filter/status');
     // Assert the same settings defined before still are there.
     $this->assertSession()->checkboxChecked('edit-options-group-info-group-items-1-value-all');
     $this->assertSession()->checkboxChecked('edit-options-group-info-group-items-2-value-1');
     $this->assertSession()->checkboxChecked('edit-options-group-info-group-items-3-value-0');
-
-    // Check the default filter value.
-    $this->drupalGet('test_exposed_admin_ui');
-    $this->assertSession()->fieldValueEquals('status', '2');
-    // Enable "Allow multiple selections" option and set a default group.
-    $this->drupalGet('admin/structure/views/nojs/handler/test_exposed_admin_ui/default/filter/status');
-    $edit['options[group_info][multiple]'] = 1;
-    $edit['options[group_info][default_group_multiple][3]'] = 1;
-    $this->submitForm($edit, 'Apply');
-    $this->submitForm([], 'Save');
-    // Check the default filter value again.
-    $this->drupalGet('test_exposed_admin_ui');
-    $this->assertSession()->checkboxNotChecked('status[1]');
-    $this->assertSession()->checkboxNotChecked('status[2]');
-    $this->assertSession()->checkboxChecked('status[3]');
   }
 
 }

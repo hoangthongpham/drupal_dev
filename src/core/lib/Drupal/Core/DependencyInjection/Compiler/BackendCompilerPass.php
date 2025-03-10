@@ -24,7 +24,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
  * @endcode
  *
  * As a developer for alternative storage engines you register a service with
- * $your_backend.$original_service:
+ * $yourbackend.$original_service:
  *
  * @code
  * sqlite.custom_service:
@@ -35,9 +35,6 @@ class BackendCompilerPass implements CompilerPassInterface {
 
   /**
    * {@inheritdoc}
-   *
-   * phpcs:ignore Drupal.Commenting.FunctionComment.VoidReturn
-   * @return void
    */
   public function process(ContainerBuilder $container) {
     $driver_backend = NULL;

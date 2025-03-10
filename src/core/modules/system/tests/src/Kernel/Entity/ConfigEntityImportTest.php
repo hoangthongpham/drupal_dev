@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\system\Kernel\Entity;
 
 use Drupal\Component\Uuid\Php;
@@ -26,6 +24,7 @@ class ConfigEntityImportTest extends KernelTestBase {
    * {@inheritdoc}
    */
   protected static $modules = [
+    'action',
     'block',
     'config_test',
     'filter',
@@ -38,9 +37,9 @@ class ConfigEntityImportTest extends KernelTestBase {
   /**
    * Runs test methods for each module within a single test run.
    */
-  public function testConfigUpdateImport(): void {
-    $this->installConfig(['block', 'filter', 'image']);
-    $this->container->get('theme_installer')->install(['olivero']);
+  public function testConfigUpdateImport() {
+    $this->installConfig(['action', 'block', 'filter', 'image']);
+    $this->container->get('theme_installer')->install(['bartik']);
     $config_storage = $this->container->get('config.storage');
     // Ensure the 'system.site' config.
     $config_storage->write('system.site', ['uuid' => (new Php())->generate()]);
@@ -84,7 +83,7 @@ class ConfigEntityImportTest extends KernelTestBase {
     $block = $this->placeBlock('system_powered_by_block', [
       'id' => 'apple',
       'label' => 'Red Delicious',
-      'theme' => 'olivero',
+      'theme' => 'bartik',
     ]);
 
     $this->checkSinglePluginConfigSync($block, 'settings', 'label', 'Red Delicious');

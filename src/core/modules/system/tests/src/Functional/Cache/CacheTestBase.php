@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\system\Functional\Cache;
 
 use Drupal\Tests\BrowserTestBase;
@@ -25,7 +23,7 @@ abstract class CacheTestBase extends BrowserTestBase {
    * @param $bin
    *   The bin the cache item was stored in.
    *
-   * @return bool
+   * @return
    *   TRUE on pass, FALSE on fail.
    */
   protected function checkCacheExists($cid, $var, $bin = NULL) {

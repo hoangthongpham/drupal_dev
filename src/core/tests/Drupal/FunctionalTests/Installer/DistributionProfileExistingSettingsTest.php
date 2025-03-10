@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\FunctionalTests\Installer;
 
 use Drupal\Component\Serialization\Yaml;
@@ -40,14 +38,14 @@ class DistributionProfileExistingSettingsTest extends InstallerTestBase {
       'distribution' => [
         'name' => 'My Distribution',
         'install' => [
-          'theme' => 'olivero',
+          'theme' => 'bartik',
         ],
       ],
     ];
     // File API functions are not available yet.
-    $path = $this->siteDirectory . '/profiles/my_distribution';
+    $path = $this->siteDirectory . '/profiles/my_distro';
     mkdir($path, 0777, TRUE);
-    file_put_contents("$path/my_distribution.info.yml", Yaml::encode($this->info));
+    file_put_contents("$path/my_distro.info.yml", Yaml::encode($this->info));
 
     // Pre-configure hash salt.
     // Any string is valid, so simply use the class name of this test.
@@ -115,18 +113,18 @@ class DistributionProfileExistingSettingsTest extends InstallerTestBase {
   /**
    * Confirms that the installation succeeded.
    */
-  public function testInstalled(): void {
+  public function testInstalled() {
     $this->assertSession()->addressEquals('user/1');
     $this->assertSession()->statusCodeEquals(200);
     // Confirm that we are logged-in after installation.
     $this->assertSession()->pageTextContains($this->rootUser->getAccountName());
 
     // Confirm that Drupal recognizes this distribution as the current profile.
-    $this->assertEquals('my_distribution', \Drupal::installProfile());
-    $this->assertEquals('my_distribution', $this->config('core.extension')->get('profile'), 'The install profile has been written to core.extension configuration.');
+    $this->assertEquals('my_distro', \Drupal::installProfile());
+    $this->assertEquals('my_distro', $this->config('core.extension')->get('profile'), 'The install profile has been written to core.extension configuration.');
 
     $this->rebuildContainer();
-    $this->assertEquals('my_distribution', \Drupal::installProfile());
+    $this->assertEquals('my_distro', \Drupal::installProfile());
   }
 
 }

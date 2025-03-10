@@ -2,8 +2,8 @@
 
 namespace Drupal\Tests\commerce_log\Unit;
 
-use Drupal\Tests\UnitTestCase;
 use Drupal\commerce_log\Plugin\LogTemplate\LogTemplate;
+use Drupal\Tests\UnitTestCase;
 
 /**
  * @coversDefaultClass \Drupal\commerce_log\Plugin\LogTemplate\LogTemplate

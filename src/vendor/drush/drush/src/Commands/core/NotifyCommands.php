@@ -1,32 +1,31 @@
 <?php
-
-declare(strict_types=1);
-
 namespace Drush\Commands\core;
 
 use Consolidation\AnnotatedCommand\CommandData;
-use Consolidation\AnnotatedCommand\Hooks\HookManager;
 use Consolidation\SiteProcess\Util\Escape;
-use Drush\Attributes as CLI;
 use Drush\Commands\DrushCommands;
 use Drush\Drush;
-use Symfony\Component\Filesystem\Path;
+use Webmozart\PathUtil\Path;
 
-final class NotifyCommands extends DrushCommands
+class NotifyCommands extends DrushCommands
 {
-    #[CLI\Hook(type: HookManager::OPTION_HOOK, target: '*')]
-    #[CLI\Option(name: 'notify', description: "Notify upon command completion. If set to a number, commands that finish in fewer seconds won't notify.")]
-    public function optionsetNotify(): void
+    /**
+     * @hook option *
+     * @option notify Notify upon command completion. If set to a number, commands that finish in fewer seconds won't notify.
+     */
+    public function optionsetNotify()
     {
     }
 
-    #[CLI\Hook(type: HookManager::PRE_COMMAND_HOOK, target: '*')]
-    public function registerShutdown(CommandData $commandData): void
+    /**
+     * @hook pre-command *
+     */
+    public function registerShutdown(CommandData $commandData)
     {
         register_shutdown_function([$this, 'shutdown'], $commandData);
     }
 
-    public function shutdown(CommandData $commandData): void
+    public function shutdown(CommandData $commandData)
     {
 
         $annotationData = $commandData->annotationData();
@@ -51,7 +50,7 @@ final class NotifyCommands extends DrushCommands
      * @param string $msg
      *   Message to send via notification.
      */
-    public static function shutdownSend(string $msg, CommandData $commandData): void
+    public static function shutdownSend($msg, CommandData $commandData)
     {
         self::shutdownSendText($msg, $commandData);
     }
@@ -64,14 +63,16 @@ final class NotifyCommands extends DrushCommands
      *
      * @param string $msg
      *   Message text for delivery.
+     *
+     * @return bool
+     *   TRUE on success, FALSE on failure
      */
-    public static function shutdownSendText(string $msg, CommandData $commandData): bool
+    public static function shutdownSendText($msg, CommandData $commandData)
     {
         $override = Drush::config()->get('notify.cmd');
 
         if (!empty($override)) {
             $cmd = $override;
-            $error_message = dt('custom notify command failed.');
         } else {
             switch (PHP_OS) {
                 case 'Darwin':
@@ -80,7 +81,7 @@ final class NotifyCommands extends DrushCommands
                     break;
                 case 'Linux':
                 default:
-                    $icon = Path::join(Drush::config()->get('drush.base-dir'), 'drush_logo-black.png');
+                    $icon = Path::join(DRUSH_BASE_PATH, 'drush_logo-black.png');
                     $cmd = "notify-send %s -i $icon";
                     $error_message = dt('notify-send command failed. Please install it as per http://coderstalk.blogspot.com/2010/02/how-to-install-notify-send-in-ubuntu.html.');
                     break;
@@ -100,8 +101,10 @@ final class NotifyCommands extends DrushCommands
 
     /**
      * Identify if the given Drush request should trigger a notification.
+     *
+     * @return bool
      */
-    public static function isAllowed(): bool
+    public static function isAllowed()
     {
         $duration = Drush::config()->get('notify.duration');
         $execution = time() - $_SERVER['REQUEST_TIME'];

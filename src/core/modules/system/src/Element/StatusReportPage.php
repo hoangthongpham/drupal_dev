@@ -2,16 +2,16 @@
 
 namespace Drupal\system\Element;
 
-use Drupal\Core\Render\Attribute\RenderElement;
-use Drupal\Core\Render\Element\RenderElementBase;
+use Drupal\Core\Render\Element\RenderElement;
 use Drupal\Core\Render\Element\StatusReport;
 use Drupal\Core\StringTranslation\PluralTranslatableMarkup;
 
 /**
  * Creates status report page element.
+ *
+ * @RenderElement("status_report_page")
  */
-#[RenderElement('status_report_page')]
-class StatusReportPage extends RenderElementBase {
+class StatusReportPage extends RenderElement {
 
   /**
    * {@inheritdoc}
@@ -59,9 +59,7 @@ class StatusReportPage extends RenderElementBase {
         case 'php_memory_limit':
           $element['#general_info']['#' . $key] = $requirement;
           if (isset($requirement['severity']) && $requirement['severity'] < REQUIREMENT_WARNING) {
-            if (empty($requirement['severity']) || $requirement['severity'] == REQUIREMENT_OK) {
-              unset($element['#requirements'][$key]);
-            }
+            unset($element['#requirements'][$key]);
           }
           break;
       }

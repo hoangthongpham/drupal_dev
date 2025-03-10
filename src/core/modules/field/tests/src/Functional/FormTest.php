@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\field\Functional;
 
 use Drupal\Component\Utility\Html;
@@ -21,18 +19,18 @@ use Drupal\field\Entity\FieldStorageConfig;
 class FormTest extends FieldTestBase {
 
   /**
-   * Modules to install.
+   * Modules to enable.
    *
    * Locale is installed so that TranslatableMarkup actually does something.
    *
    * @var array
    */
   protected static $modules = [
+    'node',
     'field_test',
     'options',
     'entity_test',
     'locale',
-    'field_ui',
   ];
 
   /**
@@ -48,6 +46,13 @@ class FormTest extends FieldTestBase {
   protected $fieldStorageSingle;
 
   /**
+   * An array of values defining a field multiple.
+   *
+   * @var array
+   */
+  protected $fieldStorageMultiple;
+
+  /**
    * An array of values defining a field with unlimited cardinality.
    *
    * @var array
@@ -61,16 +66,12 @@ class FormTest extends FieldTestBase {
    */
   protected $field;
 
-  /**
-   * {@inheritdoc}
-   */
   protected function setUp(): void {
     parent::setUp();
 
     $web_user = $this->drupalCreateUser([
       'view test entity',
       'administer entity_test content',
-      'administer entity_test fields',
     ]);
     $this->drupalLogin($web_user);
 
@@ -78,6 +79,12 @@ class FormTest extends FieldTestBase {
       'field_name' => 'field_single',
       'entity_type' => 'entity_test',
       'type' => 'test_field',
+    ];
+    $this->fieldStorageMultiple = [
+      'field_name' => 'field_multiple',
+      'entity_type' => 'entity_test',
+      'type' => 'test_field',
+      'cardinality' => 4,
     ];
     $this->fieldStorageUnlimited = [
       'field_name' => 'field_unlimited',
@@ -98,7 +105,7 @@ class FormTest extends FieldTestBase {
     ];
   }
 
-  public function testFieldFormSingle(): void {
+  public function testFieldFormSingle() {
     $field_storage = $this->fieldStorageSingle;
     $field_name = $field_storage['field_name'];
     $this->field['field_name'] = $field_name;
@@ -132,7 +139,7 @@ class FormTest extends FieldTestBase {
     ];
     $this->submitForm($edit, 'Save');
     $this->assertSession()->pageTextContains("{$this->field['label']} does not accept the value -1.");
-    // @todo check that the correct field is flagged for error.
+    // TODO : check that the correct field is flagged for error.
 
     // Create an entity
     $value = mt_rand(1, 127);
@@ -180,7 +187,7 @@ class FormTest extends FieldTestBase {
   /**
    * Tests field widget default values on entity forms.
    */
-  public function testFieldFormDefaultValue(): void {
+  public function testFieldFormDefaultValue() {
     $field_storage = $this->fieldStorageSingle;
     $field_name = $field_storage['field_name'];
     $this->field['field_name'] = $field_name;
@@ -210,7 +217,7 @@ class FormTest extends FieldTestBase {
     $this->assertTrue($entity->{$field_name}->isEmpty(), 'Field is now empty.');
   }
 
-  public function testFieldFormSingleRequired(): void {
+  public function testFieldFormSingleRequired() {
     $field_storage = $this->fieldStorageSingle;
     $field_name = $field_storage['field_name'];
     $this->field['field_name'] = $field_name;
@@ -250,7 +257,7 @@ class FormTest extends FieldTestBase {
     $this->assertSession()->pageTextContains("{$this->field['label']} field is required.");
   }
 
-  public function testFieldFormUnlimited(): void {
+  public function testFieldFormUnlimited() {
     $field_storage = $this->fieldStorageUnlimited;
     $field_name = $field_storage['field_name'];
     $this->field['field_name'] = $field_name;
@@ -261,11 +268,6 @@ class FormTest extends FieldTestBase {
       ->setComponent($field_name)
       ->save();
 
-    // Verify that only one "Default value" field
-    // exists on the Manage field display.
-    $this->drupalGet("entity_test/structure/entity_test/fields/entity_test.entity_test.{$field_name}");
-    $this->assertSession()->elementsCount('xpath', "//table[@id='field-unlimited-values']/tbody/tr//input[contains(@class, 'form-text')]", 1);
-
     // Display creation form -> 1 widget.
     $this->drupalGet('entity_test/add');
     $this->assertSession()->fieldValueEquals("{$field_name}[0][value]", '');
@@ -273,7 +275,8 @@ class FormTest extends FieldTestBase {
     $this->assertSession()->fieldNotExists("{$field_name}[1][value]");
 
     // Check if aria-describedby attribute is placed on multiple value widgets.
-    $this->assertSession()->elementAttributeContains('xpath', '//table[@id="field-unlimited-values"]', 'aria-describedby', 'edit-field-unlimited--description');
+    $elements = $this->xpath('//table[@id="field-unlimited-values" and @aria-describedby="edit-field-unlimited--description"]');
+    $this->assertTrue(isset($elements[0]), 'aria-describedby attribute is properly placed on multiple value widgets.');
 
     // Press 'add more' button -> 2 widgets.
     $this->submitForm([], 'Add another item');
@@ -281,7 +284,7 @@ class FormTest extends FieldTestBase {
     $this->assertSession()->fieldValueEquals("{$field_name}[1][value]", '');
     // Verify that no extraneous widget is displayed.
     $this->assertSession()->fieldNotExists("{$field_name}[2][value]");
-    // @todo check that non-field inputs are preserved ('title'), etc.
+    // TODO : check that non-field inputs are preserved ('title'), etc.
 
     // Yet another time so that we can play with more values -> 3 widgets.
     $this->submitForm([], 'Add another item');
@@ -345,7 +348,7 @@ class FormTest extends FieldTestBase {
   /**
    * Tests the position of the required label.
    */
-  public function testFieldFormUnlimitedRequired(): void {
+  public function testFieldFormUnlimitedRequired() {
     $field_name = $this->fieldStorageUnlimited['field_name'];
     $this->field['field_name'] = $field_name;
     $this->field['required'] = TRUE;
@@ -358,9 +361,9 @@ class FormTest extends FieldTestBase {
 
     // Display creation form -> 1 widget.
     $this->drupalGet('entity_test/add');
-    // Check that the Required symbol is present for the label of the field
-    // with unlimited cardinality.
-    $this->assertSession()->elementAttributeContains('xpath', "//h4[contains(@class, 'label') and contains(text(), '{$this->field['label']}')]", 'class', 'js-form-required');
+    // Check that the Required symbol is present for the multifield label.
+    $element = $this->xpath('//h4[contains(@class, "label") and contains(@class, "js-form-required") and contains(text(), :value)]', [':value' => $this->field['label']]);
+    $this->assertTrue(isset($element[0]), 'Required symbol added field label.');
     // Check that the label of the field input is visually hidden and contains
     // the field title and an indication of the delta for a11y.
     $this->assertSession()->elementExists('xpath', "//label[@for='edit-field-unlimited-0-value' and contains(@class, 'visually-hidden') and contains(text(), '{$this->field['label']} (value 1)')]");
@@ -369,7 +372,7 @@ class FormTest extends FieldTestBase {
   /**
    * Tests widget handling of multiple required radios.
    */
-  public function testFieldFormMultivalueWithRequiredRadio(): void {
+  public function testFieldFormMultivalueWithRequiredRadio() {
     /** @var \Drupal\Core\Entity\EntityDisplayRepositoryInterface $display_repository */
     $display_repository = \Drupal::service('entity_display.repository');
 
@@ -422,9 +425,65 @@ class FormTest extends FieldTestBase {
   }
 
   /**
+   * Tests widgets handling multiple values.
+   */
+  public function testFieldFormMultipleWidget() {
+    // Create a field with fixed cardinality, configure the form to use a
+    // "multiple" widget.
+    $field_storage = $this->fieldStorageMultiple;
+    $field_name = $field_storage['field_name'];
+    $this->field['field_name'] = $field_name;
+    FieldStorageConfig::create($field_storage)->save();
+    FieldConfig::create($this->field)->save();
+    $form = \Drupal::service('entity_display.repository')->getFormDisplay($this->field['entity_type'], $this->field['bundle'], 'default')
+      ->setComponent($field_name, [
+        'type' => 'test_field_widget_multiple',
+      ]);
+    $form->save();
+    $session = $this->assertSession();
+
+    // Display creation form.
+    $this->drupalGet('entity_test/add');
+    $this->assertSession()->fieldValueEquals($field_name, '');
+
+    // Create entity with three values.
+    $edit = [
+      $field_name => '1, 2, 3',
+    ];
+    $this->submitForm($edit, 'Save');
+    preg_match('|entity_test/manage/(\d+)|', $this->getUrl(), $match);
+    $id = $match[1];
+
+    // Check that the values were saved.
+    $entity_init = EntityTest::load($id);
+    $this->assertFieldValues($entity_init, $field_name, [1, 2, 3]);
+
+    // Display the form, check that the values are correctly filled in.
+    $this->drupalGet('entity_test/manage/' . $id . '/edit');
+    $this->assertSession()->fieldValueEquals($field_name, '1, 2, 3');
+
+    // Submit the form with more values than the field accepts.
+    $edit = [$field_name => '1, 2, 3, 4, 5'];
+    $this->submitForm($edit, 'Save');
+    $this->assertSession()->pageTextContains('this field cannot hold more than 4 values');
+    // Check that the field values were not submitted.
+    $this->assertFieldValues($entity_init, $field_name, [1, 2, 3]);
+
+    // Check that Attributes are rendered on the multivalue container if it is
+    // a multiple widget form.
+    $form->setComponent($field_name, [
+      'type' => 'entity_reference_autocomplete',
+    ])
+      ->save();
+    $this->drupalGet('entity_test/manage/' . $id . '/edit');
+    $name = str_replace('_', '-', $field_name);
+    $session->responseContains('data-drupal-selector="edit-' . $name . '"');
+  }
+
+  /**
    * Tests fields with no 'edit' access.
    */
-  public function testFieldFormAccess(): void {
+  public function testFieldFormAccess() {
     /** @var \Drupal\Core\Entity\EntityDisplayRepositoryInterface $display_repository */
     $display_repository = \Drupal::service('entity_display.repository');
 
@@ -511,10 +570,9 @@ class FormTest extends FieldTestBase {
     $this->assertEquals(2, $entity->{$field_name}->value, 'New revision has the expected value for the field with edit access.');
 
     // Check that the revision is also saved in the revisions table.
-    /** @var \Drupal\Core\Entity\RevisionableStorageInterface $storage */
-    $storage = $this->container->get('entity_type.manager')
-      ->getStorage($entity_type);
-    $entity = $storage->loadRevision($entity->getRevisionId());
+    $entity = $this->container->get('entity_type.manager')
+      ->getStorage($entity_type)
+      ->loadRevision($entity->getRevisionId());
     $this->assertEquals(99, $entity->{$field_name_no_access}->value, 'New revision has the expected value for the field with no edit access.');
     $this->assertEquals(2, $entity->{$field_name}->value, 'New revision has the expected value for the field with edit access.');
   }
@@ -522,7 +580,7 @@ class FormTest extends FieldTestBase {
   /**
    * Tests hiding a field in a form.
    */
-  public function testHiddenField(): void {
+  public function testHiddenField() {
     $entity_type = 'entity_test_rev';
     $field_storage = $this->fieldStorageSingle;
     $field_storage['entity_type'] = $entity_type;
@@ -597,12 +655,9 @@ class FormTest extends FieldTestBase {
   /**
    * Tests the form display of the label for multi-value fields.
    */
-  public function testLabelOnMultiValueFields(): void {
+  public function testLabelOnMultiValueFields() {
     $user = $this->drupalCreateUser(['administer entity_test content']);
     $this->drupalLogin($user);
-
-    // Ensure that the 'bar' bundle exists, to avoid config validation errors.
-    entity_test_create_bundle('bar', entity_type: 'entity_test_base_field_display');
 
     FieldStorageConfig::create([
       'entity_type' => 'entity_test_base_field_display',
@@ -631,6 +686,70 @@ class FormTest extends FieldTestBase {
     $this->assertSession()->pageTextContains('A field with multiple values');
     // Test if labels were XSS filtered.
     $this->assertSession()->assertEscaped("<script>alert('a configurable field');</script>");
+  }
+
+  /**
+   * Tests hook_field_widget_complete_form_alter().
+   */
+  public function testFieldFormMultipleWidgetAlter() {
+    $this->widgetAlterTest('hook_field_widget_complete_form_alter', 'test_field_widget_multiple');
+  }
+
+  /**
+   * Tests hook_field_widget_complete_form_alter() with single value elements.
+   */
+  public function testFieldFormMultipleWidgetAlterSingleValues() {
+    $this->widgetAlterTest('hook_field_widget_complete_form_alter', 'test_field_widget_multiple_single_value');
+  }
+
+  /**
+   * Tests hook_field_widget_complete_WIDGET_TYPE_form_alter().
+   */
+  public function testFieldFormMultipleWidgetTypeAlter() {
+    $this->widgetAlterTest('hook_field_widget_complete_WIDGET_TYPE_form_alter', 'test_field_widget_multiple');
+  }
+
+  /**
+   * Tests hook_field_widget_complete_WIDGET_TYPE_form_alter() with single value elements.
+   */
+  public function testFieldFormMultipleWidgetTypeAlterSingleValues() {
+    $this->widgetAlterTest('hook_field_widget_complete_WIDGET_TYPE_form_alter', 'test_field_widget_multiple_single_value');
+  }
+
+  /**
+   * Tests widget alter hooks for a given hook name.
+   */
+  protected function widgetAlterTest($hook, $widget) {
+    // Create a field with fixed cardinality, configure the form to use a
+    // "multiple" widget.
+    $field_storage = $this->fieldStorageMultiple;
+    $field_name = $field_storage['field_name'];
+    $this->field['field_name'] = $field_name;
+    FieldStorageConfig::create($field_storage)->save();
+    FieldConfig::create($this->field)->save();
+
+    // Set a flag in state so that the hook implementations will run.
+    \Drupal::state()->set("field_test.widget_alter_test", [
+      'hook' => $hook,
+      'field_name' => $field_name,
+      'widget' => $widget,
+    ]);
+    \Drupal::service('entity_display.repository')->getFormDisplay($this->field['entity_type'], $this->field['bundle'], 'default')
+      ->setComponent($field_name, [
+        'type' => $widget,
+      ])
+      ->save();
+
+    // We need to rebuild hook information after setting the component through
+    // the API.
+    $this->rebuildAll();
+
+    $this->drupalGet('entity_test/add');
+    $this->assertSession()->pageTextMatchesCount(1, '/From ' . $hook . '.* prefix on ' . $field_name . ' parent element\./');
+    if ($widget === 'test_field_widget_multiple_single_value') {
+      $suffix_text = "From $hook(): suffix on $field_name child element.";
+      $this->assertEquals($field_storage['cardinality'], substr_count($this->getTextContent(), $suffix_text), "'$suffix_text' was found {$field_storage['cardinality']} times  using widget $widget");
+    }
   }
 
 }

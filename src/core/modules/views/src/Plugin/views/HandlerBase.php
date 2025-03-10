@@ -2,7 +2,6 @@
 
 namespace Drupal\views\Plugin\views;
 
-use Drupal\Component\Utility\FilterArray;
 use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\Unicode;
 use Drupal\Component\Utility\UrlHelper;
@@ -46,8 +45,6 @@ abstract class HandlerBase extends PluginBase implements ViewsHandlerInterface {
   public $tableAlias;
 
   /**
-   * The real field.
-   *
    * The actual field in the database table, maybe different
    * on other kind of query plugins/special handlers.
    *
@@ -84,18 +81,12 @@ abstract class HandlerBase extends PluginBase implements ViewsHandlerInterface {
   protected $viewsData;
 
   /**
-   * Tracks whether the plugin is a handler.
-   */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
-  public bool $is_handler;
-
-  /**
    * Constructs a Handler object.
    *
    * @param array $configuration
    *   A configuration array containing information about the plugin instance.
    * @param string $plugin_id
-   *   The plugin ID for the plugin instance.
+   *   The plugin_id for the plugin instance.
    * @param mixed $plugin_definition
    *   The plugin implementation definition.
    */
@@ -107,7 +98,7 @@ abstract class HandlerBase extends PluginBase implements ViewsHandlerInterface {
   /**
    * {@inheritdoc}
    */
-  public function init(ViewExecutable $view, DisplayPluginBase $display, ?array &$options = NULL) {
+  public function init(ViewExecutable $view, DisplayPluginBase $display, array &$options = NULL) {
     parent::init($view, $display, $options);
 
     // Check to see if this handler type is defaulted. Note that
@@ -334,12 +325,6 @@ abstract class HandlerBase extends PluginBase implements ViewsHandlerInterface {
 
   /**
    * Provide a form for aggregation settings.
-   *
-   * @param array $form
-   *   An alterable, associative array containing the structure of the form,
-   *   passed by reference.
-   * @param \Drupal\Core\Form\FormStateInterface $form_state
-   *   The current state of the form.
    */
   public function buildGroupByForm(&$form, FormStateInterface $form_state) {
     $display_id = $form_state->get('display_id');
@@ -365,22 +350,13 @@ abstract class HandlerBase extends PluginBase implements ViewsHandlerInterface {
 
   /**
    * Perform any necessary changes to the form values prior to storage.
-   *
    * There is no need for this function to actually store the data.
-   *
-   * @param array $form
-   *   An alterable, associative array containing the structure of the form,
-   *   passed by reference.
-   * @param \Drupal\Core\Form\FormStateInterface $form_state
-   *   The current state of the form.
    */
   public function submitGroupByForm(&$form, FormStateInterface $form_state) {
     $form_state->get('handler')->options['group_type'] = $form_state->getValue(['options', 'group_type']);
   }
 
   /**
-   * Determines if the handler has extra options.
-   *
    * If a handler has 'extra options' it will get a little settings widget and
    * another form called extra_options.
    */
@@ -395,34 +371,17 @@ abstract class HandlerBase extends PluginBase implements ViewsHandlerInterface {
 
   /**
    * Provide a form for setting options.
-   *
-   * @param array $form
-   *   An alterable, associative array containing the structure of the form,
-   *   passed by reference.
-   * @param \Drupal\Core\Form\FormStateInterface $form_state
-   *   The current state of the form.
    */
   public function buildExtraOptionsForm(&$form, FormStateInterface $form_state) {}
 
   /**
    * Validate the options form.
-   *
-   * @param array $form
-   *   Associative array containing the structure of the form.
-   * @param \Drupal\Core\Form\FormStateInterface $form_state
-   *   The current state of the form.
    */
   public function validateExtraOptionsForm($form, FormStateInterface $form_state) {}
 
   /**
    * Perform any necessary changes to the form values prior to storage.
-   *
    * There is no need for this function to actually store the data.
-   *
-   * @param array $form
-   *   Associative array containing the structure of the form.
-   * @param \Drupal\Core\Form\FormStateInterface $form_state
-   *   The current state of the form.
    */
   public function submitExtraOptionsForm($form, FormStateInterface $form_state) {}
 
@@ -434,7 +393,8 @@ abstract class HandlerBase extends PluginBase implements ViewsHandlerInterface {
   }
 
   /**
-   * Set new exposed option defaults when exposed setting is flipped on.
+   * Set new exposed option defaults when exposed setting is flipped
+   * on.
    */
   public function defaultExposeOptions() {}
 
@@ -445,89 +405,42 @@ abstract class HandlerBase extends PluginBase implements ViewsHandlerInterface {
 
   /**
    * Render our chunk of the exposed handler form when selecting.
-   *
-   * @param array $form
-   *   An alterable, associative array containing the structure of the form,
-   *   passed by reference.
-   * @param \Drupal\Core\Form\FormStateInterface $form_state
-   *   The current state of the form.
    */
   public function buildExposedForm(&$form, FormStateInterface $form_state) {}
 
   /**
    * Validate the exposed handler form.
-   *
-   * @param array $form
-   *   An alterable, associative array containing the structure of the form,
-   *   passed by reference.
-   * @param \Drupal\Core\Form\FormStateInterface $form_state
-   *   The current state of the form.
    */
   public function validateExposed(&$form, FormStateInterface $form_state) {}
 
   /**
    * Submit the exposed handler form.
-   *
-   * @param array $form
-   *   An alterable, associative array containing the structure of the form,
-   *   passed by reference.
-   * @param \Drupal\Core\Form\FormStateInterface $form_state
-   *   The current state of the form.
    */
   public function submitExposed(&$form, FormStateInterface $form_state) {}
 
   /**
    * Form for exposed handler options.
-   *
-   * @param array $form
-   *   An alterable, associative array containing the structure of the form,
-   *   passed by reference.
-   * @param \Drupal\Core\Form\FormStateInterface $form_state
-   *   The current state of the form.
    */
   public function buildExposeForm(&$form, FormStateInterface $form_state) {}
 
   /**
    * Validate the options form.
-   *
-   * @param array $form
-   *   Associative array containing the structure of the form.
-   * @param \Drupal\Core\Form\FormStateInterface $form_state
-   *   The current state of the form.
    */
   public function validateExposeForm($form, FormStateInterface $form_state) {}
 
   /**
    * Perform any necessary changes to the form exposes prior to storage.
-   *
    * There is no need for this function to actually store the data.
-   *
-   * @param array $form
-   *   Associative array containing the structure of the form.
-   * @param \Drupal\Core\Form\FormStateInterface $form_state
-   *   The current state of the form.
    */
   public function submitExposeForm($form, FormStateInterface $form_state) {}
 
   /**
    * Shortcut to display the expose/hide button.
-   *
-   * @param array $form
-   *   An alterable, associative array containing the structure of the form,
-   *   passed by reference.
-   * @param \Drupal\Core\Form\FormStateInterface $form_state
-   *   The current state of the form.
    */
   public function showExposeButton(&$form, FormStateInterface $form_state) {}
 
   /**
    * Shortcut to display the exposed options form.
-   *
-   * @param array $form
-   *   An alterable, associative array containing the structure of the form,
-   *   passed by reference.
-   * @param \Drupal\Core\Form\FormStateInterface $form_state
-   *   The current state of the form.
    */
   public function showExposeForm(&$form, FormStateInterface $form_state) {
     if (empty($this->options['exposed'])) {
@@ -635,9 +548,8 @@ abstract class HandlerBase extends PluginBase implements ViewsHandlerInterface {
   public function adminSummary() {}
 
   /**
-   * Determine if this item is 'exposed'.
-   *
-   * Exposed means it provides form elements to let users modify the view.
+   * Determine if this item is 'exposed', meaning it provides form elements
+   * to let users modify the view.
    *
    * @return bool
    */
@@ -654,7 +566,6 @@ abstract class HandlerBase extends PluginBase implements ViewsHandlerInterface {
 
   /**
    * Define if the exposed input has to be submitted multiple times.
-   *
    * This is TRUE when exposed filters grouped are using checkboxes as
    * widgets.
    */
@@ -680,7 +591,7 @@ abstract class HandlerBase extends PluginBase implements ViewsHandlerInterface {
    * {@inheritdoc}
    */
   public function getJoin() {
-    // Get the join from this table that links back to the base table.
+    // get the join from this table that links back to the base table.
     // Determine the primary table to seek
     if (empty($this->query->relationships[$this->relationship])) {
       $base_table = $this->view->storage->get('base_table');
@@ -833,7 +744,7 @@ abstract class HandlerBase extends PluginBase implements ViewsHandlerInterface {
     // Filter any empty matches (Like from '++' in a string) and reset the
     // array keys. 'strlen' is used as the filter callback so we do not lose
     // 0 values (would otherwise evaluate == FALSE).
-    $value = array_values(FilterArray::removeEmptyStrings($value));
+    $value = array_values(array_filter($value, 'strlen'));
 
     if ($force_int) {
       $value = array_map('intval', $value);
@@ -844,15 +755,10 @@ abstract class HandlerBase extends PluginBase implements ViewsHandlerInterface {
 
   /**
    * Displays the Expose form.
-   *
-   * @param array $form
-   *   Associative array containing the structure of the form.
-   * @param \Drupal\Core\Form\FormStateInterface $form_state
-   *   The current state of the form.
    */
   public function displayExposedForm($form, FormStateInterface $form_state) {
     $item = &$this->options;
-    // Flip
+    // flip
     $item['exposed'] = empty($item['exposed']);
 
     // If necessary, set new defaults:
@@ -875,8 +781,6 @@ abstract class HandlerBase extends PluginBase implements ViewsHandlerInterface {
   }
 
   /**
-   * Submits a temporary form.
-   *
    * A submit handler that is used for storing temporary items when using
    * multi-step changes, such as ajax requests.
    */

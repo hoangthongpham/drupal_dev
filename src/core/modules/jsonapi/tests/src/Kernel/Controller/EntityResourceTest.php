@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\jsonapi\Kernel\Controller;
 
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
@@ -15,7 +13,7 @@ use Drupal\Tests\jsonapi\Kernel\JsonapiKernelTestBase;
 use Drupal\user\Entity\Role;
 use Drupal\user\Entity\User;
 use Drupal\user\RoleInterface;
-use Symfony\Component\HttpFoundation\InputBag;
+use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -79,13 +77,6 @@ class EntityResourceTest extends JsonapiKernelTestBase {
   protected $node3;
 
   /**
-   * A node with related nodes.
-   *
-   * @var \Drupal\node\Entity\Node
-   */
-  protected Node $node4;
-
-  /**
    * A fake request.
    *
    * @var \Symfony\Component\HttpFoundation\Request
@@ -108,15 +99,14 @@ class EntityResourceTest extends JsonapiKernelTestBase {
     $this->installEntitySchema('node');
     $this->installEntitySchema('user');
     // Add the additional table schemas.
+    $this->installSchema('system', ['sequences']);
     $this->installSchema('node', ['node_access']);
     $this->installSchema('user', ['users_data']);
     NodeType::create([
       'type' => 'lorem',
-      'name' => 'Lorem',
     ])->save();
     $type = NodeType::create([
       'type' => 'article',
-      'name' => 'Article',
     ]);
     $type->save();
     $this->user = User::create([
@@ -195,9 +185,9 @@ class EntityResourceTest extends JsonapiKernelTestBase {
   /**
    * @covers ::getCollection
    */
-  public function testGetPagedCollection(): void {
+  public function testGetPagedCollection() {
     $request = Request::create('/jsonapi/node/article');
-    $request->query = new InputBag([
+    $request->query = new ParameterBag([
       'sort' => 'nid',
       'page' => [
         'offset' => 1,
@@ -224,9 +214,9 @@ class EntityResourceTest extends JsonapiKernelTestBase {
   /**
    * @covers ::getCollection
    */
-  public function testGetEmptyCollection(): void {
+  public function testGetEmptyCollection() {
     $request = Request::create('/jsonapi/node/article');
-    $request->query = new InputBag(['filter' => ['id' => 'invalid']]);
+    $request->query = new ParameterBag(['filter' => ['id' => 'invalid']]);
 
     // Get the response.
     $resource_type = new ResourceType('node', 'article', NULL);

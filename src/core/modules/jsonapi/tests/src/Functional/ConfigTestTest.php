@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\jsonapi\Functional;
 
 use Drupal\config_test\Entity\ConfigTest;
@@ -12,7 +10,7 @@ use Drupal\Core\Url;
  *
  * @group jsonapi
  */
-class ConfigTestTest extends ConfigEntityResourceTestBase {
+class ConfigTestTest extends ResourceTestBase {
 
   /**
    * {@inheritdoc}
@@ -118,7 +116,6 @@ class ConfigTestTest extends ConfigEntityResourceTestBase {
    */
   protected function getPostDocument() {
     // @todo Update in https://www.drupal.org/node/2300677.
-    return [];
   }
 
 }

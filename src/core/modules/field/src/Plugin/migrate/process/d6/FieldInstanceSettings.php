@@ -2,7 +2,6 @@
 
 namespace Drupal\field\Plugin\migrate\process\d6;
 
-use Drupal\migrate\Attribute\MigrateProcess;
 use Drupal\migrate\MigrateExecutableInterface;
 use Drupal\migrate\ProcessPluginBase;
 use Drupal\migrate\Row;
@@ -10,9 +9,10 @@ use Drupal\migrate\Row;
 // cspell:ignore filefield imagefield
 
 /**
- * Determines the field instance settings.
+ * @MigrateProcessPlugin(
+ *   id = "d6_field_field_settings"
+ * )
  */
-#[MigrateProcess('d6_field_field_settings')]
 class FieldInstanceSettings extends ProcessPluginBase {
 
   /**
@@ -49,7 +49,7 @@ class FieldInstanceSettings extends ProcessPluginBase {
       case 'imagefield_widget':
         $settings['file_extensions'] = $widget_settings['file_extensions'];
         $settings['file_directory'] = $widget_settings['file_path'];
-        $settings['max_filesize'] = $this->convertSizeUnit($widget_settings['max_filesize_per_file'] ?? '');
+        $settings['max_filesize'] = $this->convertSizeUnit($widget_settings['max_filesize_per_file']);
         $settings['alt_field'] = $widget_settings['alt'];
         $settings['alt_field_required'] = $widget_settings['custom_alt'];
         $settings['title_field'] = $widget_settings['title'];

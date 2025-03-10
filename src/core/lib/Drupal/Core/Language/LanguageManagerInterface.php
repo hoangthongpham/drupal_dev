@@ -171,11 +171,8 @@ interface LanguageManagerInterface {
    * @param \Drupal\Core\Url $url
    *   The URL the switch links will be relative to.
    *
-   * @return object|null
-   *   An object with the following keys:
-   *   - links: An array of links indexed by the language ID
-   *   - method_id: The language negotiation method ID
-   *   or NULL if there are no language switch links.
+   * @return array
+   *   A keyed array of links ready to be themed.
    */
   public function getLanguageSwitchLinks($type, Url $url);
 
@@ -187,7 +184,7 @@ interface LanguageManagerInterface {
    *
    * @return $this
    */
-  public function setConfigOverrideLanguage(?LanguageInterface $language = NULL);
+  public function setConfigOverrideLanguage(LanguageInterface $language = NULL);
 
   /**
    * Gets the current configuration override language.
@@ -203,7 +200,7 @@ interface LanguageManagerInterface {
    * Language codes are defined by the W3C language tags document for
    * interoperability. Language codes typically have a language and, optionally,
    * a script or regional variant name. See:
-   * https://www.w3.org/International/articles/language-tags/ for more
+   * http://www.w3.org/International/articles/language-tags/ for more
    * information.
    *
    * @return array

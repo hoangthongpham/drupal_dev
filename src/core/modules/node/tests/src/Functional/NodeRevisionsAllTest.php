@@ -1,14 +1,13 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\node\Functional;
 
 use Drupal\Core\Database\Database;
 use Drupal\node\NodeInterface;
 
 /**
- * Tests global node CRUD operation permissions.
+ * Create a node with revisions and test viewing, saving, reverting, and
+ * deleting revisions for user with access to all.
  *
  * @group node
  */
@@ -22,7 +21,7 @@ class NodeRevisionsAllTest extends NodeTestBase {
   /**
    * A list of nodes created to be used as starting point of different tests.
    *
-   * @var \Drupal\node\NodeInterface[]
+   * @var Drupal\node\NodeInterface[]
    */
   protected $nodes;
 
@@ -64,6 +63,9 @@ class NodeRevisionsAllTest extends NodeTestBase {
     // Create a user for revision authoring.
     // This must be different from user performing revert.
     $this->revisionUser = $this->drupalCreateUser();
+
+    $settings = get_object_vars($node);
+    $settings['revision'] = 1;
 
     $nodes = [];
     $logs = [];
@@ -111,7 +113,7 @@ class NodeRevisionsAllTest extends NodeTestBase {
   /**
    * Checks node revision operations.
    */
-  public function testRevisions(): void {
+  public function testRevisions() {
     $node_storage = $this->container->get('entity_type.manager')->getStorage('node');
     $nodes = $this->nodes;
     $logs = $this->revisionLogs;
@@ -159,7 +161,7 @@ class NodeRevisionsAllTest extends NodeTestBase {
     $this->assertNotSame($this->revisionUser->id(), $reverted_node->getRevisionUserId(), 'Node revision author is not original revision author.');
 
     // Confirm that this is not the current version.
-    $node = $node_storage->loadRevision($node->getRevisionId());
+    $node = node_revision_load($node->getRevisionId());
     $this->assertFalse($node->isDefaultRevision(), 'Third node revision is not the current one.');
 
     // Confirm that the node can still be updated.
@@ -182,7 +184,7 @@ class NodeRevisionsAllTest extends NodeTestBase {
 
     // Set the revision timestamp to an older date to make sure that the
     // confirmation message correctly displays the stored revision date.
-    $old_revision_date = \Drupal::time()->getRequestTime() - 86400;
+    $old_revision_date = REQUEST_TIME - 86400;
     Database::getConnection()->update('node_revision')
       ->condition('vid', $nodes[2]->getRevisionId())
       ->fields([

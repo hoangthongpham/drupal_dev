@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\file\Functional;
 
 use Drupal\file\Entity\File;
@@ -16,7 +14,9 @@ use Drupal\user\RoleInterface;
 class FilePrivateTest extends FileFieldTestBase {
 
   /**
-   * {@inheritdoc}
+   * Modules to enable.
+   *
+   * @var array
    */
   protected static $modules = ['node_access_test', 'field_test'];
 
@@ -25,9 +25,6 @@ class FilePrivateTest extends FileFieldTestBase {
    */
   protected $defaultTheme = 'stark';
 
-  /**
-   * {@inheritdoc}
-   */
   protected function setUp(): void {
     parent::setUp();
     node_access_test_add_field(NodeType::load('article'));
@@ -42,12 +39,12 @@ class FilePrivateTest extends FileFieldTestBase {
   /**
    * Tests file access for file uploaded to a private node.
    */
-  public function testPrivateFile(): void {
+  public function testPrivateFile() {
     $node_storage = $this->container->get('entity_type.manager')->getStorage('node');
     /** @var \Drupal\Core\File\FileSystemInterface $file_system */
     $file_system = \Drupal::service('file_system');
     $type_name = 'article';
-    $field_name = $this->randomMachineName();
+    $field_name = strtolower($this->randomMachineName());
     $this->createFileField($field_name, 'node', $type_name, ['uri_scheme' => 'private']);
 
     $test_file = $this->getTestFile('text');

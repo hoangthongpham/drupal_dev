@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\config_translation\Unit;
 
 use Drupal\config_translation\ConfigFieldMapper;
@@ -48,8 +46,6 @@ class ConfigFieldMapperTest extends UnitTestCase {
    * {@inheritdoc}
    */
   protected function setUp(): void {
-    parent::setUp();
-
     $this->entityTypeManager = $this->createMock('Drupal\Core\Entity\EntityTypeManagerInterface');
     $this->entity = $this->createMock('Drupal\field\FieldConfigInterface');
 
@@ -87,28 +83,28 @@ class ConfigFieldMapperTest extends UnitTestCase {
    *
    * @covers ::setEntity
    */
-  public function testSetEntity(): void {
+  public function testSetEntity() {
     $entity_type = $this->createMock('Drupal\Core\Config\Entity\ConfigEntityTypeInterface');
     $entity_type
       ->expects($this->any())
       ->method('getConfigPrefix')
-      ->willReturn('config_prefix');
+      ->will($this->returnValue('config_prefix'));
 
     $this->entityTypeManager
       ->expects($this->any())
       ->method('getDefinition')
-      ->willReturn($entity_type);
+      ->will($this->returnValue($entity_type));
 
     $field_storage = $this->createMock('Drupal\field\FieldStorageConfigInterface');
     $field_storage
       ->expects($this->any())
       ->method('id')
-      ->willReturn('field_storage_id');
+      ->will($this->returnValue('field_storage_id'));
 
     $this->entity
       ->expects($this->any())
       ->method('getFieldStorageDefinition')
-      ->willReturn($field_storage);
+      ->will($this->returnValue($field_storage));
 
     $result = $this->configFieldMapper->setEntity($this->entity);
     $this->assertTrue($result);

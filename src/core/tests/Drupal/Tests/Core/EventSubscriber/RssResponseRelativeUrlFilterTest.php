@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\Core\EventSubscriber;
 
 use Drupal\Core\EventSubscriber\RssResponseRelativeUrlFilter;
@@ -17,7 +15,7 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
  */
 class RssResponseRelativeUrlFilterTest extends UnitTestCase {
 
-  public static function providerTestOnResponse() {
+  public function providerTestOnResponse() {
     $data = [];
 
     $valid_feed = <<<RSS
@@ -26,13 +24,13 @@ class RssResponseRelativeUrlFilterTest extends UnitTestCase {
 <channel>
   <title>Drupal.org</title>
   <link>https://www.drupal.org</link>
-  <description>Come for the software &amp; stay for the community
+  <description>Come for the software, stay for the community
 Drupal is an open source content management platform powering millions of websites and applications. It’s built, used, and supported by an active and diverse community of people around the world.</description>
   <language>en</language>
   <item>
      <title>Drupal 8 turns one!</title>
      <link>https://www.drupal.org/blog/drupal-8-turns-one</link>
-     <description>&lt;a href=&quot;localhost/node/1&quot;&gt;Hello&amp;nbsp;&lt;/a&gt;
+     <description>&lt;a href=&quot;localhost/node/1&quot;&gt;Hello&lt;/a&gt;
     </description>
   </item>
   </channel>
@@ -45,13 +43,13 @@ RSS;
 <channel>
   <title>Drupal.org</title>
   <link>https://www.drupal.org</link>
-  <description>Come for the software &amp; stay for the community
+  <description>Come for the software, stay for the community
 Drupal is an open source content management platform powering millions of websites and applications. It’s built, used, and supported by an active and diverse community of people around the world.</description>
   <language>en</language>
   <item>
      <title>Drupal 8 turns one!</title>
      <link>https://www.drupal.org/blog/drupal-8-turns-one</link>
-     <description>&lt;a href="localhost/node/1"&gt;Hello&amp;nbsp;&lt;/a&gt;
+     <description>&lt;a href="localhost/node/1"&gt;Hello&lt;/a&gt;
     </description>
   </item>
   </channel>
@@ -114,11 +112,11 @@ RSS;
    * @param string $expected_content
    *   The expected content from the response.
    */
-  public function testOnResponse($content, $expected_content): void {
+  public function testOnResponse($content, $expected_content) {
     $event = new ResponseEvent(
       $this->prophesize(HttpKernelInterface::class)->reveal(),
       Request::create('/'),
-      HttpKernelInterface::MAIN_REQUEST,
+      HttpKernelInterface::MASTER_REQUEST,
       new Response($content, 200, [
         'Content-Type' => 'application/rss+xml',
       ])

@@ -2,11 +2,9 @@
 
 namespace Drupal\Tests\commerce_order\Kernel;
 
-use Drupal\Core\Routing\RouteObjectInterface;
 use Drupal\commerce_order\Entity\Order;
+use Drupal\Core\Routing\RouteObjectInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Session\Session;
-use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 
 /**
  * Tests the order store resolver.
@@ -63,7 +61,6 @@ class OrderStoreResolverTest extends OrderKernelTestBase {
     $route_provider = $this->container->get('router.route_provider');
     $route = $route_provider->getRouteByName($order_canonical_url->getRouteName());
     $request = Request::create($order_canonical_url->toString());
-    $request->setSession(new Session(new MockArraySessionStorage()));
     $request->attributes->add([
       RouteObjectInterface::ROUTE_NAME => $order_canonical_url->getRouteName(),
       RouteObjectInterface::ROUTE_OBJECT => $route,

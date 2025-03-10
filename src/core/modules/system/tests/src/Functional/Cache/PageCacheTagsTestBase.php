@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\system\Functional\Cache;
 
 use Drupal\Core\Url;
@@ -14,8 +12,15 @@ abstract class PageCacheTagsTestBase extends BrowserTestBase {
 
   /**
    * {@inheritdoc}
+   *
+   * Always enable header dumping in page cache tags tests, this aids debugging.
    */
-  protected function setUp(): void {
+  protected $dumpHeaders = TRUE;
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp() {
     parent::setUp();
 
     // Enable page caching.

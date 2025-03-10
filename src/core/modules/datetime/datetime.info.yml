@@ -1,7 +1,12 @@
 name: Datetime
 type: module
-description: 'Defines field types for storing dates and times.'
+description: Defines datetime form elements and a datetime field type.
 package: Field types
-version: VERSION
+# version: VERSION
 dependencies:
   - drupal:field
+
+# Information added by Drupal.org packaging script on 2022-04-20
+version: '9.3.12'
+project: 'drupal'
+datestamp: 1650467597

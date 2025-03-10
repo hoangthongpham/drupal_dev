@@ -1,5 +1,5 @@
 /* eslint-disable import/no-extraneous-dependencies */
-/* cspell:ignore drupalelementstyle drupalelementstyleui drupalelementstyleediting imagestyle drupalmediatoolbar drupalmediaediting */
+/* cspell:words drupalelementstyle drupalelementstyleui drupalelementstyleediting imagestyle drupalmediatoolbar drupalmediaediting */
 import { Plugin } from 'ckeditor5/src/core';
 import DrupalElementStyleUi from './drupalelementstyle/drupalelementstyleui';
 import DrupalElementStyleEditing from './drupalelementstyle/drupalelementstyleediting';
@@ -30,11 +30,11 @@ import DrupalElementStyleEditing from './drupalelementstyle/drupalelementstyleed
  * @see module:drupalMedia/drupalmediaediting~DrupalMediaEditing
  * @see module:drupalMedia/drupalmediatoolbar~DrupalMediaToolbar
  *
- * @private
+ * @internal
  */
 export default class DrupalElementStyle extends Plugin {
   /**
-   * @inheritdoc
+   * @inheritDoc
    */
   static get requires() {
     return [DrupalElementStyleEditing, DrupalElementStyleUi];

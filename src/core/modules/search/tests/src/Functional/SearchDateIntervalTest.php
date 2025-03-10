@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\search\Functional;
 
 use Drupal\language\Entity\ConfigurableLanguage;
@@ -29,9 +27,6 @@ class SearchDateIntervalTest extends BrowserTestBase {
    */
   protected $defaultTheme = 'stark';
 
-  /**
-   * {@inheritdoc}
-   */
   protected function setUp(): void {
     parent::setUp();
 
@@ -84,7 +79,7 @@ class SearchDateIntervalTest extends BrowserTestBase {
   /**
    * Tests searching with date filters that exclude some translations.
    */
-  public function testDateIntervalQueryAlter(): void {
+  public function testDateIntervalQueryAlter() {
     // Search for keyword node.
     $edit = ['keys' => 'node'];
     $this->drupalGet('search/node');

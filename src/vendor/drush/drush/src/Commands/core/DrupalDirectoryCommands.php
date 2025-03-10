@@ -1,43 +1,45 @@
 <?php
-
-declare(strict_types=1);
-
 namespace Drush\Commands\core;
 
-use Consolidation\SiteAlias\HostPath;
-use Consolidation\SiteAlias\SiteAliasManagerInterface;
-use Drush\Attributes as CLI;
-use Drush\Backend\BackendPathEvaluator;
-use Drush\Commands\AutowireTrait;
 use Drush\Commands\DrushCommands;
+use Consolidation\SiteAlias\HostPath;
+use Consolidation\SiteAlias\SiteAliasManagerAwareInterface;
+use Consolidation\SiteAlias\SiteAliasManagerAwareTrait;
 
-final class DrupalDirectoryCommands extends DrushCommands
+use Drush\Backend\BackendPathEvaluator;
+
+class DrupalDirectoryCommands extends DrushCommands implements SiteAliasManagerAwareInterface
 {
-    use AutowireTrait;
 
-    const DIRECTORY = 'drupal:directory';
+    use SiteAliasManagerAwareTrait;
 
-    protected BackendPathEvaluator $pathEvaluator;
+    /** @var BackendPathEvaluator */
+    protected $pathEvaluator;
 
-    public function __construct(
-        private readonly SiteAliasManagerInterface $siteAliasManager
-    ) {
-        parent::__construct();
+    public function __construct()
+    {
         $this->pathEvaluator = new BackendPathEvaluator();
     }
 
     /**
      * Return the filesystem path for modules/themes and other key folders.
+     *
+     * @command drupal:directory
+     * @param string $target A module/theme name, or special names like root, files, private, or an <info>alias:path</info> string such as @alias:%files.
+     * @option local-only Reject any target that specifies a remote site.
+     * @usage cd $(drush dd devel)
+     *   Navigate into the devel module directory
+     * @usage cd $(drush dd)
+     *   Navigate to the root of your Drupal site
+     * @usage cd $(drush dd files)
+     *   Navigate to the files directory.
+     * @usage drush dd @alias:%files
+     *   Print the path to the files directory on the site @alias.
+     * @usage edit $(drush dd devel)/devel.module
+     *   Open devel module in your editor
+     * @aliases dd,drupal-directory
      */
-    #[CLI\Command(name: self::DIRECTORY, aliases: ['dd', 'drupal-directory'])]
-    #[CLI\Argument(name: 'target', description: 'A module/theme name, or special names like root, files, private, or an <info>alias:path</info> string such as @alias:%files.')]
-    #[CLI\Option(name: 'local-only', description: 'Reject any target that specifies a remote site.')]
-    #[CLI\Usage(name: 'cd $(drush dd devel)', description: 'Navigate into the devel module directory')]
-    #[CLI\Usage(name: 'cd $(drush dd)', description: 'Navigate to the root of your Drupal site')]
-    #[CLI\Usage(name: 'cd $(drush dd files)', description: 'Navigate to the files directory.')]
-    #[CLI\Usage(name: 'drush dd @alias:%files', description: 'Print the path to the files directory on the site @alias.')]
-    #[CLI\Usage(name: 'edit $(drush dd devel)/devel.module', description: 'Open devel module in your editor')]
-    public function drupalDirectory(string $target = 'root', $options = ['local-only' => false]): string
+    public function drupalDirectory($target = 'root', $options = ['local-only' => false])
     {
         $path = $this->getPath($target, $options['local-only']);
 
@@ -46,7 +48,7 @@ final class DrupalDirectoryCommands extends DrushCommands
         // If there is no such key, then no replacement is done.  In the
         // case of the dd command, we will consider it an error if
         // any keys are -not- replaced.
-        if ($path && (!str_contains($path, '%'))) {
+        if ($path && (strpos($path, '%') === false)) {
             return $path;
         } else {
             throw new \Exception(dt("Target '{target}' not found.", ['target' => $target]));
@@ -70,7 +72,7 @@ final class DrupalDirectoryCommands extends DrushCommands
             $target = "%$target";
         }
         // Set up the evaluated path; fail if --local-only and the site alias is remote
-        $evaluatedPath = HostPath::create($this->siteAliasManager, $target);
+        $evaluatedPath = HostPath::create($this->siteAliasManager(), $target);
         if ($local_only && $evaluatedPath->isRemote()) {
             throw new \Exception(dt('{target} was remote, and --local-only was specified', ['target' => $target]));
         }

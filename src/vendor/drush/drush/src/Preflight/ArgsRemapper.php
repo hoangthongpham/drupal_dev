@@ -1,7 +1,4 @@
 <?php
-
-declare(strict_types=1);
-
 namespace Drush\Preflight;
 
 /**
@@ -27,13 +24,15 @@ class ArgsRemapper
      *
      * @param string[] $argv
      */
-    public function remap(array $argv): array
+    public function remap($argv)
     {
         $result = [];
         $sawCommand = false;
         foreach ($argv as $arg) {
             $arg = $this->checkRemap($arg, $sawCommand);
-            $result[] = $arg;
+            if (isset($arg)) {
+                $result[] = $arg;
+            }
         }
         return $result;
     }
@@ -43,10 +42,10 @@ class ArgsRemapper
      * it does, then the remapping is performed.
      *
      * @param string $arg One argument to inspect
-     * @param bool $sawCommand True if drush command was found
+     * @param string $sawCommand True if drush command was found
      * @return string The altered argument
      */
-    protected function checkRemap(string $arg, bool &$sawCommand): string
+    protected function checkRemap($arg, &$sawCommand)
     {
         if (!$sawCommand && ctype_alpha($arg[0])) {
             $sawCommand = true;
@@ -79,17 +78,20 @@ class ArgsRemapper
      * Check to see if the provided single arg matches the candidate.
      * If the candidate is `--foo`, then we will match the exact string
      * `--foo`, or the leading substring `--foo=`, and nothing else.
+     * @param string $arg
+     * @param string $candidate
+     * @return bool
      */
-    protected function matches(string $arg, string $candidate): bool
+    protected function matches($arg, $candidate)
     {
-        if (!str_starts_with($arg, $candidate)) {
+        if (strpos($arg, $candidate) !== 0) {
             return false;
         }
 
-        if (strlen($arg) === strlen($candidate)) {
+        if (strlen($arg) == strlen($candidate)) {
             return true;
         }
 
-        return $arg[strlen($candidate)] === '=';
+        return $arg[strlen($candidate)] == '=';
     }
 }

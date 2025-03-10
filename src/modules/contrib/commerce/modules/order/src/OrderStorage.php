@@ -2,20 +2,18 @@
 
 namespace Drupal\commerce_order;
 
-use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Entity\EntityStorageException;
-use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\commerce\CommerceContentEntityStorage;
 use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\commerce_order\Event\OrderEvent;
 use Drupal\commerce_order\Event\OrderEvents;
-use Drupal\commerce_order\Exception\OrderLockedSaveException;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Defines the order storage.
  */
-class OrderStorage extends CommerceContentEntityStorage implements OrderStorageInterface {
+class OrderStorage extends CommerceContentEntityStorage {
 
   /**
    * The order refresh.
@@ -32,34 +30,11 @@ class OrderStorage extends CommerceContentEntityStorage implements OrderStorageI
   protected $skipRefresh = FALSE;
 
   /**
-   * List of successfully locked orders.
-   *
-   * @var int[]
-   */
-  protected $updateLocks = [];
-
-  /***
-   * The lock backend.
-   *
-   * @var \Drupal\Core\Lock\LockBackendInterface
-   */
-  protected $lockBackend;
-
-  /**
-   * The logger.
-   *
-   * @var \Psr\Log\LoggerInterface
-   */
-  protected $logger;
-
-  /**
    * {@inheritdoc}
    */
   public static function createInstance(ContainerInterface $container, EntityTypeInterface $entity_type) {
     $instance = parent::createInstance($container, $entity_type);
     $instance->orderRefresh = $container->get('commerce_order.order_refresh');
-    $instance->lockBackend = $container->get('lock');
-    $instance->logger = $container->get('logger.channel.commerce_order');
     return $instance;
   }
 
@@ -101,20 +76,6 @@ class OrderStorage extends CommerceContentEntityStorage implements OrderStorageI
    *   The order.
    */
   protected function doOrderPreSave(OrderInterface $order) {
-    if (!$order->isNew() && !isset($this->updateLocks[$order->id()]) && !$this->lockBackend->lockMayBeAvailable($this->getLockId($order->id()))) {
-      // This is updating an order that someone else has locked.
-      $mismatch_exception = new OrderLockedSaveException('Attempted to save order ' . $order->id() . ' that is locked for updating. Use OrderStorage::loadForUpdate().');
-      $log_only = $order->getEntityType()->get('log_version_mismatch');
-      if ($log_only) {
-        $this->logger->error('<pre>%exception</pre>', [
-          '%exception' => $mismatch_exception->__toString(),
-        ]);
-      }
-      else {
-        throw $mismatch_exception;
-      }
-    }
-
     // Ensure the order doesn't reference any removed order item by resetting
     // the "order_items" field with order items that were successfully loaded
     // from the database.
@@ -159,61 +120,6 @@ class OrderStorage extends CommerceContentEntityStorage implements OrderStorageI
     }
 
     return parent::postLoad($entities);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function save(EntityInterface $entity) {
-    try {
-      return parent::save($entity);
-    }
-    finally {
-      // Release the update lock if it was acquired for this entity.
-      $this->releaseLock($entity->id());
-    }
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function loadForUpdate(int $order_id): ?OrderInterface {
-    $lock_id = $this->getLockId($order_id);
-    if ($this->lockBackend->acquire($lock_id)) {
-      $this->updateLocks[$order_id] = TRUE;
-      return $this->loadUnchanged($order_id);
-    }
-    else {
-      // Failed to acquire initial lock, wait for it to free up.
-      if (!$this->lockBackend->wait($lock_id) && $this->lockBackend->acquire($lock_id)) {
-        $this->updateLocks[$order_id] = TRUE;
-        return $this->loadUnchanged($order_id);
-      }
-      throw new EntityStorageException('Failed to acquire lock');
-    }
-  }
-
-  /**
-   * Gets the lock ID for the given order ID.
-   *
-   * @param int $order_id
-   *   The order ID.
-   *
-   * @return string
-   *   The lock ID.
-   */
-  protected function getLockId(int $order_id): string {
-    return 'commerce_order_update:' . $order_id;
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  public function releaseLock(int $order_id): void {
-    if (isset($this->updateLocks[$order_id])) {
-      $this->lockBackend->release($this->getLockId($order_id));
-      unset($this->updateLocks[$order_id]);
-    }
   }
 
 }

@@ -2,10 +2,14 @@
 
 namespace Drupal\profile;
 
+use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityListBuilder;
+use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Language\LanguageInterface;
+use Drupal\Core\Render\RendererInterface;
+use Drupal\Core\Routing\RedirectDestinationInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -23,13 +27,6 @@ class ProfileListBuilder extends EntityListBuilder {
   protected $dateFormatter;
 
   /**
-   * The language manager.
-   *
-   * @var \Drupal\Core\Language\LanguageManagerInterface
-   */
-  protected $languageManager;
-
-  /**
    * The renderer.
    *
    * @var \Drupal\Core\Render\RendererInterface
@@ -44,15 +41,38 @@ class ProfileListBuilder extends EntityListBuilder {
   protected $redirectDestination;
 
   /**
+   * Constructs a new ProfileListController object.
+   *
+   * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type
+   *   The entity type definition.
+   * @param \Drupal\Core\Entity\EntityStorageInterface $storage
+   *   The entity storage class.
+   * @param \Drupal\Core\Datetime\DateFormatterInterface $date_formatter
+   *   The date formatter service.
+   * @param \Drupal\Core\Render\RendererInterface $renderer
+   *   The renderer.
+   * @param \Drupal\Core\Routing\RedirectDestinationInterface $redirect_destination
+   *   The redirect destination service.
+   */
+  public function __construct(EntityTypeInterface $entity_type, EntityStorageInterface $storage, DateFormatterInterface $date_formatter, RendererInterface $renderer, RedirectDestinationInterface $redirect_destination) {
+    parent::__construct($entity_type, $storage);
+
+    $this->dateFormatter = $date_formatter;
+    $this->renderer = $renderer;
+    $this->redirectDestination = $redirect_destination;
+  }
+
+  /**
    * {@inheritdoc}
    */
   public static function createInstance(ContainerInterface $container, EntityTypeInterface $entity_type) {
-    $instance = parent::createInstance($container, $entity_type);
-    $instance->dateFormatter = $container->get('date.formatter');
-    $instance->languageManager = $container->get('language_manager');
-    $instance->renderer = $container->get('renderer');
-    $instance->redirectDestination = $container->get('redirect.destination');
-    return $instance;
+    return new static(
+      $entity_type,
+      $container->get('entity_type.manager')->getStorage($entity_type->id()),
+      $container->get('date.formatter'),
+      $container->get('renderer'),
+      $container->get('redirect.destination')
+    );
   }
 
   /**
@@ -76,7 +96,7 @@ class ProfileListBuilder extends EntityListBuilder {
         'class' => [RESPONSIVE_PRIORITY_LOW],
       ],
     ];
-    if ($this->languageManager->isMultilingual()) {
+    if (\Drupal::languageManager()->isMultilingual()) {
       $header['language_name'] = [
         'data' => $this->t('Language'),
         'class' => [RESPONSIVE_PRIORITY_LOW],
@@ -93,7 +113,6 @@ class ProfileListBuilder extends EntityListBuilder {
     $langcode = $entity->language()->getId();
     $uri = $entity->toUrl();
     $options = $uri->getOptions();
-    $languages = $this->languageManager->getLanguages();
     $options += ($langcode != LanguageInterface::LANGCODE_NOT_SPECIFIED && isset($languages[$langcode]) ? ['language' => $languages[$langcode]] : []);
     $uri->setOptions($options);
     $row['label'] = $entity->toLink();
@@ -105,8 +124,9 @@ class ProfileListBuilder extends EntityListBuilder {
     $row['status'] = $entity->isPublished() ? $this->t('active') : $this->t('not active');
     $row['is_default'] = $entity->isDefault() ? $this->t('default') : $this->t('not default');
     $row['changed'] = $this->dateFormatter->format($entity->getChangedTime(), 'short');
-    if ($this->languageManager->isMultilingual()) {
-      $row['language_name'] = $this->languageManager->getLanguageName($langcode);
+    $language_manager = \Drupal::languageManager();
+    if ($language_manager->isMultilingual()) {
+      $row['language_name'] = $language_manager->getLanguageName($langcode);
     }
 
     return $row + parent::buildRow($entity);

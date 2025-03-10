@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\jsonapi\Functional;
 
 use Drupal\Core\Datetime\Entity\DateFormat;
@@ -12,7 +10,7 @@ use Drupal\Core\Url;
  *
  * @group jsonapi
  */
-class DateFormatTest extends ConfigEntityResourceTestBase {
+class DateFormatTest extends ResourceTestBase {
 
   /**
    * {@inheritdoc}
@@ -110,7 +108,6 @@ class DateFormatTest extends ConfigEntityResourceTestBase {
    */
   protected function getPostDocument() {
     // @todo Update in https://www.drupal.org/node/2300677.
-    return [];
   }
 
 }

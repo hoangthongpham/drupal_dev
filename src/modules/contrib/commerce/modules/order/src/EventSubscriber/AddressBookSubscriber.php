@@ -32,7 +32,7 @@ class AddressBookSubscriber implements EventSubscriberInterface {
   /**
    * {@inheritdoc}
    */
-  public static function getSubscribedEvents(): array {
+  public static function getSubscribedEvents() {
     return [
       'commerce_order.place.post_transition' => ['onOrderPlace', 100],
       'commerce_order.order.assign' => ['onOrderAssign', 100],

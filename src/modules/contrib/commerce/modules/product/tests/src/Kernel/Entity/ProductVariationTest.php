@@ -2,12 +2,12 @@
 
 namespace Drupal\Tests\commerce_product\Kernel\Entity;
 
-use Drupal\Tests\commerce\Kernel\CommerceKernelTestBase;
 use Drupal\commerce_price\Price;
-use Drupal\commerce_product\Entity\Product;
 use Drupal\commerce_product\Entity\ProductAttribute;
 use Drupal\commerce_product\Entity\ProductAttributeValue;
 use Drupal\commerce_product\Entity\ProductVariation;
+use Drupal\commerce_product\Entity\Product;
+use Drupal\Tests\commerce\Kernel\CommerceKernelTestBase;
 use Drupal\user\UserInterface;
 
 /**
@@ -67,6 +67,8 @@ class ProductVariationTest extends CommerceKernelTestBase {
    * @covers ::setListPrice
    * @covers ::getPrice
    * @covers ::setPrice
+   * @covers ::isActive
+   * @covers ::setActive
    * @covers ::getCreatedTime
    * @covers ::setCreatedTime
    * @covers ::getOwner
@@ -106,13 +108,9 @@ class ProductVariationTest extends CommerceKernelTestBase {
     $variation->setTitle('My title');
     $this->assertEquals('My title', $variation->getTitle());
 
-    $this->assertNull($variation->getListPrice());
-
     $list_price = new Price('19.99', 'USD');
     $variation->setListPrice($list_price);
     $this->assertEquals($list_price, $variation->getListPrice());
-
-    $this->assertNull($variation->getPrice());
 
     $price = new Price('9.99', 'USD');
     $variation->setPrice($price);
@@ -272,30 +270,6 @@ class ProductVariationTest extends CommerceKernelTestBase {
     ]);
     $variation->save();
     $variation->delete();
-  }
-
-  /**
-   * Tests that preSave doesn't throw exception on missing bundle entity.
-   *
-   * E.g.: during migration 'migrate_lookup' plugin can create stub entity for
-   * future reference. This stub entity can have bundle that is the same as
-   * entity type ID - 'commerce_product_variation'. In that case, entity should
-   * gracefully skip title generation.
-   *
-   * @see https://www.drupal.org/project/commerce/issues/3342331
-   *
-   * @covers ::preSave
-   */
-  public function testPreSaveWithMissingBundleEntity(): void {
-    $variation = ProductVariation::create([
-      // This is 'missing' bundle which is used as fallback by Drupal core and
-      // Migrations.
-      'type' => 'commerce_product_variation',
-      'sku' => strtolower($this->randomMachineName()),
-      'title' => $this->randomString(),
-    ])->save();
-
-    self::assertSame($variation, SAVED_NEW);
   }
 
 }

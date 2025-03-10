@@ -10,7 +10,6 @@ namespace Drupal\Core\Extension;
  *
  * @see https://bugs.php.net/bug.php?id=66052
  */
-#[\AllowDynamicProperties]
 class Extension {
 
   /**
@@ -49,11 +48,6 @@ class Extension {
    * @var string
    */
   protected $root;
-
-  /**
-   * The extension info array.
-   */
-  public array $info;
 
   /**
    * Constructs a new Extension object.
@@ -160,30 +154,12 @@ class Extension {
    * Re-routes method calls to SplFileInfo.
    *
    * Offers all SplFileInfo methods to consumers; e.g., $extension->getMTime().
-   *
-   * @deprecated in drupal:10.1.0 and is removed from drupal:11.0.0. Use
-   *   \Drupal\Core\Extension\Extension::getFileInfo() instead.
-   *
-   * @see https://www.drupal.org/node/2959989
    */
   public function __call($method, array $args) {
-    @trigger_error(__METHOD__ . "('$method')" . ' is deprecated in drupal:10.1.0 and is removed from drupal:11.0.0. Use \Drupal\Core\Extension\Extension::getFileInfo() instead. See https://www.drupal.org/node/3322608', E_USER_DEPRECATED);
-    return call_user_func_array([$this->getFileInfo(), $method], $args);
-  }
-
-  /**
-   * Returns SplFileInfo instance for the extension's info file.
-   *
-   * @return \SplFileInfo
-   *   The object to access a file information of info file.
-   *
-   * @see https://www.php.net/manual/class.splfileinfo.php
-   */
-  public function getFileInfo(): \SplFileInfo {
     if (!isset($this->splFileInfo)) {
       $this->splFileInfo = new \SplFileInfo($this->root . '/' . $this->pathname);
     }
-    return $this->splFileInfo;
+    return call_user_func_array([$this->splFileInfo, $method], $args);
   }
 
   /**
@@ -214,30 +190,6 @@ class Extension {
     // \Drupal\Core\Extension\ExtensionDiscovery::scanDirectory().
     $container = \Drupal::hasContainer() ? \Drupal::getContainer() : FALSE;
     $this->root = $container && $container->hasParameter('app.root') ? $container->getParameter('app.root') : DRUPAL_ROOT;
-  }
-
-  /**
-   * Checks if an extension is marked as experimental.
-   *
-   * @return bool
-   *   TRUE if an extension is marked as experimental, FALSE otherwise.
-   */
-  public function isExperimental(): bool {
-    return (isset($this->info[ExtensionLifecycle::LIFECYCLE_IDENTIFIER])
-        && $this->info[ExtensionLifecycle::LIFECYCLE_IDENTIFIER] === ExtensionLifecycle::EXPERIMENTAL);
-  }
-
-  /**
-   * Checks if an extension is marked as obsolete.
-   *
-   * @return bool
-   *   TRUE if an extension is marked as obsolete, FALSE otherwise.
-   */
-  public function isObsolete(): bool {
-    // This function checks for 'lifecycle: obsolete' to determine if an
-    // extension is marked as obsolete.
-    return (isset($this->info[ExtensionLifecycle::LIFECYCLE_IDENTIFIER])
-        && $this->info[ExtensionLifecycle::LIFECYCLE_IDENTIFIER] === ExtensionLifecycle::OBSOLETE);
   }
 
 }

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\node\Functional\Views;
 
 use Drupal\node\Entity\NodeType;
@@ -41,8 +39,8 @@ class FilterNodeAccessTest extends NodeTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp($import_test_views = TRUE, $modules = ['node_test_views']): void {
-    parent::setUp($import_test_views, $modules);
+  protected function setUp($import_test_views = TRUE): void {
+    parent::setUp($import_test_views);
 
     $this->drupalCreateContentType(['type' => 'article', 'name' => 'Article']);
 
@@ -85,7 +83,7 @@ class FilterNodeAccessTest extends NodeTestBase {
   /**
    * Tests the node access filter.
    */
-  public function testFilterNodeAccess(): void {
+  public function testFilterNodeAccess() {
     $this->drupalLogin($this->users[0]);
     $this->drupalGet('test_filter_node_access');
     // Test that the private node of the current user is shown.

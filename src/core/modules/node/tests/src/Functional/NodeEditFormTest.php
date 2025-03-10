@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\node\Functional;
 
 use Drupal\node\NodeInterface;
@@ -41,13 +39,12 @@ class NodeEditFormTest extends NodeTestBase {
   protected $nodeStorage;
 
   /**
-   * {@inheritdoc}
+   * Modules to enable.
+   *
+   * @var string[]
    */
   protected static $modules = ['block', 'node', 'datetime'];
 
-  /**
-   * {@inheritdoc}
-   */
   protected function setUp(): void {
     parent::setUp();
 
@@ -67,7 +64,7 @@ class NodeEditFormTest extends NodeTestBase {
   /**
    * Checks node edit functionality.
    */
-  public function testNodeEdit(): void {
+  public function testNodeEdit() {
     $this->drupalLogin($this->webUser);
 
     $title_key = 'title[0][value]';
@@ -89,7 +86,7 @@ class NodeEditFormTest extends NodeTestBase {
 
     // Check that the title and body fields are displayed with the correct values.
     // @todo Ideally assertLink would support HTML, but it doesn't.
-    $this->assertSession()->responseContains('Edit');
+    $this->assertSession()->responseContains('Edit<span class="visually-hidden">(active tab)</span>');
     $this->assertSession()->fieldValueEquals($title_key, $edit[$title_key]);
     $this->assertSession()->fieldValueEquals($body_key, $edit[$body_key]);
 
@@ -126,9 +123,8 @@ class NodeEditFormTest extends NodeTestBase {
     $this->assertSame($node->getOwnerId(), $revised_node->getOwnerId(), 'The node author has been preserved.');
     // Ensure that the revision authors are different since the revisions were
     // made by different users.
-    $node_storage = \Drupal::service('entity_type.manager')->getStorage('node');
-    $first_node_version = $node_storage->loadRevision($node->getRevisionId());
-    $second_node_version = $node_storage->loadRevision($revised_node->getRevisionId());
+    $first_node_version = node_revision_load($node->getRevisionId());
+    $second_node_version = node_revision_load($revised_node->getRevisionId());
     $this->assertNotSame($first_node_version->getRevisionUser()->id(), $second_node_version->getRevisionUser()->id(), 'Each revision has a distinct user.');
 
     // Check if the node revision checkbox is rendered on node edit form.
@@ -163,7 +159,7 @@ class NodeEditFormTest extends NodeTestBase {
   /**
    * Tests changing a node's "authored by" field.
    */
-  public function testNodeEditAuthoredBy(): void {
+  public function testNodeEditAuthoredBy() {
     $this->drupalLogin($this->adminUser);
 
     // Create node to edit.
@@ -224,7 +220,7 @@ class NodeEditFormTest extends NodeTestBase {
   /**
    * Tests the node meta information.
    */
-  public function testNodeMetaInformation(): void {
+  public function testNodeMetaInformation() {
     // Check that regular users (i.e. without the 'administer nodes' permission)
     // can not see the meta information.
     $this->drupalLogin($this->webUser);

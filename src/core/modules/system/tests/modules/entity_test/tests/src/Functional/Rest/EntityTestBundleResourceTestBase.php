@@ -1,13 +1,11 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\entity_test\Functional\Rest;
 
 use Drupal\entity_test\Entity\EntityTestBundle;
-use Drupal\Tests\rest\Functional\EntityResource\ConfigEntityResourceTestBase;
+use Drupal\Tests\rest\Functional\EntityResource\EntityResourceTestBase;
 
-abstract class EntityTestBundleResourceTestBase extends ConfigEntityResourceTestBase {
+abstract class EntityTestBundleResourceTestBase extends EntityResourceTestBase {
 
   /**
    * {@inheritdoc}
@@ -70,7 +68,6 @@ abstract class EntityTestBundleResourceTestBase extends ConfigEntityResourceTest
    */
   protected function getNormalizedPostEntity() {
     // @todo Update in https://www.drupal.org/node/2300677.
-    return [];
   }
 
 }

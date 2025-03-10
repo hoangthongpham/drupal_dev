@@ -6,9 +6,6 @@
 	"TTD": {
 		"name": "千里達及托巴哥元"
 	},
-	"TRY": {
-		"name": "土耳其里拉"
-	},
 	"TMT": {
 		"name": "土庫曼馬納特"
 	},
@@ -74,7 +71,7 @@
 		"name": "古巴披索"
 	},
 	"SZL": {
-		"name": "史瓦帝尼朗吉尼"
+		"name": "史瓦濟蘭里朗吉尼"
 	},
 	"NIO": {
 		"name": "尼加拉瓜金科多巴"
@@ -389,6 +386,9 @@
 	"RSD": {
 		"name": "塞爾維亞戴納"
 	},
+	"TRY": {
+		"name": "新土耳其里拉"
+	},
 	"SGD": {
 		"name": "新加坡幣"
 	},
@@ -396,7 +396,7 @@
 		"name": "新台幣",
 		"symbol": "$"
 	},
-	"SLE": {
+	"SLL": {
 		"name": "獅子山利昂"
 	},
 	"CHF": {
@@ -486,5 +486,14 @@
 	},
 	"SRD": {
 		"name": "蘇利南元"
+	},
+	"VED": {
+		"name": "Bolívar Soberano"
+	},
+	"SLE": {
+		"name": "Sierra Leonean Leone"
+	},
+	"UYW": {
+		"name": "Uruguayan Nominal Wage Index Unit"
 	}
 }

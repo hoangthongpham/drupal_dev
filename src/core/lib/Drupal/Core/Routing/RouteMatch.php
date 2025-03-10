@@ -2,7 +2,6 @@
 
 namespace Drupal\Core\Routing;
 
-use Symfony\Component\HttpFoundation\InputBag;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Route;
@@ -36,7 +35,7 @@ class RouteMatch implements RouteMatchInterface {
   /**
    * A key|value store of raw parameters.
    *
-   * @var \Symfony\Component\HttpFoundation\InputBag
+   * @var \Symfony\Component\HttpFoundation\ParameterBag
    */
   protected $rawParameters;
 
@@ -61,7 +60,7 @@ class RouteMatch implements RouteMatchInterface {
     $parameters = array_intersect_key($parameters, $route_params);
     $raw_parameters = array_intersect_key($raw_parameters, $route_params);
     $this->parameters = new ParameterBag($parameters);
-    $this->rawParameters = new InputBag($raw_parameters);
+    $this->rawParameters = new ParameterBag($raw_parameters);
   }
 
   /**
@@ -149,7 +148,7 @@ class RouteMatch implements RouteMatchInterface {
       // Route defaults that do not start with a leading "_" are also
       // parameters, even if they are not included in path or host patterns.
       foreach ($route->getDefaults() as $name => $value) {
-        if (!isset($names[$name]) && !str_starts_with($name, '_')) {
+        if (!isset($names[$name]) && substr($name, 0, 1) !== '_') {
           $names[$name] = $name;
         }
       }

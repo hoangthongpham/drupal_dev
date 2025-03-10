@@ -56,14 +56,7 @@ class NodeForm extends ContentEntityForm {
    * @param \Drupal\Core\Datetime\DateFormatterInterface $date_formatter
    *   The date formatter service.
    */
-  public function __construct(
-    EntityRepositoryInterface $entity_repository,
-    PrivateTempStoreFactory $temp_store_factory,
-    EntityTypeBundleInfoInterface $entity_type_bundle_info,
-    TimeInterface $time,
-    AccountInterface $current_user,
-    DateFormatterInterface $date_formatter,
-  ) {
+  public function __construct(EntityRepositoryInterface $entity_repository, PrivateTempStoreFactory $temp_store_factory, EntityTypeBundleInfoInterface $entity_type_bundle_info = NULL, TimeInterface $time = NULL, AccountInterface $current_user, DateFormatterInterface $date_formatter) {
     parent::__construct($entity_repository, $entity_type_bundle_info, $time);
     $this->tempStoreFactory = $temp_store_factory;
     $this->currentUser = $current_user;
@@ -244,9 +237,9 @@ class NodeForm extends ContentEntityForm {
   /**
    * Form submission handler for the 'preview' action.
    *
-   * @param array $form
+   * @param $form
    *   An associative array containing the structure of the form.
-   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   * @param $form_state
    *   The current state of the form.
    */
   public function preview(array $form, FormStateInterface $form_state) {
@@ -280,11 +273,11 @@ class NodeForm extends ContentEntityForm {
     $t_args = ['@type' => node_get_type_label($node), '%title' => $node->toLink()->toString()];
 
     if ($insert) {
-      $this->logger('content')->info('@type: added %title.', $context);
+      $this->logger('content')->notice('@type: added %title.', $context);
       $this->messenger()->addStatus($this->t('@type %title has been created.', $t_args));
     }
     else {
-      $this->logger('content')->info('@type: updated %title.', $context);
+      $this->logger('content')->notice('@type: updated %title.', $context);
       $this->messenger()->addStatus($this->t('@type %title has been updated.', $t_args));
     }
 

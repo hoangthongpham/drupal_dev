@@ -5,9 +5,9 @@
  * Install, update and uninstall functions for the commerce_promotion module.
  */
 
-use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\commerce\CommerceContentEntityStorageSchema;
 use Drupal\commerce_promotion\Entity\Promotion;
+use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\user\Entity\Role;
 
 /**
@@ -69,9 +69,7 @@ function commerce_promotion_schema() {
  * Install the `commerce_promotion_usage` table schema.
  */
 function commerce_promotion_update_8201() {
-  $schema = \Drupal::database()->schema();
-  $tables = commerce_promotion_schema();
-  $schema->createTable('commerce_promotion_usage', $tables['commerce_promotion_usage']);
+  drupal_install_schema('commerce_promotion');
 }
 
 /**

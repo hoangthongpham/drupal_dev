@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\basic_auth\Traits;
 
 /**
@@ -19,7 +17,7 @@ trait BasicAuthTestTrait {
    * @param string $password
    *   The password to use for basic authentication.
    * @param array $options
-   *   (optional) Options to be forwarded to the URL generator.
+   *   (optional) Options to be forwarded to the url generator.
    *
    * @return string
    *   The retrieved HTML string, also available as $this->getRawContent().

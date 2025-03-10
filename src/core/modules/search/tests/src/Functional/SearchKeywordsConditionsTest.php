@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\search\Functional;
 
 use Drupal\Component\Utility\Html;
@@ -40,9 +38,6 @@ class SearchKeywordsConditionsTest extends BrowserTestBase {
    */
   protected $searchingUser;
 
-  /**
-   * {@inheritdoc}
-   */
   protected function setUp(): void {
     parent::setUp();
 
@@ -60,7 +55,7 @@ class SearchKeywordsConditionsTest extends BrowserTestBase {
   /**
    * Verify the keywords are captured and conditions respected.
    */
-  public function testSearchKeywordsConditions(): void {
+  public function testSearchKeywordsConditions() {
     // No keys, not conditions - no results.
     $this->drupalGet('search/dummy_path');
     $this->assertSession()->pageTextNotContains('Dummy search snippet to display');

@@ -2,10 +2,10 @@
 
 namespace Drupal\commerce_cart;
 
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\commerce_cart\Event\CartEvents;
 use Drupal\commerce_cart\Event\OrderItemComparisonFieldsEvent;
 use Drupal\commerce_order\Entity\OrderItemInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -68,12 +68,6 @@ class OrderItemMatcher implements OrderItemMatcherInterface {
     $matched_order_items = [];
     /** @var \Drupal\commerce_order\Entity\OrderItemInterface $existing_order_item */
     foreach ($order_items as $existing_order_item) {
-      if ($existing_order_item->getData('owned_by_promotion')) {
-        // We should not attempt to match order items owned by a promotion,
-        // as they may be removed by the promotion.
-        continue;
-      }
-
       foreach ($comparison_fields as $field_name) {
         if (!$existing_order_item->hasField($field_name) || !$order_item->hasField($field_name)) {
           // The field is missing on one of the order items.

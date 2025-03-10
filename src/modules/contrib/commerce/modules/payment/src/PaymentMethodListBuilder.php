@@ -4,8 +4,6 @@ namespace Drupal\commerce_payment;
 
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityListBuilder;
-use Drupal\Core\Entity\EntityTypeInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Defines the list builder for payment methods.
@@ -13,25 +11,9 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class PaymentMethodListBuilder extends EntityListBuilder {
 
   /**
-   * The route match.
-   *
-   * @var \Drupal\Core\Routing\RouteMatchInterface
-   */
-  protected $routeMatch;
-
-  /**
    * {@inheritdoc}
    */
   protected $entitiesKey = 'payment_methods';
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function createInstance(ContainerInterface $container, EntityTypeInterface $entity_type) {
-    $instance = parent::createInstance($container, $entity_type);
-    $instance->routeMatch = $container->get('current_route_match');
-    return $instance;
-  }
 
   /**
    * {@inheritdoc}
@@ -44,7 +26,9 @@ class PaymentMethodListBuilder extends EntityListBuilder {
    * {@inheritdoc}
    */
   protected function getEntityIds() {
-    $user = $this->routeMatch->getParameter('user');
+    /** @var \Drupal\Core\Routing\RouteMatchInterface $route */
+    $route = \Drupal::service('current_route_match');
+    $user = $route->getParameter('user');
 
     $query = $this->getStorage()->getQuery()
       ->accessCheck(TRUE)
@@ -78,7 +62,7 @@ class PaymentMethodListBuilder extends EntityListBuilder {
       '#markup' => $entity->label(),
     ];
     if ($entity->bundle() == 'credit_card') {
-      $icon = 'payment-method-icon--' . $entity->get('card_type')->value;
+      $icon = 'payment-method-icon--' . $entity->card_type->value;
       $row['label']['data']['#prefix'] = '<span class="payment-method-icon ' . $icon . '"></span>';
     }
     if ($entity->isDefault()) {

@@ -2,8 +2,8 @@
 
 namespace Drupal\commerce_order;
 
-use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\entity\EntityPermissionProvider;
+use Drupal\Core\Entity\EntityTypeInterface;
 
 /**
  * Provides permissions for orders.

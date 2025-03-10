@@ -1,80 +1,80 @@
 {
 	"country_code": "VE",
 	"subdivisions": {
-		"Z": {
-			"name": "Amazonas"
+		"Amazonas": {
+			"iso_code": "VE-Z"
 		},
-		"B": {
-			"name": "Anzoátegui"
+		"Anzoátegui": {
+			"iso_code": "VE-B"
 		},
-		"C": {
-			"name": "Apure"
+		"Apure": {
+			"iso_code": "VE-C"
 		},
-		"D": {
-			"name": "Aragua"
+		"Aragua": {
+			"iso_code": "VE-D"
 		},
-		"E": {
-			"name": "Barinas"
+		"Barinas": {
+			"iso_code": "VE-E"
 		},
-		"F": {
-			"name": "Bolívar"
+		"Bolívar": {
+			"iso_code": "VE-F"
 		},
-		"G": {
-			"name": "Carabobo"
+		"Carabobo": {
+			"iso_code": "VE-G"
 		},
-		"H": {
-			"name": "Cojedes"
+		"Cojedes": {
+			"iso_code": "VE-H"
 		},
-		"Y": {
-			"name": "Delta Amacuro"
+		"Delta Amacuro": {
+			"iso_code": "VE-Y"
 		},
-		"W": {
-			"name": "Dependencias Federales"
+		"Dependencias Federales": {
+			"iso_code": "VE-W"
 		},
-		"A": {
-			"name": "Distrito Federal"
+		"Distrito Federal": {
+			"iso_code": "VE-A"
 		},
-		"I": {
-			"name": "Falcón"
+		"Falcón": {
+			"iso_code": "VE-I"
 		},
-		"J": {
-			"name": "Guárico"
+		"Guárico": {
+			"iso_code": "VE-J"
 		},
-		"K": {
-			"name": "Lara"
+		"Lara": {
+			"iso_code": "VE-K"
 		},
-		"L": {
-			"name": "Mérida"
+		"Mérida": {
+			"iso_code": "VE-L"
 		},
-		"M": {
-			"name": "Miranda"
+		"Miranda": {
+			"iso_code": "VE-M"
 		},
-		"N": {
-			"name": "Monagas"
+		"Monagas": {
+			"iso_code": "VE-N"
 		},
-		"O": {
-			"name": "Nueva Esparta"
+		"Nueva Esparta": {
+			"iso_code": "VE-O"
 		},
-		"P": {
-			"name": "Portuguesa"
+		"Portuguesa": {
+			"iso_code": "VE-P"
 		},
-		"R": {
-			"name": "Sucre"
+		"Sucre": {
+			"iso_code": "VE-R"
 		},
-		"S": {
-			"name": "Táchira"
+		"Táchira": {
+			"iso_code": "VE-S"
 		},
-		"T": {
-			"name": "Trujillo"
+		"Trujillo": {
+			"iso_code": "VE-T"
 		},
-		"X": {
-			"name": "La Guaira"
+		"Vargas": {
+			"iso_code": "VE-X"
 		},
-		"U": {
-			"name": "Yaracuy"
+		"Yaracuy": {
+			"iso_code": "VE-U"
 		},
-		"V": {
-			"name": "Zulia"
+		"Zulia": {
+			"iso_code": "VE-V"
 		}
 	}
 }

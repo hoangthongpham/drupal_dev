@@ -154,7 +154,7 @@ final class NumberFormatterTest extends TestCase
     /**
      * Provides the locale, number style, value and expected formatted value.
      */
-    public static function numberValueProvider()
+    public function numberValueProvider()
     {
         return [
             ['en', 'decimal', '-50.00', '-50'],
@@ -170,7 +170,7 @@ final class NumberFormatterTest extends TestCase
     /**
      * Provides values for the formatted value parser.
      */
-    public static function formattedValueProvider()
+    public function formattedValueProvider()
     {
         return [
             ['en', '500,100.05', '500100.05'],

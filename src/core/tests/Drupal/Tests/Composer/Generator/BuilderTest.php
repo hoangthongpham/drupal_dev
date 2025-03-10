@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\Composer\Generator;
 
 use Drupal\Composer\Generator\Builder\DrupalCoreRecommendedBuilder;
@@ -20,20 +18,20 @@ class BuilderTest extends TestCase {
   /**
    * Provides test data for testBuilder.
    */
-  public static function builderTestData() {
+  public function builderTestData() {
     return [
       [
         DrupalCoreRecommendedBuilder::class,
         [
           'name' => 'drupal/core-recommended',
           'type' => 'metapackage',
-          'description' => 'Core and its dependencies with known-compatible minor versions. Require this project INSTEAD OF drupal/core.',
+          'description' => 'Locked core dependencies; require this project INSTEAD OF drupal/core.',
           'license' => 'GPL-2.0-or-later',
           'require' =>
           [
             'drupal/core' => Composer::drupalVersionBranch(),
-            'symfony/polyfill-ctype' => '~v1.12.0',
-            'symfony/yaml' => '~v3.4.32',
+            'symfony/polyfill-ctype' => 'v1.12.0',
+            'symfony/yaml' => 'v3.4.32',
           ],
           'conflict' =>
           [
@@ -88,7 +86,7 @@ class BuilderTest extends TestCase {
    *
    * @dataProvider builderTestData
    */
-  public function testBuilder($builderClass, $expected): void {
+  public function testBuilder($builderClass, $expected) {
     $fixtures = new Fixtures();
     $drupalCoreInfo = $fixtures->drupalCoreComposerFixture();
 

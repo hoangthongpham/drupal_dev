@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\block\Kernel\Migrate\d7;
 
 use Drupal\Tests\migrate_drupal\Kernel\d7\MigrateDrupal7TestBase;
@@ -19,15 +17,19 @@ class MigrateBlockContentTranslationTest extends MigrateDrupal7TestBase {
   protected static $modules = [
     'node',
     'text',
+    'aggregator',
+    'book',
     'block',
     'comment',
     'filter',
+    'forum',
     'views',
     'block_content',
     'config_translation',
     'language',
     'locale',
     'path_alias',
+    'statistics',
     'taxonomy',
   ];
 
@@ -37,10 +39,8 @@ class MigrateBlockContentTranslationTest extends MigrateDrupal7TestBase {
   protected function setUp(): void {
     parent::setUp();
     $this->installEntitySchema('block_content');
-    $this->installEntitySchema('path_alias');
     $this->installConfig(['block']);
     $this->installConfig(['block_content']);
-    $this->container->get('theme_installer')->install(['stark']);
 
     $this->executeMigrations([
       'language',
@@ -58,10 +58,7 @@ class MigrateBlockContentTranslationTest extends MigrateDrupal7TestBase {
   /**
    * Tests the migration of block title translation.
    */
-  public function testBlockContentTranslation(): void {
-    // @todo Skipped due to frequent random test failures.
-    // See https://www.drupal.org/project/drupal/issues/3389365
-    $this->markTestSkipped();
+  public function testBlockContentTranslation() {
     /** @var \Drupal\language\ConfigurableLanguageManagerInterface $language_manager */
     $language_manager = $this->container->get('language_manager');
 

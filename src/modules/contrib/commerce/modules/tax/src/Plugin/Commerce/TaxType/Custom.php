@@ -2,26 +2,24 @@
 
 namespace Drupal\commerce_tax\Plugin\Commerce\TaxType;
 
-use Drupal\Component\Utility\Html;
-use Drupal\Component\Uuid\UuidInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Locale\CountryManager;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\commerce_price\RounderInterface;
-use Drupal\commerce_tax\Attribute\CommerceTaxType;
 use Drupal\commerce_tax\Resolver\ChainTaxRateResolverInterface;
 use Drupal\commerce_tax\TaxZone;
+use Drupal\Component\Uuid\UuidInterface;
+use Drupal\Component\Utility\Html;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Provides the Custom tax type.
+ *
+ * @CommerceTaxType(
+ *   id = "custom",
+ *   label = "Custom",
+ * )
  */
-#[CommerceTaxType(
-  id: "custom",
-  label: new TranslatableMarkup("Custom"),
-)]
 class Custom extends LocalTaxTypeBase {
 
   /**
@@ -129,7 +127,7 @@ class Custom extends LocalTaxTypeBase {
       $territories = $this->configuration['territories'];
       // Initialize empty rows in case there's no data yet.
       $rates = $rates ?: [NULL];
-      $territories = $territories ?: [];
+      $territories = $territories ?: [NULL];
 
       $form_state->set('rates', $rates);
       $form_state->set('territories', $territories);
@@ -303,6 +301,9 @@ class Custom extends LocalTaxTypeBase {
     if (empty($values['rates'])) {
       $form_state->setError($form['rates'], $this->t('Please add at least one rate.'));
     }
+    if (empty($values['territories'])) {
+      $form_state->setError($form['territories'], $this->t('Please add at least one territory.'));
+    }
   }
 
   /**
@@ -377,15 +378,6 @@ class Custom extends LocalTaxTypeBase {
    */
   public function buildZones() {
     $rates = $this->configuration['rates'];
-    $territories = $this->configuration['territories'];
-    // When no territory has been selected, load all countries to form
-    // a global tax zone.
-    if (empty($territories)) {
-      $country_codes = array_keys(CountryManager::getStandardList());
-      foreach ($country_codes as $country_code) {
-        $territories[] = ['country_code' => $country_code];
-      }
-    }
     // The plugin doesn't support defining multiple percentages with own
     // start/end dates for UX reasons, so a start date is invented here.
     foreach ($rates as &$rate) {
@@ -403,7 +395,7 @@ class Custom extends LocalTaxTypeBase {
       'id' => 'default',
       'label' => 'Default',
       'display_label' => $this->getDisplayLabel(),
-      'territories' => $territories,
+      'territories' => $this->configuration['territories'],
       'rates' => $rates,
     ]);
 

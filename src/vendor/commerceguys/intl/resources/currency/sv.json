@@ -47,9 +47,6 @@
 		"name": "barbadisk dollar",
 		"symbol": "Bds$"
 	},
-	"BYN": {
-		"name": "belarusisk rubel"
-	},
 	"BZD": {
 		"name": "belizisk dollar",
 		"symbol": "BZ$"
@@ -60,6 +57,9 @@
 	},
 	"BTN": {
 		"name": "bhutanesisk ngultrum"
+	},
+	"VED": {
+		"name": "Bolívar Soberano"
 	},
 	"BOB": {
 		"name": "boliviansk boliviano"
@@ -381,6 +381,9 @@
 		"name": "seychellisk rupie"
 	},
 	"SLE": {
+		"name": "Sierra Leonean Leone"
+	},
+	"SLL": {
 		"name": "sierraleonsk leone"
 	},
 	"SGD": {
@@ -473,6 +476,9 @@
 	},
 	"VND": {
 		"name": "vietnamesisk dong"
+	},
+	"BYN": {
+		"name": "vitrysk rubel"
 	},
 	"XOF": {
 		"name": "västafrikansk franc",

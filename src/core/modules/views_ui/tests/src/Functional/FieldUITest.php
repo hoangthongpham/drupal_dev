@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\views_ui\Functional;
 
 use Drupal\Component\Serialization\Json;
@@ -30,7 +28,7 @@ class FieldUITest extends UITestBase {
   /**
    * Tests the UI of field handlers.
    */
-  public function testFieldUI(): void {
+  public function testFieldUI() {
     // Ensure the field is not marked as hidden on the first run.
     $this->drupalGet('admin/structure/views/view/test_view/edit');
     $this->assertSession()->pageTextContains('Views test: Name');
@@ -60,7 +58,8 @@ class FieldUITest extends UITestBase {
     $this->assertSession()->elementTextEquals('xpath', "{$xpath}[2]", '{{ id }} == ID');
     $this->assertSession()->elementTextEquals('xpath', "{$xpath}[3]", '{{ name }} == Name');
 
-    $this->assertSession()->elementNotExists('xpath', '//details[@id="edit-options-more"]');
+    $result = $this->xpath('//details[@id="edit-options-more"]');
+    $this->assertEmpty($result, "Container 'more' is empty and should not be displayed.");
 
     // Ensure that dialog titles are not escaped.
     $edit_groupby_url = 'admin/structure/views/nojs/handler/test_view/default/field/name';
@@ -84,12 +83,12 @@ class FieldUITest extends UITestBase {
   /**
    * Tests the field labels.
    */
-  public function testFieldLabel(): void {
+  public function testFieldLabel() {
     // Create a view with unformatted style and make sure the fields have no
     // labels by default.
     $view = [];
     $view['label'] = $this->randomMachineName(16);
-    $view['id'] = $this->randomMachineName(16);
+    $view['id'] = strtolower($this->randomMachineName(16));
     $view['description'] = $this->randomMachineName(16);
     $view['show[wizard_key]'] = 'node';
     $view['page[create]'] = TRUE;

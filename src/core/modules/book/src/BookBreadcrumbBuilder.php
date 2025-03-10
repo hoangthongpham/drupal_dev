@@ -4,7 +4,6 @@ namespace Drupal\book;
 
 use Drupal\Core\Breadcrumb\Breadcrumb;
 use Drupal\Core\Breadcrumb\BreadcrumbBuilderInterface;
-use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Language\LanguageInterface;
@@ -56,14 +55,22 @@ class BookBreadcrumbBuilder implements BreadcrumbBuilderInterface {
    *   The entity type manager service.
    * @param \Drupal\Core\Session\AccountInterface $account
    *   The current user account.
-   * @param \Drupal\Core\Entity\EntityRepositoryInterface $entity_repository
+   * @param \Drupal\Core\Entity\EntityRepositoryInterface|null $entity_repository
    *   The entity repository service.
-   * @param \Drupal\Core\Language\LanguageManagerInterface $language_manager
+   * @param \Drupal\Core\Language\LanguageManagerInterface|null $language_manager
    *   The language manager service.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, AccountInterface $account, EntityRepositoryInterface $entity_repository, LanguageManagerInterface $language_manager) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, AccountInterface $account, EntityRepositoryInterface $entity_repository = NULL, LanguageManagerInterface $language_manager = NULL) {
     $this->nodeStorage = $entity_type_manager->getStorage('node');
     $this->account = $account;
+    if (!$entity_repository) {
+      @trigger_error('The entity.repository service must be passed to ' . __NAMESPACE__ . '\BookBreadcrumbBuilder::__construct(). It was added in drupal:9.2.0 and will be required before drupal:10.0.0.', E_USER_DEPRECATED);
+      $entity_repository = \Drupal::service('entity.repository');
+    }
+    if (!$language_manager) {
+      @trigger_error('The language_manager service must be passed to ' . __NAMESPACE__ . '\BookBreadcrumbBuilder::__construct(). It was added in drupal:9.2.0 and will be required before drupal:10.0.0.', E_USER_DEPRECATED);
+      $language_manager = \Drupal::service('language_manager');
+    }
     $this->entityRepository = $entity_repository;
     $this->languageManager = $language_manager;
   }
@@ -71,8 +78,7 @@ class BookBreadcrumbBuilder implements BreadcrumbBuilderInterface {
   /**
    * {@inheritdoc}
    */
-  public function applies(RouteMatchInterface $route_match, ?CacheableMetadata $cacheable_metadata = NULL) {
-    $cacheable_metadata?->addCacheContexts(['route.book_navigation']);
+  public function applies(RouteMatchInterface $route_match) {
     $node = $route_match->getParameter('node');
     return $node instanceof NodeInterface && !empty($node->book);
   }

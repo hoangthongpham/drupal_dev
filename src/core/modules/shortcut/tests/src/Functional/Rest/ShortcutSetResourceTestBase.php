@@ -1,16 +1,14 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\shortcut\Functional\Rest;
 
 use Drupal\shortcut\Entity\ShortcutSet;
-use Drupal\Tests\rest\Functional\EntityResource\ConfigEntityResourceTestBase;
+use Drupal\Tests\rest\Functional\EntityResource\EntityResourceTestBase;
 
 /**
  * ResourceTestBase for ShortcutSet entity.
  */
-abstract class ShortcutSetResourceTestBase extends ConfigEntityResourceTestBase {
+abstract class ShortcutSetResourceTestBase extends EntityResourceTestBase {
 
   /**
    * {@inheritdoc}
@@ -59,7 +57,7 @@ abstract class ShortcutSetResourceTestBase extends ConfigEntityResourceTestBase 
    */
   protected function createEntity() {
     $set = ShortcutSet::create([
-      'id' => 'llama-set',
+      'id' => 'llama_set',
       'label' => 'Llama Set',
     ]);
     $set->save();
@@ -71,7 +69,7 @@ abstract class ShortcutSetResourceTestBase extends ConfigEntityResourceTestBase 
    */
   protected function getExpectedNormalizedEntity() {
     return [
-      'id' => 'llama-set',
+      'id' => 'llama_set',
       'uuid' => $this->entity->uuid(),
       'label' => 'Llama Set',
       'status' => TRUE,
@@ -85,7 +83,6 @@ abstract class ShortcutSetResourceTestBase extends ConfigEntityResourceTestBase 
    */
   protected function getNormalizedPostEntity() {
     // @todo Update in https://www.drupal.org/node/2300677.
-    return [];
   }
 
   /**

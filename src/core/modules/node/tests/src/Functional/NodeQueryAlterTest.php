@@ -1,11 +1,8 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\node\Functional;
 
 use Drupal\Core\Database\Database;
-use Drupal\user\Entity\User;
 
 /**
  * Tests that node access queries are properly altered by the node module.
@@ -15,7 +12,9 @@ use Drupal\user\Entity\User;
 class NodeQueryAlterTest extends NodeTestBase {
 
   /**
-   * {@inheritdoc}
+   * Modules to enable.
+   *
+   * @var array
    */
   protected static $modules = ['node_access_test'];
 
@@ -26,28 +25,14 @@ class NodeQueryAlterTest extends NodeTestBase {
 
   /**
    * User with permission to view content.
-   *
-   * @var \Drupal\user\Entity\User|false
    */
   protected $accessUser;
 
   /**
    * User without permission to view content.
-   *
-   * @var \Drupal\user\Entity\User|false
    */
   protected $noAccessUser;
 
-  /**
-   * User without permission to view content.
-   *
-   * @var \Drupal\user\Entity\User
-   */
-  protected User $noAccessUser2;
-
-  /**
-   * {@inheritdoc}
-   */
   protected function setUp(): void {
     parent::setUp();
 
@@ -82,7 +67,7 @@ class NodeQueryAlterTest extends NodeTestBase {
    * Verifies that a non-standard table alias can be used, and that a user with
    * node access can view the nodes.
    */
-  public function testNodeQueryAlterLowLevelWithAccess(): void {
+  public function testNodeQueryAlterLowLevelWithAccess() {
     // User with access should be able to view 4 nodes.
     try {
       $query = Database::getConnection()->select('node', 'n')
@@ -102,7 +87,7 @@ class NodeQueryAlterTest extends NodeTestBase {
   /**
    * Tests 'node_access' query alter with revision-enabled nodes.
    */
-  public function testNodeQueryAlterWithRevisions(): void {
+  public function testNodeQueryAlterWithRevisions() {
     // Execute a query that only deals with the 'node_revision' table.
     try {
       $query = \Drupal::entityTypeManager()->getStorage('node')->getQuery();
@@ -124,7 +109,7 @@ class NodeQueryAlterTest extends NodeTestBase {
    * Verifies that a non-standard table alias can be used, and that a user
    * without node access cannot view the nodes.
    */
-  public function testNodeQueryAlterLowLevelNoAccess(): void {
+  public function testNodeQueryAlterLowLevelNoAccess() {
     // User without access should be able to view 0 nodes.
     try {
       $query = Database::getConnection()->select('node', 'n')
@@ -147,7 +132,7 @@ class NodeQueryAlterTest extends NodeTestBase {
    * Verifies that a non-standard table alias can be used, and that a user with
    * view-only node access cannot edit the nodes.
    */
-  public function testNodeQueryAlterLowLevelEditAccess(): void {
+  public function testNodeQueryAlterLowLevelEditAccess() {
     // User with view-only access should not be able to edit nodes.
     try {
       $query = Database::getConnection()->select('node', 'n')
@@ -175,7 +160,7 @@ class NodeQueryAlterTest extends NodeTestBase {
    * add a record to {node_access} paired with a corresponding privilege in
    * hook_node_grants().
    */
-  public function testNodeQueryAlterOverride(): void {
+  public function testNodeQueryAlterOverride() {
     $record = [
       'nid' => 0,
       'gid' => 0,

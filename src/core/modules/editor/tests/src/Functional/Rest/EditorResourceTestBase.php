@@ -1,23 +1,20 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\editor\Functional\Rest;
 
-use Drupal\ckeditor5\Plugin\CKEditor5Plugin\Heading;
 use Drupal\editor\Entity\Editor;
 use Drupal\filter\Entity\FilterFormat;
-use Drupal\Tests\rest\Functional\EntityResource\ConfigEntityResourceTestBase;
+use Drupal\Tests\rest\Functional\EntityResource\EntityResourceTestBase;
 
 /**
  * ResourceTestBase for Editor entity.
  */
-abstract class EditorResourceTestBase extends ConfigEntityResourceTestBase {
+abstract class EditorResourceTestBase extends EntityResourceTestBase {
 
   /**
    * {@inheritdoc}
    */
-  protected static $modules = ['ckeditor5', 'editor'];
+  protected static $modules = ['ckeditor', 'editor'];
 
   /**
    * {@inheritdoc}
@@ -62,11 +59,11 @@ abstract class EditorResourceTestBase extends ConfigEntityResourceTestBase {
     // Create a "Camelids" editor.
     $camelids = Editor::create([
       'format' => 'llama',
-      'editor' => 'ckeditor5',
+      'editor' => 'ckeditor',
     ]);
     $camelids
       ->setImageUploadSettings([
-        'status' => TRUE,
+        'status' => FALSE,
         'scheme' => 'public',
         'directory' => 'inline-images',
         'max_size' => '',
@@ -90,16 +87,16 @@ abstract class EditorResourceTestBase extends ConfigEntityResourceTestBase {
           'filter.format.llama',
         ],
         'module' => [
-          'ckeditor5',
+          'ckeditor',
         ],
       ],
-      'editor' => 'ckeditor5',
+      'editor' => 'ckeditor',
       'format' => 'llama',
       'image_upload' => [
-        'status' => TRUE,
+        'status' => FALSE,
         'scheme' => 'public',
         'directory' => 'inline-images',
-        'max_size' => NULL,
+        'max_size' => '',
         'max_dimensions' => [
           'width' => NULL,
           'height' => NULL,
@@ -108,10 +105,49 @@ abstract class EditorResourceTestBase extends ConfigEntityResourceTestBase {
       'langcode' => 'en',
       'settings' => [
         'toolbar' => [
-          'items' => ['heading', 'bold', 'italic'],
+          'rows' => [
+            [
+              [
+                'name' => 'Formatting',
+                'items' => [
+                  'Bold',
+                  'Italic',
+                ],
+              ],
+              [
+                'name' => 'Links',
+                'items' => [
+                  'DrupalLink',
+                  'DrupalUnlink',
+                ],
+              ],
+              [
+                'name' => 'Lists',
+                'items' => [
+                  'BulletedList',
+                  'NumberedList',
+                ],
+              ],
+              [
+                'name' => 'Media',
+                'items' => [
+                  'Blockquote',
+                  'DrupalImage',
+                ],
+              ],
+              [
+                'name' => 'Tools',
+                'items' => [
+                  'Source',
+                ],
+              ],
+            ],
+          ],
         ],
         'plugins' => [
-          'ckeditor5_heading' => Heading::DEFAULT_CONFIGURATION,
+          'language' => [
+            'language_list' => 'un',
+          ],
         ],
       ],
       'status' => TRUE,
@@ -124,7 +160,6 @@ abstract class EditorResourceTestBase extends ConfigEntityResourceTestBase {
    */
   protected function getNormalizedPostEntity() {
     // @todo Update in https://www.drupal.org/node/2300677.
-    return [];
   }
 
   /**

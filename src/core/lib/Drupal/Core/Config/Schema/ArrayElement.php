@@ -15,25 +15,6 @@ abstract class ArrayElement extends Element implements \IteratorAggregate, Typed
   protected $elements;
 
   /**
-   * Determines if there is a translatable value.
-   *
-   * @return bool
-   *   Returns true if a translatable element is found.
-   */
-  public function hasTranslatableElements(): bool {
-    foreach ($this as $element) {
-      // Early return if found.
-      if ($element->getDataDefinition()['translatable'] === TRUE) {
-        return TRUE;
-      }
-      if ($element instanceof ArrayElement && $element->hasTranslatableElements()) {
-        return TRUE;
-      }
-    }
-    return FALSE;
-  }
-
-  /**
    * Gets valid configuration data keys.
    *
    * @return array
@@ -156,7 +137,8 @@ abstract class ArrayElement extends Element implements \IteratorAggregate, Typed
   }
 
   /**
-   * Creates a new data definition object from an array and configuration.
+   * Creates a new data definition object from a type definition array and
+   * actual configuration data.
    *
    * @param array $definition
    *   The base type definition array, for which a data definition should be

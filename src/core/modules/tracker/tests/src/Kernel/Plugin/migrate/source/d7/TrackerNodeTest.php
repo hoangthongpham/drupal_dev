@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\tracker\Kernel\Plugin\migrate\source\d7;
 
 use Drupal\Tests\migrate\Kernel\MigrateSqlSourceTestBase;
@@ -12,7 +10,6 @@ use Drupal\Tests\migrate\Kernel\MigrateSqlSourceTestBase;
  * @covers Drupal\tracker\Plugin\migrate\source\d7\TrackerNode
  *
  * @group tracker
- * @group legacy
  */
 class TrackerNodeTest extends MigrateSqlSourceTestBase {
 
@@ -24,7 +21,7 @@ class TrackerNodeTest extends MigrateSqlSourceTestBase {
   /**
    * {@inheritdoc}
    */
-  public static function providerSource() {
+  public function providerSource() {
     $tests = [];
 
     // The source data.

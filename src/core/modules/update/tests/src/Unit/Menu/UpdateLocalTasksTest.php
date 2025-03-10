@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\update\Unit\Menu;
 
 use Drupal\Tests\Core\Menu\LocalTaskIntegrationTestBase;
@@ -13,9 +11,6 @@ use Drupal\Tests\Core\Menu\LocalTaskIntegrationTestBase;
  */
 class UpdateLocalTasksTest extends LocalTaskIntegrationTestBase {
 
-  /**
-   * {@inheritdoc}
-   */
   protected function setUp(): void {
     $this->directoryList = ['update' => 'core/modules/update'];
     parent::setUp();
@@ -26,7 +21,7 @@ class UpdateLocalTasksTest extends LocalTaskIntegrationTestBase {
    *
    * @dataProvider getUpdateReportRoutes
    */
-  public function testUpdateReportLocalTasks($route): void {
+  public function testUpdateReportLocalTasks($route) {
     $this->assertLocalTasks($route, [
       0 => ['update.status', 'update.settings', 'update.report_update'],
     ]);
@@ -35,7 +30,7 @@ class UpdateLocalTasksTest extends LocalTaskIntegrationTestBase {
   /**
    * Provides a list of report routes to test.
    */
-  public static function getUpdateReportRoutes() {
+  public function getUpdateReportRoutes() {
     return [
       ['update.status'],
       ['update.settings'],
@@ -48,7 +43,7 @@ class UpdateLocalTasksTest extends LocalTaskIntegrationTestBase {
    *
    * @dataProvider getUpdateModuleRoutes
    */
-  public function testUpdateModuleLocalTasks($route): void {
+  public function testUpdateModuleLocalTasks($route) {
     $this->assertLocalTasks($route, [
       0 => ['update.module_update'],
     ]);
@@ -57,7 +52,7 @@ class UpdateLocalTasksTest extends LocalTaskIntegrationTestBase {
   /**
    * Provides a list of module routes to test.
    */
-  public static function getUpdateModuleRoutes() {
+  public function getUpdateModuleRoutes() {
     return [
       ['update.module_update'],
     ];
@@ -68,7 +63,7 @@ class UpdateLocalTasksTest extends LocalTaskIntegrationTestBase {
    *
    * @dataProvider getUpdateThemeRoutes
    */
-  public function testUpdateThemeLocalTasks($route): void {
+  public function testUpdateThemeLocalTasks($route) {
     $this->assertLocalTasks($route, [
       0 => ['update.theme_update'],
     ]);
@@ -77,7 +72,7 @@ class UpdateLocalTasksTest extends LocalTaskIntegrationTestBase {
   /**
    * Provides a list of theme routes to test.
    */
-  public static function getUpdateThemeRoutes() {
+  public function getUpdateThemeRoutes() {
     return [
       ['update.theme_update'],
     ];

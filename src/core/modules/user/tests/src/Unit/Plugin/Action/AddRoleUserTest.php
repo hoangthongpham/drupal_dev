@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\user\Unit\Plugin\Action;
 
 use Drupal\user\Plugin\Action\AddRoleUser;
@@ -15,15 +13,14 @@ class AddRoleUserTest extends RoleUserTestBase {
   /**
    * Tests the execute method on a user with a role.
    */
-  public function testExecuteAddExistingRole(): void {
+  public function testExecuteAddExistingRole() {
     $this->account->expects($this->never())
-      ->method('addRole')
-      ->willReturn($this->account);
+      ->method('addRole');
 
     $this->account->expects($this->any())
       ->method('hasRole')
       ->with($this->equalTo('test_role_1'))
-      ->willReturn(TRUE);
+      ->will($this->returnValue(TRUE));
 
     $config = ['rid' => 'test_role_1'];
     $add_role_plugin = new AddRoleUser($config, 'user_add_role_action', ['type' => 'user'], $this->userRoleEntityType);
@@ -34,15 +31,14 @@ class AddRoleUserTest extends RoleUserTestBase {
   /**
    * Tests the execute method on a user without a specific role.
    */
-  public function testExecuteAddNonExistingRole(): void {
+  public function testExecuteAddNonExistingRole() {
     $this->account->expects($this->once())
-      ->method('addRole')
-      ->willReturn($this->account);
+      ->method('addRole');
 
     $this->account->expects($this->any())
       ->method('hasRole')
       ->with($this->equalTo('test_role_1'))
-      ->willReturn(FALSE);
+      ->will($this->returnValue(FALSE));
 
     $config = ['rid' => 'test_role_1'];
     $add_role_plugin = new AddRoleUser($config, 'user_add_role_action', ['type' => 'user'], $this->userRoleEntityType);

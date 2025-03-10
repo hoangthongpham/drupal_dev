@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\field\Kernel;
 
 use Drupal\Component\Render\FormattableMarkup;
@@ -17,7 +15,9 @@ use Drupal\KernelTests\KernelTestBase;
 abstract class FieldKernelTestBase extends KernelTestBase {
 
   /**
-   * {@inheritdoc}
+   * Modules to enable.
+   *
+   * @var array
    */
   protected static $modules = [
     'user',
@@ -45,23 +45,19 @@ abstract class FieldKernelTestBase extends KernelTestBase {
   protected $fieldTestData;
 
   /**
-   * @var string
-   */
-  protected string $entityId;
-
-  /**
    * Set the default field storage backend for fields created during tests.
    */
-  protected function setUp(): void {
+  protected function setUp() {
     parent::setUp();
 
     $this->fieldTestData = new \ArrayObject([], \ArrayObject::ARRAY_AS_PROPS);
 
     $this->installEntitySchema('entity_test');
     $this->installEntitySchema('user');
+    $this->installSchema('system', ['sequences']);
 
     // Set default storage backend and configure the theme system.
-    $this->installConfig(['field', 'system', 'user']);
+    $this->installConfig(['field', 'system']);
 
     // Create user 1.
     $storage = \Drupal::entityTypeManager()->getStorage('user');
@@ -98,7 +94,7 @@ abstract class FieldKernelTestBase extends KernelTestBase {
     $field = 'field' . $suffix;
     $field_definition = 'field_definition' . $suffix;
 
-    $this->fieldTestData->$field_name = $this->randomMachineName() . '_field_name' . $suffix;
+    $this->fieldTestData->$field_name = mb_strtolower($this->randomMachineName() . '_field_name' . $suffix);
     $this->fieldTestData->$field_storage = FieldStorageConfig::create([
       'field_name' => $this->fieldTestData->$field_name,
       'entity_type' => $entity_type,
@@ -155,7 +151,7 @@ abstract class FieldKernelTestBase extends KernelTestBase {
   protected function entityValidateAndSave(EntityInterface $entity) {
     $violations = $entity->validate();
     if ($violations->count()) {
-      $this->fail((string) $violations);
+      $this->fail($violations);
     }
     else {
       $entity->save();
@@ -168,7 +164,7 @@ abstract class FieldKernelTestBase extends KernelTestBase {
    * @param $cardinality
    *   Number of values to generate.
    *
-   * @return array
+   * @return
    *   An array of random values, in the format expected for field values.
    */
   protected function _generateTestFieldValues($cardinality) {

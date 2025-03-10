@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\media\FunctionalJavascript;
 
 use Drupal\media\Entity\Media;
@@ -17,14 +15,12 @@ class MediaSourceFileTest extends MediaSourceTestBase {
   /**
    * {@inheritdoc}
    */
-  protected $defaultTheme = 'stark';
+  protected $defaultTheme = 'classy';
 
   /**
    * Tests the file media source.
    */
-  public function testMediaFileSource(): void {
-    // Skipped due to frequent random test failures.
-    $this->markTestSkipped();
+  public function testMediaFileSource() {
     $media_type_id = 'test_media_file_type';
     $source_field_id = 'field_media_file';
     $provided_fields = [
@@ -74,7 +70,7 @@ class MediaSourceFileTest extends MediaSourceTestBase {
     // Make sure a link to the file is displayed.
     $assert_session->linkExists($test_filename);
     // The thumbnail should not be displayed.
-    $assert_session->elementNotExists('css', 'img');
+    $assert_session->elementNotExists('css', '.image-style-thumbnail');
 
     // Make sure checkbox changes the visibility of log message field.
     $this->drupalGet("media/1/edit");
@@ -97,7 +93,7 @@ class MediaSourceFileTest extends MediaSourceTestBase {
     $result = $assert_session->waitForButton('Remove');
     $this->assertNotEmpty($result);
     $page->pressButton('Save');
-    $assert_session->elementAttributeContains('css', 'img', 'src', 'text--plain.png');
+    $assert_session->elementAttributeContains('css', '.image-style-thumbnail', 'src', 'text--plain.png');
 
     // Check if the mapped name is automatically updated.
     $new_filename = $this->randomMachineName() . '.txt';
@@ -114,7 +110,7 @@ class MediaSourceFileTest extends MediaSourceTestBase {
     /** @var \Drupal\media\MediaInterface $media */
     $media = \Drupal::entityTypeManager()->getStorage('media')->loadUnchanged(1);
     $this->assertEquals($new_filename, $media->getName());
-    $assert_session->statusMessageContains("$new_filename has been updated.", 'status');
+    $assert_session->pageTextContains("$new_filename has been updated.");
   }
 
 }

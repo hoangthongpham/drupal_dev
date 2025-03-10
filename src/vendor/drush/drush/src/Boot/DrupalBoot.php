@@ -1,11 +1,11 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drush\Boot;
 
 use Drush\Drush;
-use Symfony\Component\Filesystem\Path;
+use Drush\Log\LogLevel;
+use Drush\Sql\SqlBase;
+use Webmozart\PathUtil\Path;
 
 abstract class DrupalBoot extends BaseBoot
 {
@@ -13,7 +13,7 @@ abstract class DrupalBoot extends BaseBoot
      * Select the best URI for the provided cwd. Only called
      * if the user did not explicitly specify a URI.
      */
-    public function findUri($root, $cwd): string
+    public function findUri($root, $cwd)
     {
         if (Path::isBasePath($root, $cwd)) {
             $siteDir = $this->scanUpForUri($root, $cwd);
@@ -38,16 +38,23 @@ abstract class DrupalBoot extends BaseBoot
                 return false;
             }
             $scan = $next;
-            if ($scan === $root) {
+            if ($scan == $root) {
                 return false;
             }
         }
         return false;
     }
 
-    public function confPath(bool $require_settings = true, bool $reset = false): ?string
+    public function validRoot($path)
     {
-        return null;
+    }
+
+    public function getVersion($drupal_root)
+    {
+    }
+
+    public function confPath($require_settings = true, $reset = false)
+    {
     }
 
     /**
@@ -65,28 +72,27 @@ abstract class DrupalBoot extends BaseBoot
      * method is called, if defined.  The validate method name is the
      * bootstrap method name with "_validate" appended.
      */
-    public function bootstrapPhases(): array
+    public function bootstrapPhases()
     {
-        return [
-            DrupalBootLevels::NONE            => 'NoLongerUsed',
-            DrupalBootLevels::ROOT            => 'bootstrapDrupalRoot',
-            DrupalBootLevels::SITE            => 'bootstrapDrupalSite',
-            DrupalBootLevels::CONFIGURATION   => 'bootstrapDrupalConfiguration',
-            DrupalBootLevels::DATABASE        => 'bootstrapDrupalDatabase',
-            DrupalBootLevels::FULL            => 'bootstrapDrupalFull',
+        return parent::bootstrapPhases() + [
+            DRUSH_BOOTSTRAP_DRUPAL_ROOT            => 'bootstrapDrupalRoot',
+            DRUSH_BOOTSTRAP_DRUPAL_SITE            => 'bootstrapDrupalSite',
+            DRUSH_BOOTSTRAP_DRUPAL_CONFIGURATION   => 'bootstrapDrupalConfiguration',
+            DRUSH_BOOTSTRAP_DRUPAL_DATABASE        => 'bootstrapDrupalDatabase',
+            DRUSH_BOOTSTRAP_DRUPAL_FULL            => 'bootstrapDrupalFull',
         ];
     }
 
-    public function bootstrapPhaseMap(): array
+    public function bootstrapPhaseMap()
     {
         return parent::bootstrapPhaseMap() + [
-            'root' => DrupalBootLevels::ROOT,
-            'site' => DrupalBootLevels::SITE,
-            'config' => DrupalBootLevels::CONFIGURATION,
-            'configuration' => DrupalBootLevels::CONFIGURATION,
-            'db' => DrupalBootLevels::DATABASE,
-            'database' => DrupalBootLevels::DATABASE,
-            'full' => DrupalBootLevels::FULL,
+            'root' => DRUSH_BOOTSTRAP_DRUPAL_ROOT,
+            'site' => DRUSH_BOOTSTRAP_DRUPAL_SITE,
+            'config' => DRUSH_BOOTSTRAP_DRUPAL_CONFIGURATION,
+            'configuration' => DRUSH_BOOTSTRAP_DRUPAL_CONFIGURATION,
+            'db' => DRUSH_BOOTSTRAP_DRUPAL_DATABASE,
+            'database' => DRUSH_BOOTSTRAP_DRUPAL_DATABASE,
+            'full' => DRUSH_BOOTSTRAP_DRUPAL_FULL,
         ];
     }
 
@@ -95,7 +101,7 @@ abstract class DrupalBoot extends BaseBoot
      *
      * In this function, we will check if a valid Drupal directory is available.
      */
-    public function bootstrapDrupalRootValidate(BootstrapManager $manager): bool
+    public function bootstrapDrupalRootValidate(BootstrapManager $manager)
     {
         $drupal_root = $manager->getRoot();
         return (bool) $drupal_root;
@@ -111,11 +117,11 @@ abstract class DrupalBoot extends BaseBoot
      * We can now include files from the Drupal tree, and figure
      * out more context about the codebase, such as the version of Drupal.
      */
-    public function bootstrapDrupalRoot(BootstrapManager $manager): void
+    public function bootstrapDrupalRoot(BootstrapManager $manager)
     {
         $drupal_root = $manager->getRoot();
         chdir($drupal_root);
-        $this->logger->info(dt("Change working directory to !drupal_root", ['!drupal_root' => $drupal_root]));
+        $this->logger->log(LogLevel::BOOTSTRAP, dt("Change working directory to !drupal_root", ['!drupal_root' => $drupal_root]));
 
         $core = $this->bootstrapDrupalCore($manager, $drupal_root);
 
@@ -128,15 +134,9 @@ abstract class DrupalBoot extends BaseBoot
         }
 
         // DRUSH_DRUPAL_CORE should point to the /core folder in Drupal 8+.
-        // @deprecated. See bootstrapDrupalCore().
         define('DRUSH_DRUPAL_CORE', $core);
 
-        $this->logger->info(dt("Initialized Drupal !version root directory at !drupal_root", ["!version" => Drush::bootstrap()->getVersion($drupal_root), '!drupal_root' => $drupal_root]));
-    }
-
-    public function bootstrapDrupalCore(BootstrapManager $manager, string $drupal_root): string
-    {
-        return Path::join($drupal_root, 'core');
+        $this->logger->log(LogLevel::BOOTSTRAP, dt("Initialized Drupal !version root directory at !drupal_root", ["!version" => Drush::bootstrap()->getVersion($drupal_root), '!drupal_root' => $drupal_root]));
     }
 
     /**
@@ -147,6 +147,17 @@ abstract class DrupalBoot extends BaseBoot
      */
     public function bootstrapDrupalSiteValidate(BootstrapManager $manager)
     {
+    }
+
+    /**
+     * Initialize a site on the Drupal root.
+     *
+     * We now set various contexts that we determined and confirmed to be valid.
+     * Additionally we load an optional drush.yml file in the site directory.
+     */
+    public function bootstrapDrupalSite(BootstrapManager $manager)
+    {
+        $this->bootstrapDoDrupalSite($manager);
     }
 
     /**
@@ -170,17 +181,17 @@ abstract class DrupalBoot extends BaseBoot
     /**
      * Bootstrap the Drupal database.
      */
-    public function bootstrapDrupalDatabase(BootstrapManager $manager): void
+    public function bootstrapDrupalDatabase(BootstrapManager $manager)
     {
         // We presume that our derived classes will connect and then
         // either fail, or call us via parent::
-        $this->logger->info(dt("Successfully connected to the Drupal database."));
+        $this->logger->log(LogLevel::BOOTSTRAP, dt("Successfully connected to the Drupal database."));
     }
 
     /**
      * Attempt to load the full Drupal system.
      */
-    public function bootstrapDrupalFull(BootstrapManager $manager): void
+    public function bootstrapDrupalFull(BootstrapManager $manager)
     {
     }
 }

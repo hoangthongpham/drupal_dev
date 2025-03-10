@@ -2,8 +2,8 @@
 
 namespace Drupal\Tests\commerce_price\Functional;
 
-use Drupal\Tests\commerce\Functional\CommerceBrowserTestBase;
 use Drupal\language\Entity\ConfigurableLanguage;
+use Drupal\Tests\commerce\Functional\CommerceBrowserTestBase;
 
 /**
  * Tests the number element.

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\migrate_drupal\Traits;
 
 use Drupal\migrate_drupal\NodeMigrateType;
@@ -184,7 +182,7 @@ trait NodeMigrateTypeTestTrait {
       foreach ($keys as $key) {
         unset($fields[$key]);
         unset($values[$key]);
-        if (str_contains($key, 'sourceid')) {
+        if (strstr($key, 'sourceid')) {
           $index_key = substr($key, -1) - 1;
           unset($indexes['source'][$index_key]);
         }

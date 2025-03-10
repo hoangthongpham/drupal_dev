@@ -1,12 +1,8 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\FunctionalTests\Installer;
 
 use Drupal\Tests\BrowserTestBase;
-
-// cspell:ignore montag
 
 /**
  * Tests translation files for multiple languages get imported during install.
@@ -47,8 +43,8 @@ class InstallerTranslationMultipleLanguageNonInteractiveTest extends BrowserTest
    * @return string
    *   Contents for the test .po file.
    */
-  protected function getPo($langcode): string {
-    return <<<PO
+  protected function getPo($langcode) {
+    return <<<ENDPO
 msgid ""
 msgstr ""
 
@@ -64,7 +60,7 @@ msgstr "Language $langcode"
 #: Testing site name configuration during the installer.
 msgid "Drupal"
 msgstr "Drupal"
-PO;
+ENDPO;
   }
 
   /**
@@ -79,7 +75,7 @@ PO;
   /**
    * Tests that translations ended up at the expected places.
    */
-  public function testTranslationsLoaded(): void {
+  public function testTranslationsLoaded() {
     $this->drupalLogin($this->createUser([], NULL, TRUE));
     // Ensure the title is correct.
     $this->assertEquals('SITE_NAME_en', \Drupal::config('system.site')->get('name'));

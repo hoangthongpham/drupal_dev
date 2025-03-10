@@ -154,7 +154,10 @@ class FileStorage implements StorageInterface {
       $status = @file_put_contents($target, $encoded_data);
     }
     if ($status === FALSE) {
-      throw new StorageException('Failed to write configuration file: ' . $target);
+      throw new StorageException('Failed to write configuration file: ' . $this->getFilePath($name));
+    }
+    else {
+      $this->getFileSystem()->chmod($target);
     }
 
     $this->fileCache->set($target, $data);
@@ -291,12 +294,12 @@ class FileStorage implements StorageInterface {
    *   ./collection/sub/two
    * this function will return:
    * @code
-   *   [
+   *   array(
    *     'another_collection.one',
    *     'another_collection.two',
    *     'collection.sub.one',
    *     'collection.sub.two',
-   *   ];
+   *   );
    * @endcode
    *
    * @param string $directory

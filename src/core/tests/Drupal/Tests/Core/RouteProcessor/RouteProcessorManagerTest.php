@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\Core\RouteProcessor;
 
 use Drupal\Core\Cache\Cache;
@@ -23,19 +21,14 @@ class RouteProcessorManagerTest extends UnitTestCase {
    */
   protected $processorManager;
 
-  /**
-   * {@inheritdoc}
-   */
   protected function setUp(): void {
-    parent::setUp();
-
     $this->processorManager = new RouteProcessorManager();
   }
 
   /**
    * Tests the Route process manager functionality.
    */
-  public function testRouteProcessorManager(): void {
+  public function testRouteProcessorManager() {
     $route = new Route('');
     $parameters = ['test' => 'test'];
     $route_name = 'test_name';

@@ -2,11 +2,11 @@
 
 namespace Drupal\commerce_store\Entity;
 
-use Drupal\Core\Entity\ContentEntityInterface;
-use Drupal\Core\Entity\EntityChangedInterface;
 use Drupal\address\AddressInterface;
 use Drupal\commerce_price\Entity\CurrencyInterface;
+use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\user\EntityOwnerInterface;
+use Drupal\Core\Entity\EntityChangedInterface;
 
 /**
  * Defines the interface for stores.

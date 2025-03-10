@@ -1,18 +1,15 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\KernelTests\Core\Entity;
 
 use Drupal\Tests\SchemaCheckTestTrait;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityStorageException;
 use Drupal\Core\Field\BaseFieldDefinition;
-use Drupal\Core\Field\FieldException;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
-use Drupal\Tests\field\Traits\EntityReferenceFieldCreationTrait;
+use Drupal\Tests\field\Traits\EntityReferenceTestTrait;
 use Drupal\user\Entity\Role;
 use Drupal\user\Entity\User;
 use Drupal\user\RoleInterface;
@@ -27,7 +24,7 @@ use Drupal\entity_test\Entity\EntityTestStringId;
 class EntityReferenceFieldTest extends EntityKernelTestBase {
 
   use SchemaCheckTestTrait;
-  use EntityReferenceFieldCreationTrait;
+  use EntityReferenceTestTrait;
 
   /**
    * The entity type used in this test.
@@ -58,7 +55,9 @@ class EntityReferenceFieldTest extends EntityKernelTestBase {
   protected $fieldName = 'field_test';
 
   /**
-   * {@inheritdoc}
+   * Modules to install.
+   *
+   * @var array
    */
   protected static $modules = ['entity_reference_test', 'entity_test_update'];
 
@@ -87,7 +86,7 @@ class EntityReferenceFieldTest extends EntityKernelTestBase {
   /**
    * Tests reference field validation.
    */
-  public function testEntityReferenceFieldValidation(): void {
+  public function testEntityReferenceFieldValidation() {
     // Test a valid reference.
     $referenced_entity = $this->container->get('entity_type.manager')
       ->getStorage($this->referencedEntityType)
@@ -105,7 +104,7 @@ class EntityReferenceFieldTest extends EntityKernelTestBase {
     $entity->{$this->fieldName}->target_id = 9999;
     $violations = $entity->{$this->fieldName}->validate();
     $this->assertEquals(1, $violations->count(), 'Validation throws a violation.');
-    $this->assertEquals(sprintf('The referenced entity (%s: 9999) does not exist.', $this->referencedEntityType), $violations[0]->getMessage());
+    $this->assertEquals(t('The referenced entity (%type: %id) does not exist.', ['%type' => $this->referencedEntityType, '%id' => 9999]), $violations[0]->getMessage());
 
     // Test a non-referenceable bundle.
     entity_test_create_bundle('non_referenceable', NULL, $this->referencedEntityType);
@@ -116,13 +115,13 @@ class EntityReferenceFieldTest extends EntityKernelTestBase {
     $entity->{$this->fieldName}->target_id = $referenced_entity->id();
     $violations = $entity->{$this->fieldName}->validate();
     $this->assertEquals(1, $violations->count(), 'Validation throws a violation.');
-    $this->assertEquals(sprintf('This entity (%s: %s) cannot be referenced.', $this->referencedEntityType, $referenced_entity->id()), $violations[0]->getMessage());
+    $this->assertEquals(t('This entity (%type: %id) cannot be referenced.', ['%type' => $this->referencedEntityType, '%id' => $referenced_entity->id()]), $violations[0]->getMessage());
   }
 
   /**
    * Tests the multiple target entities loader.
    */
-  public function testReferencedEntitiesMultipleLoad(): void {
+  public function testReferencedEntitiesMultipleLoad() {
     // Create the parent entity.
     $entity = $this->container->get('entity_type.manager')
       ->getStorage($this->entityType)
@@ -194,7 +193,7 @@ class EntityReferenceFieldTest extends EntityKernelTestBase {
   /**
    * Tests referencing entities with string IDs.
    */
-  public function testReferencedEntitiesStringId(): void {
+  public function testReferencedEntitiesStringId() {
     $field_name = 'entity_reference_string_id';
     $this->installEntitySchema('entity_test_string_id');
     $this->createEntityReferenceField(
@@ -244,7 +243,7 @@ class EntityReferenceFieldTest extends EntityKernelTestBase {
   /**
    * Tests all the possible ways to autocreate an entity via the API.
    */
-  public function testAutocreateApi(): void {
+  public function testAutocreateApi() {
     $entity = $this->entityTypeManager
       ->getStorage($this->entityType)
       ->create(['name' => $this->randomString()]);
@@ -370,29 +369,9 @@ class EntityReferenceFieldTest extends EntityKernelTestBase {
   }
 
   /**
-   * Tests exception thrown with a missing target entity type.
-   */
-  public function testTargetEntityTypeMissing(): void {
-    // Setup a test entity type with an entity reference field to an entity type
-    // that doesn't exist.
-    $definitions = [
-      'bad_reference' => BaseFieldDefinition::create('entity_reference')
-        ->setSetting('target_type', 'made_up_entity_type')
-        ->setSetting('handler', 'default'),
-    ];
-    $this->state->set('entity_test.additional_base_field_definitions', $definitions);
-    $this->entityTypeManager->clearCachedDefinitions();
-
-    $this->expectException(FieldException::class);
-    $this->expectExceptionMessage("Field 'bad_reference' on entity type 'entity_test' references a target entity type 'made_up_entity_type' which does not exist.");
-
-    $this->installEntitySchema('entity_test');
-  }
-
-  /**
    * Tests that the target entity is not unnecessarily loaded.
    */
-  public function testTargetEntityNoLoad(): void {
+  public function testTargetEntityNoLoad() {
     // Setup a test entity type with an entity reference field to itself. We use
     // a special storage class throwing exceptions when a load operation is
     // triggered to be able to detect them.
@@ -443,7 +422,7 @@ class EntityReferenceFieldTest extends EntityKernelTestBase {
   /**
    * Tests the dependencies entity reference fields are created with.
    */
-  public function testEntityReferenceFieldDependencies(): void {
+  public function testEntityReferenceFieldDependencies() {
     $field_name = 'user_reference_field';
     $entity_type = 'entity_test';
 

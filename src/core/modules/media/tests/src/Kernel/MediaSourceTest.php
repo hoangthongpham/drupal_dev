@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\media\Kernel;
 
 use Drupal\Core\Form\FormState;
@@ -18,14 +16,9 @@ use Drupal\media\Entity\MediaType;
 class MediaSourceTest extends MediaKernelTestBase {
 
   /**
-   * {@inheritdoc}
-   */
-  protected static $modules = ['field_ui'];
-
-  /**
    * Tests that metadata is correctly mapped irrespective of how media is saved.
    */
-  public function testSave(): void {
+  public function testSave() {
     $field_storage = FieldStorageConfig::create([
       'entity_type' => 'media',
       'field_name' => 'field_to_map_to',
@@ -91,7 +84,7 @@ class MediaSourceTest extends MediaKernelTestBase {
   /**
    * Tests default media name functionality.
    */
-  public function testDefaultName(): void {
+  public function testDefaultName() {
     // Make sure that the default name is set if not provided by the user.
     /** @var \Drupal\media\MediaInterface $media */
     $media = Media::create(['bundle' => $this->testMediaType->id()]);
@@ -135,7 +128,7 @@ class MediaSourceTest extends MediaKernelTestBase {
   /**
    * Tests metadata mapping functionality.
    */
-  public function testMetadataMapping(): void {
+  public function testMetadataMapping() {
     $field_name = 'field_to_map_to';
     $attribute_name = 'attribute_to_map';
     $storage = FieldStorageConfig::create([
@@ -216,7 +209,7 @@ class MediaSourceTest extends MediaKernelTestBase {
   /**
    * Tests the getSourceFieldValue() method.
    */
-  public function testGetSourceFieldValue(): void {
+  public function testGetSourceFieldValue() {
     /** @var \Drupal\media\MediaInterface $media */
     $media = Media::create([
       'bundle' => $this->testMediaType->id(),
@@ -234,7 +227,7 @@ class MediaSourceTest extends MediaKernelTestBase {
   /**
    * Tests the thumbnail functionality.
    */
-  public function testThumbnail(): void {
+  public function testThumbnail() {
     file_put_contents('public://thumbnail1.jpg', '');
     file_put_contents('public://thumbnail2.jpg', '');
 
@@ -307,25 +300,6 @@ class MediaSourceTest extends MediaKernelTestBase {
     $this->assertEmpty($media->thumbnail->title);
     $this->assertSame('', $media->thumbnail->alt);
 
-    // Set the width and height metadata attributes and make sure they're used
-    // for the thumbnail.
-    \Drupal::state()->set('media_source_test_definition', [
-      'thumbnail_width_metadata_attribute' => 'width',
-      'thumbnail_height_metadata_attribute' => 'height',
-    ]);
-    \Drupal::state()->set('media_source_test_attributes', [
-      'width' => ['value' => 1024],
-      'height' => ['value' => 768],
-    ]);
-    $media = Media::create([
-      'bundle' => $this->testMediaType->id(),
-      'name' => 'Are you looking at me?',
-      'field_media_test' => 'some_value',
-    ]);
-    $media->save();
-    $this->assertSame(1024, $media->thumbnail->width);
-    $this->assertSame(768, $media->thumbnail->height);
-
     // Enable queued thumbnails and make sure that the entity gets the default
     // thumbnail initially.
     \Drupal::state()->set('media_source_test_definition', []);
@@ -384,7 +358,7 @@ class MediaSourceTest extends MediaKernelTestBase {
   /**
    * Tests the media item constraints functionality.
    */
-  public function testConstraints(): void {
+  public function testConstraints() {
     // Test entity constraints.
     \Drupal::state()->set('media_source_test_entity_constraints', [
       'MediaTestConstraint' => [],
@@ -451,7 +425,7 @@ class MediaSourceTest extends MediaKernelTestBase {
   /**
    * Tests logic related to the automated source field creation.
    */
-  public function testSourceFieldCreation(): void {
+  public function testSourceFieldCreation() {
     /** @var \Drupal\media\MediaTypeInterface $type */
     $type = MediaType::create([
       'id' => 'test_type',
@@ -513,30 +487,12 @@ class MediaSourceTest extends MediaKernelTestBase {
     $this->assertTrue($field->isRequired(), 'Field is not required.');
     $this->assertEquals('Test source with constraints', $field->label(), 'Incorrect label is used.');
     $this->assertSame('test_constraints_type', $field->getTargetBundle(), 'Field is not targeting correct bundle.');
-
-    // Test that new source fields respect the configured field prefix, no
-    // prefix at all if that's what's configured.
-    $this->installConfig('field_ui');
-    $this->config('field_ui.settings')
-      ->set('field_prefix', 'prefix_')
-      ->save();
-    $type = MediaType::create([
-      'id' => $this->randomMachineName(),
-      'label' => $this->randomString(),
-      'source' => 'test',
-    ]);
-    $this->assertSame('prefix_media_test', $type->getSource()->createSourceField($type)->getName());
-
-    $this->config('field_ui.settings')
-      ->set('field_prefix', '')
-      ->save();
-    $this->assertSame('media_test', $type->getSource()->createSourceField($type)->getName());
   }
 
   /**
    * Tests configuration form submit handler on the base media source plugin.
    */
-  public function testSourceConfigurationSubmit(): void {
+  public function testSourceConfigurationSubmit() {
     /** @var \Drupal\media\MediaSourceManager $manager */
     $manager = $this->container->get('plugin.manager.media.source');
     $form = [];
@@ -571,7 +527,7 @@ class MediaSourceTest extends MediaKernelTestBase {
   /**
    * Tests different display options for the source field.
    */
-  public function testDifferentSourceFieldDisplays(): void {
+  public function testDifferentSourceFieldDisplays() {
     $id = 'test_different_displays';
     $field_name = 'field_media_different_display';
 
@@ -592,7 +548,7 @@ class MediaSourceTest extends MediaKernelTestBase {
   /**
    * Tests hidden source field in media type.
    */
-  public function testHiddenSourceField(): void {
+  public function testHiddenSourceField() {
     $id = 'test_hidden_source_field';
     $field_name = 'field_media_hidden';
 
@@ -626,7 +582,7 @@ class MediaSourceTest extends MediaKernelTestBase {
     $form_state->setValues([
       'label' => 'Test type',
       'id' => $source_plugin_id,
-      'op' => 'Save and manage fields',
+      'op' => 'Save',
     ]);
 
     /** @var \Drupal\Core\Entity\EntityFieldManagerInterface $field_manager */

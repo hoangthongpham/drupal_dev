@@ -1,13 +1,11 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\views\Functional\Rest;
 
-use Drupal\Tests\rest\Functional\EntityResource\ConfigEntityResourceTestBase;
+use Drupal\Tests\rest\Functional\EntityResource\EntityResourceTestBase;
 use Drupal\views\Entity\View;
 
-abstract class ViewResourceTestBase extends ConfigEntityResourceTestBase {
+abstract class ViewResourceTestBase extends EntityResourceTestBase {
 
   /**
    * {@inheritdoc}
@@ -86,7 +84,6 @@ abstract class ViewResourceTestBase extends ConfigEntityResourceTestBase {
    */
   protected function getNormalizedPostEntity() {
     // @todo Update in https://www.drupal.org/node/2300677.
-    return [];
   }
 
 }

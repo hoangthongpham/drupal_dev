@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\block\Functional;
 
 use Drupal\Component\Utility\Html;
@@ -15,7 +13,9 @@ use Drupal\Tests\BrowserTestBase;
 class BlockRenderOrderTest extends BrowserTestBase {
 
   /**
-   * {@inheritdoc}
+   * Modules to install.
+   *
+   * @var array
    */
   protected static $modules = ['node', 'block'];
 
@@ -24,9 +24,6 @@ class BlockRenderOrderTest extends BrowserTestBase {
    */
   protected $defaultTheme = 'stark';
 
-  /**
-   * {@inheritdoc}
-   */
   protected function setUp(): void {
     parent::setUp();
     // Create a test user.
@@ -39,7 +36,7 @@ class BlockRenderOrderTest extends BrowserTestBase {
   /**
    * Tests the render order of the blocks.
    */
-  public function testBlockRenderOrder(): void {
+  public function testBlockRenderOrder() {
     // Enable test blocks and place them in the same region.
     $region = 'header';
     $test_blocks = [

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\jsonapi\Functional;
 
 use Drupal\Core\Cache\Cache;
@@ -110,12 +108,11 @@ class EntityTestComputedFieldTest extends ResourceTestBase {
           'self' => ['href' => $self_url],
         ],
         'attributes' => [
-          'created' => (new \DateTime())->setTimestamp((int) $this->entity->get('created')->value)->setTimezone(new \DateTimeZone('UTC'))->format(\DateTime::RFC3339),
+          'created' => (new \DateTime())->setTimestamp($this->entity->get('created')->value)->setTimezone(new \DateTimeZone('UTC'))->format(\DateTime::RFC3339),
           'name' => 'Llama',
           'drupal_internal__id' => 1,
           'computed_string_field' => NULL,
           'computed_test_cacheable_string_field' => 'computed test cacheable string field',
-          'computed_test_cacheable_integer_field' => 0,
         ],
         'relationships' => [
           'computed_reference_field' => [
@@ -151,7 +148,7 @@ class EntityTestComputedFieldTest extends ResourceTestBase {
       'data' => [
         'type' => 'entity_test_computed_field--entity_test_computed_field',
         'attributes' => [
-          'name' => 'Drama llama',
+          'name' => 'Dramallama',
         ],
       ],
     ];
@@ -169,16 +166,16 @@ class EntityTestComputedFieldTest extends ResourceTestBase {
     ]));
   }
 
-  protected function getExpectedCacheContexts(?array $sparse_fieldset = NULL) {
+  protected function getExpectedCacheContexts(array $sparse_fieldset = NULL) {
     $cache_contexts = parent::getExpectedCacheContexts($sparse_fieldset);
     if ($sparse_fieldset === NULL || in_array('computed_test_cacheable_string_field', $sparse_fieldset)) {
-      $cache_contexts = Cache::mergeContexts($cache_contexts, ['url.query_args']);
+      $cache_contexts = Cache::mergeContexts($cache_contexts, ['url.query_args:computed_test_cacheable_string_field']);
     }
 
     return $cache_contexts;
   }
 
-  protected function getExpectedCacheTags(?array $sparse_fieldset = NULL) {
+  protected function getExpectedCacheTags(array $sparse_fieldset = NULL) {
     $expected_cache_tags = parent::getExpectedCacheTags($sparse_fieldset);
     if ($sparse_fieldset === NULL || in_array('computed_test_cacheable_string_field', $sparse_fieldset)) {
       $expected_cache_tags = Cache::mergeTags($expected_cache_tags, ['field:computed_test_cacheable_string_field']);

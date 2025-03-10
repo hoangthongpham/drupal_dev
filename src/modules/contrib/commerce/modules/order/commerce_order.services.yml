@@ -12,6 +12,7 @@ services:
   commerce_order.availability_manager:
     class: Drupal\commerce_order\AvailabilityManager
     tags:
+      - { name: service_collector, tag: commerce.availability_checker, call: addLegacyChecker }
       - { name: service_collector, tag: commerce_order.availability_checker, call: addChecker }
 
   commerce_order.chain_order_type_resolver:
@@ -82,7 +83,7 @@ services:
 
   commerce_order.order_receipt_mail:
     class: Drupal\commerce_order\Mail\OrderReceiptMail
-    arguments: ['@entity_type.manager', '@commerce.mail_handler', '@commerce_order.order_total_summary', '@token']
+    arguments: ['@entity_type.manager', '@commerce.mail_handler', '@commerce_order.order_total_summary']
 
   commerce_order.order_total_summary:
     class: Drupal\commerce_order\OrderTotalSummary
@@ -101,8 +102,3 @@ services:
   commerce_order.price_calculator:
     class: Drupal\commerce_order\PriceCalculator
     arguments: ['@commerce_order.adjustment_transformer', '@commerce_order.chain_order_type_resolver', '@commerce_price.chain_price_resolver', '@entity_type.manager', '@request_stack']
-
-  logger.channel.commerce_order:
-    class: Drupal\Core\Logger\LoggerChannel
-    factory: logger.factory:get
-    arguments: ['commerce_order']

@@ -1,5 +1,5 @@
 networks:
-  drupal_dev_network:
+  d_network:
     driver: bridge
 
 volumes:
@@ -12,41 +12,41 @@ volumes:
 
 services:
   app:
-    container_name: drupal_dev_app
-    image: drupal_dev_app
+    container_name: d_app
+    image: d_app
     build:
       dockerfile: Dockerfile
       context: .docker/php/
     restart: always
     networks:
-      - drupal_dev_network
+      - d_network
     volumes:
       - ./.docker/php/config/php.ini:/usr/local/etc/php/php.ini
       - site:/var/www/html
 
   db:
-    container_name: drupal_dev_db
-    image: postgres:16
+    container_name: d_db
+    image: postgres:13.1
     restart: unless-stopped
     networks:
-      - drupal_dev_network
+      - d_network
     environment:
       POSTGRES_PASSWORD: 123456
-      POSTGRES_DB: drupal_dev_db
+      POSTGRES_DB: d_db
     volumes:
       - ./.docker/database:/var/lib/postgresql/data
       - ./.docker/backups:/var/backups
     ports:
       - '5433:5432'
 
-  webserver:
-    container_name: drupal_dev_webserver
-    image: drupal_dev_webserver
+  server:
+    container_name: d_server
+    image: d_server
     build:
       context: .docker/nginx/
       dockerfile: Dockerfile
     networks:
-      - drupal_dev_network
+      - d_network
     volumes:
       - site:/var/www/html
       - ./.docker/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf
@@ -58,14 +58,22 @@ services:
       - 443:443
 
   workspace:
-    container_name: drupal_dev_workspace
-    image: drupal_dev_workspace
+    container_name: d_workspace
+    image: d_workspace
     build:
       context: .
       dockerfile: .docker/workspace/Dockerfile
     networks:
-      - drupal_dev_network
+      - d_network
     volumes:
       - site:/var/www/html
     tty: true
 
+  memcached:
+    container_name: d_memcached
+    image: memcached:latest
+    restart: always
+    networks:
+      - d_network
+    ports:
+      - "11211:11211"

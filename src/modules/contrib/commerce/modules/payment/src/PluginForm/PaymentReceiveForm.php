@@ -2,8 +2,8 @@
 
 namespace Drupal\commerce_payment\PluginForm;
 
-use Drupal\Core\Form\FormStateInterface;
 use Drupal\commerce_price\Price;
+use Drupal\Core\Form\FormStateInterface;
 
 class PaymentReceiveForm extends PaymentGatewayFormBase {
 

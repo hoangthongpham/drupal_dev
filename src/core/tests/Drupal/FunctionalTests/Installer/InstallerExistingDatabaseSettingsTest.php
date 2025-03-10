@@ -1,13 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\FunctionalTests\Installer;
 
 use Drupal\Core\Database\Database;
 
 /**
- * Tests installation with database information in an existing settings file.
+ * Tests the installer with an existing settings file with database connection
+ * info.
  *
  * @group Installer
  */
@@ -59,7 +58,7 @@ class InstallerExistingDatabaseSettingsTest extends InstallerTestBase {
   /**
    * Verifies that installation succeeded.
    */
-  public function testInstaller(): void {
+  public function testInstaller() {
     $this->assertSession()->addressEquals('user/1');
     $this->assertSession()->statusCodeEquals(200);
   }

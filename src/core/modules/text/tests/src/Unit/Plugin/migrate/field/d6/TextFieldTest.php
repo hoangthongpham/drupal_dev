@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\text\Unit\Plugin\migrate\field\d6;
 
 use Drupal\migrate\Plugin\MigrationInterface;
@@ -32,8 +30,6 @@ class TextFieldTest extends UnitTestCase {
    * {@inheritdoc}
    */
   protected function setUp(): void {
-    parent::setUp();
-
     $this->plugin = new TextField([], 'text', []);
 
     $migration = $this->prophesize(MigrationInterface::class);
@@ -53,11 +49,11 @@ class TextFieldTest extends UnitTestCase {
   /**
    * @covers ::defineValueProcessPipeline
    */
-  public function testFilteredTextValueProcessPipeline(): void {
+  public function testProcessFilteredTextFieldValues($method = 'defineValueProcessPipeline') {
     $field_info = [
       'widget_type' => 'text_textfield',
     ];
-    $this->plugin->defineValueProcessPipeline($this->migration, 'body', $field_info);
+    $this->plugin->$method($this->migration, 'body', $field_info);
 
     $process = $this->migration->getProcess();
     $this->assertSame('sub_process', $process['plugin']);
@@ -76,14 +72,14 @@ class TextFieldTest extends UnitTestCase {
   /**
    * @covers ::defineValueProcessPipeline
    */
-  public function testBooleanTextImplicitValueProcessPipeline(): void {
+  public function testProcessBooleanTextImplicitValues($method = 'defineValueProcessPipeline') {
     $info = [
       'widget_type' => 'optionwidgets_onoff',
       'global_settings' => [
         'allowed_values' => "foo\nbar",
       ],
     ];
-    $this->plugin->defineValueProcessPipeline($this->migration, 'field', $info);
+    $this->plugin->$method($this->migration, 'field', $info);
 
     $expected = [
       'value' => [
@@ -101,14 +97,14 @@ class TextFieldTest extends UnitTestCase {
   /**
    * @covers ::defineValueProcessPipeline
    */
-  public function testBooleanTextExplicitValueProcessPipeline(): void {
+  public function testProcessBooleanTextExplicitValues($method = 'defineValueProcessPipeline') {
     $info = [
       'widget_type' => 'optionwidgets_onoff',
       'global_settings' => [
-        'allowed_values' => "foo|Foo\nBaz|Baz",
+        'allowed_values' => "foo|Foo\nbaz|Baz",
       ],
     ];
-    $this->plugin->defineValueProcessPipeline($this->migration, 'field', $info);
+    $this->plugin->$method($this->migration, 'field', $info);
 
     $expected = [
       'value' => [
@@ -116,7 +112,7 @@ class TextFieldTest extends UnitTestCase {
         'source' => 'value',
         'default_value' => 0,
         'map' => [
-          'Baz' => 1,
+          'baz' => 1,
         ],
       ],
     ];
@@ -126,29 +122,29 @@ class TextFieldTest extends UnitTestCase {
   /**
    * Data provider for testGetFieldType().
    */
-  public static function getFieldTypeProvider() {
+  public function getFieldTypeProvider() {
     return [
       ['string_long', 'text_textfield', ['text_processing' => FALSE]],
       ['string', 'text_textfield', [
-        'text_processing' => FALSE,
-        'max_length' => 128,
-      ],
+          'text_processing' => FALSE,
+          'max_length' => 128,
+        ],
       ],
       ['string_long', 'text_textfield', [
-        'text_processing' => FALSE,
-        'max_length' => 4096,
-      ],
+          'text_processing' => FALSE,
+          'max_length' => 4096,
+        ],
       ],
       ['text_long', 'text_textfield', ['text_processing' => TRUE]],
       ['text', 'text_textfield', [
-        'text_processing' => TRUE,
-        'max_length' => 128,
-      ],
+          'text_processing' => TRUE,
+          'max_length' => 128,
+        ],
       ],
       ['text_long', 'text_textfield', [
-        'text_processing' => TRUE,
-        'max_length' => 4096,
-      ],
+          'text_processing' => TRUE,
+          'max_length' => 4096,
+        ],
       ],
       ['list_string', 'optionwidgets_buttons'],
       ['list_string', 'optionwidgets_select'],
@@ -163,7 +159,7 @@ class TextFieldTest extends UnitTestCase {
    * @covers ::getFieldType
    * @dataProvider getFieldTypeProvider
    */
-  public function testGetFieldType($expected_type, $widget_type, array $settings = []): void {
+  public function testGetFieldType($expected_type, $widget_type, array $settings = []) {
     $row = new Row();
     $row->setSourceProperty('widget_type', $widget_type);
     $row->setSourceProperty('global_settings', $settings);

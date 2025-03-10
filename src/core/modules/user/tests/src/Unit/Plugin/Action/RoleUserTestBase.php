@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\user\Unit\Plugin\Action;
 
 use Drupal\Tests\UnitTestCase;
@@ -28,7 +26,7 @@ abstract class RoleUserTestBase extends UnitTestCase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp(): void {
+  protected function setUp() {
     parent::setUp();
 
     $this->account = $this

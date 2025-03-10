@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\Core\Routing;
 
 use Drupal\Core\Path\CurrentPathStack;
@@ -12,7 +10,6 @@ use Drupal\Core\Routing\Router;
 use Drupal\Core\Routing\UrlGeneratorInterface;
 use Drupal\Tests\UnitTestCase;
 use Prophecy\Argument;
-use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 
@@ -25,7 +22,7 @@ class RouterTest extends UnitTestCase {
   /**
    * @covers ::applyFitOrder
    */
-  public function testMatchesWithDifferentFitOrder(): void {
+  public function testMatchesWithDifferentFitOrder() {
     $route_provider = $this->prophesize(RouteProviderInterface::class);
 
     $route_collection = new RouteCollection();
@@ -45,11 +42,9 @@ class RouterTest extends UnitTestCase {
     $current_path_stack = $this->prophesize(CurrentPathStack::class);
     $router = new Router($route_provider->reveal(), $current_path_stack->reveal(), $url_generator->reveal());
 
-    $request_context = $this->createMock(RequestContext::class);
-    $request_context->expects($this->any())
-      ->method('getScheme')
-      ->willReturn('http');
-    $router->setContext($request_context);
+    $request_context = $this->prophesize(RequestContext::class);
+    $request_context->getScheme()->willReturn('http');
+    $router->setContext($request_context->reveal());
 
     $current_path_stack->getPath(Argument::any())->willReturn('/user/1');
     $result = $router->match('/user/1');
@@ -60,9 +55,6 @@ class RouterTest extends UnitTestCase {
     $result = $router->match('/user/login');
 
     $this->assertEquals('user_login', $result['_route']);
-
-    $this->expectException(ResourceNotFoundException::class);
-    $router->match('/user/login ');
   }
 
 }

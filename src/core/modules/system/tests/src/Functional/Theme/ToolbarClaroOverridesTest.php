@@ -1,10 +1,7 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\system\Functional\Theme;
 
-use Drupal\Core\Theme\ThemeManagerInterface;
 use Drupal\Tests\BrowserTestBase;
 
 /**
@@ -32,13 +29,6 @@ class ToolbarClaroOverridesTest extends BrowserTestBase {
   protected $themeInstaller;
 
   /**
-   * The theme manager.
-   *
-   * @var \Drupal\Core\Theme\ThemeManagerInterface
-   */
-  protected ThemeManagerInterface $themeManager;
-
-  /**
    * {@inheritdoc}
    */
   protected function setUp(): void {
@@ -61,7 +51,7 @@ class ToolbarClaroOverridesTest extends BrowserTestBase {
   /**
    * Confirm Claro assets load on a non-Claro default theme.
    */
-  public function testClaroAssets(): void {
+  public function testClaroAssets() {
     $default_stylesheets = [
       'core/modules/toolbar/css/toolbar.module.css',
       'core/modules/toolbar/css/toolbar.menu.css',

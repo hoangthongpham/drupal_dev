@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\user\Kernel\Plugin\migrate\source\d7;
 
 use Drupal\Tests\migrate\Kernel\MigrateSqlSourceTestBase;
@@ -22,7 +20,7 @@ class UserTest extends MigrateSqlSourceTestBase {
   /**
    * {@inheritdoc}
    */
-  public static function providerSource() {
+  public function providerSource() {
     $tests = [];
 
     // The source data.
@@ -56,18 +54,6 @@ class UserTest extends MigrateSqlSourceTestBase {
         'field_file_display' => 1,
         'field_file_description' => 'None',
       ],
-      [
-        'entity_type' => 'user',
-        'bundle' => 'user',
-        'deleted' => 0,
-        'entity_id' => 3,
-        'revision_id' => NULL,
-        'language' => 'und',
-        'delta' => 0,
-        'field_file_fid' => 42,
-        'field_file_display' => 1,
-        'field_file_description' => 'None',
-      ],
     ];
     $tests[0]['source_data']['role'] = [
       [
@@ -95,32 +81,10 @@ class UserTest extends MigrateSqlSourceTestBase {
         'init' => 'odo@local.host',
         'data' => 'a:1:{s:7:"contact";i:1;}',
       ],
-      [
-        'uid' => '3',
-        'name' => 'foo',
-        'pass' => 'password',
-        'mail' => 'foo@local.host',
-        'theme' => '',
-        'signature' => '',
-        'signature_format' => 'filtered_html',
-        'created' => '1647752102',
-        'access' => '0',
-        'login' => '0',
-        'status' => '1',
-        'timezone' => 'America/Chicago',
-        'language' => '',
-        'picture' => '0',
-        'init' => 'foo@local.host',
-        'data' => NULL,
-      ],
     ];
     $tests[0]['source_data']['users_roles'] = [
       [
         'uid' => 2,
-        'rid' => 2,
-      ],
-      [
-        'uid' => 3,
         'rid' => 2,
       ],
     ];
@@ -149,31 +113,6 @@ class UserTest extends MigrateSqlSourceTestBase {
         'field_file' => [
           [
             'fid' => 99,
-            'display' => 1,
-            'description' => 'None',
-          ],
-        ],
-      ],
-      [
-        'uid' => '3',
-        'name' => 'foo',
-        'pass' => 'password',
-        'mail' => 'foo@local.host',
-        'signature' => '',
-        'signature_format' => 'filtered_html',
-        'created' => '1647752102',
-        'access' => '0',
-        'login' => '0',
-        'status' => '1',
-        'timezone' => 'America/Chicago',
-        'language' => '',
-        'picture' => '0',
-        'init' => 'foo@local.host',
-        'roles' => [2],
-        'data' => FALSE,
-        'field_file' => [
-          [
-            'fid' => 42,
             'display' => 1,
             'description' => 'None',
           ],

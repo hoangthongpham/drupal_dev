@@ -1,13 +1,11 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\tour\Functional\Rest;
 
-use Drupal\Tests\rest\Functional\EntityResource\ConfigEntityResourceTestBase;
+use Drupal\Tests\rest\Functional\EntityResource\EntityResourceTestBase;
 use Drupal\tour\Entity\Tour;
 
-abstract class TourResourceTestBase extends ConfigEntityResourceTestBase {
+abstract class TourResourceTestBase extends EntityResourceTestBase {
 
   /**
    * {@inheritdoc}
@@ -96,7 +94,6 @@ abstract class TourResourceTestBase extends ConfigEntityResourceTestBase {
    */
   protected function getNormalizedPostEntity() {
     // @todo Update in https://www.drupal.org/node/2300677.
-    return [];
   }
 
   /**

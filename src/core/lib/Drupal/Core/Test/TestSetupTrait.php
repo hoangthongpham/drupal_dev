@@ -17,8 +17,8 @@ trait TestSetupTrait {
   protected static $configSchemaCheckerExclusions = [
     // Following are used to test lack of or partial schema. Where partial
     // schema is provided, that is explicitly tested in specific tests.
-    'config_schema_test.no_schema',
-    'config_schema_test.some_schema',
+    'config_schema_test.noschema',
+    'config_schema_test.someschema',
     'config_schema_test.schema_data_types',
     'config_schema_test.no_schema_data_types',
     // Used to test application of schema to filtering of configuration.
@@ -42,6 +42,7 @@ trait TestSetupTrait {
   /**
    * The public file directory for the test environment.
    *
+   * @see \Drupal\simpletest\TestBase::prepareEnvironment()
    * @see \Drupal\Tests\BrowserTestBase::prepareEnvironment()
    *
    * @var string
@@ -58,6 +59,7 @@ trait TestSetupTrait {
   /**
    * The private file directory for the test environment.
    *
+   * @see \Drupal\simpletest\TestBase::prepareEnvironment()
    * @see \Drupal\Tests\BrowserTestBase::prepareEnvironment()
    *
    * @var string
@@ -81,25 +83,12 @@ trait TestSetupTrait {
   protected $kernel;
 
   /**
-   * The database prefix of this test run.
-   *
-   * @var string
-   */
-  protected $databasePrefix;
-
-  /**
-   * The app root.
-   *
-   * @var string
-   */
-  protected $root;
-
-  /**
    * The temporary file directory for the test environment.
    *
    * This value has to match the temporary directory created in
    * install_base_system() for test installs.
    *
+   * @see \Drupal\simpletest\TestBase::prepareEnvironment()
    * @see \Drupal\Tests\BrowserTestBase::prepareEnvironment()
    * @see install_base_system()
    *
@@ -115,19 +104,13 @@ trait TestSetupTrait {
   protected $testId;
 
   /**
-   * Returns the database connection to the site under test.
+   * Returns the database connection to the site running Simpletest.
    *
    * @return \Drupal\Core\Database\Connection
    *   The database connection to use for inserting assertions.
-   *
-   * @deprecated in drupal:10.1.0 and is removed from drupal:11.0.0. There is no
-   *   replacement.
-   *
-   * @see https://www.drupal.org/node/3176816
    */
   public static function getDatabaseConnection() {
-    @trigger_error(__METHOD__ . ' is deprecated in drupal:10.1.0 and is removed from drupal:11.0.0. There is no replacement. See https://www.drupal.org/node/3176816', E_USER_DEPRECATED);
-    return SimpletestTestRunResultsStorage::getConnection();
+    return TestDatabase::getConnection();
   }
 
   /**
@@ -170,7 +153,7 @@ trait TestSetupTrait {
       // Ensure no existing database gets in the way. If a default database
       // exists already it must be removed.
       Database::removeConnection('default');
-      $database = Database::convertDbUrlToConnectionInfo($db_url, $this->root ?? DRUPAL_ROOT, TRUE);
+      $database = Database::convertDbUrlToConnectionInfo($db_url, $this->root ?? DRUPAL_ROOT);
       Database::addConnectionInfo('default', 'default', $database);
     }
 
@@ -201,12 +184,12 @@ trait TestSetupTrait {
     $exceptions = [];
     while ($class) {
       if (property_exists($class, 'configSchemaCheckerExclusions')) {
-        $exceptions[] = $class::$configSchemaCheckerExclusions;
+        $exceptions = array_merge($exceptions, $class::$configSchemaCheckerExclusions);
       }
       $class = get_parent_class($class);
     }
     // Filter out any duplicates.
-    return array_unique(array_merge(...$exceptions));
+    return array_unique($exceptions);
   }
 
 }

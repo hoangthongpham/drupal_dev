@@ -5,7 +5,7 @@ namespace Drupal\views\Plugin\views\cache;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\views\Plugin\views\PluginBase;
-use Drupal\Core\Database\Query\SelectInterface;
+use Drupal\Core\Database\Query\Select;
 use Drupal\views\ResultRow;
 
 /**
@@ -30,8 +30,6 @@ abstract class CachePluginBase extends PluginBase {
 
   /**
    * Contains all data that should be written/read from cache.
-   *
-   * @var array
    */
   public $storage = [];
 
@@ -64,7 +62,8 @@ abstract class CachePluginBase extends PluginBase {
   }
 
   /**
-   * Returns a string to display as the clickable title for the access control.
+   * Return a string to display as the clickable title for the
+   * access control.
    */
   public function summaryTitle() {
     return $this->t('Unknown');
@@ -148,7 +147,7 @@ abstract class CachePluginBase extends PluginBase {
             // Load entities for each result.
             $this->view->query->loadEntities($this->view->result);
             $this->view->total_rows = $cache->data['total_rows'];
-            $this->view->setCurrentPage($cache->data['current_page']);
+            $this->view->setCurrentPage($cache->data['current_page'], TRUE);
             $this->view->execute_time = 0;
             return TRUE;
           }
@@ -181,7 +180,7 @@ abstract class CachePluginBase extends PluginBase {
    * go there:
    *
    * @code
-   *   strtr($output, ['<!--post-FIELD-1-->', 'output for FIELD of nid 1']);
+   *   strtr($output, array('<!--post-FIELD-1-->', 'output for FIELD of nid 1');
    * @endcode
    *
    * All of the cached result data will be available in $view->result, as well,
@@ -202,7 +201,7 @@ abstract class CachePluginBase extends PluginBase {
       foreach (['query', 'count_query'] as $index) {
         // If the default query back-end is used generate SQL query strings from
         // the query objects.
-        if ($build_info[$index] instanceof SelectInterface) {
+        if ($build_info[$index] instanceof Select) {
           $query = clone $build_info[$index];
           $query->preExecute();
           $build_info[$index] = [
@@ -244,7 +243,7 @@ abstract class CachePluginBase extends PluginBase {
 
     if (!empty($entity_information)) {
       // Add the list cache tags for each entity type used by this view.
-      foreach ($entity_information as $metadata) {
+      foreach ($entity_information as $table => $metadata) {
         $tags = Cache::mergeTags($tags, \Drupal::entityTypeManager()->getDefinition($metadata['entity_type'])->getListCacheTags());
       }
     }

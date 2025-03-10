@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\Core\Batch;
 
 use Drupal\Core\Batch\BatchBuilder;
@@ -22,7 +20,7 @@ class BatchBuilderTest extends UnitTestCase {
    *
    * @covers ::toArray
    */
-  public function testDefaultValues(): void {
+  public function testDefaultValues() {
     $batch = (new BatchBuilder())->toArray();
 
     $this->assertIsArray($batch);
@@ -51,7 +49,7 @@ class BatchBuilderTest extends UnitTestCase {
    *
    * @covers ::setTitle
    */
-  public function testSetTitle(): void {
+  public function testSetTitle() {
     $batch = (new BatchBuilder())
       ->setTitle(new TranslatableMarkup('New Title'))
       ->toArray();
@@ -64,7 +62,7 @@ class BatchBuilderTest extends UnitTestCase {
    *
    * @covers ::setFinishCallback
    */
-  public function testSetFinishCallback(): void {
+  public function testSetFinishCallback() {
     $batch = (new BatchBuilder())
       ->setFinishCallback('\Drupal\Tests\Core\Batch\BatchBuilderTest::finishedCallback')
       ->toArray();
@@ -77,7 +75,7 @@ class BatchBuilderTest extends UnitTestCase {
    *
    * @covers ::setInitMessage
    */
-  public function testSetInitMessage(): void {
+  public function testSetInitMessage() {
     $batch = (new BatchBuilder())
       ->setInitMessage(new TranslatableMarkup('New initialization message.'))
       ->toArray();
@@ -90,7 +88,7 @@ class BatchBuilderTest extends UnitTestCase {
    *
    * @covers ::setProgressMessage
    */
-  public function testSetProgressMessage(): void {
+  public function testSetProgressMessage() {
     $batch = (new BatchBuilder())
       ->setProgressMessage(new TranslatableMarkup('Batch in progress...'))
       ->toArray();
@@ -101,7 +99,7 @@ class BatchBuilderTest extends UnitTestCase {
   /**
    * Tests setErrorMessage().
    */
-  public function testSetErrorMessage(): void {
+  public function testSetErrorMessage() {
     $batch = (new BatchBuilder())
       ->setErrorMessage(new TranslatableMarkup('Oops. An error has occurred :('))
       ->toArray();
@@ -114,7 +112,7 @@ class BatchBuilderTest extends UnitTestCase {
    *
    * @covers ::setFile
    */
-  public function testSetFile(): void {
+  public function testSetFile() {
     $filename = dirname(__DIR__, 6) . '/core/modules/system/tests/modules/batch_test/batch_test.callbacks.inc';
     $this->assertIsNotCallable('_batch_test_callback_1');
     $this->assertIsNotCallable('_batch_test_finished_1');
@@ -136,7 +134,7 @@ class BatchBuilderTest extends UnitTestCase {
    *
    * @covers ::setLibraries
    */
-  public function testAddingLibraries(): void {
+  public function testAddingLibraries() {
     $batch = (new BatchBuilder())
       ->setLibraries(['only/library'])
       ->toArray();
@@ -149,7 +147,7 @@ class BatchBuilderTest extends UnitTestCase {
    *
    * @covers ::setProgressive
    */
-  public function testSetProgressive(): void {
+  public function testSetProgressive() {
     $batch_builder = new BatchBuilder();
     $batch = $batch_builder
       ->setProgressive(FALSE)
@@ -169,7 +167,7 @@ class BatchBuilderTest extends UnitTestCase {
    *
    * @covers ::setQueue
    */
-  public function testSetQueue(): void {
+  public function testSetQueue() {
     $batch = (new BatchBuilder())
       ->setQueue('BatchName', '\Drupal\Core\Queue\Batch')
       ->toArray();
@@ -185,7 +183,7 @@ class BatchBuilderTest extends UnitTestCase {
    *
    * @covers ::setQueue
    */
-  public function testQueueExists(): void {
+  public function testQueueExists() {
     $batch_builder = (new BatchBuilder());
     $this->expectException(\InvalidArgumentException::class);
     $this->expectExceptionMessage('Class \ThisIsNotAClass does not exist.');
@@ -197,7 +195,7 @@ class BatchBuilderTest extends UnitTestCase {
    *
    * @covers ::setQueue
    */
-  public function testQueueImplements(): void {
+  public function testQueueImplements() {
     $batch_builder = (new BatchBuilder());
     $this->expectException(\InvalidArgumentException::class);
     $this->expectExceptionMessage('Class Exception does not implement \Drupal\Core\Queue\QueueInterface.');
@@ -209,7 +207,7 @@ class BatchBuilderTest extends UnitTestCase {
    *
    * @covers ::setUrlOptions
    */
-  public function testSetUrlOptions(): void {
+  public function testSetUrlOptions() {
     $options = [
       'absolute' => TRUE,
       'language' => 'de',
@@ -226,7 +224,7 @@ class BatchBuilderTest extends UnitTestCase {
    *
    * @covers ::addOperation
    */
-  public function testAddOperation(): void {
+  public function testAddOperation() {
     $batch_builder = new BatchBuilder();
     $batch = $batch_builder
       ->addOperation('\Drupal\Tests\Core\Batch\BatchBuilderTest::operationCallback')

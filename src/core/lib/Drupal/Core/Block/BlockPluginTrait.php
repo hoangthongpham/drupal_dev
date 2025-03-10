@@ -31,13 +31,6 @@ trait BlockPluginTrait {
   use PluginWithFormsTrait;
 
   /**
-   * Whether the plugin is being rendered in preview mode.
-   *
-   * @var bool
-   */
-  protected $inPreview = FALSE;
-
-  /**
    * The transliteration service.
    *
    * @var \Drupal\Component\Transliteration\TransliterationInterface
@@ -138,7 +131,7 @@ trait BlockPluginTrait {
    * @param \Drupal\Core\Session\AccountInterface $account
    *   The user session for which to check access.
    *
-   * @return \Drupal\Core\Access\AccessResultInterface
+   * @return \Drupal\Core\Access\AccessResult
    *   The access result.
    *
    * @see self::access()
@@ -255,9 +248,6 @@ trait BlockPluginTrait {
     $transliterated = mb_strtolower($transliterated);
 
     $transliterated = preg_replace('@[^a-z0-9_.]+@', '', $transliterated);
-    // Furthermore remove any characters that are not alphanumerical from the
-    // beginning and end of the transliterated string.
-    $transliterated = preg_replace('@^([^a-z0-9]+)|([^a-z0-9]+)$@', '', $transliterated);
 
     return $transliterated;
   }
@@ -289,13 +279,6 @@ trait BlockPluginTrait {
    */
   public function setTransliteration(TransliterationInterface $transliteration) {
     $this->transliteration = $transliteration;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setInPreview(bool $in_preview): void {
-    $this->inPreview = $in_preview;
   }
 
 }

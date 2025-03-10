@@ -1,5 +1,5 @@
 /* eslint-disable import/no-extraneous-dependencies */
-/* cspell:ignore imagealternativetext drupalimagealternativetextediting drupalimagetextalternativecommand textalternativemissingview imagetextalternativecommand */
+/* cspell:words imagealternativetext drupalimagealternativetextediting drupalimagetextalternativecommand textalternativemissingview imagetextalternativecommand */
 
 /**
  * @module drupalImage/imagealternativetext/drupalimagealternativetextediting
@@ -19,14 +19,14 @@ import ImageTextAlternativeCommand from '@ckeditor/ckeditor5-image/src/imagetext
  */
 export default class DrupalImageTextAlternativeEditing extends Plugin {
   /**
-   * @inheritdoc
+   * @inheritDoc
    */
   static get requires() {
     return ['ImageUtils'];
   }
 
   /**
-   * @inheritdoc
+   * @inheritDoc
    */
   static get pluginName() {
     return 'DrupalImageAlternativeTextEditing';
@@ -45,7 +45,7 @@ export default class DrupalImageTextAlternativeEditing extends Plugin {
   }
 
   /**
-   * @inheritdoc
+   * @inheritDoc
    */
   init() {
     const editor = this.editor;

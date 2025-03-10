@@ -1,12 +1,8 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\node\Kernel\Plugin\migrate\source\d7;
 
 use Drupal\Tests\migrate\Kernel\MigrateSqlSourceTestBase;
-
-// cspell:ignore tnid
 
 /**
  * Tests D7 node source plugin.
@@ -25,11 +21,10 @@ class NodeTest extends MigrateSqlSourceTestBase {
   /**
    * {@inheritdoc}
    */
-  public static function providerSource() {
+  public function providerSource() {
     $tests = [];
 
-    // Test retrieval of article and page content types when configuration
-    // key 'node_type' is not set.
+    // The source data.
     $tests[0]['source_data']['node'] = [
       [
         'nid' => 1,
@@ -660,6 +655,12 @@ class NodeTest extends MigrateSqlSourceTestBase {
       'node_type' => ['article', 'page'],
     ];
     $tests[4]['expected_data'] = $tests[0]['expected_data'];
+
+    // Test retrieval of article and page content types when configuration
+    // key 'node_type' is not set.
+    $tests[5] = $tests[0];
+    unset($tests[5]['configuration']);
+    $tests[5]['expected_data'] = $tests[0]['expected_data'];
 
     return $tests;
   }

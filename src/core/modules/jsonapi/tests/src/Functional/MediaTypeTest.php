@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Drupal\Tests\jsonapi\Functional;
 
 use Drupal\Core\Url;
@@ -12,7 +10,7 @@ use Drupal\media\Entity\MediaType;
  *
  * @group jsonapi
  */
-class MediaTypeTest extends ConfigEntityResourceTestBase {
+class MediaTypeTest extends ResourceTestBase {
 
   /**
    * {@inheritdoc}
@@ -54,7 +52,7 @@ class MediaTypeTest extends ConfigEntityResourceTestBase {
   protected function createEntity() {
     // Create a "Camelids" media type.
     $camelids = MediaType::create([
-      'label' => 'Camelids',
+      'name' => 'Camelids',
       'id' => 'camelids',
       'description' => 'Camelids are large, strictly herbivorous animals with slender necks and long legs.',
       'source' => 'file',
@@ -92,7 +90,7 @@ class MediaTypeTest extends ConfigEntityResourceTestBase {
           'dependencies' => [],
           'description' => 'Camelids are large, strictly herbivorous animals with slender necks and long legs.',
           'field_map' => [],
-          'label' => 'Camelids',
+          'label' => NULL,
           'langcode' => 'en',
           'new_revision' => FALSE,
           'queue_thumbnail_downloads' => FALSE,
@@ -112,7 +110,6 @@ class MediaTypeTest extends ConfigEntityResourceTestBase {
    */
   protected function getPostDocument() {
     // @todo Update in https://www.drupal.org/node/2300677.
-    return [];
   }
 
 }

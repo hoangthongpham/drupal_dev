@@ -3,8 +3,8 @@
 namespace Drupal\Tests\commerce_tax\Kernel;
 
 use CommerceGuys\Addressing\Address;
-use Drupal\Tests\commerce\Kernel\CommerceKernelTestBase;
 use Drupal\commerce_tax\TaxZone;
+use Drupal\Tests\commerce\Kernel\CommerceKernelTestBase;
 
 /**
  * @coversDefaultClass \Drupal\commerce_tax\TaxZone
