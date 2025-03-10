@@ -1,5 +1,5 @@
-# Use Debian-based PHP 7.3 FPM as the base image (not Alpine)
-FROM php:7.3.23-fpm
+# Use Debian-based PHP 7.4 FPM as the base image
+FROM php:7.4-fpm
 
 # Set maintainer information
 LABEL maintainer="PHT <phamhoangthongxyz@gmail.com>"
@@ -9,6 +9,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 # Update package lists and install necessary dependencies
 RUN apt-get update && apt-get install -y \
+  pkg-config \
   openssl \
   zip \
   unzip \
@@ -17,18 +18,17 @@ RUN apt-get update && apt-get install -y \
   nano \
   libzip-dev \
   libicu-dev \
-  libonig-dev \
   autoconf \
   g++ \
   make \
-  pkg-config \
+  libonig-dev \
   libcurl4-openssl-dev \
   libssl-dev \
   libpq-dev \
   libpng-dev \
   libjpeg-dev \
   libfreetype6-dev \
-  && docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
+  && docker-php-ext-configure gd --with-freetype --with-jpeg \
   && docker-php-ext-install -j$(nproc) \
   bcmath \
   mbstring \
