@@ -4,11 +4,10 @@ namespace Drupal\commerce_order\Entity;
 
 use Drupal\commerce\Entity\CommerceContentEntityBase;
 use Drupal\commerce_order\Adjustment;
-use Drupal\commerce_order\Event\OrderLabelEvent;
-use Drupal\commerce_order\Exception\OrderVersionMismatchException;
 use Drupal\commerce_order\Event\OrderEvents;
+use Drupal\commerce_order\Event\OrderLabelEvent;
 use Drupal\commerce_order\Event\OrderProfilesEvent;
-use Drupal\commerce_order\OrderBalanceFieldItemList;
+use Drupal\commerce_order\Exception\OrderVersionMismatchException;
 use Drupal\commerce_price\Price;
 use Drupal\commerce_store\Entity\StoreInterface;
 use Drupal\Core\Datetime\DrupalDateTime;
@@ -17,9 +16,9 @@ use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\profile\Entity\ProfileInterface;
 use Drupal\user\Entity\User;
 use Drupal\user\UserInterface;
-use Drupal\profile\Entity\ProfileInterface;
 
 /**
  * Defines the order entity class.
@@ -465,21 +464,35 @@ class Order extends CommerceContentEntityBase implements OrderInterface {
         $total_price = $total_price ? $total_price->add($order_item_total) : $order_item_total;
       }
     }
-    if ($total_price) {
-      $adjustments = $this->collectAdjustments();
-      if ($adjustments) {
-        /** @var \Drupal\commerce_order\AdjustmentTransformerInterface $adjustment_transformer */
-        $adjustment_transformer = \Drupal::service('commerce_order.adjustment_transformer');
-        $adjustments = $adjustment_transformer->combineAdjustments($adjustments);
-        $adjustments = $adjustment_transformer->roundAdjustments($adjustments);
-        foreach ($adjustments as $adjustment) {
-          if (!$adjustment->isIncluded()) {
-            $total_price = $total_price->add($adjustment->getAmount());
-          }
+    $adjustments = $this->collectAdjustments();
+    if ($adjustments) {
+      /** @var \Drupal\commerce_order\AdjustmentTransformerInterface $adjustment_transformer */
+      $adjustment_transformer = \Drupal::service('commerce_order.adjustment_transformer');
+      $adjustments = $adjustment_transformer->combineAdjustments($adjustments);
+      $adjustments = $adjustment_transformer->roundAdjustments($adjustments);
+      foreach ($adjustments as $adjustment) {
+        if (!$adjustment->isIncluded()) {
+          $total_price = $total_price ? $total_price->add($adjustment->getAmount()) : $adjustment->getAmount();
         }
       }
     }
     $this->total_price = $total_price;
+    $this->recalculateBalance();
+
+    return $this;
+  }
+
+  /**
+   * Recalculates the order balance.
+   *
+   * @return $this
+   */
+  protected function recalculateBalance() {
+    $balance = NULL;
+    if ($total_price = $this->getTotalPrice()) {
+      $balance = $total_price->subtract($this->getTotalPaid());
+    }
+    $this->set('balance', $balance);
 
     return $this;
   }
@@ -512,15 +525,22 @@ class Order extends CommerceContentEntityBase implements OrderInterface {
    */
   public function setTotalPaid(Price $total_paid) {
     $this->set('total_paid', $total_paid);
+    $this->recalculateBalance();
   }
 
   /**
    * {@inheritdoc}
    */
   public function getBalance() {
+    if (!$this->get('balance')->isEmpty()) {
+      return $this->get('balance')->first()->toPrice();
+    }
     if ($total_price = $this->getTotalPrice()) {
+      // Provide a default without storing it, to avoid having to update
+      // the field if the order currency changes before the order is placed.
       return $total_price->subtract($this->getTotalPaid());
     }
+    return NULL;
   }
 
   /**
@@ -535,7 +555,8 @@ class Order extends CommerceContentEntityBase implements OrderInterface {
     $balance = $this->getBalance();
     // Free orders are considered fully paid once they have been placed.
     if ($total_price->isZero()) {
-      return $this->getState()->getId() != 'draft';
+      $state_id = $this->getState()->getId();
+      return ($state_id != 'draft') && ($state_id != 'canceled');
     }
     else {
       return $balance->isNegative() || $balance->isZero();
@@ -666,11 +687,26 @@ class Order extends CommerceContentEntityBase implements OrderInterface {
    * {@inheritdoc}
    */
   public function getCalculationDate() {
-    $timezone = $this->getStore()->getTimezone();
+    $timezone = $this->getStore()?->getTimezone();
     $timestamp = $this->getPlacedTime() ?: \Drupal::time()->getRequestTime();
     $date = DrupalDateTime::createFromTimestamp($timestamp, $timezone);
 
     return $date;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getCustomerComments(): ?string {
+    return $this->get('customer_comments')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setCustomerComments($comments): static {
+    $this->set('customer_comments', $comments);
+    return $this;
   }
 
   /**
@@ -683,7 +719,9 @@ class Order extends CommerceContentEntityBase implements OrderInterface {
       $mismatch_exception = new OrderVersionMismatchException(sprintf('Attempted to save order %s with version %s. Current version is %s.', $this->id(), $this->getVersion(), $this->original->getVersion()));
       $log_only = $this->getEntityType()->get('log_version_mismatch');
       if ($log_only) {
-        watchdog_exception('commerce_order', $mismatch_exception);
+        \Drupal::logger('commerce_order')->error('<pre>%exception</pre>', [
+          '%exception' => $mismatch_exception->__toString(),
+        ]);
       }
       else {
         throw $mismatch_exception;
@@ -700,7 +738,7 @@ class Order extends CommerceContentEntityBase implements OrderInterface {
       $this->setCustomerId(0);
     }
     // Maintain the order email.
-    if (!$this->getEmail() && $customer->isAuthenticated()) {
+    if (!$this->getEmail() && !$customer->isAnonymous()) {
       $this->setEmail($customer->getEmail());
     }
     // Make sure the billing profile is owned by the order, not the customer.
@@ -863,6 +901,7 @@ class Order extends CommerceContentEntityBase implements OrderInterface {
           'override_labels' => TRUE,
           'label_singular' => t('order item'),
           'label_plural' => t('order items'),
+          'removed_reference' => 'delete',
         ],
       ])
       ->setDisplayOptions('view', [
@@ -904,8 +943,11 @@ class Order extends CommerceContentEntityBase implements OrderInterface {
       ->setLabel(t('Order balance'))
       ->setDescription(t('The order balance.'))
       ->setReadOnly(TRUE)
-      ->setComputed(TRUE)
-      ->setClass(OrderBalanceFieldItemList::class)
+      ->setDisplayOptions('view', [
+        'label' => 'hidden',
+        'type' => 'commerce_price_default',
+        'weight' => 0,
+      ])
       ->setDisplayConfigurable('form', FALSE)
       ->setDisplayConfigurable('view', TRUE);
 
@@ -968,6 +1010,16 @@ class Order extends CommerceContentEntityBase implements OrderInterface {
       ])
       ->setDisplayConfigurable('view', TRUE);
 
+    $fields['customer_comments'] = BaseFieldDefinition::create('string_long')
+      ->setLabel(t('Customer comments'))
+      ->setDisplayOptions('view', [
+        'type' => 'string',
+        'label' => 'above',
+        'settings' => [],
+      ])
+      ->setDisplayConfigurable('form', TRUE)
+      ->setDisplayConfigurable('view', TRUE);
+
     return $fields;
   }
 
@@ -990,11 +1042,11 @@ class Order extends CommerceContentEntityBase implements OrderInterface {
    *   The order.
    *
    * @return string
-   *   The workflow ID.
+   *   The workflow ID, "order_default" if it cannot be determined.
    */
   public static function getWorkflowId(OrderInterface $order) {
-    $workflow = OrderType::load($order->bundle())->getWorkflowId();
-    return $workflow;
+    $order_type = OrderType::load($order->bundle());
+    return $order_type?->getWorkflowId() ?? 'order_default';
   }
 
 }

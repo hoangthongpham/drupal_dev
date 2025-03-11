@@ -5,7 +5,7 @@ package: Other
 core_version_requirement: ^8 || ^9 || ^10
 libraries:
 - ecommerce_xx/global-styling
-base theme: bartik
+base theme: olivero
 regions:
   branding: Branding
   navigation: Main navigation

@@ -1,5 +1,5 @@
-# Use PHP 7.4 FPM with Alpine as the base image
-FROM php:7.4-fpm-alpine
+# Use PHP 8.1 FPM with Alpine as the base image
+FROM php:8.1.23-fpm-alpine
 
 # Set maintainer information
 LABEL maintainer="HoangThong <phamhoangthongxyz@gmail.com>"
@@ -7,8 +7,11 @@ LABEL maintainer="HoangThong <phamhoangthongxyz@gmail.com>"
 # Set non-interactive mode for package installation
 ARG DEBIAN_FRONTEND=noninteractive
 
+# Use alternative Alpine mirrors to avoid network issues
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
+
 # Update system and install necessary dependencies
-RUN apk update && apk upgrade && apk add --no-cache \
+RUN apk update --update-cache && apk upgrade && apk add --no-cache \
   openssl \
   zip \
   unzip \

@@ -2,9 +2,9 @@
 
 namespace Drupal\commerce_payment;
 
-use Drupal\Core\DestructableInterface;
 use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\commerce_price\Price;
+use Drupal\Core\DestructableInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 
 class PaymentOrderUpdater implements PaymentOrderUpdaterInterface, DestructableInterface {
@@ -52,10 +52,13 @@ class PaymentOrderUpdater implements PaymentOrderUpdaterInterface, DestructableI
    */
   public function updateOrders() {
     if (!empty($this->updateList)) {
+      /** @var \Drupal\commerce_order\OrderStorage $order_storage */
       $order_storage = $this->entityTypeManager->getStorage('commerce_order');
-      /** @var \Drupal\commerce_order\Entity\OrderInterface[] $orders */
-      $orders = $order_storage->loadMultiple($this->updateList);
-      foreach ($orders as $order) {
+      foreach ($this->updateList as $order_id) {
+        $order = $order_storage->loadForUpdate($order_id);
+        if (!$order) {
+          continue;
+        }
         $this->updateOrder($order, TRUE);
       }
     }

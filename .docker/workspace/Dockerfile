@@ -1,5 +1,5 @@
-# Use Debian-based PHP 7.4 FPM as the base image
-FROM php:7.4-fpm
+# Use Debian-based PHP 8.1 FPM as the base image
+FROM php:8.1.23-fpm
 
 # Set maintainer information
 LABEL maintainer="PHT <phamhoangthongxyz@gmail.com>"
@@ -38,6 +38,7 @@ RUN apt-get update && apt-get install -y \
   pdo_pgsql \
   pgsql \
   gd \
+  zip \
   && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install Composer globally

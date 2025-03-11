@@ -4,10 +4,13 @@ namespace Drupal\commerce_payment;
 
 use Drupal\commerce\EntityHelper;
 use Drupal\commerce_order\Entity\OrderInterface;
+use Drupal\commerce_payment\Event\FilterPaymentOptionsEvent;
+use Drupal\commerce_payment\Event\PaymentEvents;
 use Drupal\commerce_payment\Plugin\Commerce\PaymentGateway\SupportsStoredPaymentMethodsInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslationInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class PaymentOptionsBuilder implements PaymentOptionsBuilderInterface {
 
@@ -21,16 +24,26 @@ class PaymentOptionsBuilder implements PaymentOptionsBuilderInterface {
   protected $entityTypeManager;
 
   /**
+   * The event dispatcher.
+   *
+   * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
+   */
+  protected $eventDispatcher;
+
+  /**
    * Constructs a new PaymentOptionsBuilder object.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
    * @param \Drupal\Core\StringTranslation\TranslationInterface $string_translation
    *   The string translation.
+   * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $event_dispatcher
+   *   The event dispatcher.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, TranslationInterface $string_translation) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, TranslationInterface $string_translation, EventDispatcherInterface $event_dispatcher) {
     $this->entityTypeManager = $entity_type_manager;
     $this->stringTranslation = $string_translation;
+    $this->eventDispatcher = $event_dispatcher;
   }
 
   /**
@@ -51,7 +64,7 @@ class PaymentOptionsBuilder implements PaymentOptionsBuilderInterface {
     $options = [];
     // 1) Add options to reuse stored payment methods for known customers.
     $customer = $order->getCustomer();
-    if ($customer->isAuthenticated()) {
+    if (!$customer->isAnonymous()) {
       $billing_countries = $order->getStore()->getBillingCountries();
       /** @var \Drupal\commerce_payment\PaymentMethodStorageInterface $payment_method_storage */
       $payment_method_storage = $this->entityTypeManager->getStorage('commerce_payment_method');
@@ -73,7 +86,7 @@ class PaymentOptionsBuilder implements PaymentOptionsBuilderInterface {
     // 2) Add the order's payment method if it was not included above.
     /** @var \Drupal\commerce_payment\Entity\PaymentMethodInterface $order_payment_method */
     $order_payment_method = $order->get('payment_method')->entity;
-    if ($order_payment_method) {
+    if ($order_payment_method && !$order_payment_method->isExpired()) {
       $order_payment_method_id = $order_payment_method->id();
       // Make sure that the payment method's gateway is still available.
       $payment_gateway_id = $order_payment_method->getPaymentGatewayId();
@@ -141,7 +154,9 @@ class PaymentOptionsBuilder implements PaymentOptionsBuilderInterface {
       }
     }
 
-    return $options;
+    $event = new FilterPaymentOptionsEvent($options, $order);
+    $this->eventDispatcher->dispatch($event, PaymentEvents::FILTER_PAYMENT_OPTIONS);
+    return $event->getPaymentOptions();
   }
 
   /**

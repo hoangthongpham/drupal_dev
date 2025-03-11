@@ -2,8 +2,8 @@
 
 namespace Drupal\commerce_price\Repository;
 
-use CommerceGuys\Intl\NumberFormat\NumberFormatRepositoryInterface;
 use CommerceGuys\Intl\NumberFormat\NumberFormatRepository as ExternalNumberFormatRepository;
+use CommerceGuys\Intl\NumberFormat\NumberFormatRepositoryInterface;
 use Drupal\commerce_price\Event\NumberFormatDefinitionEvent;
 use Drupal\commerce_price\Event\PriceEvents;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -17,22 +17,13 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 class NumberFormatRepository extends ExternalNumberFormatRepository implements NumberFormatRepositoryInterface {
 
   /**
-   * The event dispatcher.
-   *
-   * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
-   */
-  protected $eventDispatcher;
-
-  /**
    * Creates a NumberFormatRepository instance.
    *
-   * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $event_dispatcher
+   * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $eventDispatcher
    *   The event dispatcher.
    */
-  public function __construct(EventDispatcherInterface $event_dispatcher) {
+  public function __construct(protected EventDispatcherInterface $eventDispatcher) {
     parent::__construct();
-
-    $this->eventDispatcher = $event_dispatcher;
   }
 
   /**

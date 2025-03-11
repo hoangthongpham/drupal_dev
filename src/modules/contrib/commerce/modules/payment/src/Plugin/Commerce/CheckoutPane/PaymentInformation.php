@@ -254,6 +254,10 @@ class PaymentInformation extends CheckoutPaneBase {
    *   The modified pane form.
    */
   protected function buildPaymentMethodForm(array $pane_form, FormStateInterface $form_state, PaymentOption $payment_option) {
+    if ($payment_option->getPaymentMethodId() && !$payment_option->getPaymentMethodTypeId()) {
+      // Editing payment methods at checkout is not supported.
+      return $pane_form;
+    }
     $payment_method_storage = $this->entityTypeManager->getStorage('commerce_payment_method');
     assert($payment_method_storage instanceof PaymentMethodStorageInterface);
     $payment_method = $payment_method_storage->createForCustomer(
@@ -335,7 +339,6 @@ class PaymentInformation extends CheckoutPaneBase {
     if ($triggering_element_name == 'payment_method') {
       $user_input = &$form_state->getUserInput();
       $pane_input = NestedArray::getValue($user_input, $element['#parents']);
-      unset($pane_input['billing_information']);
       unset($pane_input['add_payment_method']);
       NestedArray::setValue($user_input, $element['#parents'], $pane_input);
     }
