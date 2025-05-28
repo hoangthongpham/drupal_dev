@@ -17,7 +17,7 @@ final class HomepageController extends ControllerBase {
   public function index() {
     $build['content'] = [
       '#type' => 'item',
-      '#markup' => $this->t('It works!'),
+      '#markup' => $this->t('Welcome to HomePage!'),
     ];
 
     return $build;

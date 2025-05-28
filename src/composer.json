@@ -21,7 +21,12 @@
         "drupal/core-project-message": "^9.4",
         "drupal/core-recommended": "^9.4",
         "drupal/core-vendor-hardening": "^9.4",
+        "drupal/devel": "^5.1",
+        "drupal/gin": "^3.0",
+        "drupal/gin_toolbar": "^1.0",
         "drupal/inline_entity_form": "^1.0@RC",
+        "drupal/php": "^1.2",
+        "drupal/profile": "^1.12",
         "drush/drush": "^11.6"
     },
     "conflict": {
@@ -95,5 +100,8 @@
                 "      composer remove drupal/core-project-message"
             ]
         }
+    },
+    "require-dev": {
+        "kint-php/kint": "^6.0"
     }
 }

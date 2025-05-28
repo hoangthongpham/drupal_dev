@@ -1,0 +1,8 @@
+mymodule.autocomplete.custom_category_id:
+  path: '/commerce_custom/autocomplete/custom-category-id'
+  defaults:
+    _controller: '\Drupal\commerce_custom\Controller\AutocompleteController::handleCustomCategoryId'
+  requirements:
+    _permission: 'access content' # Hoặc một permission phù hợp hơn nếu cần
+  options:
+    _theme: 'adminimal_theme' # Hoặc theme admin bạn đang dùng, để đảm bảo styling

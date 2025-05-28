@@ -1,0 +1,15 @@
+<?php
+/**
+ * Implements hook_entity_autocomplete_labels_alter().
+ */
+function commerce_custom_entity_autocomplete_labels_alter(array &$labels, array $entities) {
+  foreach ($entities as $id => $entity) {
+    if ($entity->getEntityTypeId() === 'taxonomy_term' && $entity->bundle() === 'category') {
+      if ($entity->hasField('field_category_id') && !$entity->get('field_category_id')->isEmpty()) {
+        $category_id = $entity->get('field_category_id')->value;
+        $labels[$id] = $entity->label() . ' (' . $category_id . ')';
+      }
+    }
+  }
+}
+

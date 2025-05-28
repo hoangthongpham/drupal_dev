@@ -1,0 +1,7 @@
+name: 'Commerce Custom'
+type: module
+description: 'Tùy chỉnh autocomplete category trong commerce promotion.'
+core_version_requirement: ^9 || ^10
+package: Custom
+dependencies:
+  - commerce
